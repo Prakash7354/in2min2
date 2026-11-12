@@ -14,6 +14,10 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // The free preview address (in2min2.pksgrg.workers.dev) and a separate
+  // preview address for every branch. Keep both until in2min2.com is live.
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
