@@ -1,0 +1,29 @@
+// Cloudflare Worker that runs the In2Min2 Next.js app, built by OpenNext
+// (@opennextjs/cloudflare). `npm run deploy` builds and deploys from this Mac;
+// Cloudflare's Git integration does the same on every push to main.
+//
+// "name" MUST match the Worker's name in the Cloudflare dashboard, or the
+// Git build fails. The preview address is https://in2min2.<account>.workers.dev
+//
+// Public values only. Secrets (GEMINI_API_KEY, later the Supabase secret key
+// and Stripe keys) are set with `npx wrangler secret put NAME` or in the
+// dashboard as type "Secret". Never put them in this file.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "in2min2",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    // Lets the app call itself (used by OpenNext for caching). Must match "name".
+    { "binding": "WORKER_SELF_REFERENCE", "service": "in2min2" }
+  ],
+  "vars": {
+    "GEMINI_MODEL": "gemini-3.5-flash-lite"
+  },
+  "observability": { "enabled": true }
+}
