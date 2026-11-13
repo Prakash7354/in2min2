@@ -1,11 +1,20 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3, 13 November 2026. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.1, 13 November 2026 (evening). Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.1 (owner's answers of 13 Nov 2026, evening):**
+- Pricing shape confirmed: the plan buys time, and people come in packs. People included are now 200, 300, 400 and 500 (5b, Recommended).
+- Next year and more than one event: "Run it again" with carry-over, same-again and welcome-back discounts (5g).
+- Free, half or full: the owner decides each case; the system never does (5h).
+- Community events must say who organises them and whether anyone profits (5h).
+- A memorial or funeral event type, handled quietly (2, 5g).
+- The In2Min2 website, a private demo account, and colour options for the logo (18b–18d).
+- Stripe as a sole trader; stay on Supabase's free plan with our own nightly backups until income covers Pro (14b, 17a, 21).
 
 **What changed in version 3:**
 - The owner agreed the launch prices and every item in the old open-decisions list.
@@ -45,10 +54,10 @@ The first question in the builder is "How big is your event?". The answer decide
 | Scale | Examples | Typical life | What it needs |
 | --- | --- | --- | --- |
 | **Personal**: friends and family | Birthday, Pasni (rice feeding), party, house-warming | About a week either side | Invitation card, RSVP, map, parking, photos, thank-you |
-| **Celebration**: a big family or group occasion | Wedding, engagement, wedding anniversary, Bratabandha, **reunion, regimental day** | Planned over weeks; **90 days is the sweet spot** | Several functions (Mehndi, Ceremony, Reception), separate guest lists, honoured family, gifts, guestbook, two languages, guest numbers for the venue and caterer |
+| **Celebration**: a big family or group occasion | Wedding, engagement, wedding anniversary, Bratabandha, **reunion, regimental day**, **memorial or funeral** (handled quietly, 5g) | Planned over weeks; **90 days is the sweet spot** | Several functions (Mehndi, Ceremony, Reception), separate guest lists, honoured family, gifts, guestbook, two languages, guest numbers for the venue and caterer |
 | **Community and sport**: a public event | Mela, Gurkha Cup or Nepal Cup-style tournament, **charity fundraiser**, cultural show | Months of entries and sales before; results and photos after | Tickets (paid or free), team entries, the draw, fixtures, live scores, stalls, sponsors, parking, receipts, cash on the day, head count against capacity |
 
-The scale is stored on the event (`events.scale`, filled from the event type) and the host can change it. Event types live in a table, so adding one (memorial, school reunion, Teej, Dashain party) needs no code change.
+The scale is stored on the event (`events.scale`, filled from the event type) and the host can change it. Event types live in a table, so adding one (school reunion, Teej, Dashain party) needs no code change. Each type also says whether it comes round every year, and whether it is a sensitive occasion (5g).
 
 ## 3. Who it is for first (Recommended)
 
@@ -97,7 +106,7 @@ Golf Society Home keeps its own social-event builder for golf days. In2Min2 is f
 
 **Conclusion:** today a wedding host who pays for an invitation, a website and a photo app spends £40–200. A tournament organiser pays a ticketing site per ticket **and** a tournament tool. In2Min2 does all of it, so it can charge less than any one of them and still make money, because serving an event costs pennies (section 17).
 
-## 5. Pricing (Decided by the owner, 13 Nov 2026, as launch prices)
+## 5. Pricing (shape decided by the owner, 13 Nov 2026; the numbers are launch prices, Recommended until he confirms them)
 
 ### 5a. Principles
 
@@ -108,17 +117,19 @@ Golf Society Home keeps its own social-event builder for golf days. In2Min2 is f
 5. **Never hold memories hostage.** Before a free page closes, the host can download the photos at standard quality, for free.
 6. **Community events pay nothing up front.** There is a fee only when money comes in online, and only on that sale. Organisers are often volunteers and can't pay before entries come in. Free events pay nothing at all.
 
-### 5b. Personal and celebration events: one payment per event
+### 5b. Personal and celebration events: time sets the plan, people add packs
+
+**How it works (Decided, owner, 13 Nov 2026):** the plan is *how long the page stays up*. Each plan includes a starting number of people, and any plan can add more in packs of 100 for £3, as many as needed.
 
 The page is live from the moment it is published. It stays up for this long *after* the event:
 
 | | **Pop-Up** | **Season** ★ | **Half-Year** | **Keepsake** |
 | --- | --- | --- | --- | --- |
-| Best for | Birthdays, Pasni, parties | Anniversaries, engagements, Bratabandha, reunions | Weddings planned well ahead | Weddings and milestones to keep |
+| Best for | Birthdays, Pasni, parties, memorials | Anniversaries, engagements, Bratabandha, reunions | Weddings planned well ahead | Weddings and milestones to keep |
 | Price | **Free** | **£9** | **£15** | **£25** |
 | Online after the event | 7 days | 90 days | 6 months | 12 months |
-| People included | 50 | 200 | 400 | 800 |
-| More people | +100 for £3 (Recommended) | +100 for £3 | +100 for £3 | +100 for £3 |
+| People included (Recommended) | **200** | **300** | **400** | **500** |
+| More people | +100 for £3 | +100 for £3 | +100 for £3 | +100 for £3 |
 | Photos (per guest) | 50 (10) | 300 (20) | 600 (20) | 1,000 (30) |
 | AI writes | 5 | 30 | 50 | 100 |
 | Download | Standard quality | Standard quality | Standard quality | Full resolution, as a ZIP |
@@ -126,11 +137,25 @@ The page is live from the moment it is published. It stays up for this long *aft
 
 ★ The sweet spot the owner described. £9 for 90 days is cheaper than every paid invitation or photo app in section 4.
 
-**Time and size are separate (Recommended, owner's point of 13 Nov 2026).** The plan sets how long the page stays up. Extra people come in packs of 100 for £3. A 90-day anniversary for 260 people costs £9 + £3 = **£12**. A one-week birthday for 120 costs £0 + £3 = **£3**. Each plan's price, people and pack live in the `plans` table, so changing them needs no new release. (Built: `plans.guest_pack_size`, `plans.guest_pack_pence`, `events.extra_guests`.)
+**Why 200, 300, 400 and 500 people (Recommended; the owner asked for numbers between 200 and 500):**
+- **200 on the free plan** covers almost every birthday, Pasni and family party. So the free page is truly useful and gets shared, and that is the hook. What makes people pay is time and photos: the page closing after 7 days, and 50 photos filling up.
+- **Each step adds 100 people**, the same as one pack. That makes it easy to explain: "the next plan gives you 100 more people *and* more time".
+- **People cost In2Min2 almost nothing** (a guest is a few hundred bytes). Photos and time are what cost. So the price follows time, and people are cheap to add.
+- **Weddings (300–600 people)** land on Half-Year or Keepsake, perhaps with a pack. A 600-person Keepsake wedding is £25 + £3 = £28, still below every rival in section 4.
+
+**Examples:**
+
+| Event | Plan | People | Price |
+| --- | --- | --- | --- |
+| One-week birthday | Pop-Up | 250 | £0 + £3 = **£3** |
+| 90-day anniversary | Season | 380 | £9 + £3 = **£12** |
+| 12-month wedding | Keepsake | 650 | £25 + £6 = **£31** |
+
+Each plan's price, people and pack live in the `plans` table, so changing them needs no new release. (Built: `plans.guest_pack_size`, `plans.guest_pack_pence`, `events.extra_guests`.)
 
 ### 5c. How limits, warnings and upgrades work (Recommended; database part built)
 
-**The first payment.** In the builder, after "When and where", one question: **"About how many people?"**, a number (`events.expected_guests`). With the date, it picks the plan and shows the price before anything is paid: *"90 days, up to 300 people: £12"*.
+**The first payment.** In the builder, after "When and where", one question: **"About how many people?"**, a number (`events.expected_guests`). With the date, it picks the plan and shows the price before anything is paid, with any discount (5g, 5h) already taken off: *"90 days, up to 400 people: £12"*.
 
 - **Pop-Up** needs no card.
 - **Paid plans** go through Stripe Checkout: card, Apple Pay or Google Pay, about 20 seconds, with a receipt by email.
@@ -215,6 +240,66 @@ Re-check them every three months.
 | **Organiser** subscription (phase 6) | £10 a month or £100 a year | For clubs and committees that run several events: booking fee drops to 2.5% + 25p, own logo, no In2Min2 footer, every event kept 12 months. Compare LeagueRepublic at about €17.90 a month |
 | Cash gifts (phase 4) | No In2Min2 fee at launch | The guest covers the card cost. "Every penny reaches the family" |
 
+### 5g. Next year, and more than one event (Recommended, owner's idea of 13 Nov 2026)
+
+Many events come round every year: birthdays, anniversaries, a Gurkha Cup, a regimental day, a charity walk. Others happen once: a wedding, a Pasni. The event type knows which (`event_types.repeats_yearly`, built), and a wedding comes back as its anniversary (`event_types.repeat_as`, built).
+
+**1. The same event next year: "Run it again", 30% off.**
+- When the page closes, the host is asked: *"Will you hold this again next year?"*
+  - **Yes, keep it** (free): the guest list, functions, honoured family, words, look and switches are kept for up to 13 months after the event, with the page offline (`events.keep_for_next_year`, built). Photos follow the plan as normal.
+  - **No**: everything is deleted 30 days after closing, as now.
+- About 8 weeks before the date next year: *"Your Gurkha Cup is coming up. Set up 2027 in one tap."* One tap makes a draft copy with next year's date and everything carried over. The host checks it and publishes.
+- **30% off** the plan and guest packs, applied by itself. There's no code to type, so nothing to lose or pass around.
+- A wedding's "next year" is its first anniversary: *"Your first anniversary is on 14 March. Make a page for it, 30% off, with your wedding guest list ready."*
+- Community events carry over their competitions, products and prices, stalls and sponsors. Their booking fee is per sale, so the 30% doesn't apply to them. The carry-over and the same address every year are their hook. A fee level the owner set (5h) carries over too, and he can change it.
+- All the years of one event share a `series_id` (built). That is how the system knows it's a repeat. To count, the new date must be at least 9 months after the last one.
+
+**2. A different event: "Welcome back", 20% off.**
+- A host who paid for an event in the last 12 months gets 20% off their next one. It is applied by itself and shown as *"Welcome back: 20% off"*.
+- Example: a family's Pasni in March, then a grandparent's birthday in August.
+
+**3. Rules that keep it simple:**
+- Discounts never stack. The single best one applies: the owner's fee level (5h), same-again or welcome-back.
+- The owner's own codes (`LAUNCH50`, or one he makes for a group) still work, typed or through a link.
+- **Sensitive occasions are never sent offers.** A memorial or funeral (`event_types.sensitive`, built) gets no discount emails and no "run it again" reminders, with calm colours and no celebration animation. The family can still copy it themselves.
+
+**4. Many events a year:**
+- Clubs and committees: the **Organiser** subscription (5f), with every event kept 12 months and data kept between events.
+- Families with four or more events a year: perhaps a **Family Year** pass later (for example £39 a year for every personal and celebration event). Decide after the pilot, from real numbers.
+
+*When:* the "Keep it for next year?" question comes in phase 3 with the closing emails, so pilot families can say yes. "Run it again" and the discounts come in phase 6, well before the first repeats in late 2027. The database fields are ready now.
+
+### 5h. Free, half or full: the owner decides (Decided, owner, 13 Nov 2026)
+
+The system can't know whether an event is sensitive or deserving, so it never decides. **Every event pays the normal prices by default.** The owner can set any one event to:
+
+| Fee level | What the event pays In2Min2 | Example |
+| --- | --- | --- |
+| **Full** (default) | 100%: the normal plan, packs and booking fee | Almost everything |
+| **Half** | 50%: e.g. Season £4.50; booking fee 2% + 15p | A registered charity's fundraiser |
+| **Free** | Nothing | A funeral; an Army-side Nepal Cup as a showcase |
+
+- Stripe's own card cost (about 1.5% + 20p) still applies to online sales on Half and Free. In2Min2 can't waive it, just as a card machine still charges.
+- **How organisers ask:** an *"Ask about a reduced fee"* link on the pricing page and the organiser dashboard opens a short form: organiser, event, why, and a charity number if they have one. It goes to the owner by email. Nobody gets a reduction without asking.
+- **How the owner sets it:** on the admin page (phase 4), choose Full, Half or Free and add a note. Until then: Supabase › **Table Editor** › `events` › the `charge_percent` column (100, 50 or 0). Built: `events.charge_percent` and `events.charge_note`, which only the server can change, with checks.
+- **Does any law say some events must be free?** No. No UK law requires a booking service to give free or cheaper service to charities, the armed forces or funerals, so the system doesn't need to know. One legal point does matter. Under the Equality Act 2010, the decision must not depend on religion, race or another protected characteristic. So write down simple rules and apply them the same way to everyone, for example:
+  - memorials and funerals: Free;
+  - registered charities and armed-forces welfare events: Half, or Free as a showcase;
+  - everything else: Full.
+- **Can the system check a charity?** Partly. A charity number can be looked up on the Charity Commission's register (England and Wales), OSCR (Scotland) or the Charity Commission for Northern Ireland. Small charities (income under £5,000) don't have to register, so a missing number doesn't mean "not a charity". The owner checks by hand; an automatic check could come later (24).
+
+**Who is behind a community event (Decided, owner: "remove this anonymity").**
+- Before a community event can be published, the organiser gives:
+  - the organiser's name;
+  - what kind of organiser: family, individual, business, community group, club, charity, armed forces association or faith group;
+  - **"Is anyone making a profit from this event?"**;
+  - a charity number, if any;
+  - a contact to show.
+- The database refuses to publish a community event without the first three (built and tested).
+- The public page shows it: *"Organised by Andover Gurkha Welfare Group · Charity 1234567 · Not for profit"*. Buyers see who they are paying and whether anyone profits.
+- Anyone who takes money online also passes Stripe's identity check (name, address, date of birth, bank). So nobody sells tickets anonymously.
+- Prices are the same for profit and not-for-profit events by default. The answer helps the owner judge fee requests. A false answer breaks the terms: the owner can move the event to Full or take it down.
+
 ## 6. The life of an event (Decided)
 
 The page changes by the clock alone, in the event's own time zone (`public.stage()`):
@@ -240,6 +325,7 @@ There is never a separate "preview mode" that looks different from the real page
 
 1. **What are you celebrating?** Picture tiles: Birthday, Pasni, Wedding, Anniversary, Reunion, Mela, Tournament, Charity… The scale is picked automatically and shown: "This looks like a Celebration. Change".
 2. **Who is it for?** The **stars**: the child, the couple, the birthday person, the regiment, or the tournament itself. Then **"Family to honour"**: parents, grandparents and close family, with names and optional photos. They appear with pride on the card and page ("With blessings from") (`event_people` table, built).
+   - **Community events: who's organising.** Name, kind of organiser, "Is anyone making a profit?", charity number and a contact. Needed before publishing (5h).
 3. **When, where and how many.**
    - Date and time.
    - Venue: type the address or paste a Google Maps link.
@@ -310,6 +396,7 @@ Everything else stays still. People who have reduced motion switched on see no a
   - Every payment step explains itself in plain words (14a).
   - "Made with In2Min2" stays small.
 - **Small moments of delight**, only at the six moments in 7b.
+- **Quiet for sad occasions.** A memorial or funeral gets calm colours, no petals or confetti, gentle wording that never says "celebrate", and no offers (5g).
 
 ## 8. The AI writer and languages
 
@@ -348,9 +435,11 @@ Three levels, shown honestly in the language picker:
 
 | Level | Languages | What it means |
 | --- | --- | --- |
-| **Ready** (launch) | English, Nepali, Nepali in English letters | Phrase bank and examples checked by a native speaker; matching fonts in every text style |
+| **Ready** (launch) | English, Nepali, Nepali in English letters | Full phrase bank and examples; matching fonts in every text style |
 | **AI-written** (launch, labelled "Beta, please ask a native speaker to check") | Hindi, Punjabi, Gujarati, Bengali, Tamil, Tagalog (Filipino), Polish and other left-to-right languages | Gemini writes them; fonts from Noto; we promote a language to Ready when a community helps check its phrase bank |
 | **Later** | Urdu, Arabic and other right-to-left languages | The whole page layout flips, so these need design work first |
+
+**Who checks the words (Decided, owner, 13 Nov 2026):** the host or organiser, in every language. They save, approve and publish their own text, and nothing goes live unapproved (7). In2Min2's own example texts are labelled as examples, and are corrected whenever a user suggests a better wording.
 
 Filipino families can use In2Min2 from day one: Tagalog uses English letters, so they get the beta level straight away. The **buttons and menus** stay in English at first. Translating the interface comes later (backlog), starting with Nepali and Hindi.
 
@@ -520,7 +609,7 @@ Every paid or free item is a **product** with switches. One screen, one row per 
 - **Big-screen mode** (`/live/{code}`) runs on a TV or projector. It cycles through live scores, next fixtures, sponsor logos and the photo wall.
 - **Results and awards**: winners, runners-up, top scorer, best goalkeeper, fair play. A results image is made automatically, ready to share.
 
-**A free showcase.** A large, free, Army-side event such as a Nepal Cup costs In2Min2 nothing to support, because there are no sales and so no fee. It is a perfect public showcase. Offer it free, with the organisers' permission to show it.
+**A free showcase.** A large, free, Army-side event such as a Nepal Cup costs In2Min2 almost nothing to support. It is a perfect public showcase. Whether it's free is the owner's call (5h): he sets its fee level to Free and asks the organisers' permission to show it.
 
 ### 13c. Business stalls and sponsors
 
@@ -560,7 +649,7 @@ Many people in the community still prefer cash and distrust paying online. In2Mi
 **Rule: In2Min2 never holds anyone else's money.** That keeps it out of e-money regulation.
 
 1. **Hosts buying a plan (Season, Half-Year, Keepsake, guest packs).**
-   - The host pays by Stripe Checkout into **In2Min2's own Stripe account**, which pays out to the owner's bank automatically every few days.
+   - The host pays by Stripe Checkout into **In2Min2's own Stripe account**, which pays out to the owner's bank automatically every few days. The account is a **sole trader account in Prakash's name**, trading as GoChuchuro, until the business is incorporated (Decided, 13 Nov 2026).
    - Stripe charges 1.5% + 20p on standard UK cards. On a £9 plan the owner keeps about £8.67.
    - Stripe sends the host a receipt, and a webhook switches the plan on.
 2. **Community sales (tickets, parking, entries, stalls).** These use **Stripe Connect**.
@@ -657,7 +746,7 @@ It is **not Next.js** and has **no Stripe**. Reuse its database patterns, rules,
 | Part | Service | Free allowance (check current terms) | When to pay |
 | --- | --- | --- | --- |
 | App | Next.js 16 on **Cloudflare Workers** (OpenNext) | 100,000 requests a day; 10 ms CPU per request | Workers Paid ($5 a month) at launch: share pictures and busy events need more CPU |
-| Database, sign-in, live updates | **Supabase** (London) | 500 MB, 200 live connections. **Free projects pause after 7 days without use, and have no backups** | Pro ($25 a month, daily backups) **before the first real guest's details go in** |
+| Database, sign-in, live updates | **Supabase** (London) | 500 MB, 50,000 monthly users, 2 free projects. **Free projects pause after a week without use, and have no backups** | **Stay free until income covers it** (Recommended, owner's question): our own nightly backup replaces Supabase's (section 21). Move to Pro ($25 a month) when the first community event takes money, or when income passes £25 a month, whichever comes first |
 | Photos | **Cloudflare R2** | 10 GB | About $0.015 per GB a month; no download fees |
 | AI words | **Gemini** `gemini-3.5-flash-lite` through `@google/genai` | Free quota; UK users get the paid-tier data terms (prompts not used to improve Google's products) | Turn on billing only after sign-in protects the writer (section 21) |
 | Email | **Resend** | 3,000 a month, **but only 100 a day** | Pro ($20 a month) before an event that sends hundreds of confirmations in a day |
@@ -672,9 +761,9 @@ It is **not Next.js** and has **no Stripe**. Reuse its database patterns, rules,
 | Later | SMS (Twilio, about 4p a text), WhatsApp Business messages, Google Wallet (free), Apple Wallet (£79 a year), SumUp card reader (one-off hardware) | | When asked for |
 
 **Running cost:**
-- £0 a month while building.
-- About £40–45 a month once real events run: Supabase Pro, Resend Pro and Workers Paid.
-- One Season sale a week covers it.
+- £0 a month while building and through the family pilot (plus the ICO fee and the domain, which are yearly).
+- Then each service is paid for only when it is needed: Workers Paid (about £4) when share pictures need it; Supabase Pro (about £20) when community money starts; Resend Pro (about £16) before a big event's emails.
+- About £40–45 a month with all three. One Season sale a week covers it.
 
 **Hosting notes:**
 - `cacheComponents` is **off** in `next.config.ts`. With it on, every page hung under OpenNext (tested 12 Nov 2026).
@@ -716,11 +805,60 @@ Event types can never clash with app routes; the database checks this. Event pag
 - The owner will buy it once he has seen the Phase 1 preview working. It costs about £8–10 a year at Cloudflare. Until it's bought, someone else could register it.
 - Also check the name on the UK IPO trade mark search (classes 41 and 42) and reserve the social media handles.
 
+### 18b. The In2Min2 website: home page, sign-in and contact (Decided, owner, 13 Nov 2026)
+
+The home page sells In2Min2 and explains it. It is built in phase 2, with screenshots from the demo account (18c).
+
+**Top menu:** logo · How it works · Pricing · Communities · Contact · **Sign in** · **Start free** (button). On a phone: logo, **Start free**, and a menu button (☰) for the rest.
+
+**Sections, top to bottom:**
+1. **Opening:** one line ("Your event online in two minutes, from invitation to memory book"), a phone showing an invitation that moves through its stages, and two buttons: *Start free* and *See how it works*.
+2. **How it works**, in three steps with small moving pictures: *Choose what you're celebrating → We write it in your languages → Share one link: invitation, live day, memory book.*
+3. **Every kind of event:** picture tiles (birthday, Pasni, wedding, anniversary, reunion, mela, tournament, charity).
+4. **Pricing:** the four plans; a slider, "About how many people?", that shows the price; the launch offer ("12 of 50 free places left"); and "Community events: free to set up".
+5. **For communities and clubs:** the dated fee comparison (5d), safe payment (14a), gate scanning, and the event pack for venues (10).
+6. **Safe and private:** no adverts, data kept in London, "Delete everything", and the ICO registration number.
+7. **Questions and answers.**
+8. **Contact:** a short form (protected by Turnstile) that emails the owner, and "Ask about a reduced fee" (5h).
+9. **Footer:** privacy, terms, cookies (none used), ICO number, "A GoChuchuro product".
+
+There is no public demo log-in (owner's decision). Visitors see "How it works" and screenshots, and the owner shows the live demo himself. The home page is listed by search engines; event pages never are.
+
+### 18c. Demo account (Decided, owner, 13 Nov 2026)
+
+A private account that only the owner signs in to. It has two uses: screenshots for the website and social posts, and showing In2Min2 to a family or organiser without opening anyone's real event.
+
+- **Sample events**, with made-up names and no real people's photos: a birthday, a Pasni, a five-function wedding, an anniversary, a reunion, a charity walk, and a two-sport tournament with a draw, fixtures and scores.
+- **Safe by design** (`events.is_demo`, built; only the server sets it):
+  - every page shows a small "Demo" label;
+  - payments use Stripe's test mode, so no real money moves;
+  - no emails or texts are sent;
+  - never listed by search engines.
+- **"Reset demo"** button, plus a nightly reset, puts every sample back as it was. A demo can get messy, and the next one still starts clean.
+- Built in phase 2, before the website needs screenshots.
+
+### 18d. Colours and logo (owner choosing; Recommended)
+
+The **brand colours** are for In2Min2's own screens: the website, sign-in, dashboard and builder, and the small "Made with In2Min2" footer. Each event page keeps its own template and colours (7). So the brand must sit calmly beside a wedding, a football final and a memorial.
+
+Three options are drawn on a comparison page for the owner: https://claude.ai/artifact/3JA1Qkc6JzKqpjMoQwCP2v (private to the owner).
+
+| Option | Colours | Feel |
+| --- | --- | --- |
+| **A. Marigold & Indigo** (Recommended) | Deep indigo, marigold, soft rose, warm cream | Calm and trusted, festive without being loud. Marigold is the garland of Tihar and weddings, and the RSVP petals (7b) |
+| **B. Lali Gurans** | Rhododendron crimson, midnight navy, marigold, ivory | The warmest and most Nepali (the national flower). Red is strong on memorial and payment screens |
+| **C. Himalayan Dusk** | Plum, peach, teal, snow white | Soft and modern; teal brings in sport |
+
+**Then the logo.** The owner designs it. It needs:
+- a full logo (mark and "In2Min2") and a square icon, for the phone home screen and the browser tab;
+- to work in one colour, on light and dark backgrounds;
+- files in SVG if possible, otherwise PNG at least 1024 pixels wide on a transparent background.
+
 ## 19. The database (built: `supabase/migrations/0001_init.sql`, not yet run on Supabase)
 
 **Tables:**
-- `plans` (with guest packs) and `event_types` (now with reunion and charity);
-- `events` (now with parking, expected guests, venue capacity and extra guests);
+- `plans` (with guest packs; 200, 300, 400 and 500 people) and `event_types` (with reunion, charity and memorial; whether each repeats yearly, what it repeats as, and whether it is sensitive);
+- `events` (with parking, expected guests, venue capacity and extra guests; the organiser's name, kind, profit answer, charity number and contact; the fee level and its note; the series; keep-for-next-year; the demo flag);
 - `event_hosts`, `event_people`, `sub_events`, `guest_crm`, `sub_event_guests` and `feature_toggles`;
 - `offers` and `offer_claims`.
 
@@ -728,7 +866,7 @@ Event types can never clash with app routes; the database checks this. Event pag
 - `stage()`, `event_settings()`, `public_event()`, `resolve_short_code()`, `is_event_host()` and `copy_fits()`;
 - `event_usage()`, `claim_offer()` and `offer_places_left()`.
 
-`npm run test:db` runs it on real Postgres 17 (PGlite, with stand-ins for Supabase's `auth`) and checks **112 rules**. Among them:
+`npm run test:db` runs it on real Postgres 17 (PGlite, with stand-ins for Supabase's `auth`) and checks **136 rules**. Among them:
 - Each host sees only their own events. Helpers read, co-hosts edit, owners manage and delete.
 - The public reads no table. Drafts are invisible. Private events and invite-only functions open only with a guest's link.
 - The browser can never set a plan, hosting length, guest packs, own domain, AI usage or money.
@@ -745,8 +883,16 @@ Event types can never clash with app routes; the database checks this. Event pag
   - deleting and starting again can't claim twice;
   - the public can see places left but can't claim.
 - One delete removes an event's guest list, switches and hosts.
+- Plans include 200, 300, 400 and 500 people.
+- Fee level: only the server sets Full, Half or Free (100, 50 or 0); hosts can't, and the public never sees it or its note.
+- A community event can't be published without its organiser, kind and profit answer, and the public then sees them. Family events need none of this.
+- A wedding repeats as its anniversary; a memorial is sensitive and never prompted to repeat; every event starts its own series, which hosts can't change.
+- A demo event tells its page to show the "Demo" label; hosts can't set it.
 
 **Next migrations:**
+- `price_quote()`: plan plus packs, then the single best of fee level, same-again or welcome-back (phase 1);
+- `repeat_event()`: "Run it again" into the same series (phase 6);
+- an admin list for the owner's page (phase 4);
 - `submit_rsvp()`, with capacity, the 10% grace and the waiting list;
 - `photos`, `guestbook_entries` and `video_links`;
 - `products`, `orders`, `order_items`, `cash_sales` and `cash_ups`;
@@ -760,22 +906,22 @@ Small events run all year, so the personal and celebration side comes first and 
 
 | Phase | What | Target | Done when |
 | --- | --- | --- | --- |
-| **0** | Next.js on Cloudflare with Git builds, AI writer route, database (112 checks), this plan | Done 12–13 Nov 2026 | Done |
-| **1** | **The builder** (section 7): live preview, styles, honoured family, parking and numbers, AI in two languages, Supabase sign-in, save and publish, launch-offer code | Mid-December 2026 | A new host publishes a good-looking event in under 2 minutes on the owner's own phone |
-| **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; reminders; privacy notice and terms | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
+| **0** | Next.js on Cloudflare with Git builds, AI writer route, database (136 checks), this plan | Done 12–13 Nov 2026 | Done |
+| **1** | **The builder** (section 7): live preview, styles, honoured family, parking and numbers, the price from "About how many people?", AI in two languages, Supabase sign-in, save and publish, launch-offer code | Mid-December 2026 | A new host publishes a good-looking event in under 2 minutes on the owner's own phone |
+| **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
 | **Pilot 1** | 3–5 family events from the owner's network (Pop-Up and `LAUNCH50`) | From January 2027 | Real families use it; feedback collected |
-| **3** | Guest-list tools, the photo wall and gallery, video links, the event pack, feedback | January–February 2027 | 200 photos from 20 phones in an hour without failure |
-| **4** | Stripe: plan upgrades and guest packs; then products, orders, QR passes, the Gate screen (works offline), cash sales and cash-up | February 2027 | A test mela sells entry and parking online and on the day, with every sale accounted for |
+| **3** | Guest-list tools, the photo wall and gallery, video links, the event pack, feedback; closing emails with "Keep it for next year?" (5g) | January–February 2027 | 200 photos from 20 phones in an hour without failure |
+| **4** | Stripe: plan upgrades and guest packs; then products, orders, QR passes, the Gate screen (works offline), cash sales and cash-up; **the owner's admin page** (fee levels, offer codes, demo reset) and "Ask about a reduced fee" (5h); organiser details for community events | February 2027 | A test mela sells entry and parking online and on the day, with every sale accounted for |
 | **5** | Competitions: any sport and group, team entries, the draw, fixtures, live scores, big screen | February–early March 2027 | A 16-team test tournament runs from draw to final, with two sports at once |
 | **Organiser demos** | Show organisers a working demo; free for the first 5 | February–March 2027 | Entries open for the April–May season |
-| **6** | Organiser subscription, own domains, extras (section 24) | After the season starts | |
+| **6** | "Run it again" with same-again and welcome-back discounts (5g); Organiser subscription; own domains; extras (section 24) | After the season starts, before the first repeats in late 2027 | |
 
 Each phase ends deployed to the preview, with exactly what was tested stated: real phone, browser at phone width, local Worker or PGlite. The dates depend on the owner's time for testing and decisions. If a real tournament date is fixed sooner, phases 4–5 move ahead of phase 3.
 
 ## 21. Security and resilience (owner: "crucial")
 
 **Against data leaks:**
-- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 112 checks today, and they run before every commit.
+- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 136 checks today, and they run before every commit.
 - **The public reads no table**, only functions that return what a guest may see. Server-only columns (plan, money, domain) can't be written from a browser.
 - **Hold as little as possible:**
   - no dates of birth, ID documents or player ages;
@@ -799,7 +945,12 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
   - the AI writer must require sign-in and count `ai_writes_used`.
 
 **Against system failure:**
-- **Backups:** Supabase Pro gives daily backups (7 days). Add a weekly copy to R2 that In2Min2 controls.
+- **Backups without paying for Pro yet** (owner's question). From the first real guest, a **nightly, encrypted copy** of the database goes to a private Cloudflare R2 store that In2Min2 controls.
+  - It is made by a scheduled GitHub job using Supabase's own export tool: about a minute a night, well inside GitHub's free allowance. Supabase itself advises free projects to export their data regularly.
+  - Copies are kept 30 days, then deleted.
+  - A restore is practised once before the pilot, so we know it works.
+  - Later, Supabase Pro adds its own daily backups, and the nightly copy carries on as a second copy.
+- **Pausing:** a free Supabase project pauses after a week without use. Real use and the nightly backup keep it awake. If it ever pauses, one click restores it and no data is lost.
 - **No single server:** Cloudflare runs the app in many places at once.
 - **Separate test and live databases** from the first real guest: test on staging, never on real events.
 - **The Gate screen works without signal.** QR passes are signed so a phone can check them offline. Cash sales and scans are saved on the phone and sent when the signal returns.
@@ -860,18 +1011,28 @@ Before deleting:
 The same deletion runs automatically 30 days after a page closes.
 
 **Other legal steps:**
-- Trade through GoChuchuro with its Stripe account in the business name.
+- **Stripe as a sole trader in Prakash's name** (Decided), trading as GoChuchuro, until the business is incorporated. Register with HMRC as self-employed if not already (ask the accountant).
+- **Keeping guest lists for next year** (5g): the privacy notice says the host may keep the list for up to 13 months to invite people again. Any guest can ask to be removed, and the list is deleted after 13 months.
+- **Fee decisions** (5h) follow written rules, applied the same way to everyone (Equality Act 2010).
 - Keep records for 6 years.
-- VAT applies only above £90,000 a year.
+- VAT applies only above £90,000 a year (not close yet, owner, 13 Nov 2026).
 - Do a trade mark check for "In2Min2" at the UK IPO.
 - Follow the CAP Code for any competitor comparison (5d).
 
 ## 23. Decisions
 
 **Decided by the owner, 13 Nov 2026:**
-- Launch prices: Pop-Up free 7 days, Season £9 90 days, Half-Year £15, Keepsake £25.
+- Price shape: the plan buys time (Pop-Up free 7 days, Season £9 90 days, Half-Year £15 6 months, Keepsake £25 12 months). People come in packs of +100 for £3, on any plan, as many as needed.
 - Community: free set-up, 4% + 30p per online order, nothing on cash or free events.
-- Limits: 50, 200, 400 and 800 people; 50, 300, 600 and 1,000 photos; 2,000 for community events.
+- Photo limits: 50, 300, 600 and 1,000; 2,000 for community events.
+- Fee levels: Full (default), Half or Free, set only by the owner when someone asks. The system never decides (5h).
+- Community events must say who organises them and whether anyone profits (5h).
+- Repeat events and multiple events should get carry-over and automatic discounts (5g; the percentages are still open).
+- Stripe: a sole trader account in Prakash's name until incorporation.
+- The host or organiser checks and approves every word, in any language, before publishing.
+- A private demo account; no public demo log-in.
+- A marketing website with a top menu, How it works, sign-up, sign-in and contact.
+- Two-step sign-in on every account (agreed; still to switch on).
 - Own web address: £10 a year.
 - Organiser subscription: £10 a month or £100 a year, in phase 6.
 - Free Keepsake for the first 50 families, stopping automatically.
@@ -884,12 +1045,12 @@ The same deletion runs automatically 30 days after a page closes.
 - The preview is a live mirror of the real page.
 
 **Still open (Recommended answers in brackets):**
-1. Extra people in packs of 100 for £3 on any plan? (Yes)
-2. Replies allowed 10% over the guest limit before they pause? (Yes)
-3. `LAUNCH50`: share the code only with your network, or show it publicly with "places left"? (Your network first, then public if places remain after January)
-4. Which business will hold the Stripe account: GoChuchuro as a sole trader or a limited company? (Ask your accountant)
-5. Who can check the Nepali phrase bank and the example texts? (You, or a family member, about one hour)
-6. Approach the Nepal Cup-style organisers as a free showcase? (Yes, in February with the demo)
+1. People included: 200 (Pop-Up), 300 (Season), 400 (Half-Year), 500 (Keepsake)? (Yes)
+2. Same event next year 30% off, a different event 20% off, applied automatically and never stacked; "keep it for next year" free? (Yes)
+3. Replies allowed 10% over the guest limit before they pause? (Yes)
+4. `LAUNCH50`: share the code only with your network, or show it publicly with "places left"? (Your network first, then public if places remain after January)
+5. Brand colours: A, B or C (18d)? (A, Marigold & Indigo)
+6. Stay on Supabase's free plan, with our own nightly backups, until the first community event takes money or income passes £25 a month? (Yes)
 
 ## 24. More ideas (backlog)
 
@@ -905,7 +1066,9 @@ The same deletion runs automatically 30 days after a page closes.
 - A 10-second video of the card opening, for Reels and TikTok.
 - The interface (buttons) in Nepali and Hindi.
 - Short video clips up to 30 seconds (12b).
-- More event types as they appear: memorials, school and regimental reunions, Teej and Dashain gatherings, charity dinners.
+- More event types as they appear: school reunions, Teej and Dashain gatherings, charity dinners.
+- An automatic charity-number check against the charity registers (5h).
+- A Family Year pass, if pilot families run several events a year (5g).
 
 ## 25. Sources (November 2026 research)
 
@@ -950,6 +1113,8 @@ The same deletion runs automatically 30 days after a page closes.
   - [NSPCC photography guidance](https://learning.nspcc.org.uk/research-resources/briefings/photography-sharing-images-guidance/)
 - **Services:**
   - [Supabase pricing guide 2026](https://www.jetadmin.io/blog/supabase-pricing-2026-guide-to-plans-limits-and-real-world-costs/)
+  - [Supabase free tier limits 2026](https://automationatlas.io/answers/supabase-free-tier-limits-2026/)
+  - [Supabase free tier in practice](https://dev.to/mahdi_benrhouma_fe1c6005/supabase-free-tier-limits-in-2026-what-you-actually-get-and-when-you-will-hit-them-4mhe)
   - [Resend free tier 2026](https://automationatlas.io/answers/resend-free-tier-explained-2026/)
   - [Gemini API terms](https://ai.google.dev/gemini-api/terms_preview)
   - [Gemini data logging policy](https://ai.google.dev/gemini-api/docs/logs-policy)

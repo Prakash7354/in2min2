@@ -1,6 +1,6 @@
 # Your action plan
 
-*For Prakash. Updated 13 November 2026. The full plan is `docs/CONCEPT.md`.*
+*For Prakash. Updated 13 November 2026 (evening). The full plan is `docs/CONCEPT.md`.*
 
 Change `[ ]` to `[x]` when you finish a step, or just tell Claude Code it's done. If a screen looks different from these steps, describe what you see and you'll get the right step.
 
@@ -8,18 +8,29 @@ Change `[ ]` to `[x]` when you finish a step, or just tell Claude Code it's done
 
 ---
 
+## Already decided by you (13 November)
+
+- The plan buys time (7 days free, 90 days £9, 6 months £15, 12 months £25). More people come in packs of +100 for £3, on any plan.
+- Stripe: a sole trader account in your name, until you incorporate.
+- The host or organiser checks and approves every word, in any language, before publishing.
+- Free, half or full price is your decision, case by case. Every event pays full unless you change it.
+- Community events must say who organises them and whether anyone profits.
+- A private demo account for you; no public demo log-in.
+- A website with a top menu, How it works, sign-up, sign-in and contact.
+- VAT: not close to the threshold.
+
 ## This week: free, about 45 minutes in all
 
 ### [ ] 1. Answer six questions (5 minutes)
 
-Reply in the chat with your answers, for example: *"1 yes, 2 yes, 3 network first, 4 ask accountant, 5 me, 6 yes"*.
+Reply in the chat with your answers, for example: *"1 yes, 2 yes, 3 yes, 4 network first, 5 A, 6 yes"*. The reasons are in `docs/CONCEPT.md`, sections 5 and 18d.
 
-1. Extra people in packs of 100 for £3, on any plan?
-2. Allow guests' replies up to 10% over the limit before they pause?
-3. The `LAUNCH50` code: share it only with your network, or also publicly with "places left"?
-4. Will the Stripe account be in your name as a sole trader, or a limited company? (Ask your accountant.)
-5. Who can check the Nepali wording and example texts? (About an hour.)
-6. Offer a Nepal Cup-style event In2Min2 for free, as a showcase?
+1. **People included:** 200 on Pop-Up, 300 on Season, 400 on Half-Year, 500 on Keepsake? (Recommended: yes)
+2. **Discounts:** the same event next year 30% off; a different event within 12 months 20% off; applied automatically, never added together; keeping the guest list for next year free? (Recommended: yes)
+3. **Grace:** allow guests' replies up to 10% over the limit before they pause? (Recommended: yes)
+4. **`LAUNCH50`:** share it only with your network, or also publicly with "places left"? (Recommended: your network first)
+5. **Colours:** A, B or C? Look at the options here: https://claude.ai/artifact/3JA1Qkc6JzKqpjMoQwCP2v (Recommended: A, Marigold & Indigo)
+6. **Supabase:** stay on the free plan, with our own nightly backups, until the first community event takes money or income passes £25 a month? (Recommended: yes)
 
 ### [ ] 2. Switch on two-step sign-in (15 minutes)
 
@@ -94,16 +105,16 @@ Pay it before any real family's details go in.
 
 ### [ ] 6. Ask your accountant two things
 
-- Should the Stripe account be in your name as a sole trader, or a limited company?
-- Is there anything to note about VAT? (VAT only applies above £90,000 a year.)
+- You'll trade as a sole trader in your own name for now. Do you need to register with HMRC as self-employed, and what records should you keep?
+- At what income would becoming a limited company be worth it?
 
 ### [ ] 7. Find 3–5 pilot families
 
 Look for a birthday or Pasni, an anniversary and a reunion happening in January or February. Give them the code `LAUNCH50` for a free Keepsake.
 
-### [ ] 8. Check the Nepali wording (about an hour)
+### [x] 8. Nepali wording: no separate check needed
 
-Claude Code will draft the phrase bank and example texts. You, or someone in the family, read them and correct anything that sounds wrong.
+Your decision: hosts and organisers check and approve their own words, in any language, before publishing. In2Min2's example texts are labelled as examples and corrected whenever someone suggests better wording.
 
 ### [ ] 9. Approve the privacy notice and terms
 
@@ -117,25 +128,39 @@ Claude Code drafts them in phase 2. Read them, and ask about anything unclear. B
 
 It was still free on 13 November 2026, but anyone can buy it until you do.
 
-### [ ] 11. Upgrade Supabase to Pro ($25 a month) the week before the pilot
+### [ ] 11. Supabase Pro: not yet
 
-The free plan has no backups and pauses itself after 7 days. Claude Code will remind you.
+You asked how to avoid paying for Supabase Pro ($25 a month) before there's income. The plan:
+- Stay on the free plan through building and the family pilot.
+- From the first real guest, a nightly, locked copy of the database goes to In2Min2's own Cloudflare storage. This replaces Supabase's backups, and Claude Code sets it up in phase 2.
+- Move to Pro when the first community event takes money, or when income passes £25 a month, whichever comes first. Claude Code will remind you.
+
+### [ ] 12. Design the logo, by mid-December (the website needs it in early January)
+
+What it needs is at the bottom of the colours page (question 5): a full logo, a square icon, a one-colour version, and SVG or PNG files. Put the files in the project's `public/brand/` folder, or send them in the chat.
 
 ---
 
 ## Before the community season (February–March 2027)
 
-### [ ] 12. Open a Stripe account (phase 4)
+### [ ] 13. Write down your fee rules (5 minutes)
+
+Your free, half or full decisions must be fair and consistent (`docs/CONCEPT.md`, section 5h). A starting point to edit:
+- memorials and funerals: Free;
+- registered charities and armed-forces welfare events: Half, or Free as a showcase;
+- everything else: Full.
+
+### [ ] 14. Open a Stripe account (phase 4)
 
 1. Go to **stripe.com/gb** and click **Start now**.
-2. Open it in the business name your accountant suggests.
+2. Choose **Individual / sole trader**, in your own name, with GoChuchuro as the trading name.
 3. Switch on two-step sign-in.
 
-### [ ] 13. List the organisers to approach
+### [ ] 15. List the organisers to approach
 
 Include the Gurkha Cup, Nepal Cup-style events, melas and charities. Book demos for February so they can open entries in March for the April–May season.
 
-### [ ] 14. Run a practice gate day with 2–3 helpers
+### [ ] 16. Run a practice gate day with 2–3 helpers
 
 Print the posters and car park slips, scan some test passes, take some "cash", then do a cash-up.
 

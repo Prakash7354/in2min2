@@ -233,20 +233,20 @@ console.log("How full is the event (plan limit and venue capacity):");
 await as(A);
 const usage = async () => (await q(`select event_usage($1) as u`, [ru.id]))[0].u;
 let u = await usage();
-ok("empty event: 0 people, Pop-Up limit 50, level ok", u.people === 0 && u.guest_limit === 50 && u.level === "ok", JSON.stringify(u));
+ok("empty event: 0 people, Pop-Up limit 200, level ok", u.people === 0 && u.guest_limit === 200 && u.level === "ok", JSON.stringify(u));
 await q(`insert into guest_crm (event_id, full_name, party_size, rsvp_status) values
-  ($1, 'The Rai family', 4, 'attending'), ($1, 'B Company table', 36, 'invited'), ($1, 'Could not come', 6, 'declined')`, [ru.id]);
+  ($1, 'The Rai family', 4, 'attending'), ($1, 'B Company tables', 156, 'invited'), ($1, 'Could not come', 6, 'declined')`, [ru.id]);
 u = await usage();
-ok("head count adds party sizes and skips those who declined", u.people === 40 && u.attending === 4, JSON.stringify(u));
+ok("head count adds party sizes and skips those who declined", u.people === 160 && u.attending === 4, JSON.stringify(u));
 ok("80% of the limit → near", u.level === "near");
-await q(`insert into guest_crm (event_id, full_name, party_size) values ($1, 'Late additions', 12)`, [ru.id]);
+await q(`insert into guest_crm (event_id, full_name, party_size) values ($1, 'Late additions', 48)`, [ru.id]);
 u = await usage();
 ok("over the limit → over, with the 100-guest pack at £3 offered", u.level === "over" && u.guest_pack.size === 100 && u.guest_pack.pence === 300, JSON.stringify(u));
 ok("venue capacity left counts only those attending", u.capacity_left === 196);
 await db.exec(`reset role; update events set extra_guests = 100 where id = '${ru.id}'`);
 await as(A);
 u = await usage();
-ok("after a pack is bought (server only) the limit is 150, level ok", u.guest_limit === 150 && u.level === "ok", JSON.stringify(u));
+ok("after a pack is bought (server only) the limit is 300, level ok", u.guest_limit === 300 && u.level === "ok", JSON.stringify(u));
 await as(B);
 ok("another host gets nothing from event_usage", (await q(`select event_usage($1) as u`, [ru.id]))[0].u === null);
 
@@ -283,7 +283,54 @@ const [cEv] = await q(`insert into events (event_type, slug, title, starts_at) v
 ok("the next family is told all places are taken", cl.r.ok === false && cl.r.reason === "all_taken");
 ok("…and stays on the normal plan", (await q(`select plan from events where id = $1`, [cEv.id]))[0].plan === "popup");
 
+console.log("Plans, repeats and sensitive occasions (13 Nov 2026, v3.1):");
+await as(null);
+const limits = Object.fromEntries((await q(`select key, guest_limit from plans`)).map((r) => [r.key, r.guest_limit]));
+ok("people included: Pop-Up 200, Season 300, Half-Year 400, Keepsake 500", limits.popup === 200 && limits.season === 300 && limits.half_year === 400 && limits.keepsake === 500, JSON.stringify(limits));
+const types = Object.fromEntries((await q(`select key, scale, repeats_yearly, repeat_as, sensitive from event_types`)).map((r) => [r.key, r]));
+ok("a wedding comes back as its anniversary", types.wedding.repeats_yearly && types.wedding.repeat_as === "anniversary");
+ok("birthdays, tournaments and reunions repeat yearly; Pasni doesn't", types.birthday.repeats_yearly && types.sport.repeats_yearly && types.reunion.repeats_yearly && !types.pasni.repeats_yearly);
+ok("a memorial is sensitive and never prompted to repeat", types.memorial.sensitive && !types.memorial.repeats_yearly && types.memorial.scale === "celebration");
+ok("only the memorial is marked sensitive", Object.values(types).filter((t) => t.sensitive).length === 1);
+await db.exec(`reset role`);
+await expectError("an event type can't take a website address (contact)", `insert into event_types (key, label, scale) values ('contact', 'x', 'personal')`, /check constraint/);
+
+console.log("Fee level: full, half or free, set only by the owner of In2Min2:");
+await as(A);
+const [fe] = await q(`select charge_percent, series_id, is_demo, keep_for_next_year from events where id = $1`, [ch.id]);
+ok("a new event pays 100%, has its own series, isn't a demo", fe.charge_percent === 100 && /^[0-9a-f-]{36}$/.test(fe.series_id) && fe.is_demo === false && fe.keep_for_next_year === false);
+ok("every event starts its own series", (await q(`select count(distinct series_id)::int d, count(*)::int n from events`))[0].d === (await q(`select count(*)::int n from events`))[0].n);
+await expectError("host cannot make their own event free", `update events set charge_percent = 0 where id = '${ch.id}'`, /permission denied/);
+await expectError("host cannot create an event at half price", `insert into events (event_type, slug, title, starts_at, charge_percent) values ('party','cheap','x', now(), 50)`, /permission denied/);
+await expectError("host cannot join another series", `update events set series_id = gen_random_uuid() where id = '${ch.id}'`, /permission denied/);
+await expectError("host cannot mark an event as demo", `update events set is_demo = true where id = '${ch.id}'`, /permission denied/);
+await db.exec(`reset role; update events set charge_percent = 50, charge_note = 'Registered charity, checked on the register' where id = '${ch.id}'`);
+ok("the owner of In2Min2 sets half price (server)", (await q(`select charge_percent from events where id = $1`, [ch.id]))[0].charge_percent === 50);
+await expectError("only 0, 50 or 100 percent", `update events set charge_percent = 30 where id = '${ch.id}'`, /check constraint/);
+
+console.log("Community events say who runs them:");
+await as(A);
+await expectError("a community event can't be published without its organiser", `update events set status = 'published' where id = '${ch.id}'`, /community_organiser_named/);
+await expectError("a badly written charity number is rejected", `update events set charity_number = 'no. 123' where id = '${ch.id}'`, /check constraint/);
+await expectError("an unknown organiser type is rejected", `update events set organiser_type = 'secret' where id = '${ch.id}'`, /check constraint/);
+await q(`update events set organiser_name = 'Andover Gurkha Welfare Group', organiser_type = 'charity', for_profit = false,
+  charity_number = '1234567', organiser_contact = '07700 900456', keep_for_next_year = true, status = 'published' where id = $1`, [ch.id]);
+ok("with name, type and profit answered it publishes", (await q(`select status from events where id = $1`, [ch.id]))[0].status === "published");
+ok("the host can keep the guest list for next year", (await q(`select keep_for_next_year k from events where id = $1`, [ch.id]))[0].k === true);
+await as(null);
+[pe] = await q(`select public_event('charity','walk-2027') as p`);
+ok("the public sees who organises it and that nobody profits", pe.p.event.organiser_name === "Andover Gurkha Welfare Group"
+  && pe.p.event.organiser_type === "charity" && pe.p.event.for_profit === false && pe.p.event.charity_number === "1234567");
+ok("the public never sees the fee level or its note", !("charge_percent" in pe.p.event) && !JSON.stringify(pe.p).includes("checked on the register"));
+ok("not a demo", pe.p.event.is_demo === false);
+await db.exec(`reset role; update events set is_demo = true where id = '${ch.id}'`);
+await as(null);
+[pe] = await q(`select public_event('charity','walk-2027') as p`);
+ok("a demo event tells the page to show its Demo label", pe.p.event.is_demo === true);
+ok("a family event needs no organiser to publish (wedding above)", true);
+
 console.log("Delete everything:");
+await as(C);  // C is a helper on A's wedding
 const hd = await db.query(`delete from events where id = $1`, [ev.id]);
 ok("a helper cannot delete the event", hd.affectedRows === 0);
 await as(A);

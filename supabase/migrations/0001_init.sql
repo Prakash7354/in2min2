@@ -34,6 +34,8 @@ create type public.event_scale as enum ('personal', 'celebration', 'community');
 
 -- What a host can buy. Prices live here, not in code, so they can change
 -- without a release. PROVISIONAL launch prices: see docs/CONCEPT.md, "Pricing".
+-- The plan buys TIME (how long the page stays up after the event); people
+-- included rise 200 → 300 → 400 → 500, and packs of +100 cover any more.
 create table public.plans (
   key                text primary key check (key ~ '^[a-z][a-z0-9_]*$'),
   name               text not null,
@@ -62,10 +64,10 @@ create table public.plans (
 insert into public.plans (key, name, price_pence, hosting_days_after, guest_limit, photo_limit, photos_per_guest, ai_writes,
                           full_res_download, hide_branding, booking_fee_bps, booking_fee_pence, scales,
                           guest_pack_size, guest_pack_pence, sort_order) values
-  ('popup',     'Pop-Up',       0,   7,  50,   50, 10,  5, false, false,   0,  0, '{personal,celebration}', 100, 300, 1),
-  ('season',    'Season',     900,  90, 200,  300, 20, 30, false, false,   0,  0, '{personal,celebration}', 100, 300, 2),
+  ('popup',     'Pop-Up',       0,   7, 200,   50, 10,  5, false, false,   0,  0, '{personal,celebration}', 100, 300, 1),
+  ('season',    'Season',     900,  90, 300,  300, 20, 30, false, false,   0,  0, '{personal,celebration}', 100, 300, 2),
   ('half_year', 'Half-Year', 1500, 182, 400,  600, 20, 50, false, false,   0,  0, '{personal,celebration}', 100, 300, 3),
-  ('keepsake',  'Keepsake',  2500, 365, 800, 1000, 30, 100, true, true,    0,  0, '{personal,celebration}', 100, 300, 4),
+  ('keepsake',  'Keepsake',  2500, 365, 500, 1000, 30, 100, true, true,    0,  0, '{personal,celebration}', 100, 300, 4),
   ('community', 'Community',    0,  90, null, 2000, 20, 30, false, false, 400, 30, '{community}',           null, null, 5);
 
 -- The first part of an event's address: in2min2.com/{event_type}/{slug}.
@@ -75,29 +77,43 @@ insert into public.plans (key, name, price_pence, hosting_days_after, guest_limi
 create table public.event_types (
   key              text primary key check (key ~ '^[a-z]+(-[a-z]+)*$' and key not in
                      ('api','app','admin','builder','dashboard','e','c','g','live','login','signin','signup',
-                      'pricing','help','terms','privacy','about','blog','static','assets','_next')),
+                      'pricing','help','terms','privacy','about','blog','static','assets','_next',
+                      'contact','demo','how-it-works','communities','faq')),
   label            text not null,
   scale            public.event_scale not null,
   default_theme    text not null default 'classic',
   default_toggles  jsonb not null default '{}'::jsonb check (jsonb_typeof(default_toggles) = 'object'),
+  -- Does this kind of event come round every year? Drives "Run it again" and
+  -- the same-again discount (CONCEPT 5g). A wedding comes back as its
+  -- anniversary (repeat_as).
+  repeats_yearly   boolean not null default false,
+  repeat_as        text references public.event_types(key) on update cascade,
+  -- A sad or delicate occasion: never sent offers, discounts or "run it again"
+  -- reminders; calm look and no celebration animation by default.
+  sensitive        boolean not null default false,
   sort_order       integer not null default 0
 );
 
-insert into public.event_types (key, label, scale, default_theme, default_toggles, sort_order) values
-  ('birthday',    'Birthday',               'personal',    'modern',  '{}', 1),
-  ('pasni',       'Pasni (rice feeding)',   'personal',    'festive', '{"gift_registry": true}', 2),
-  ('party',       'Party',                  'personal',    'modern',  '{}', 3),
-  ('ceremony',    'Family ceremony',        'personal',    'festive', '{"gift_registry": true}', 4),
-  ('wedding',     'Wedding',                'celebration', 'classic', '{"gift_registry": true, "guestbook": true}', 5),
-  ('engagement',  'Engagement',             'celebration', 'classic', '{"guestbook": true}', 6),
-  ('anniversary', 'Wedding anniversary',    'celebration', 'classic', '{"guestbook": true}', 7),
-  ('bratabandha', 'Bratabandha',            'celebration', 'festive', '{"gift_registry": true}', 8),
-  ('reunion',     'Reunion or regimental day', 'celebration', 'classic', '{"guestbook": true}', 9),
-  ('corporate',   'Corporate event',        'celebration', 'modern',  '{"sponsors": true}', 10),
-  ('mela',        'Mela / festival',        'community',   'festive', '{"rsvp": false, "tickets": true, "stalls": true, "parking": true, "sponsors": true}', 11),
-  ('sport',       'Sports tournament',      'community',   'sport',   '{"rsvp": false, "tickets": true, "team_entries": true, "stalls": true, "parking": true, "sponsors": true, "live_scores": true}', 12),
-  ('charity',     'Charity or fundraiser',  'community',   'festive', '{"tickets": true, "sponsors": true}', 13),
-  ('community',   'Community event',        'community',   'festive', '{"tickets": true, "sponsors": true}', 14);
+insert into public.event_types (key, label, scale, default_theme, default_toggles, repeats_yearly, sensitive, sort_order) values
+  ('birthday',    'Birthday',               'personal',    'modern',  '{}', true, false, 1),
+  ('pasni',       'Pasni (rice feeding)',   'personal',    'festive', '{"gift_registry": true}', false, false, 2),
+  ('party',       'Party',                  'personal',    'modern',  '{}', false, false, 3),
+  ('ceremony',    'Family ceremony',        'personal',    'festive', '{"gift_registry": true}', false, false, 4),
+  ('wedding',     'Wedding',                'celebration', 'classic', '{"gift_registry": true, "guestbook": true}', true, false, 5),
+  ('engagement',  'Engagement',             'celebration', 'classic', '{"guestbook": true}', false, false, 6),
+  ('anniversary', 'Wedding anniversary',    'celebration', 'classic', '{"guestbook": true}', true, false, 7),
+  ('bratabandha', 'Bratabandha',            'celebration', 'festive', '{"gift_registry": true}', false, false, 8),
+  ('reunion',     'Reunion or regimental day', 'celebration', 'classic', '{"guestbook": true}', true, false, 9),
+  ('corporate',   'Corporate event',        'celebration', 'modern',  '{"sponsors": true}', true, false, 10),
+  ('mela',        'Mela / festival',        'community',   'festive', '{"rsvp": false, "tickets": true, "stalls": true, "parking": true, "sponsors": true}', true, false, 11),
+  ('sport',       'Sports tournament',      'community',   'sport',   '{"rsvp": false, "tickets": true, "team_entries": true, "stalls": true, "parking": true, "sponsors": true, "live_scores": true}', true, false, 12),
+  ('charity',     'Charity or fundraiser',  'community',   'festive', '{"tickets": true, "sponsors": true}', true, false, 13),
+  ('community',   'Community event',        'community',   'festive', '{"tickets": true, "sponsors": true}', true, false, 14),
+  -- Several rites over days, numbers for the meal, a condolence book; never "celebration" in the wording.
+  ('memorial',    'Memorial or funeral',    'celebration', 'classic', '{"guestbook": true}', false, true, 15);
+
+-- A wedding comes back next year as its first anniversary.
+update public.event_types set repeat_as = 'anniversary' where key = 'wedding';
 
 -- ─────────────────────────────────── Types ───────────────────────────────────
 
@@ -174,6 +190,17 @@ create table public.events (
   expected_guests     integer check (expected_guests between 1 and 100000),
   venue_capacity      integer check (venue_capacity between 1 and 100000),
 
+  -- Who is behind the event, shown on the public page. A community event
+  -- can't be published without it (check below), so nobody sells tickets
+  -- anonymously and buyers can see whether anyone profits. Anyone taking
+  -- money online is also identity-checked by Stripe.
+  organiser_name      text check (char_length(organiser_name) <= 120),
+  organiser_type      text check (organiser_type in ('family', 'individual', 'business', 'community_group',
+                                                     'club', 'charity', 'armed_forces', 'faith')),
+  for_profit          boolean,                      -- "Is anyone making a profit from this event?"
+  charity_number      text check (charity_number ~ '^[A-Z0-9]{4,12}$'), -- optional; the owner checks it on the charity register
+  organiser_contact   text check (char_length(organiser_contact) <= 120), -- the phone or email the organiser chooses to show
+
   -- The facts given to the AI, kept so "Generate again" needs no retyping.
   language_mix        text check (char_length(language_mix) <= 80),
   tone                text check (char_length(tone) <= 60),
@@ -209,20 +236,41 @@ create table public.events (
   extra_guests        integer not null default 0 check (extra_guests >= 0),  -- guest packs bought
   hosting_until       timestamptz,                -- filled in by set_hosting_until()
   custom_domain       text unique check (custom_domain = lower(custom_domain) and custom_domain ~ '^[a-z0-9.-]+\.[a-z]{2,}$'),
+  -- What share of In2Min2's normal charges this event pays: 100 (full, the
+  -- default), 50 (half) or 0 (free). Set only by the owner of In2Min2 when an
+  -- organiser asks (a memorial, a charity, an armed-forces event); the system
+  -- can't judge that. Applies to the plan, guest packs and the booking fee.
+  -- Stripe's own card cost still applies to online sales.
+  charge_percent      integer not null default 100 check (charge_percent in (0, 50, 100)),
+  charge_note         text check (char_length(charge_note) <= 200),  -- why, for his records
+  -- Every year of the same event shares a series. "Run it again" copies an
+  -- event into its series, which is how carry-over and the same-again
+  -- discount know it is a repeat (CONCEPT 5g).
+  series_id           uuid not null default gen_random_uuid(),
+  -- The owner's demo account: marked "Demo", never charged, never emails.
+  is_demo             boolean not null default false,
 
   status              public.event_status not null default 'draft',
   published_at        timestamptz,
   is_private          boolean not null default false, -- true: only guests with their own link can open it
+  -- When the page closes, keep the guest list and settings (not the photos)
+  -- for up to 13 months so next year's event can start from them. Otherwise
+  -- everything is deleted 30 days after closing.
+  keep_for_next_year  boolean not null default false,
   created_at          timestamptz not null default now(),
   updated_at          timestamptz not null default now(),
 
   unique (event_type, slug),
-  check (ends_at is null or ends_at >= starts_at)
+  check (ends_at is null or ends_at >= starts_at),
+  -- A community event can't go public without saying who runs it and whether anyone profits.
+  constraint community_organiser_named check (scale <> 'community' or status <> 'published'
+    or (organiser_name is not null and organiser_type is not null and for_profit is not null))
 );
 
 alter table public.events alter column short_code set default public.new_short_code();
 create index events_owner_idx on public.events (owner_id);
 create index events_starts_idx on public.events (starts_at);
+create index events_series_idx on public.events (series_id);
 
 -- Who runs an event. The creator is added as owner automatically.
 --   owner   : everything, including plan, payments, deleting and adding hosts
@@ -633,6 +681,9 @@ begin
       'timezone', e.timezone, 'starts_at', e.starts_at, 'ends_at', e.ends_at,
       'venue_name', e.venue_name, 'venue_address', e.venue_address, 'venue_lat', e.venue_lat, 'venue_lng', e.venue_lng,
       'parking', e.parking, 'parking_note', e.parking_note,
+      'organiser_name', e.organiser_name, 'organiser_type', e.organiser_type, 'for_profit', e.for_profit,
+      'charity_number', e.charity_number, 'organiser_contact', e.organiser_contact,
+      'is_demo', e.is_demo,
       'card_headline', e.card_headline, 'card_invite_body', e.card_invite_body,
       'landing_page_story', e.landing_page_story, 'guest_note_box', e.guest_note_box,
       'post_event_thank_you', case when s = 'post' then e.post_event_thank_you end,
@@ -733,23 +784,26 @@ create policy toggles_edit on public.feature_toggles for update to authenticated
 
 -- ─────────────────────────── Column grants ───────────────────────────
 -- Row Level Security decides WHICH rows; these decide WHICH COLUMNS a
--- signed-in host may write. Plan, hosting, custom domain, AI usage and money
--- are written only by the server (service role) after a payment or a check.
+-- signed-in host may write. Plan, hosting, custom domain, AI usage, money,
+-- the charge percent, the series and the demo flag are written only by the
+-- server (service role) after a payment, a check or the owner's decision.
 
 revoke insert, update on public.events from anon, authenticated;
 grant insert (event_type, scale, slug, title, host_names, timezone, starts_at, ends_at,
               venue_name, venue_address, venue_lat, venue_lng, parking, parking_note,
-              expected_guests, venue_capacity, language_mix, tone, languages,
+              expected_guests, venue_capacity, organiser_name, organiser_type, for_profit,
+              charity_number, organiser_contact, language_mix, tone, languages,
               card_headline, card_invite_body, landing_page_story, guest_note_box, post_event_thank_you,
               copy_translations, theme, primary_color, text_style, photo_style, motion,
-              cover_image_key, status, is_private)
+              cover_image_key, status, is_private, keep_for_next_year)
   on public.events to authenticated;
 grant update (event_type, scale, slug, title, host_names, timezone, starts_at, ends_at,
               venue_name, venue_address, venue_lat, venue_lng, parking, parking_note,
-              expected_guests, venue_capacity, language_mix, tone, languages,
+              expected_guests, venue_capacity, organiser_name, organiser_type, for_profit,
+              charity_number, organiser_contact, language_mix, tone, languages,
               card_headline, card_invite_body, landing_page_story, guest_note_box, post_event_thank_you,
               copy_translations, theme, primary_color, text_style, photo_style, motion,
-              cover_image_key, status, is_private)
+              cover_image_key, status, is_private, keep_for_next_year)
   on public.events to authenticated;
 
 revoke insert, update on public.guest_crm from anon, authenticated;
@@ -789,3 +843,7 @@ grant  execute on function public.claim_offer(uuid, text) to authenticated;
 --   photos, guestbook_entries
 --   products, orders, order_items, cash_sales (tickets, entries, stalls, parking, receipts)
 --   divisions, teams, matches (tournaments: draw, fixtures, live scores)
+--   price_quote(): plan + packs, then the best ONE of charge_percent, same-again
+--     (series) or welcome-back discount (CONCEPT 5g, 5h). Phase 1.
+--   repeat_event(): "Run it again" — copies an event into its series with next
+--     year's date (repeat_as for weddings), guests only if keep_for_next_year.
