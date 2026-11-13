@@ -25,8 +25,15 @@ create extension if not exists pgcrypto with schema extensions;
 
 -- ─────────────────────────────── Reference data ───────────────────────────────
 
+-- How big the event is. Chosen first in the builder; it decides which
+-- switches a host ever sees, so a birthday never shows "car park fees".
+--   personal    : friends and family (birthday, Pasni, party)
+--   celebration : a big family occasion over weeks (wedding, anniversary, Bratabandha)
+--   community   : a public event that may sell things (mela, tournament, fundraiser)
+create type public.event_scale as enum ('personal', 'celebration', 'community');
+
 -- What a host can buy. Prices live here, not in code, so they can change
--- without a release. PROVISIONAL: see docs/CONCEPT.md, "Pricing".
+-- without a release. PROVISIONAL launch prices: see docs/CONCEPT.md, "Pricing".
 create table public.plans (
   key                text primary key check (key ~ '^[a-z][a-z0-9_]*$'),
   name               text not null,
@@ -35,17 +42,26 @@ create table public.plans (
   hosting_days_after integer not null check (hosting_days_after > 0), -- page stays up this long after the event ends
   guest_limit        integer check (guest_limit > 0),                 -- null = no limit (fair use)
   photo_limit        integer check (photo_limit > 0),                 -- null = no limit (fair use)
+  photos_per_guest   integer check (photos_per_guest > 0),            -- stops one phone filling the wall
   ai_writes          integer not null default 5 check (ai_writes >= 0),
   full_res_download  boolean not null default false,
   hide_branding      boolean not null default false,                  -- "Made with In2Min2" footer
+  -- In2Min2's booking fee on each ONLINE order (tickets, entries, stalls,
+  -- parking), card costs included. Cash on the day is never charged.
+  booking_fee_bps    integer not null default 0 check (booking_fee_bps between 0 and 2000), -- 400 = 4%
+  booking_fee_pence  integer not null default 0 check (booking_fee_pence >= 0),
+  scales             public.event_scale[] not null default '{personal,celebration}', -- offered to these scales
   sort_order         integer not null default 0,
   is_active          boolean not null default true
 );
 
-insert into public.plans (key, name, price_pence, hosting_days_after, guest_limit, photo_limit, ai_writes, full_res_download, hide_branding, sort_order) values
-  ('popup',    'Pop-Up',      0,   7,   50,   150,   5, false, false, 1),
-  ('season',   'Season',   1900,  90,  300,  2000,  30, false, false, 2),
-  ('keepsake', 'Keepsake', 3900, 365, null, 10000, 100, true,  true,  3);
+insert into public.plans (key, name, price_pence, hosting_days_after, guest_limit, photo_limit, photos_per_guest, ai_writes,
+                          full_res_download, hide_branding, booking_fee_bps, booking_fee_pence, scales, sort_order) values
+  ('popup',     'Pop-Up',       0,   7,  50,   50, 10,  5, false, false,   0,  0, '{personal,celebration}', 1),
+  ('season',    'Season',     900,  90, 200,  300, 20, 30, false, false,   0,  0, '{personal,celebration}', 2),
+  ('half_year', 'Half-Year', 1500, 182, 400,  600, 20, 50, false, false,   0,  0, '{personal,celebration}', 3),
+  ('keepsake',  'Keepsake',  2500, 365, 800, 1000, 30, 100, true, true,    0,  0, '{personal,celebration}', 4),
+  ('community', 'Community',    0,  90, null, 2000, 20, 30, false, false, 400, 30, '{community}',            5);
 
 -- The first part of an event's address: in2min2.com/{event_type}/{slug}.
 -- A table rather than an enum so a new type needs no migration, and each type
@@ -56,20 +72,25 @@ create table public.event_types (
                      ('api','app','admin','builder','dashboard','e','c','g','live','login','signin','signup',
                       'pricing','help','terms','privacy','about','blog','static','assets','_next')),
   label            text not null,
+  scale            public.event_scale not null,
   default_theme    text not null default 'classic',
   default_toggles  jsonb not null default '{}'::jsonb check (jsonb_typeof(default_toggles) = 'object'),
   sort_order       integer not null default 0
 );
 
-insert into public.event_types (key, label, default_theme, default_toggles, sort_order) values
-  ('wedding',   'Wedding',                       'classic', '{"gift_registry": true, "guestbook": true}', 1),
-  ('ceremony',  'Ceremony (Pasni, Bratabandha…)', 'festive', '{"gift_registry": true}', 2),
-  ('birthday',  'Birthday',                      'modern',  '{}', 3),
-  ('party',     'Party',                         'modern',  '{}', 4),
-  ('mela',      'Mela / festival',               'festive', '{"ticket_tiers": true, "sponsors": true}', 5),
-  ('sport',     'Sports tournament',             'sport',   '{"ticket_tiers": true, "sponsors": true, "gift_registry": false}', 6),
-  ('community', 'Community event',               'festive', '{"sponsors": true}', 7),
-  ('corporate', 'Corporate event',               'modern',  '{"sponsors": true}', 8);
+insert into public.event_types (key, label, scale, default_theme, default_toggles, sort_order) values
+  ('birthday',    'Birthday',               'personal',    'modern',  '{}', 1),
+  ('pasni',       'Pasni (rice feeding)',   'personal',    'festive', '{"gift_registry": true}', 2),
+  ('party',       'Party',                  'personal',    'modern',  '{}', 3),
+  ('ceremony',    'Family ceremony',        'personal',    'festive', '{"gift_registry": true}', 4),
+  ('wedding',     'Wedding',                'celebration', 'classic', '{"gift_registry": true, "guestbook": true}', 5),
+  ('engagement',  'Engagement',             'celebration', 'classic', '{"guestbook": true}', 6),
+  ('anniversary', 'Wedding anniversary',    'celebration', 'classic', '{"guestbook": true}', 7),
+  ('bratabandha', 'Bratabandha',            'celebration', 'festive', '{"gift_registry": true}', 8),
+  ('corporate',   'Corporate event',        'celebration', 'modern',  '{"sponsors": true}', 9),
+  ('mela',        'Mela / festival',        'community',   'festive', '{"rsvp": false, "tickets": true, "stalls": true, "parking": true, "sponsors": true}', 10),
+  ('sport',       'Sports tournament',      'community',   'sport',   '{"rsvp": false, "tickets": true, "team_entries": true, "stalls": true, "parking": true, "sponsors": true, "live_scores": true}', 11),
+  ('community',   'Community event',        'community',   'festive', '{"tickets": true, "sponsors": true}', 12);
 
 -- ─────────────────────────────────── Types ───────────────────────────────────
 
@@ -101,12 +122,28 @@ begin
   return code;
 end $$;
 
+-- The second language's text boxes, {"ne": {"card_headline": …, …}}, held to
+-- the same limits as the main boxes (lib/ai/copy.ts).
+create or replace function public.copy_fits(t jsonb) returns boolean
+language sql immutable as $$
+  select jsonb_typeof(t) = 'object' and not exists (
+    select 1 from jsonb_each(t) as l(lang, box)
+    where l.lang !~ '^[a-z]{2,3}(-[A-Z][a-z]{3})?$'
+       or jsonb_typeof(box) <> 'object'
+       or char_length(coalesce(box->>'card_headline', ''))        > 45
+       or char_length(coalesce(box->>'card_invite_body', ''))     > 180
+       or char_length(coalesce(box->>'landing_page_story', ''))   > 450
+       or char_length(coalesce(box->>'guest_note_box', ''))       > 140
+       or char_length(coalesce(box->>'post_event_thank_you', '')) > 220)
+$$;
+
 -- ─────────────────────────────────── Events ───────────────────────────────────
 
 create table public.events (
   id                  uuid primary key default gen_random_uuid(),
   owner_id            uuid not null default auth.uid() references auth.users(id) on delete cascade,
   event_type          text not null references public.event_types(key) on update cascade,
+  scale               public.event_scale not null,   -- filled from the type if not given (set_hosting_until)
   slug                text not null check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(slug) between 3 and 60),
   short_code          text not null unique,
   title               text not null check (char_length(title) between 1 and 120),
@@ -125,18 +162,28 @@ create table public.events (
   language_mix        text check (char_length(language_mix) <= 80),
   tone                text check (char_length(tone) <= 60),
 
-  -- The five AI text boxes. Limits match lib/ai/copy.ts.
+  -- One or two languages, main first: '{en}', '{ne,en}', '{en,ne-Latn}' (Nepali in English letters).
+  languages           text[] not null default '{en}' check (cardinality(languages) between 1 and 2
+                        and array_to_string(languages, ',') ~ '^[a-z]{2,3}(-[A-Z][a-z]{3})?(,[a-z]{2,3}(-[A-Z][a-z]{3})?)?$'),
+
+  -- The five AI text boxes, in the main language. Limits match lib/ai/copy.ts.
   card_headline        text check (char_length(card_headline) <= 45),
   card_invite_body     text check (char_length(card_invite_body) <= 180),
   landing_page_story   text check (char_length(landing_page_story) <= 450),
   guest_note_box       text check (char_length(guest_note_box) <= 140),
   post_event_thank_you text check (char_length(post_event_thank_you) <= 220),
+  -- The same five boxes in the second language: {"ne": {"card_headline": "…", …}}
+  copy_translations    jsonb not null default '{}'::jsonb check (public.copy_fits(copy_translations)),
   ai_writes_used       integer not null default 0 check (ai_writes_used >= 0),
 
-  -- The look: a template plus two choices. Everything else is designed for them.
+  -- The look: a template plus a few ready-made choices. Nothing is free-form.
   theme               public.theme_template not null default 'classic',
   primary_color       text not null default '#E11D48' check (primary_color ~ '^#[0-9A-Fa-f]{6}$'),
-  font_pairing        text not null default 'classic' check (font_pairing ~ '^[a-z0-9-]+$'),
+  text_style          text not null default 'classic'
+                        check (text_style in ('clean', 'classic', 'elegant', 'calligraphy', 'bold')),
+  photo_style         text not null default 'arch'
+                        check (photo_style in ('hero', 'arch', 'polaroid', 'split')),
+  motion              boolean not null default true,  -- the few animations at key moments
   cover_image_key     text,                       -- object key in the R2 photos bucket
 
   -- Plan and hosting. Set by the server after payment, never by the browser
@@ -172,6 +219,24 @@ create table public.event_hosts (
   primary key (event_id, user_id)
 );
 create index event_hosts_user_idx on public.event_hosts (user_id);
+
+-- The people the day is about, and the family it honours. Shown with pride
+-- on the card and the page: the stars large, the honoured family in a row
+-- beneath ("With blessings from").
+--   star   : the child, the couple, the birthday person, the team
+--   honour : parents, grandparents, uncles and aunts, the committee
+create table public.event_people (
+  id          uuid primary key default gen_random_uuid(),
+  event_id    uuid not null references public.events(id) on delete cascade,
+  role        text not null default 'star' check (role in ('star', 'honour')),
+  relation    text check (char_length(relation) <= 40),        -- "Bride", "Parents", "Grandparents"
+  names       text not null check (char_length(names) between 1 and 120),
+  names_local text check (char_length(names_local) <= 120),     -- in the second language's script
+  photo_key   text,                                            -- R2 object key
+  sort_order  integer not null default 0,
+  created_at  timestamptz not null default now()
+);
+create index event_people_event_idx on public.event_people (event_id, role, sort_order);
 
 -- ──────────────────────────────── Sub-events ────────────────────────────────
 -- The parts of the day, or the days of a festival: Mehndi, Ceremony,
@@ -278,20 +343,29 @@ create index sub_event_guests_event_idx on public.sub_event_guests (event_id);
 -- The builder's on/off switches, one row per event, created with the event
 -- from its type's defaults. Every switch works on every plan; plans differ in
 -- how long the page stays up and how many guests and photos it holds.
+-- Which switches a host SEES depends on the event's scale (lib config), so a
+-- birthday host is never shown tickets, stalls or parking.
 
 create table public.feature_toggles (
   event_id        uuid primary key references public.events(id) on delete cascade,
+  -- every scale
   ai_copy         boolean not null default true,   -- AI text generation
   rsvp            boolean not null default true,   -- RSVP form before the day
   countdown       boolean not null default true,
   schedule        boolean not null default true,   -- sub-events timeline
   map_directions  boolean not null default true,   -- interactive map and directions
-  gift_registry   boolean not null default false,  -- gift list link or cash gifts
   photo_wall      boolean not null default true,   -- live photo wall on the day, gallery after
-  guestbook       boolean not null default false,  -- written messages from guests
-  ticket_tiers    boolean not null default false,  -- paid or tiered entry
-  sponsors        boolean not null default false,  -- sponsor logos and tiers
   auto_reminders  boolean not null default true,   -- email reminder 24 hours before
+  -- personal and celebration
+  gift_registry   boolean not null default false,  -- gift list link or cash gifts
+  guestbook       boolean not null default false,  -- written messages from guests
+  -- community and sport
+  tickets         boolean not null default false,  -- entry tickets: online price and on-the-day price
+  team_entries    boolean not null default false,  -- teams apply and pay to enter; draw and fixtures
+  stalls          boolean not null default false,  -- businesses apply for a stall
+  parking         boolean not null default false,  -- car park passes
+  live_scores     boolean not null default false,  -- results and tables update live
+  sponsors        boolean not null default false,  -- sponsor logos and tiers
   settings        jsonb not null default '{}'::jsonb check (jsonb_typeof(settings) = 'object'),
                   -- options per switch, e.g. {"gift_registry": {"url": "…"}, "photo_wall": {"approve_first": true}}
   updated_at      timestamptz not null default now()
@@ -311,11 +385,23 @@ create trigger sub_events_touch       before update on public.sub_events      fo
 create trigger guest_crm_touch        before update on public.guest_crm       for each row execute function public.touch_updated_at();
 create trigger feature_toggles_touch  before update on public.feature_toggles for each row execute function public.touch_updated_at();
 
--- How long the page stays up: the event's end (or start) plus the plan's days
--- plus any extension bought. Recomputed whenever any of those change.
+-- Scale, plan and how long the page stays up.
+--   * Scale comes from the event type unless the host chose one.
+--   * A free plan follows the scale (community events get the Community plan,
+--     whose income is the booking fee). A paid plan is never changed here.
+--   * Hosting = the event's end (or start) + the plan's days + any extension.
 create or replace function public.set_hosting_until() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
+  if new.scale is null
+     or (tg_op = 'UPDATE' and new.event_type is distinct from old.event_type
+         and new.scale is not distinct from old.scale) then
+    select t.scale into new.scale from public.event_types t where t.key = new.event_type;
+  end if;
+  if new.plan in ('popup', 'community') then
+    new.plan := case when new.scale = 'community' then 'community' else 'popup' end;
+  end if;
+
   select coalesce(new.ends_at, new.starts_at)
          + make_interval(days => p.hosting_days_after + new.extra_hosting_days)
     into new.hosting_until
@@ -326,7 +412,7 @@ begin
   return new;
 end $$;
 
-create trigger events_hosting before insert or update of plan, starts_at, ends_at, extra_hosting_days, status
+create trigger events_hosting before insert or update of plan, scale, event_type, starts_at, ends_at, extra_hosting_days, status
   on public.events for each row execute function public.set_hosting_until();
 
 -- A new event gets its owner as host and its switches from the type's defaults.
@@ -386,7 +472,10 @@ $$;
 create or replace function public.event_settings(p_event uuid) returns jsonb
 language sql stable security invoker set search_path = public as $$
   select jsonb_build_object(
-    'theme_config',     jsonb_build_object('template', e.theme, 'primary_color', e.primary_color, 'font_pairing', e.font_pairing),
+    'scale',            e.scale,
+    'languages',        to_jsonb(e.languages),
+    'theme_config',     jsonb_build_object('template', e.theme, 'primary_color', e.primary_color,
+                          'text_style', e.text_style, 'photo_style', e.photo_style, 'motion', e.motion),
     'feature_flags',    to_jsonb(f) - 'event_id' - 'settings' - 'updated_at',
     'feature_settings', f.settings)
   from public.events e join public.feature_toggles f on f.event_id = e.id
@@ -428,9 +517,21 @@ begin
       'card_headline', e.card_headline, 'card_invite_body', e.card_invite_body,
       'landing_page_story', e.landing_page_story, 'guest_note_box', e.guest_note_box,
       'post_event_thank_you', case when s = 'post' then e.post_event_thank_you end,
-      'theme', e.theme, 'primary_color', e.primary_color, 'font_pairing', e.font_pairing,
+      'languages', to_jsonb(e.languages),
+      -- Second-language boxes; the thank-you stays hidden until after the event here too.
+      'translations', case when s = 'post' then e.copy_translations else
+        (select coalesce(jsonb_object_agg(l.lang, l.box - 'post_event_thank_you'), '{}'::jsonb)
+           from jsonb_each(e.copy_translations) as l(lang, box)) end,
+      'scale', e.scale,
+      'theme', e.theme, 'primary_color', e.primary_color,
+      'text_style', e.text_style, 'photo_style', e.photo_style, 'motion', e.motion,
       'cover_image_key', e.cover_image_key,
       'hide_branding', (select p.hide_branding from public.plans p where p.key = e.plan)),
+    'people', coalesce((
+      select jsonb_agg(jsonb_build_object('role', p.role, 'relation', p.relation, 'names', p.names,
+                                          'names_local', p.names_local, 'photo_key', p.photo_key)
+             order by p.role desc, p.sort_order)   -- 'star' before 'honour'
+      from public.event_people p where p.event_id = e.id), '[]'::jsonb),
     'features', (select to_jsonb(f) - 'event_id' - 'updated_at' from public.feature_toggles f where f.event_id = e.id),
     'sub_events', coalesce((
       select jsonb_agg(jsonb_build_object(
@@ -462,6 +563,7 @@ alter table public.event_types      enable row level security;
 alter table public.events           enable row level security;
 alter table public.event_hosts      enable row level security;
 alter table public.sub_events       enable row level security;
+alter table public.event_people     enable row level security;
 alter table public.guest_crm        enable row level security;
 alter table public.sub_event_guests enable row level security;
 alter table public.feature_toggles  enable row level security;
@@ -492,6 +594,10 @@ create policy sub_events_read  on public.sub_events for select to authenticated 
 create policy sub_events_write on public.sub_events for all    to authenticated
   using (public.is_event_host(event_id, 'co_host')) with check (public.is_event_host(event_id, 'co_host'));
 
+create policy people_read  on public.event_people for select to authenticated using (public.is_event_host(event_id));
+create policy people_write on public.event_people for all    to authenticated
+  using (public.is_event_host(event_id, 'co_host')) with check (public.is_event_host(event_id, 'co_host'));
+
 create policy guests_read  on public.guest_crm for select to authenticated using (public.is_event_host(event_id));
 create policy guests_write on public.guest_crm for all    to authenticated
   using (public.is_event_host(event_id, 'co_host')) with check (public.is_event_host(event_id, 'co_host'));
@@ -510,15 +616,17 @@ create policy toggles_edit on public.feature_toggles for update to authenticated
 -- are written only by the server (service role) after a payment or a check.
 
 revoke insert, update on public.events from anon, authenticated;
-grant insert (event_type, slug, title, host_names, timezone, starts_at, ends_at,
-              venue_name, venue_address, venue_lat, venue_lng, language_mix, tone,
+grant insert (event_type, scale, slug, title, host_names, timezone, starts_at, ends_at,
+              venue_name, venue_address, venue_lat, venue_lng, language_mix, tone, languages,
               card_headline, card_invite_body, landing_page_story, guest_note_box, post_event_thank_you,
-              theme, primary_color, font_pairing, cover_image_key, status, is_private)
+              copy_translations, theme, primary_color, text_style, photo_style, motion,
+              cover_image_key, status, is_private)
   on public.events to authenticated;
-grant update (event_type, slug, title, host_names, timezone, starts_at, ends_at,
-              venue_name, venue_address, venue_lat, venue_lng, language_mix, tone,
+grant update (event_type, scale, slug, title, host_names, timezone, starts_at, ends_at,
+              venue_name, venue_address, venue_lat, venue_lng, language_mix, tone, languages,
               card_headline, card_invite_body, landing_page_story, guest_note_box, post_event_thank_you,
-              theme, primary_color, font_pairing, cover_image_key, status, is_private)
+              copy_translations, theme, primary_color, text_style, photo_style, motion,
+              cover_image_key, status, is_private)
   on public.events to authenticated;
 
 revoke insert, update on public.guest_crm from anon, authenticated;
@@ -538,11 +646,14 @@ revoke insert on public.feature_toggles from anon, authenticated;
 revoke insert, update, delete on public.plans, public.event_types from anon, authenticated;
 
 -- The anonymous public reaches event data only through these.
-revoke all on public.events, public.event_hosts, public.sub_events, public.guest_crm,
+revoke all on public.events, public.event_hosts, public.sub_events, public.event_people, public.guest_crm,
               public.sub_event_guests, public.feature_toggles from anon;
 grant execute on function public.public_event(text, text, text) to anon, authenticated;
 grant execute on function public.resolve_short_code(text)       to anon, authenticated;
 
--- NEXT MIGRATION (phase 2): submit_rsvp(token or event, …) as a security-definer
--- function with golf's reply rules (0053 reply limit, 0056 one reply each,
--- 0058 first reply stands). Never open guest_crm to anon inserts.
+-- NEXT MIGRATIONS (docs/CONCEPT.md, "Build plan"):
+--   submit_rsvp(): security-definer, with golf's reply rules (0053 reply limit,
+--     0056 one reply each, 0058 first reply stands). Never open guest_crm to anon inserts.
+--   photos, guestbook_entries
+--   products, orders, order_items, cash_sales (tickets, entries, stalls, parking, receipts)
+--   divisions, teams, matches (tournaments: draw, fixtures, live scores)

@@ -31,5 +31,5 @@ npm run typecheck && npm run lint && npm run test:db && npx opennextjs-cloudflar
 
 - **Preview address:** https://in2min2.pksgrg.workers.dev (until in2min2.com is bought).
 - `npm run deploy` builds and deploys from this Mac.
-- Pushing to `main` on GitHub deploys through Cloudflare's own build (Workers › in2min2 › Settings › Build), so it uses no GitHub Actions minutes. Build command `npx opennextjs-cloudflare build`, deploy command `npx opennextjs-cloudflare deploy`, non-production branches `npx opennextjs-cloudflare upload` (each branch gets its own preview address).
+- Pushing to `main` on GitHub deploys through Cloudflare's own build (Workers › in2min2 › Settings › Build), so it uses no GitHub Actions minutes. Build command `npx opennextjs-cloudflare build`, deploy command `npx opennextjs-cloudflare deploy` (set and working, 13 Nov 2026). Branch builds are not switched on; if they ever are, the non-production command is `npx opennextjs-cloudflare upload`.
 - The Worker name `in2min2` in `wrangler.jsonc` must match the dashboard, or the Git build fails.

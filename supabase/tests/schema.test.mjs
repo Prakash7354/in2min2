@@ -58,7 +58,8 @@ ok("creator added as owner", hosts.length === 1 && hosts[0].role === "owner");
 const [ft] = await q(`select * from feature_toggles where event_id = $1`, [ev.id]);
 ok("toggles row created", !!ft);
 ok("wedding defaults applied (gift_registry, guestbook on)", ft.gift_registry === true && ft.guestbook === true);
-ok("column defaults kept (rsvp on, ticket_tiers off)", ft.rsvp === true && ft.ticket_tiers === false);
+ok("column defaults kept (rsvp on, tickets off)", ft.rsvp === true && ft.tickets === false);
+ok("wedding gets celebration scale from its type", (await q(`select scale from events where id = $1`, [ev.id]))[0].scale === "celebration");
 const [st] = await q(`select event_settings($1) as s`, [ev.id]);
 ok("event_settings returns theme_config + feature_flags", st.s.theme_config.template === "classic" && st.s.feature_flags.photo_wall === true);
 
@@ -71,8 +72,42 @@ await expectError("duplicate type+slug rejected", `insert into events (event_typ
 
 // Sport defaults
 const [sp] = await q(`insert into events (event_type, slug, title, starts_at) values ('sport','kickoff-2026','Kickoff', '2027-05-01 09:00+00') returning id`);
-const [spt] = await q(`select ticket_tiers, sponsors, gift_registry from feature_toggles where event_id = $1`, [sp.id]);
-ok("sport defaults applied (tickets, sponsors on; gifts off)", spt.ticket_tiers && spt.sponsors && !spt.gift_registry);
+const [spt] = await q(`select tickets, team_entries, stalls, parking, live_scores, sponsors, gift_registry, rsvp from feature_toggles where event_id = $1`, [sp.id]);
+ok("sport defaults: tickets, teams, stalls, parking, live scores, sponsors on; gifts and RSVP off", spt.tickets && spt.team_entries && spt.stalls && spt.parking && spt.live_scores && spt.sponsors && !spt.gift_registry && !spt.rsvp);
+
+console.log("Scales and plans:");
+const [spe] = await q(`select scale, plan, hosting_until, starts_at from events where id = $1`, [sp.id]);
+ok("tournament is community scale on the Community plan", spe.scale === "community" && spe.plan === "community", JSON.stringify(spe));
+ok("Community plan keeps the page 90 days", (new Date(spe.hosting_until) - new Date(spe.starts_at)) / 86400000 === 90);
+const [bd] = await q(`insert into events (event_type, slug, title, starts_at) values ('birthday','asha-10','Asha is 10', '2027-02-01 14:00+00') returning id, scale, plan`);
+ok("birthday is personal scale on Pop-Up", bd.scale === "personal" && bd.plan === "popup");
+await q(`update events set event_type = 'sport' where id = $1`, [bd.id]);
+const [bd2] = await q(`select scale, plan from events where id = $1`, [bd.id]);
+ok("changing the type moves scale and free plan with it", bd2.scale === "community" && bd2.plan === "community", JSON.stringify(bd2));
+await q(`update events set scale = 'personal' where id = $1`, [bd.id]);
+ok("host can choose the scale; free plan follows", (await q(`select plan from events where id = $1`, [bd.id]))[0].plan === "popup");
+await db.exec(`reset role; update events set plan = 'half_year' where id = '${bd.id}'`);
+await as(A);
+await q(`update events set scale = 'community' where id = $1`, [bd.id]);
+ok("a paid plan is never changed by a scale change", (await q(`select plan from events where id = $1`, [bd.id]))[0].plan === "half_year");
+ok("Half-Year keeps the page 182 days", (await q(`select (hosting_until - starts_at) = interval '182 days' as ok from events where id = $1`, [bd.id]))[0].ok === true);
+
+console.log("Languages and look:");
+await q(`update events set languages = '{ne,en}', copy_translations = $2 where id = $1`,
+  [ev.id, JSON.stringify({ en: { card_headline: "Meenu & Jose", post_event_thank_you: "Thank you for coming!" } })]);
+ok("two languages with second-language boxes saved", true);
+await expectError("three languages rejected", `update events set languages = '{en,ne,hi}' where id = '${ev.id}'`, /check constraint/);
+await expectError("badly written language code rejected", `update events set languages = '{EN}' where id = '${ev.id}'`, /check constraint/);
+await expectError("second-language headline over 45 chars rejected", `update events set copy_translations = '{"ne": {"card_headline": "${"क".repeat(46)}"}}' where id = '${ev.id}'`, /check constraint/);
+await expectError("unknown text style rejected", `update events set text_style = 'comic-sans' where id = '${ev.id}'`, /check constraint/);
+await q(`update events set text_style = 'calligraphy', photo_style = 'arch' where id = $1`, [ev.id]);
+const [st2] = await q(`select event_settings($1) as s`, [ev.id]);
+ok("settings carry scale, languages and styles", st2.s.scale === "celebration" && st2.s.languages[0] === "ne" && st2.s.theme_config.text_style === "calligraphy");
+
+console.log("The stars and the honoured family:");
+await q(`insert into event_people (event_id, role, relation, names, sort_order) values
+  ($1, 'honour', 'Parents', 'Mr & Mrs Gurung', 1), ($1, 'star', 'Bride and groom', 'Meenu & Jose', 1)`, [ev.id]);
+ok("star and honour rows added", (await q(`select count(*)::int n from event_people where event_id = $1`, [ev.id]))[0].n === 2);
 
 console.log("Guests and sub-events:");
 const [g1] = await q(`insert into guest_crm (event_id, full_name, email, phone) values ($1, 'Asha Gurung', 'asha@example.com', '+447700900123') returning id, invite_token`, [ev.id]);
@@ -96,6 +131,7 @@ await as(B);
 ok("B sees no events", (await q(`select id from events`)).length === 0);
 ok("B sees no guests", (await q(`select id from guest_crm`)).length === 0);
 ok("B sees no toggles", (await q(`select event_id from feature_toggles`)).length === 0);
+ok("B sees no family names", (await q(`select id from event_people`)).length === 0);
 const upd = await db.query(`update events set title = 'hacked' where id = $1`, [ev.id]);
 ok("B's update changes nothing", upd.affectedRows === 0);
 await expectError("B cannot add guests to A's event", `insert into guest_crm (event_id, full_name) values ('${ev.id}', 'Intruder')`, /row-level security/);
@@ -127,6 +163,9 @@ ok("published event visible, stage pre", pe.p?.stage === "pre", JSON.stringify(p
 ok("public page never includes guest list", !JSON.stringify(pe.p).includes("asha@example.com"));
 ok("invite-only Mehndi hidden from public", pe.p.sub_events.length === 1 && pe.p.sub_events[0].title === "Ceremony");
 ok("thank-you hidden before the event", pe.p.event.post_event_thank_you === null);
+ok("second-language thank-you hidden before the event too", pe.p.event.translations.en.card_headline === "Meenu & Jose" && !("post_event_thank_you" in pe.p.event.translations.en));
+ok("stars shown first, then the honoured family", pe.p.people.length === 2 && pe.p.people[0].role === "star" && pe.p.people[1].relation === "Parents");
+await expectError("anon cannot read event_people directly", `select * from event_people`, /permission denied/);
 [pe] = await q(`select public_event('wedding','meenu-jose', $1) as p`, [g1.invite_token]);
 ok("invited guest's link shows Mehndi too", pe.p.sub_events.length === 2);
 ok("guest's own name on their link", pe.p.guest?.name === "Asha Gurung");
@@ -169,6 +208,7 @@ ok("server upgrades to keepsake → post again (365 days)", (await q(`select sta
 await as(null);
 [pe] = await q(`select public_event('wedding','meenu-jose', $1) as p`, [g1.invite_token]);
 ok("after the event the thank-you appears", pe.p.stage === "post" && "post_event_thank_you" in pe.p.event);
+ok("…in both languages", pe.p.event.translations.en.post_event_thank_you === "Thank you for coming!");
 ok("keepsake hides branding", pe.p.event.hide_branding === true);
 
 console.log(`\n${pass} passed, ${fail} failed`);
