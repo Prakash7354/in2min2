@@ -6,15 +6,15 @@
 import { useState, type ReactNode } from "react";
 import { COPY_FIELDS, COPY_KEYS, charCount, type CopyKey, type CopyResponse } from "@/lib/ai/copy";
 import {
-  EVENT_TYPES, LANGUAGES, ORGANISER_TYPES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES, TEMPLATES, TEXT_STYLES,
-  TOGGLES, TONES, eventType, formatPence, language, paletteFor, plan, plansFor, quote,
-  type PhotoStyle, type Scale, type Template, type TextStyle,
+  BORDERS, EVENT_TYPES, LANGUAGES, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
+  TEMPLATES, TEXT_STYLES, TOGGLES, TONES, eventType, formatPence, language, paletteFor, plan, plansFor, quote,
+  type Palette, type PhotoStyle, type Scale,
 } from "@/lib/catalog";
 import { applyScale, applyType, people, slugify, slugOk, toViewData, type Draft } from "@/lib/draft";
 import { formatDate, formatTime } from "@/lib/event-view";
 import { resizePhoto } from "@/lib/image";
 import EventView from "@/components/event/event-view";
-import { Button, Choices, Field, Group, Notice, Soon, Switch, inputClass } from "./ui";
+import { Button, Choices, Field, Group, Notice, Soon, Switch, Tick, inputClass } from "./ui";
 
 export type StepProps = { d: Draft; update: (fn: (d: Draft) => Draft) => void; now: number };
 
@@ -465,11 +465,19 @@ function CopyBox({ id, d, update, secondName, secondCode }: {
 }
 
 // ───────────────────────────── 5. The look ─────────────────────────────
+// Like browsing a high street: suggestions for this kind of event first, then
+// everything else. Every choice is shown on the host's own card.
 
 export function StepLook({ d, update, now }: StepProps) {
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [allBorders, setAllBorders] = useState(false);
   const data = toViewData(d);
+  const t = eventType(d.eventType);
+  const suggested = t?.borders ?? ["none"];
+  const shownBorders = allBorders ? BORDERS : BORDERS.filter((b) => suggested.includes(b.key) || b.key === d.border)
+    .sort((a, b) => suggested.indexOf(a.key) - suggested.indexOf(b.key));
+  const scriptSample = d.languages.map((c) => language(c)?.sample).find((x) => x && x !== "Aa" && x !== "Ąa");
 
   async function pickPhoto(file: File | undefined) {
     if (!file) return;
@@ -498,36 +506,38 @@ export function StepLook({ d, update, now }: StepProps) {
         {photoError && <Notice tone="warn">{photoError}</Notice>}
       </Group>
 
-      <Group title="Template">
-        <Choices<Template>
-          label="Template"
-          value={d.template}
-          columns="grid-cols-2"
-          onChange={(k) => update(set("template", k))}
-          options={TEMPLATES.map((t) => ({
-            key: t.key, label: t.name, line: t.line,
-            visual: <Thumb><EventView data={{ ...data, template: t.key }} view="card" now={now} /></Thumb>,
-          }))}
-        />
+      <Group title="Border" line={allBorders ? "All borders. Each one takes your colours." : `Suggested for ${t ? t.label.toLowerCase() : "your event"}. Each one takes your colours.`}>
+        <div role="radiogroup" aria-label="Border" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {shownBorders.map((b) => (
+            <Tile key={b.key} on={d.border === b.key} onClick={() => update(set("border", b.key))} label={b.name} line={b.line}>
+              <span className="pointer-events-none block overflow-hidden rounded-lg" aria-hidden="true">
+                <EventView data={{ ...data, border: b.key }} view="card" now={now} />
+              </span>
+            </Tile>
+          ))}
+        </div>
+        <Button kind="ghost" onClick={() => setAllBorders((v) => !v)} className="justify-self-start">
+          {allBorders ? "Show only the suggestions" : `Show all ${BORDERS.length} borders`}
+        </Button>
       </Group>
 
       <Group title="Colours" line="Every set is checked so the words stay easy to read.">
-        <div role="radiogroup" aria-label="Colours" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {PALETTES.map((p) => {
-            const on = d.palette === p.key;
-            return (
-              <button key={p.key} type="button" role="radio" aria-checked={on} onClick={() => update(set("palette", p.key))}
-                className={`grid gap-2 rounded-2xl border-2 p-3 text-left transition ${on ? "border-brand bg-card" : "border-line bg-card/80 hover:border-brand/40"}`}>
-                <span className="flex h-9 overflow-hidden rounded-lg" aria-hidden="true">
-                  {[p.main, p.accent, p.soft, p.bg].map((c, i) => <i key={i} className="flex-1" style={{ background: c }} />)}
-                </span>
-                <span className="font-semibold leading-tight">{p.name}</span>
-                {p.brand && <span className="text-xs font-bold text-muted">In2Min2 colours</span>}
-              </button>
-            );
-          })}
-          <label className={`grid cursor-pointer gap-2 rounded-2xl border-2 p-3 transition ${d.palette === "custom" ? "border-brand bg-card" : "border-line bg-card/80"}`}>
-            <span className="relative flex h-9 overflow-hidden rounded-lg" style={{ background: d.customColor }}>
+        {PALETTE_FAMILIES.map((family) => (
+          <div key={family} className="grid gap-2">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted">{family === "In2Min2" ? "In2Min2 colours" : family}</h3>
+            <div role="radiogroup" aria-label={`${family} colours`} className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {PALETTES.filter((p) => p.family === family).map((p) => (
+                <Tile key={p.key} on={d.palette === p.key} onClick={() => update(set("palette", p.key))} label={p.name}>
+                  <Swatch p={p} />
+                </Tile>
+              ))}
+            </div>
+          </div>
+        ))}
+        <div className="grid gap-2">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-muted">Your own</h3>
+          <label className={`grid cursor-pointer gap-2 rounded-2xl border-2 p-3 transition sm:max-w-[33%] ${d.palette === "custom" ? "border-brand bg-card" : "border-line bg-card/80"}`}>
+            <span className="relative flex h-10 overflow-hidden rounded-lg" style={{ background: d.customColor }}>
               <input type="color" value={d.customColor} aria-label="Your own colour" className="absolute inset-0 size-full cursor-pointer opacity-0"
                 onChange={(e) => update((x) => ({ ...x, customColor: e.target.value, palette: "custom" }))}
                 onClick={() => update(set("palette", "custom"))} />
@@ -538,17 +548,31 @@ export function StepLook({ d, update, now }: StepProps) {
         </div>
       </Group>
 
-      <Group title="Text style">
-        <Choices<TextStyle>
-          label="Text style"
-          value={d.textStyle}
-          columns="grid-cols-2 sm:grid-cols-3"
-          onChange={(k) => update(set("textStyle", k))}
-          options={TEXT_STYLES.map((t) => ({
-            key: t.key, label: t.name, line: t.feel,
-            visual: <span className="text-3xl leading-none text-brand" style={{ fontFamily: t.display }} aria-hidden="true">Aa अ</span>,
-          }))}
-        />
+      <Group title="Text style" line="Each style has matching letters for Nepali, Hindi, Punjabi, Gujarati, Bengali and Tamil.">
+        <div role="radiogroup" aria-label="Text style" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {TEXT_STYLES.map((ts) => (
+            <Tile key={ts.key} on={d.textStyle === ts.key} onClick={() => update(set("textStyle", ts.key))} label={ts.name} line={ts.feel}>
+              <span className="block truncate text-[26px] leading-tight text-brand" style={{ fontFamily: ts.display, fontStyle: ts.key === "elegant" ? "italic" : undefined, textTransform: ts.key === "bold" ? "uppercase" : undefined }} aria-hidden="true">
+                {(d.title || t?.label || "Our event").slice(0, 28)}
+              </span>
+              <span className="block text-xl leading-tight text-ink" style={{ fontFamily: ts.display }} aria-hidden="true">
+                Aa {scriptSample ?? "अ"}
+              </span>
+            </Tile>
+          ))}
+        </div>
+      </Group>
+
+      <Group title="Layout">
+        <div role="radiogroup" aria-label="Layout" className="grid grid-cols-2 gap-3">
+          {TEMPLATES.map((tp) => (
+            <Tile key={tp.key} on={d.template === tp.key} onClick={() => update(set("template", tp.key))} label={tp.name} line={tp.line}>
+              <span className="pointer-events-none block h-44 overflow-hidden rounded-lg" aria-hidden="true">
+                <EventView data={{ ...data, template: tp.key }} view="page" now={now} />
+              </span>
+            </Tile>
+          ))}
+        </div>
       </Group>
 
       <Group title="Photo style">
@@ -567,16 +591,33 @@ export function StepLook({ d, update, now }: StepProps) {
   );
 }
 
-function Thumb({ children }: { children: ReactNode }) {
+function Tile({ on, onClick, label, line, children }: { on: boolean; onClick: () => void; label: string; line?: string; children: ReactNode }) {
   return (
-    <span className="pointer-events-none block h-40 overflow-hidden rounded-xl" aria-hidden="true">
+    <button type="button" role="radio" aria-checked={on} onClick={onClick}
+      className={`grid content-start gap-2 rounded-2xl border-2 p-2.5 text-left transition ${on ? "border-brand bg-card shadow-[0_6px_18px_-10px_rgba(46,42,110,0.6)]" : "border-line bg-card/80 hover:border-brand/40"}`}>
       {children}
+      <span className="flex items-start justify-between gap-2 px-0.5">
+        <span className="font-semibold leading-tight">{label}</span>
+        {on && <Tick />}
+      </span>
+      {line && <span className="px-0.5 text-sm leading-snug text-muted">{line}</span>}
+    </button>
+  );
+}
+
+function Swatch({ p }: { p: Palette }) {
+  return (
+    <span className="grid h-12 grid-cols-[2fr_1fr] overflow-hidden rounded-lg ring-1 ring-black/10" aria-hidden="true">
+      <span className="flex" style={p.gradient ? { background: p.gradient } : undefined}>
+        {!p.gradient && [p.main, p.accent, p.soft].map((c, i) => <i key={i} className="flex-1" style={{ background: c }} />)}
+      </span>
+      <span className="grid place-items-center font-display text-lg font-bold" style={{ background: p.bg, color: p.main }}>Aa</span>
     </span>
   );
 }
 
 function PhotoShape({ kind }: { kind: PhotoStyle }) {
-  const box = "bg-rose";
+  const box = "bg-brand/25";
   return (
     <span className="flex h-16 items-center justify-center rounded-xl bg-wash" aria-hidden="true">
       {kind === "hero" && <span className={`h-10 w-24 rounded-md ${box}`} />}
@@ -713,7 +754,7 @@ export function StepPublish({ d, update, onPreview, onStartAgain, goTo }: StepPr
         {!confirmReset ? (
           <Button kind="quiet" onClick={() => setConfirmReset(true)} className="justify-self-start">Start again</Button>
         ) : (
-          <div className="grid gap-3 rounded-2xl border-2 border-rose bg-card p-4">
+          <div className="grid gap-3 rounded-2xl border-2 border-marigold bg-card p-4">
             <p className="font-semibold">Start again? This clears everything on this phone, including the photo.</p>
             <div className="flex flex-wrap gap-3">
               <Button kind="brand" onClick={() => { setConfirmReset(false); onStartAgain(); }}>Yes, clear it</Button>

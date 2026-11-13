@@ -49,23 +49,37 @@ ok("switch defaults match", JSON.stringify(dbToggles) === JSON.stringify(cat.TOG
 ok("every switch in a type's defaults exists", cat.EVENT_TYPES.every((t) => Object.keys(t.toggles).every((k) => k in cat.TOGGLE_DEFAULTS)));
 
 // Look and language
-const dbTextStyles = sql.match(/text_style in \(([^)]+)\)/)[1].replace(/'|\s/g, "").split(",");
-ok("text styles match", JSON.stringify(dbTextStyles) === JSON.stringify(cat.TEXT_STYLES.map((s) => s.key)));
+const shape = /^[a-z][a-z_]{2,29}$/;
+ok("the database accepts any well-formed text style and border", /text_style\s+text not null default 'classic' check \(text_style ~ '\^\[a-z\]\[a-z_\]\{2,29\}\$'\)/.test(sql) && /border\s+text not null default 'none' check \(border ~/.test(sql));
+ok("every text style name fits the database check", cat.TEXT_STYLES.every((t) => shape.test(t.key)) && cat.TEXT_STYLES.length === 10);
+ok("every border name fits the database check", cat.BORDERS.every((b) => shape.test(b.key)) && cat.BORDERS.length === 18);
+ok("every palette name fits the database check", cat.PALETTES.every((p) => shape.test(p.key)));
+ok("no two palettes, text styles or borders share a name", new Set(cat.PALETTES.map((p) => p.key)).size === cat.PALETTES.length
+  && new Set(cat.TEXT_STYLES.map((t) => t.key)).size === cat.TEXT_STYLES.length && new Set(cat.BORDERS.map((b) => b.key)).size === cat.BORDERS.length);
 const dbPhotoStyles = sql.match(/photo_style in \(([^)]+)\)/)[1].replace(/'|\s/g, "").split(",");
 ok("photo styles match", JSON.stringify(dbPhotoStyles) === JSON.stringify(cat.PHOTO_STYLES.map((s) => s.key)));
 const dbOrganiser = sql.match(/organiser_type in \(([^)]+)\)/)[1].replace(/'|\s/g, "").split(",");
 ok("organiser types match", JSON.stringify([...dbOrganiser].sort()) === JSON.stringify(cat.ORGANISER_TYPES.map((o) => o.key).sort()));
-ok("every palette name fits the database check", cat.PALETTES.every((p) => /^[a-z][a-z_]{2,29}$/.test(p.key)));
-ok("every event type's starting palette exists", cat.EVENT_TYPES.every((t) => cat.PALETTES.some((p) => p.key === t.palette)));
+ok("every event type's starting palette, text style and borders exist", cat.EVENT_TYPES.every((t) =>
+  cat.PALETTES.some((p) => p.key === t.palette) && cat.TEXT_STYLES.some((s) => s.key === t.textStyle)
+  && t.borders.length >= 3 && t.borders.every((b) => cat.BORDERS.some((x) => x.key === b))));
+ok("pinks are a small minority (owner, 13 Nov)", cat.PALETTES.filter((p) => /pastel|lali/.test(p.key)).length <= 2);
+ok("every palette family has at least two choices", cat.PALETTE_FAMILIES.every((f) => cat.PALETTES.filter((p) => p.family === f).length >= 2));
+ok("formal palettes exist for regiments, memorials and corporate events", ["navy_gold", "regimental", "black_gold", "charcoal_silver"].every((k) => cat.PALETTES.some((p) => p.key === k)));
+ok("memorials start calm and formal", cat.eventType("memorial").palette === "calm" && cat.eventType("memorial").textStyle === "formal" && cat.eventType("memorial").borders[0] === "fine_line");
+ok("every palette has at least five colours for confetti and bunting", cat.PALETTES.every((p) => cat.partyColours(p).length >= 5));
 const langRe = /^[a-z]{2,3}(-[A-Z][a-z]{3})?$/;
 ok("every language code fits the database check", cat.LANGUAGES.every((l) => langRe.test(l.code)));
+for (const script of ["deva", "guru", "gujr", "beng", "taml"]) {
+  ok(`every text style has a font for ${script} letters`, cat.TEXT_STYLES.every((t) => t.display.includes(`-${script}`) || (script === "deva" && /--f-(mukta|baloo|rozha|amita|kalam)\b/.test(t.display))));
+}
 const low = [];
 for (const p of cat.PALETTES) {
   for (const [a, b, n] of [[p.main, p.bg, "main"], [p.onMain, p.main, "onMain"], [p.onAccent, p.accent, "onAccent"], [p.ink, p.bg, "ink"], [p.muted, p.bg, "muted"], [p.ink, p.soft, "ink/soft"]]) {
     if (cat.contrast(a, b) < 4.5) low.push(`${p.key} ${n} ${cat.contrast(a, b).toFixed(2)}`);
   }
 }
-ok("every palette's text passes the 4.5:1 readability check", low.length === 0, low.join("; "));
+ok(`every one of the ${cat.PALETTES.length} palettes passes the 4.5:1 readability check`, low.length === 0, low.join("; "));
 const own = cat.paletteFor("custom", "#FFE066");
 ok("your own pale colour gets dark text automatically", cat.contrast(own.onMain, own.main) >= 4.5 && own.onMain !== "#FFFFFF");
 

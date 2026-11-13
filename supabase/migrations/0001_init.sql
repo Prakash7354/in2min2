@@ -226,8 +226,10 @@ create table public.events (
   -- Checked by shape only, so a new palette needs no migration.
   palette             text not null default 'marigold_indigo' check (palette ~ '^[a-z][a-z_]{2,29}$'),
   primary_color       text not null default '#2E2A6E' check (primary_color ~ '^#[0-9A-Fa-f]{6}$'),
-  text_style          text not null default 'classic'
-                        check (text_style in ('clean', 'classic', 'elegant', 'calligraphy', 'bold')),
+  -- Text style and border: keys from lib/catalog.ts (TEXT_STYLES, BORDERS),
+  -- checked by shape only so a new style or border needs no migration.
+  text_style          text not null default 'classic' check (text_style ~ '^[a-z][a-z_]{2,29}$'),
+  border              text not null default 'none' check (border ~ '^[a-z][a-z_]{2,29}$'),
   photo_style         text not null default 'arch'
                         check (photo_style in ('hero', 'arch', 'polaroid', 'split')),
   motion              boolean not null default true,  -- the few animations at key moments
@@ -571,7 +573,7 @@ language sql stable security invoker set search_path = public as $$
     'scale',            e.scale,
     'languages',        to_jsonb(e.languages),
     'theme_config',     jsonb_build_object('template', e.theme, 'palette', e.palette, 'primary_color', e.primary_color,
-                          'text_style', e.text_style, 'photo_style', e.photo_style, 'motion', e.motion),
+                          'text_style', e.text_style, 'border', e.border, 'photo_style', e.photo_style, 'motion', e.motion),
     'feature_flags',    to_jsonb(f) - 'event_id' - 'settings' - 'updated_at',
     'feature_settings', f.settings)
   from public.events e join public.feature_toggles f on f.event_id = e.id
@@ -698,7 +700,7 @@ begin
            from jsonb_each(e.copy_translations) as l(lang, box)) end,
       'scale', e.scale,
       'theme', e.theme, 'palette', e.palette, 'primary_color', e.primary_color,
-      'text_style', e.text_style, 'photo_style', e.photo_style, 'motion', e.motion,
+      'text_style', e.text_style, 'border', e.border, 'photo_style', e.photo_style, 'motion', e.motion,
       'cover_image_key', e.cover_image_key,
       'hide_branding', (select p.hide_branding from public.plans p where p.key = e.plan)),
     'people', coalesce((
@@ -798,7 +800,7 @@ grant insert (event_type, scale, slug, title, host_names, timezone, starts_at, e
               expected_guests, venue_capacity, organiser_name, organiser_type, for_profit,
               charity_number, organiser_contact, language_mix, tone, languages,
               card_headline, card_invite_body, landing_page_story, guest_note_box, post_event_thank_you,
-              copy_translations, theme, palette, primary_color, text_style, photo_style, motion,
+              copy_translations, theme, palette, primary_color, text_style, border, photo_style, motion,
               cover_image_key, status, is_private, keep_for_next_year)
   on public.events to authenticated;
 grant update (event_type, scale, slug, title, host_names, timezone, starts_at, ends_at,
@@ -806,7 +808,7 @@ grant update (event_type, scale, slug, title, host_names, timezone, starts_at, e
               expected_guests, venue_capacity, organiser_name, organiser_type, for_profit,
               charity_number, organiser_contact, language_mix, tone, languages,
               card_headline, card_invite_body, landing_page_story, guest_note_box, post_event_thank_you,
-              copy_translations, theme, palette, primary_color, text_style, photo_style, motion,
+              copy_translations, theme, palette, primary_color, text_style, border, photo_style, motion,
               cover_image_key, status, is_private, keep_for_next_year)
   on public.events to authenticated;
 

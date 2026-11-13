@@ -19,6 +19,17 @@ Change `[ ]` to `[x]` when you finish a step, or just tell Claude Code it's done
 - A website with a top menu, How it works, sign-up, sign-in and contact.
 - VAT: not close to the threshold.
 
+## Now: agree the design (10 minutes)
+
+### [ ] 0. Look at the new design on your phone, then say "agreed" or what to change
+
+1. Open https://in2min2.pksgrg.workers.dev/builder on your phone.
+2. Pick an event (try a Wedding, a Reunion and a Memorial), then tap **Next** until you reach **The look**.
+3. Try the **Border** tiles (tap **Show all 18 borders**), the **Colours** families and the **Text style** tiles.
+4. Tap the small preview at the top to see it full-screen.
+
+**Once you say "agreed", the next steps are 2, 3 and 4 below.** Claude Code will remind you.
+
 ## This week: free, about 45 minutes in all
 
 ### [x] 1. Answer six questions
@@ -128,9 +139,9 @@ You asked how to avoid paying for Supabase Pro ($25 a month) before there's inco
 - From the first real guest, a nightly, locked copy of the database goes to In2Min2's own Cloudflare storage. This replaces Supabase's backups, and Claude Code sets it up in phase 2.
 - Move to Pro when the first community event takes money, or when income passes £25 a month, whichever comes first. Claude Code will remind you.
 
-### [ ] 12. Design the logo, by mid-December (the website needs it in early January)
+### [x] 12. Logo: not needed
 
-Use colours A, Marigold & Indigo: indigo `#2E2A6E`, marigold `#F4A522`, soft rose `#F2C4CB`, cream `#FFF9EF`, ink `#1C1A3A`. What it needs is at the bottom of the colours page (https://claude.ai/artifact/3JA1Qkc6JzKqpjMoQwCP2v): a full logo, a square icon, a one-colour version, and SVG or PNG files. Put the files in the project's `public/brand/` folder, or send them in the chat.
+Your decision (13 November): the In2Min2 wordmark is the logo, with marigold 2s on indigo. The square icon for the browser tab and phone home screen is already made. A designer can refine it one day, but nothing waits for it.
 
 ---
 

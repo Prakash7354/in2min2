@@ -42,6 +42,7 @@ export type Draft = {
   palette: string;
   customColor: string;
   textStyle: TextStyle;
+  border: string;
   photoStyle: PhotoStyle;
   motion: boolean;
   cover: string | null;
@@ -88,6 +89,7 @@ export function newDraft(): Draft {
     palette: "marigold_indigo",
     customColor: "#2E2A6E",
     textStyle: "classic",
+    border: "none",
     photoStyle: "arch",
     motion: true,
     cover: null,
@@ -114,6 +116,7 @@ export function applyType(d: Draft, key: string): Draft {
     template: t.theme,
     palette: t.palette,
     textStyle: t.textStyle,
+    border: t.borders[0] ?? "none",
     photoStyle: t.photoStyle,
     motion: !t.sensitive,
     tone: t.tone,
@@ -211,6 +214,7 @@ export function toViewData(d: Draft): EventViewData {
     template: d.template,
     palette: paletteFor(d.palette, d.customColor),
     textStyle: d.textStyle,
+    border: d.border,
     photoStyle: d.photoStyle,
     motion: d.motion,
     cover: d.cover,

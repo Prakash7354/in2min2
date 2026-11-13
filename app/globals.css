@@ -1,20 +1,23 @@
 @import "tailwindcss";
 
 /* In2Min2's own colours: option A, Marigold & Indigo (owner's choice, 13 Nov 2026).
+   Professional first (owner, 13 Nov): indigo carries the buttons and headings;
+   marigold is a small accent (the 2s in the wordmark, progress, highlights).
    Event pages use their own palettes (lib/catalog.ts); these are for the
    website, builder and dashboard only. Every text pair passes WCAG AA. */
 @theme {
   --color-brand: #2E2A6E;      /* indigo: logo, headings, links, selected */
   --color-brand-deep: #221F55;
-  --color-marigold: #F4A522;   /* highlight: the main button (with ink text) */
+  --color-marigold: #F4A522;   /* accent: the 2s in the wordmark, progress, highlights */
   --color-marigold-deep: #E0901A;
-  --color-rose: #F2C4CB;       /* gentle panels */
+  --color-rose: #F2C4CB;       /* brand colour A; rarely used in the app */
   --color-cream: #FFF9EF;      /* background */
   --color-card: #FFFFFF;
   --color-ink: #1C1A3A;        /* text */
   --color-muted: #5C5878;      /* secondary text */
   --color-line: #EADFCB;       /* borders */
   --color-wash: #F6EEDD;       /* quiet fills */
+  --color-amber-wash: #FCEFD6; /* gentle warnings */
 
   --font-display: var(--f-bricolage), "Avenir Next", "Segoe UI", system-ui, sans-serif;
   --font-sans: var(--f-mukta), "Segoe UI", system-ui, -apple-system, sans-serif;

@@ -109,7 +109,7 @@ export function Button({ children, onClick, kind = "main", disabled, type = "but
   type?: "button" | "submit"; className?: string;
 }) {
   const styles = {
-    main: "bg-marigold text-ink hover:bg-marigold-deep",
+    main: "bg-brand text-white hover:bg-brand-deep",
     brand: "bg-brand text-white hover:bg-brand-deep",
     ghost: "bg-transparent text-brand ring-2 ring-inset ring-brand hover:bg-brand/5",
     quiet: "bg-wash text-ink hover:bg-line",
@@ -130,7 +130,7 @@ export function Notice({ tone = "info", children }: { tone?: "info" | "warn"; ch
   return (
     <p
       role={tone === "warn" ? "alert" : undefined}
-      className={`rounded-2xl px-4 py-3 text-[15px] leading-snug ${tone === "warn" ? "bg-rose/60 text-ink" : "bg-wash text-ink"}`}
+      className={`rounded-2xl border-l-4 px-4 py-3 text-[15px] leading-snug ${tone === "warn" ? "border-marigold-deep bg-amber-wash text-ink" : "border-brand/30 bg-wash text-ink"}`}
     >
       {children}
     </p>

@@ -16,7 +16,7 @@ export default function Home() {
         <span className="font-display text-2xl font-extrabold tracking-tight text-brand">
           In<span className="text-marigold-deep">2</span>Min<span className="text-marigold-deep">2</span>
         </span>
-        <Link href="/builder" className="inline-flex min-h-11 items-center rounded-full bg-marigold px-5 font-bold text-ink hover:bg-marigold-deep">
+        <Link href="/builder" className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 font-bold text-white hover:bg-brand-deep">
           Start free
         </Link>
       </header>
@@ -33,7 +33,7 @@ export default function Home() {
             invitation to memory book.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
-            <Link href="/builder" className="inline-flex min-h-12 items-center rounded-full bg-marigold px-7 text-lg font-bold text-ink hover:bg-marigold-deep">
+            <Link href="/builder" className="inline-flex min-h-12 items-center rounded-full bg-brand px-7 text-lg font-bold text-white hover:bg-brand-deep">
               Start free
             </Link>
             <a href="#how" className="inline-flex min-h-12 items-center rounded-full px-7 text-lg font-bold text-brand ring-2 ring-inset ring-brand hover:bg-brand/5">

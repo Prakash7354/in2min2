@@ -7,11 +7,12 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
-import { TEXT_STYLES } from "@/lib/catalog";
+import { partyColours, textStyle } from "@/lib/catalog";
 import {
   daysUntil, directionsUrl, formatDate, formatTime, monogram,
   type EventStageView, type EventViewData,
 } from "@/lib/event-view";
+import BorderArt from "./borders";
 // Styles: components/event/event-view.css, loaded once in app/layout.tsx.
 // Class names: s.card → "ev-card" (see event-view.css).
 const s = new Proxy({} as Record<string, string>, { get: (_, key) => `ev-${String(key)}` });
@@ -20,10 +21,13 @@ type Props = { data: EventViewData; view: EventStageView; now: number };
 
 export default function EventView({ data, view, now }: Props) {
   const p = data.palette;
-  const ts = TEXT_STYLES.find((t) => t.key === data.textStyle) ?? TEXT_STYLES[0];
+  const ts = textStyle(data.textStyle);
+  const party = partyColours(p);
   const vars = {
     "--ev-bg": p.bg, "--ev-main": p.main, "--ev-on-main": p.onMain, "--ev-accent": p.accent, "--ev-on-accent": p.onAccent,
     "--ev-soft": p.soft, "--ev-ink": p.ink, "--ev-muted": p.muted, "--ev-display": ts.display, "--ev-body": ts.body,
+    ...(p.gradient ? { "--ev-gradient": p.gradient } : {}),
+    ...Object.fromEntries(Array.from({ length: 6 }, (_, i) => [`--ev-c${i + 1}`, party[i % party.length]])),
   } as CSSProperties;
 
   return (
@@ -35,6 +39,8 @@ export default function EventView({ data, view, now }: Props) {
         data-template={data.template}
         data-text={data.textStyle}
         data-motion={data.motion ? "on" : "off"}
+        data-border={data.border}
+        data-gradient={p.gradient ? "on" : "off"}
       >
         {data.demo && <span className={s.demo}>Demo</span>}
         {view === "card" && <Card d={data} />}
@@ -148,8 +154,9 @@ function Card({ d }: { d: EventViewData }) {
   const { main, second, secondLang } = words(d);
   return (
     <div className={s.cardWrap}>
-      <div className={`${s.deco}`} />
       <article className={s.card}>
+        <BorderArt kind={d.border} />
+        <div className={s.cardInner}>
         <Photo d={d} />
         <Kicker>{d.sensitive ? "In loving memory" : d.scale === "community" ? d.typeLabel : "You’re invited"}</Kicker>
         <Headline d={d} />
@@ -161,8 +168,8 @@ function Card({ d }: { d: EventViewData }) {
         {d.venueName && <p className={s.where}>{d.venueName}</p>}
         <Blessing d={d} />
         {d.toggles.rsvp && <span className={s.btn}>{d.sensitive ? "Let the family know" : "Reply"}</span>}
+        </div>
       </article>
-      <div className={`${s.deco} ${s.decoBottom}`} />
     </div>
   );
 }
@@ -172,6 +179,7 @@ function Hero({ d, children }: { d: EventViewData; children?: ReactNode }) {
   if (d.photoStyle === "split") {
     return (
       <header className={`${s.hero} ${s.heroBand}`} data-photo="split">
+        <BorderArt kind={d.border} className={s.heroArt} />
         <div className={s.splitGrid}>
           <Photo d={d} />
           <div className={s.splitText}>
@@ -185,6 +193,7 @@ function Hero({ d, children }: { d: EventViewData; children?: ReactNode }) {
   }
   return (
     <header className={`${s.hero} ${s.heroBand}`} data-photo={d.photoStyle}>
+      <BorderArt kind={d.border} className={s.heroArt} />
       <Photo d={d} />
       <Kicker>{kicker}</Kicker>
       <Headline d={d} as="h1" />
@@ -200,7 +209,6 @@ function Page({ d, now }: { d: EventViewData; now: number }) {
   const story = main.landing_page_story.split(/\n\s*\n/).filter((x) => x.trim());
   return (
     <>
-      <div className={s.deco} />
       <Hero d={d}>
         <p className={s.when}>{whenLine(d)}</p>
         {d.venueName && <p className={s.where}>{d.venueName}</p>}
@@ -255,7 +263,6 @@ function Page({ d, now }: { d: EventViewData; now: number }) {
       )}
 
       <Footer d={d} />
-      <div className={`${s.deco} ${s.decoBottom}`} />
     </>
   );
 }
@@ -385,7 +392,6 @@ function After({ d }: { d: EventViewData }) {
   const { main, second, secondLang } = words(d);
   return (
     <>
-      <div className={s.deco} />
       <Hero d={d}>
         <p className={s.body}>
           {main.post_event_thank_you}
@@ -405,7 +411,6 @@ function After({ d }: { d: EventViewData }) {
         </section>
       )}
       <Footer d={d} />
-      <div className={`${s.deco} ${s.decoBottom}`} />
     </>
   );
 }
@@ -423,7 +428,7 @@ function Footer({ d }: { d: EventViewData }) {
           {o.contact && ` · ${o.contact}`}
         </span>
       )}
-      {!d.hideBranding && <span className={s.made}><i />Made with In2Min2</span>}
+      {!d.hideBranding && <span className={s.made}>Made with In<b>2</b>Min<b>2</b></span>}
     </footer>
   );
 }

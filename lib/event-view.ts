@@ -32,6 +32,7 @@ export type EventViewData = {
   template: Template;
   palette: Palette;
   textStyle: TextStyle;
+  border: string;     // BORDERS key in lib/catalog.ts
   photoStyle: PhotoStyle;
   motion: boolean;
   cover: string | null; // image URL (a data: URL while it's a draft)

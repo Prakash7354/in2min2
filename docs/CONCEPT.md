@@ -1,11 +1,18 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.2, 13 November 2026 (night). Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.3, 13 November 2026 (late). Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.3 (owner's design review, 13 Nov 2026):** far more choice in the look, "like shopping on the high street", with a professional side for regiments, charities, memorials and corporate events (7, step 5; 7d):
+- 18 borders drawn for each kind of event;
+- 30 colour sets in 8 families, with fewer pinks, festival colour blends, and dark styles;
+- 10 text styles, each with fonts for six scripts.
+
+Also: In2Min2's own screens look more formal; the wordmark is the logo (18d); the guest dashboard comes in phase 2 (9).
 
 **What changed in version 3.2:** the owner chose colours A for In2Min2 itself, asked for all three brand palettes to be offered to hosts, and said "Yes, go" (taken as yes to the other open recommendations; section 23). Phase 1 started: the builder's seven steps, the live preview and the In2Min2 colours are built (section 20).
 
@@ -339,19 +346,48 @@ There is never a separate "preview mode" that looks different from the real page
    - Press **"Write it for me"** and the boxes fill in both languages, each with a character counter.
    - Every box has small buttons: *Shorter · Warmer · More formal · More fun · Rewrite*.
    - Edit anything.
-5. **The look.** Four ready-made choices, each shown as a picture, never a settings form:
-   - **Template:** Classic, Modern, Festive or Sport, each shown as a live miniature of the host's own card.
-   - **Colours (Decided, owner, 13 Nov 2026: hosts choose from all three brand palettes):** ten ready-made sets, each checked for readability: the three In2Min2 palettes (Marigold & Indigo, Lali Gurans, Himalayan Dusk), plus Red & Gold, Royal Blue, Garden Green, Pastel Party, Black & White, Pitch Green and Calm. Then "your own colour", with the text colour picked automatically so it stays readable. Each event type starts on a fitting set (a wedding on Red & Gold, a tournament on Pitch Green, a memorial on Calm). Built: `events.palette`, `lib/catalog.ts` `PALETTES`.
-   - **Text style**, 5 presets from plain to calligraphic, each with a matching Devanagari font (all free Google Fonts):
+5. **The look (Decided in outline, owner, 13 Nov 2026: "verities makes people … feel good like shopping in the high street").** Every choice is shown on the host's own card, never as a settings form. Suggestions for this kind of event come first, then everything else. Built in `lib/catalog.ts` and `components/event/`; checked by `npm run test:db`.
+   - **Main photo**, made smaller on the phone with its location data removed.
+   - **Border (18, drawn in code, in the event's own colours):**
 
-     | Preset | Feel | Fonts (Latin + Devanagari) |
+     | Border | Suggested for |
+     | --- | --- |
+     | Plain · Fine lines | Corporate, memorial, anyone who wants it quiet |
+     | Ornate scrolls · Art Deco | Weddings, anniversaries, galas, engagements |
+     | Laurel | Regimental days, reunions, awards, remembrance |
+     | Flowers · Leafy vine | Weddings, birthdays, charities |
+     | Marigold garland · Dhaka pattern · Lotus & mandala | Pasni, Bratabandha, pujas, Dashain and Tihar, Nepali weddings |
+     | Balloons · Confetti · Bunting · Stars | Birthdays, parties, fêtes, melas |
+     | Sunburst · Festival frame | Melas, charity days, festivals (a bold colour-blend frame) |
+     | Sport stripes · Pitch lines | Tournaments |
+
+     Each event type lists its suggestions in order, and the first is where it starts (`EVENT_TYPES[].borders`; `events.border`).
+   - **Colours (30 sets in 8 families, every one checked for readability):**
+     - **In2Min2:** Marigold & Indigo, Lali Gurans, Himalayan Dusk (the three the owner wants hosts to have).
+     - **Formal:** Navy & Gold, Regimental Green, Black & Gold (dark), Burgundy & Gold, Charcoal & Silver, Black & White.
+     - **Nepali and South Asian:** Red & Gold, Dhaka Red, Saffron & Maroon, Tihar Night (dark).
+     - **Modern:** Sage & Terracotta, Ocean & Coral, Royal Blue, Garden Green, Lavender & Sage.
+     - **Festival colours:** Festival Rainbow, Sunset Mela, Holi Colours, Northern Lights (dark), Confetti Brights. These are colour blends, like a festival poster.
+     - **Party:** Citrus Pop, Pastel Party (the only pink-led set, as the owner asked for fewer pinks).
+     - **Sport:** Pitch Green, Team Red & Black, Stadium Night (dark).
+     - **Calm:** Calm Grey, Lily White & Sage, for memorials.
+     - Then "your own colour", with the text colour picked automatically.
+   - **Text style (10), each with matching letters for Nepali and Hindi, Punjabi, Gujarati, Bengali and Tamil** (all free Google Fonts, self-hosted; a phone downloads only what the event shows):
+
+     | Style | Feel | Headline font (Latin; Devanagari) |
      | --- | --- | --- |
-     | Clean | Plain black and white, modern | Inter + Noto Sans Devanagari |
-     | Classic | Traditional serif | Playfair Display + Noto Serif Devanagari |
-     | Elegant | Italic serif headline, light body | Cormorant Garamond Italic + Noto Serif Devanagari |
-     | Calligraphy | Script headline for weddings | Great Vibes + Cormorant; Kalam for Devanagari |
-     | Bold | Strong poster lettering for sport and melas | Bebas Neue + Mukta |
+     | Classic | Traditional serif | Playfair Display; Tiro Devanagari |
+     | Formal | Engraved capitals: regimental, memorial, corporate | Cinzel; Tiro Devanagari |
+     | Elegant | Light italic serif | Cormorant Garamond; Noto Serif |
+     | Calligraphy | Flowing script for weddings | Great Vibes; Amita |
+     | Heritage | Bold, beautiful Nepali and Hindi headlines | Rozha One |
+     | Contemporary | Soft modern serif | Fraunces; Noto Serif |
+     | Clean | Plain and modern | Inter; Noto Sans |
+     | Poster | Tall capitals for sport and melas | Bebas Neue; Mukta |
+     | Playful | Round and friendly, for children | Baloo 2 (and its Punjabi, Gujarati, Bengali and Tamil sisters) |
+     | Handwritten | Like a note from a friend | Caveat; Kalam |
 
+   - **Layout:** Classic (centred), Modern (left-aligned with a colour band), Festive (centred with a bright label), Poster (big capitals).
    - **Photo style**, 4 presets:
      - *Hero*: the photo fills the top, with the words over it.
      - *Arch*: the photo sits in an arch or circle frame, ideal for a child or a couple.
@@ -386,7 +422,7 @@ Everything else stays still. People who have reduced motion switched on see no a
   - Every screen should make a mother, a father, an auntie or a team manager feel proud to share it.
 - **For everyone who plans.** Women and men both organise these events, often together.
   - The templates run from soft and floral to classic, bold and sporty.
-  - Ten colour sets, from soft and floral to bold and sporty, including all three of In2Min2's own (7, step 5).
+  - Thirty colour sets in eight families, from formal navy and gold to festival colour blends, including all three of In2Min2's own (7, step 5).
   - Nothing assumes who the host is.
 - **Easy for grandparents.**
   - Large text and strong contrast.
@@ -402,6 +438,33 @@ Everything else stays still. People who have reduced motion switched on see no a
 - **Quiet for sad occasions.** A memorial or funeral gets calm colours, no petals or confetti, gentle wording that never says "celebrate", and no offers (5g).
 
 ## 8. The AI writer and languages
+
+### 7d. Design artwork: what we can do, and who owns it (owner's question, 13 Nov 2026)
+
+**Drawn in code (now).** Every border is drawn by In2Min2's own code, as shapes rather than pictures. That means:
+- In2Min2 owns them outright;
+- they stay sharp on any phone;
+- they cost nothing to show;
+- they change colour with the event.
+
+Code drawing suits crisp, modern, flat designs: garlands, laurels, Art Deco, confetti, patterns. It does not suit painterly watercolour (butterflies, Christmas baubles, hand-painted flowers).
+
+**Pictures found online can't be used.** Pinterest, Canva, Freepik and similar sites can't be copied into the app.
+- Pinterest images belong to other people.
+- Canva's licence doesn't allow its elements to be taken into another product.
+- Most stock licences don't allow their art in an app where customers make their own designs.
+
+**To go further, three options (Recommended, in this order):**
+1. **Commission an illustrator** for a signature set, for example 6–10 hand-drawn borders for weddings, Pasni, memorials and melas.
+   - Ask for SVG files and a written transfer of full commercial rights.
+   - Get quotes from UK illustrators, or on Upwork or Fiverr. Prices vary widely, so compare several.
+   - The code adds each one as a new border, in the event's colours where the artwork allows.
+2. **AI-generated artwork** with Google's Gemini image model, on the account we already use for the AI writer.
+   - Good for one-off backgrounds and textures.
+   - Each picture needs checking and tidying, and Google's terms must be checked before commercial use.
+3. **Figma**, the free design tool, if a designer joins: Claude Code can read Figma designs once the owner connects it.
+
+Canva stays useful for the owner's own posters and social posts.
 
 ### 8a. "Trained" without the cost of training (Recommended)
 
@@ -444,9 +507,23 @@ Three levels, shown honestly in the language picker:
 
 **Who checks the words (Decided, owner, 13 Nov 2026):** the host or organiser, in every language. They save, approve and publish their own text, and nothing goes live unapproved (7). In2Min2's own example texts are labelled as examples, and are corrected whenever a user suggests a better wording.
 
+**Fonts for other languages (owner's question, 13 Nov 2026).** The AI writes the words; nobody has to design fonts.
+- Every text style already has a matching free Google font for Devanagari (Nepali, Hindi), Gurmukhi (Punjabi), Gujarati, Bengali and Tamil.
+- The phone uses the right one for each letter automatically. A Punjabi guest sees Punjabi letters in the same style as the English headline.
+- Tagalog and Polish use Latin letters, so every style already works for them.
+- A new script needs only one more font per style, added to `components/event/fonts.ts`.
+
 Filipino families can use In2Min2 from day one: Tagalog uses English letters, so they get the beta level straight away. The **buttons and menus** stay in English at first. Translating the interface comes later (backlog), starting with Nepali and Hindi.
 
 ## 9. Guest list (the CRM)
+
+**The guest dashboard: who's coming, by category (owner's request, 13 Nov 2026; phase 2, with the replies).** One screen, always up to date, shows:
+- **Coming, maybe, can't come, not replied yet**, counted in people (a family of four is 4).
+- **By category:** family, friends, VIPs, children, teams, sponsors, stall holders, plus the host's own tags (e.g. "Bride's side").
+- **By function:** who's coming to the Mehndi, the ceremony and the reception.
+- **Diets and access needs**, totalled for the caterer.
+- **Against the limits:** people against the plan's limit and against the venue's safe capacity (5c, 10).
+- **One-tap lists:** "not replied yet" with a WhatsApp reminder ready to send; export for the caterer and venue.
 
 One table, `guest_crm`, holds a wedding guest, a child, a sponsor, a stall holder and a football team.
 
@@ -854,10 +931,13 @@ Three options are drawn on a comparison page for the owner: https://claude.ai/ar
 
 All three are also offered to hosts as event colours (7).
 
-**Then the logo.** The owner designs it. It needs:
-- a full logo (mark and "In2Min2") and a square icon, for the phone home screen and the browser tab;
-- to work in one colour, on light and dark backgrounds;
-- files in SVG if possible, otherwise PNG at least 1024 pixels wide on a transparent background.
+**The logo is the wordmark (Decided, owner, 13 Nov 2026): no separate logo image is needed.**
+- "In2Min2" in Bricolage Grotesque, indigo, with the two 2s in marigold.
+- The square icon (browser tab, phone home screen) is a marigold 2 on an indigo square: `app/icon.svg`.
+- "Made with In2Min2" on event pages uses the same wordmark.
+- A designer can refine it later, but nothing waits for it.
+
+**In2Min2's own screens look professional, not like a party (owner, 13 Nov 2026):** indigo carries the buttons and headings, marigold is only a small accent, and there are no pink panels. The party colours belong to the hosts' events.
 
 ## 19. The database (built: `supabase/migrations/0001_init.sql`, not yet run on Supabase)
 
@@ -914,8 +994,9 @@ Small events run all year, so the personal and celebration side comes first and 
 | **0** | Next.js on Cloudflare with Git builds, AI writer route, database (140 checks), this plan | Done 12–13 Nov 2026 | Done |
 | **1** | **The builder** (section 7): live preview, styles, honoured family, parking and numbers, the price from "About how many people?", AI in two languages, Supabase sign-in, save and publish, launch-offer code | Mid-December 2026 | A new host publishes a good-looking event in under 2 minutes on the owner's own phone |
 | 1a (done 13 Nov) | In2Min2 colours and fonts; the seven builder steps; the live preview (card, page, on the day, after) drawn by the same code the public page will use; ten palettes; prices with packs; the draft saved on the device; the AI writer in two languages | | Tested in Chrome at phone and computer width |
-| 1b (next) | Supabase sign-in by email code, saving and publishing to the database, the launch-offer code, the AI writer only for signed-in hosts | Needs the owner's Supabase URL and publishable key | |
-| **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
+| 1a+ (done 13 Nov) | Design review: 18 borders, 30 colour sets in 8 families, 10 text styles with fonts for six scripts, layouts, the wordmark logo and icon, a more formal In2Min2 look | | Tested in Chrome at phone and computer width |
+| 1b (next, once the owner agrees the design) | Supabase sign-in by email code, saving and publishing to the database, the launch-offer code, the AI writer only for signed-in hosts | Needs the owner's Supabase URL and publishable key | |
+| **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; **the guest dashboard (9)**; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
 | **Pilot 1** | 3–5 family events from the owner's network (Pop-Up and `LAUNCH50`) | From January 2027 | Real families use it; feedback collected |
 | **3** | Guest-list tools, the photo wall and gallery, video links, the event pack, feedback; closing emails with "Keep it for next year?" (5g) | January–February 2027 | 200 photos from 20 phones in an hour without failure |
 | **4** | Stripe: plan upgrades and guest packs; then products, orders, QR passes, the Gate screen (works offline), cash sales and cash-up; **the owner's admin page** (fee levels, offer codes, demo reset) and "Ask about a reduced fee" (5h); organiser details for community events | February 2027 | A test mela sells entry and parking online and on the day, with every sale accounted for |
@@ -1041,6 +1122,15 @@ The same deletion runs automatically 30 days after a page closes.
 - A marketing website with a top menu, How it works, sign-up, sign-in and contact.
 - Two-step sign-in on every account (agreed; still to switch on).
 - Colours: A, Marigold & Indigo, for In2Min2's own screens; hosts choose from all three brand palettes and more (13 Nov 2026, night).
+- The design review (13 Nov 2026, late):
+  - more variety and modern mixes, fewer pinks;
+  - festival colour blends;
+  - borders drawn for each kind of event;
+  - a professional look for formal events and for In2Min2 itself;
+  - lots of text styles;
+  - the wordmark is the logo;
+  - a guest dashboard by category.
+- The owner's set-up steps wait until he agrees the design.
 - "Yes, go" (13 Nov 2026, night), taken as yes to the five other recommendations below; any can still be changed:
   - people included 200, 300, 400 and 500;
   - same event next year 30% off, a different event 20% off, automatic and never stacked; keeping the guest list for next year free;

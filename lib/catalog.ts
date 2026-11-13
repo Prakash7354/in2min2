@@ -8,7 +8,7 @@
 
 export type Scale = "personal" | "celebration" | "community";
 export type Template = "classic" | "modern" | "festive" | "sport";
-export type TextStyle = "clean" | "classic" | "elegant" | "calligraphy" | "bold";
+export type TextStyle = "classic" | "formal" | "elegant" | "calligraphy" | "heritage" | "contemporary" | "clean" | "bold" | "playful" | "handwritten";
 export type PhotoStyle = "hero" | "arch" | "polaroid" | "split";
 export type Parking = "unknown" | "none" | "free" | "paid" | "street";
 export type PlanKey = "popup" | "season" | "half_year" | "keepsake" | "community";
@@ -39,45 +39,46 @@ export type EventType = {
   // Builder only (not in the database):
   line: string;          // one line under the tile
   starLabel: string;     // "Who is it for?" label
-  palette: PaletteKey;   // starting colours
+  palette: string;       // starting colours (PALETTES)
   textStyle: TextStyle;
+  borders: BorderKey[];  // suggested borders, best first; the first is the starting one
   photoStyle: PhotoStyle;
   tone: string;
 };
 
 export const EVENT_TYPES: EventType[] = [
   { key: "birthday", label: "Birthday", scale: "personal", theme: "modern", toggles: {}, repeatsYearly: true, sensitive: false,
-    line: "Any age, any size", starLabel: "The birthday person", palette: "pastel_party", textStyle: "clean", photoStyle: "polaroid", tone: "Fun and playful" },
+    line: "Any age, any size", starLabel: "The birthday person", palette: "confetti_brights", textStyle: "playful", borders: ["balloons", "confetti", "bunting", "stars", "floral"], photoStyle: "polaroid", tone: "Fun and playful" },
   { key: "pasni", label: "Pasni (rice feeding)", scale: "personal", theme: "festive", toggles: { gift_registry: true }, repeatsYearly: false, sensitive: false,
-    line: "Baby's first rice", starLabel: "The child", palette: "marigold_indigo", textStyle: "classic", photoStyle: "arch", tone: "Warm and welcoming" },
+    line: "Baby's first rice", starLabel: "The child", palette: "marigold_indigo", textStyle: "heritage", borders: ["marigold", "mandala", "floral", "balloons"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "party", label: "Party", scale: "personal", theme: "modern", toggles: {}, repeatsYearly: false, sensitive: false,
-    line: "House-warming, get-together", starLabel: "Who it's for", palette: "royal_blue", textStyle: "clean", photoStyle: "hero", tone: "Fun and playful" },
+    line: "House-warming, get-together", starLabel: "Who it's for", palette: "citrus", textStyle: "playful", borders: ["confetti", "bunting", "balloons", "stars", "sunburst"], photoStyle: "hero", tone: "Fun and playful" },
   { key: "ceremony", label: "Family ceremony", scale: "personal", theme: "festive", toggles: { gift_registry: true }, repeatsYearly: false, sensitive: false,
-    line: "Puja, naming, blessing", starLabel: "Who it's for", palette: "marigold_indigo", textStyle: "classic", photoStyle: "arch", tone: "Warm and welcoming" },
+    line: "Puja, naming, blessing", starLabel: "Who it's for", palette: "saffron", textStyle: "heritage", borders: ["marigold", "mandala", "dhaka", "ornate"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "wedding", label: "Wedding", scale: "celebration", theme: "classic", toggles: { gift_registry: true, guestbook: true }, repeatsYearly: true, sensitive: false,
-    line: "Mehndi, ceremony, reception", starLabel: "The couple", palette: "red_gold", textStyle: "calligraphy", photoStyle: "arch", tone: "Formal and elegant" },
+    line: "Mehndi, ceremony, reception", starLabel: "The couple", palette: "red_gold", textStyle: "calligraphy", borders: ["ornate", "floral", "marigold", "art_deco", "mandala", "fine_line"], photoStyle: "arch", tone: "Formal and elegant" },
   { key: "engagement", label: "Engagement", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: false, sensitive: false,
-    line: "Tika, ring ceremony", starLabel: "The couple", palette: "lali_gurans", textStyle: "elegant", photoStyle: "arch", tone: "Warm and welcoming" },
+    line: "Tika, ring ceremony", starLabel: "The couple", palette: "burgundy_gold", textStyle: "elegant", borders: ["floral", "ornate", "art_deco", "stars"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "anniversary", label: "Wedding anniversary", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: true, sensitive: false,
-    line: "Silver, golden or any year", starLabel: "The couple", palette: "red_gold", textStyle: "elegant", photoStyle: "arch", tone: "Warm and welcoming" },
+    line: "Silver, golden or any year", starLabel: "The couple", palette: "black_gold", textStyle: "elegant", borders: ["art_deco", "ornate", "floral", "stars", "fine_line"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "bratabandha", label: "Bratabandha", scale: "celebration", theme: "festive", toggles: { gift_registry: true }, repeatsYearly: false, sensitive: false,
-    line: "Sacred thread ceremony", starLabel: "The boy", palette: "marigold_indigo", textStyle: "classic", photoStyle: "arch", tone: "Festive and joyful" },
+    line: "Sacred thread ceremony", starLabel: "The boy", palette: "saffron", textStyle: "heritage", borders: ["mandala", "marigold", "dhaka", "ornate"], photoStyle: "arch", tone: "Festive and joyful" },
   { key: "reunion", label: "Reunion or regimental day", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: true, sensitive: false,
-    line: "Old comrades, classmates, family", starLabel: "Who's coming together", palette: "royal_blue", textStyle: "classic", photoStyle: "hero", tone: "Warm and welcoming" },
+    line: "Old comrades, classmates, family", starLabel: "Who's coming together", palette: "regimental", textStyle: "formal", borders: ["laurel", "fine_line", "art_deco", "bunting", "dhaka"], photoStyle: "hero", tone: "Warm and welcoming" },
   { key: "corporate", label: "Corporate event", scale: "celebration", theme: "modern", toggles: { sponsors: true }, repeatsYearly: true, sensitive: false,
-    line: "Dinner, launch, awards", starLabel: "The organisation", palette: "black_white", textStyle: "clean", photoStyle: "split", tone: "Formal and elegant" },
+    line: "Dinner, launch, awards", starLabel: "The organisation", palette: "navy_gold", textStyle: "formal", borders: ["fine_line", "art_deco", "none", "stars"], photoStyle: "split", tone: "Formal and elegant" },
   { key: "mela", label: "Mela / festival", scale: "community", theme: "festive",
     toggles: { rsvp: false, tickets: true, stalls: true, parking: true, sponsors: true }, repeatsYearly: true, sensitive: false,
-    line: "Stalls, food, music, parking", starLabel: "The festival", palette: "marigold_indigo", textStyle: "bold", photoStyle: "hero", tone: "Festive and joyful" },
+    line: "Stalls, food, music, parking", starLabel: "The festival", palette: "festival_rainbow", textStyle: "bold", borders: ["rainbow", "bunting", "sunburst", "dhaka", "confetti", "marigold"], photoStyle: "hero", tone: "Festive and joyful" },
   { key: "sport", label: "Sports tournament", scale: "community", theme: "sport",
     toggles: { rsvp: false, tickets: true, team_entries: true, stalls: true, parking: true, sponsors: true, live_scores: true }, repeatsYearly: true, sensitive: false,
-    line: "Teams, draw, fixtures, live scores", starLabel: "The tournament", palette: "pitch_green", textStyle: "bold", photoStyle: "split", tone: "Sporty and energetic" },
+    line: "Teams, draw, fixtures, live scores", starLabel: "The tournament", palette: "pitch_green", textStyle: "bold", borders: ["stripes", "pitch", "laurel", "bunting", "sunburst"], photoStyle: "split", tone: "Sporty and energetic" },
   { key: "charity", label: "Charity or fundraiser", scale: "community", theme: "festive", toggles: { tickets: true, sponsors: true }, repeatsYearly: true, sensitive: false,
-    line: "Walks, dinners, appeals", starLabel: "The cause", palette: "garden_green", textStyle: "clean", photoStyle: "hero", tone: "Warm and welcoming" },
+    line: "Walks, dinners, appeals", starLabel: "The cause", palette: "garden_green", textStyle: "contemporary", borders: ["vines", "rainbow", "sunburst", "floral", "bunting"], photoStyle: "hero", tone: "Warm and welcoming" },
   { key: "community", label: "Community event", scale: "community", theme: "festive", toggles: { tickets: true, sponsors: true }, repeatsYearly: true, sensitive: false,
-    line: "Dashain, Teej, cultural show", starLabel: "The event", palette: "himalayan_dusk", textStyle: "classic", photoStyle: "hero", tone: "Festive and joyful" },
+    line: "Dashain, Teej, cultural show", starLabel: "The event", palette: "dhaka", textStyle: "heritage", borders: ["dhaka", "bunting", "rainbow", "marigold", "sunburst"], photoStyle: "hero", tone: "Festive and joyful" },
   { key: "memorial", label: "Memorial or funeral", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: false, sensitive: true,
-    line: "Funeral, prayers, remembrance", starLabel: "In memory of", palette: "calm", textStyle: "classic", photoStyle: "arch", tone: "Gentle and respectful" },
+    line: "Funeral, prayers, remembrance", starLabel: "In memory of", palette: "calm", textStyle: "formal", borders: ["fine_line", "laurel", "vines", "none"], photoStyle: "arch", tone: "Gentle and respectful" },
 ];
 
 export const REPEAT_AS: Record<string, string> = { wedding: "anniversary" };
@@ -228,30 +229,72 @@ export function togglesFor(typeKey: string | null): Record<ToggleKey, boolean> {
 
 // ─────────────────────────────── The look ───────────────────────────────
 
-export type PaletteKey =
-  | "marigold_indigo" | "lali_gurans" | "himalayan_dusk"
-  | "red_gold" | "royal_blue" | "garden_green" | "pastel_party" | "black_white" | "pitch_green" | "calm";
+export type PaletteFamily = "In2Min2" | "Formal" | "Nepali and South Asian" | "Modern" | "Festival colours" | "Party" | "Sport" | "Calm";
 
 export type Palette = {
-  key: PaletteKey | "custom";
+  key: string;
   name: string;
-  brand?: boolean; // one of In2Min2's own three
+  family: PaletteFamily;
   bg: string; main: string; onMain: string; accent: string; onAccent: string; soft: string; ink: string; muted: string;
+  dark?: boolean;      // light text on a dark page
+  gradient?: string;   // a colour blend behind the card and in some borders
+  party?: string[];    // colours for confetti, balloons, bunting and leaves
 };
 
-// Every pair used for text passes WCAG AA (4.5:1), checked 13 Nov 2026.
+// Every pair used for text passes WCAG AA (4.5:1); checked by npm run test:db.
+// Grouped like a high-street shop: formal first, party last.
 export const PALETTES: Palette[] = [
-  { key: "marigold_indigo", name: "Marigold & Indigo", brand: true, bg: "#FFF9EF", main: "#2E2A6E", onMain: "#FFFFFF", accent: "#F4A522", onAccent: "#1C1A3A", soft: "#F2C4CB", ink: "#1C1A3A", muted: "#5C5878" },
-  { key: "lali_gurans", name: "Lali Gurans", brand: true, bg: "#FFF8F4", main: "#C0163D", onMain: "#FFFFFF", accent: "#F2B134", onAccent: "#15203B", soft: "#F6D6D9", ink: "#15203B", muted: "#5E5A66" },
-  { key: "himalayan_dusk", name: "Himalayan Dusk", brand: true, bg: "#F6F7FA", main: "#4A2545", onMain: "#FFFFFF", accent: "#F7A072", onAccent: "#4A2545", soft: "#CFE6E4", ink: "#22172A", muted: "#5D5866" },
-  { key: "red_gold", name: "Red & Gold", bg: "#FFF7EC", main: "#8E1B1B", onMain: "#FFFFFF", accent: "#C9A23F", onAccent: "#2B1408", soft: "#F3E3C3", ink: "#2B1408", muted: "#6A5446" },
-  { key: "royal_blue", name: "Royal Blue", bg: "#F5F8FF", main: "#1F3B8C", onMain: "#FFFFFF", accent: "#E0B84A", onAccent: "#111A33", soft: "#DCE5FA", ink: "#111A33", muted: "#4F5A75" },
-  { key: "garden_green", name: "Garden Green", bg: "#F5FAF4", main: "#1F5E3A", onMain: "#FFFFFF", accent: "#E2A93B", onAccent: "#12261A", soft: "#D7ECD9", ink: "#12261A", muted: "#4E6355" },
-  { key: "pastel_party", name: "Pastel Party", bg: "#FFF7FB", main: "#A63D74", onMain: "#FFFFFF", accent: "#6EC6CA", onAccent: "#1F2E33", soft: "#FBE0EC", ink: "#2E1A27", muted: "#6B5563" },
-  { key: "black_white", name: "Black & White", bg: "#FFFFFF", main: "#111111", onMain: "#FFFFFF", accent: "#C9A23F", onAccent: "#111111", soft: "#EFEFEF", ink: "#111111", muted: "#555555" },
-  { key: "pitch_green", name: "Pitch Green", bg: "#F3F7F2", main: "#0F3D2B", onMain: "#FFFFFF", accent: "#F2C230", onAccent: "#0B1F16", soft: "#DCEADF", ink: "#0B1F16", muted: "#4B5E53" },
-  { key: "calm", name: "Calm", bg: "#F4F3F1", main: "#4A4E57", onMain: "#FFFFFF", accent: "#A8A39A", onAccent: "#1F2126", soft: "#E4E1DC", ink: "#2A2C31", muted: "#5C5F66" },
+  // In2Min2's own three (owner's choice, 13 Nov 2026)
+  { key: "marigold_indigo", name: "Marigold & Indigo", family: "In2Min2", bg: "#FFF9EF", main: "#2E2A6E", onMain: "#FFFFFF", accent: "#F4A522", onAccent: "#1C1A3A", soft: "#F7E6C4", ink: "#1C1A3A", muted: "#5C5878" },
+  { key: "lali_gurans", name: "Lali Gurans", family: "In2Min2", bg: "#FFF8F4", main: "#C0163D", onMain: "#FFFFFF", accent: "#F2B134", onAccent: "#15203B", soft: "#F3DCD6", ink: "#15203B", muted: "#5E5A66" },
+  { key: "himalayan_dusk", name: "Himalayan Dusk", family: "In2Min2", bg: "#F6F7FA", main: "#4A2545", onMain: "#FFFFFF", accent: "#F7A072", onAccent: "#4A2545", soft: "#CFE6E4", ink: "#22172A", muted: "#5D5866" },
+  // Formal: regimental days, memorials, corporate, charities, anniversaries
+  { key: "navy_gold", name: "Navy & Gold", family: "Formal", bg: "#FBF8F1", main: "#14213D", onMain: "#FFFFFF", accent: "#C9A23F", onAccent: "#14213D", soft: "#ECE5D3", ink: "#14213D", muted: "#535A6B" },
+  { key: "regimental", name: "Regimental Green", family: "Formal", bg: "#F7F5EE", main: "#1F3A2E", onMain: "#FFFFFF", accent: "#B8973A", onAccent: "#13261D", soft: "#E3E6D8", ink: "#13261D", muted: "#4F5B52" },
+  { key: "black_gold", name: "Black & Gold", family: "Formal", dark: true, bg: "#141414", main: "#D4AF37", onMain: "#141414", accent: "#D4AF37", onAccent: "#141414", soft: "#24211A", ink: "#F3EBD3", muted: "#BDB291" },
+  { key: "burgundy_gold", name: "Burgundy & Gold", family: "Formal", bg: "#FBF6F0", main: "#6B1D2F", onMain: "#FFFFFF", accent: "#C9A23F", onAccent: "#2B0D14", soft: "#EEDFD0", ink: "#2B0D14", muted: "#6A5258" },
+  { key: "charcoal_silver", name: "Charcoal & Silver", family: "Formal", bg: "#F6F6F5", main: "#2E3138", onMain: "#FFFFFF", accent: "#9AA1AC", onAccent: "#15171B", soft: "#E3E4E6", ink: "#1C1E22", muted: "#555A63" },
+  { key: "black_white", name: "Black & White", family: "Formal", bg: "#FFFFFF", main: "#111111", onMain: "#FFFFFF", accent: "#C9A23F", onAccent: "#111111", soft: "#EFEFEF", ink: "#111111", muted: "#555555" },
+  // Nepali and South Asian
+  { key: "red_gold", name: "Red & Gold", family: "Nepali and South Asian", bg: "#FFF7EC", main: "#8E1B1B", onMain: "#FFFFFF", accent: "#C9A23F", onAccent: "#2B1408", soft: "#F3E3C3", ink: "#2B1408", muted: "#6A5446" },
+  { key: "dhaka", name: "Dhaka Red", family: "Nepali and South Asian", bg: "#FFF8F0", main: "#A8201A", onMain: "#FFFFFF", accent: "#E39B2D", onAccent: "#1B1B1B", soft: "#F2E3CF", ink: "#1B1B1B", muted: "#5E534A",
+    party: ["#A8201A", "#1B1B1B", "#E39B2D", "#F2E3CF", "#7A5C2E"] },
+  { key: "saffron", name: "Saffron & Maroon", family: "Nepali and South Asian", bg: "#FFF7EA", main: "#7A1F2B", onMain: "#FFFFFF", accent: "#F08A24", onAccent: "#2A0E12", soft: "#FBE3C1", ink: "#2A0E12", muted: "#6B4F44" },
+  { key: "tihar_night", name: "Tihar Night", family: "Nepali and South Asian", dark: true, bg: "#1E1433", main: "#F4A522", onMain: "#1E1433", accent: "#F26B3A", onAccent: "#1E1433", soft: "#2D2149", ink: "#F8EEDC", muted: "#CBBCDD",
+    gradient: "linear-gradient(160deg, #1E1433 0%, #3A1F5C 55%, #6B2A4A 100%)", party: ["#F4A522", "#F26B3A", "#FFD36E", "#E8E0F5", "#B993F2"] },
+  // Modern
+  { key: "sage_terracotta", name: "Sage & Terracotta", family: "Modern", bg: "#F7F3EC", main: "#4E6B53", onMain: "#FFFFFF", accent: "#AD5230", onAccent: "#FFFFFF", soft: "#E3E8DC", ink: "#23302A", muted: "#56615A" },
+  { key: "ocean", name: "Ocean & Coral", family: "Modern", bg: "#F3F8F9", main: "#0E5A66", onMain: "#FFFFFF", accent: "#FF8366", onAccent: "#1A1F24", soft: "#D6EBEE", ink: "#10262B", muted: "#4B5F64" },
+  { key: "royal_blue", name: "Royal Blue", family: "Modern", bg: "#F5F8FF", main: "#1F3B8C", onMain: "#FFFFFF", accent: "#E0B84A", onAccent: "#111A33", soft: "#DCE5FA", ink: "#111A33", muted: "#4F5A75" },
+  { key: "garden_green", name: "Garden Green", family: "Modern", bg: "#F5FAF4", main: "#1F5E3A", onMain: "#FFFFFF", accent: "#E2A93B", onAccent: "#12261A", soft: "#D7ECD9", ink: "#12261A", muted: "#4E6355" },
+  { key: "lavender_sage", name: "Lavender & Sage", family: "Modern", bg: "#F7F5FB", main: "#5A4A8A", onMain: "#FFFFFF", accent: "#9DB89A", onAccent: "#1F2A1E", soft: "#E6E1F3", ink: "#221B36", muted: "#5D5870" },
+  // Festival colours: blends, like a festival poster
+  { key: "festival_rainbow", name: "Festival Rainbow", family: "Festival colours", bg: "#F3ECDF", main: "#111111", onMain: "#F3ECDF", accent: "#F2B134", onAccent: "#111111", soft: "#E6DCCB", ink: "#111111", muted: "#4A443B",
+    gradient: "linear-gradient(120deg, #7B3FE4 0%, #E6399B 22%, #F5A524 45%, #8BC34A 66%, #2EB5A0 83%, #4FA8F0 100%)", party: ["#7B3FE4", "#E6399B", "#F5A524", "#8BC34A", "#2EB5A0", "#4FA8F0"] },
+  { key: "sunset", name: "Sunset Mela", family: "Festival colours", bg: "#FFF6EC", main: "#5B1E4D", onMain: "#FFFFFF", accent: "#F28C28", onAccent: "#2A0D22", soft: "#FBE2CC", ink: "#2A0D22", muted: "#6A4E5F",
+    gradient: "linear-gradient(135deg, #5B1E4D 0%, #B2365B 35%, #F28C28 70%, #F6C445 100%)", party: ["#5B1E4D", "#B2365B", "#F28C28", "#F6C445", "#FFE7B3"] },
+  { key: "holi", name: "Holi Colours", family: "Festival colours", bg: "#FFFDF8", main: "#2D2A7A", onMain: "#FFFFFF", accent: "#FFC93C", onAccent: "#1D1B4F", soft: "#EEF0FB", ink: "#1D1B4F", muted: "#55537A",
+    gradient: "linear-gradient(120deg, #FF4FA3 0%, #FFC93C 28%, #38C172 52%, #3BA4F5 76%, #8E5CF7 100%)", party: ["#FF4FA3", "#FFC93C", "#38C172", "#3BA4F5", "#8E5CF7"] },
+  { key: "aurora", name: "Northern Lights", family: "Festival colours", dark: true, bg: "#0C1424", main: "#6EE7C8", onMain: "#0C1424", accent: "#A78BFA", onAccent: "#0C1424", soft: "#16223A", ink: "#E8F0FA", muted: "#A3B3CA",
+    gradient: "linear-gradient(150deg, #0C1424 0%, #0E5A66 45%, #3DB89A 75%, #A78BFA 100%)", party: ["#6EE7C8", "#A78BFA", "#3DB89A", "#7DD3FC", "#F0ABFC"] },
+  { key: "confetti_brights", name: "Confetti Brights", family: "Festival colours", bg: "#FFFFFF", main: "#1D4ED8", onMain: "#FFFFFF", accent: "#FACC15", onAccent: "#1A1A1A", soft: "#E8F0FE", ink: "#111827", muted: "#4B5563",
+    gradient: "linear-gradient(90deg, #EF4444, #F59E0B, #FACC15, #22C55E, #3B82F6, #8B5CF6)", party: ["#EF4444", "#F59E0B", "#FACC15", "#22C55E", "#3B82F6", "#8B5CF6"] },
+  // Party
+  { key: "citrus", name: "Citrus Pop", family: "Party", bg: "#FFFBEA", main: "#B93D0B", onMain: "#FFFFFF", accent: "#84CC16", onAccent: "#1A2E05", soft: "#FEF0C3", ink: "#1C1917", muted: "#57534E",
+    party: ["#F97316", "#84CC16", "#FACC15", "#14B8A6", "#B93D0B"] },
+  { key: "pastel_party", name: "Pastel Party", family: "Party", bg: "#FFF7FB", main: "#A63D74", onMain: "#FFFFFF", accent: "#6EC6CA", onAccent: "#1F2E33", soft: "#FBE0EC", ink: "#2E1A27", muted: "#6B5563",
+    party: ["#F9A8D4", "#6EC6CA", "#FDE68A", "#C4B5FD", "#A7F3D0"] },
+  // Sport
+  { key: "pitch_green", name: "Pitch Green", family: "Sport", bg: "#F3F7F2", main: "#0F3D2B", onMain: "#FFFFFF", accent: "#F2C230", onAccent: "#0B1F16", soft: "#DCEADF", ink: "#0B1F16", muted: "#4B5E53" },
+  { key: "team_red", name: "Team Red & Black", family: "Sport", bg: "#F7F7F7", main: "#B91C1C", onMain: "#FFFFFF", accent: "#111111", onAccent: "#FFFFFF", soft: "#E7E7E7", ink: "#111111", muted: "#4B4B4B" },
+  { key: "stadium_night", name: "Stadium Night", family: "Sport", dark: true, bg: "#0B132B", main: "#FACC15", onMain: "#0B132B", accent: "#38BDF8", onAccent: "#0B132B", soft: "#1C2541", ink: "#F1F5F9", muted: "#A9B4C8",
+    gradient: "linear-gradient(160deg, #0B132B 0%, #1C2541 60%, #3A506B 100%)" },
+  // Calm: memorials and quiet occasions
+  { key: "calm", name: "Calm Grey", family: "Calm", bg: "#F4F3F1", main: "#4A4E57", onMain: "#FFFFFF", accent: "#A8A39A", onAccent: "#1F2126", soft: "#E4E1DC", ink: "#2A2C31", muted: "#5C5F66" },
+  { key: "lily", name: "Lily White & Sage", family: "Calm", bg: "#FFFFFF", main: "#47604F", onMain: "#FFFFFF", accent: "#B9C7B5", onAccent: "#1D2A21", soft: "#EEF2EC", ink: "#1D2A21", muted: "#56645A" },
 ];
+
+export const PALETTE_FAMILIES: PaletteFamily[] = ["In2Min2", "Formal", "Nepali and South Asian", "Modern", "Festival colours", "Party", "Sport", "Calm"];
 
 function luminance(hex: string): number {
   const n = hex.replace("#", "");
@@ -265,6 +308,12 @@ export function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+// Colours for confetti, balloons and bunting: the palette's own, or a set
+// made from its main colours.
+export function partyColours(p: Palette): string[] {
+  return p.party ?? [p.main, p.accent, p.soft === p.bg ? p.muted : p.muted, p.ink === p.main ? p.accent : p.ink, p.accent];
+}
+
 // The host's own colour: build a full palette round it, picking white or dark
 // text automatically so everything stays readable.
 export function paletteFor(key: string, customColor?: string): Palette {
@@ -273,30 +322,55 @@ export function paletteFor(key: string, customColor?: string): Palette {
   const main = customColor && /^#[0-9A-Fa-f]{6}$/.test(customColor) ? customColor : PALETTES[0].main;
   const ink = "#1C1A1F";
   const onMain = contrast("#FFFFFF", main) >= contrast(ink, main) ? "#FFFFFF" : ink;
-  return { key: "custom", name: "Your own colour", bg: "#FFFFFF", main, onMain, accent: main, onAccent: onMain,
+  return { key: "custom", name: "Your own colour", family: "Modern", bg: "#FFFFFF", main, onMain, accent: main, onAccent: onMain,
     soft: "#F1F0EE", ink, muted: "#5B5962" };
 }
 
 export const TEMPLATES: { key: Template; name: string; line: string }[] = [
-  { key: "classic", name: "Classic", line: "Centred, framed, traditional" },
-  { key: "modern", name: "Modern", line: "Big words, clean lines" },
-  { key: "festive", name: "Festive", line: "Garland borders, warm and bright" },
-  { key: "sport", name: "Sport", line: "Bold stripes, poster lettering" },
+  { key: "classic", name: "Classic", line: "Centred and traditional" },
+  { key: "modern", name: "Modern", line: "Left-aligned, a bold colour band" },
+  { key: "festive", name: "Festive", line: "Centred, with a bright label" },
+  { key: "sport", name: "Poster", line: "Big capitals, left-aligned" },
 ];
 
-// Font CSS variables are set in app/fonts.ts.
-export const TEXT_STYLES: { key: TextStyle; name: string; feel: string; display: string; body: string }[] = [
+// Fonts for every script the AI writes in, in each text style. A browser uses
+// the first font in the list that has the letter, so Nepali, Hindi, Punjabi,
+// Gujarati, Bengali and Tamil each get a matching font, and only the fonts an
+// event actually uses are downloaded. Font variables: components/event/fonts.ts.
+const SCRIPTS_SANS = "var(--f-noto-sans-deva), var(--f-noto-sans-guru), var(--f-noto-sans-gujr), var(--f-noto-sans-beng), var(--f-noto-sans-taml)";
+const SCRIPTS_SERIF = "var(--f-noto-serif-deva), var(--f-noto-serif-guru), var(--f-noto-serif-gujr), var(--f-noto-serif-beng), var(--f-noto-serif-taml)";
+const SCRIPTS_TIRO = "var(--f-tiro-deva), var(--f-tiro-guru), var(--f-noto-serif-gujr), var(--f-tiro-beng), var(--f-tiro-taml)";
+const SCRIPTS_MUKTA = "var(--f-mukta), var(--f-mukta-guru), var(--f-mukta-gujr), var(--f-hind-beng), var(--f-mukta-taml)";
+const SCRIPTS_BALOO = "var(--f-baloo), var(--f-baloo-guru), var(--f-baloo-gujr), var(--f-baloo-beng), var(--f-baloo-taml)";
+
+export type TextStyleDef = { key: TextStyle; name: string; feel: string; display: string; body: string };
+
+export const TEXT_STYLES: TextStyleDef[] = [
+  { key: "classic", name: "Classic", feel: "Traditional serif, for anything",
+    display: `var(--f-playfair), ${SCRIPTS_TIRO}, Georgia, serif`, body: `var(--f-inter), ${SCRIPTS_SANS}, system-ui, sans-serif` },
+  { key: "formal", name: "Formal", feel: "Engraved capitals: regimental, memorial, corporate",
+    display: `var(--f-cinzel), ${SCRIPTS_TIRO}, Georgia, serif`, body: `var(--f-lora), ${SCRIPTS_SERIF}, Georgia, serif` },
+  { key: "elegant", name: "Elegant", feel: "Light italic serif",
+    display: `var(--f-cormorant), ${SCRIPTS_SERIF}, Georgia, serif`, body: `var(--f-cormorant), ${SCRIPTS_SERIF}, Georgia, serif` },
+  { key: "calligraphy", name: "Calligraphy", feel: "Flowing script for weddings",
+    display: `var(--f-great-vibes), var(--f-amita), ${SCRIPTS_SERIF}, cursive`, body: `var(--f-cormorant), ${SCRIPTS_SERIF}, Georgia, serif` },
+  { key: "heritage", name: "Heritage", feel: "Bold, beautiful Nepali and Hindi headlines",
+    display: `var(--f-rozha), ${SCRIPTS_TIRO}, Georgia, serif`, body: `${SCRIPTS_MUKTA}, system-ui, sans-serif` },
+  { key: "contemporary", name: "Contemporary", feel: "Soft modern serif",
+    display: `var(--f-fraunces), ${SCRIPTS_SERIF}, Georgia, serif`, body: `var(--f-inter), ${SCRIPTS_SANS}, system-ui, sans-serif` },
   { key: "clean", name: "Clean", feel: "Plain and modern",
-    display: "var(--f-inter), var(--f-noto-sans-deva), system-ui, sans-serif", body: "var(--f-inter), var(--f-noto-sans-deva), system-ui, sans-serif" },
-  { key: "classic", name: "Classic", feel: "Traditional serif",
-    display: "var(--f-playfair), var(--f-noto-serif-deva), Georgia, serif", body: "var(--f-inter), var(--f-noto-sans-deva), system-ui, sans-serif" },
-  { key: "elegant", name: "Elegant", feel: "Light and graceful",
-    display: "var(--f-cormorant), var(--f-noto-serif-deva), Georgia, serif", body: "var(--f-cormorant), var(--f-noto-serif-deva), Georgia, serif" },
-  { key: "calligraphy", name: "Calligraphy", feel: "Script headline for weddings",
-    display: "var(--f-great-vibes), var(--f-kalam), cursive", body: "var(--f-cormorant), var(--f-noto-serif-deva), Georgia, serif" },
-  { key: "bold", name: "Bold", feel: "Poster lettering for sport and melas",
-    display: "var(--f-bebas), var(--f-mukta), Impact, sans-serif", body: "var(--f-mukta), system-ui, sans-serif" },
+    display: `var(--f-inter), ${SCRIPTS_SANS}, system-ui, sans-serif`, body: `var(--f-inter), ${SCRIPTS_SANS}, system-ui, sans-serif` },
+  { key: "bold", name: "Poster", feel: "Tall poster capitals for sport and melas",
+    display: `var(--f-bebas), ${SCRIPTS_MUKTA}, Impact, sans-serif`, body: `${SCRIPTS_MUKTA}, system-ui, sans-serif` },
+  { key: "playful", name: "Playful", feel: "Round and friendly, for children",
+    display: `${SCRIPTS_BALOO}, system-ui, sans-serif`, body: `${SCRIPTS_BALOO}, system-ui, sans-serif` },
+  { key: "handwritten", name: "Handwritten", feel: "Like a note from a friend",
+    display: `var(--f-caveat), var(--f-kalam), ${SCRIPTS_SANS}, cursive`, body: `${SCRIPTS_MUKTA}, system-ui, sans-serif` },
 ];
+
+export function textStyle(key: string): TextStyleDef {
+  return TEXT_STYLES.find((t) => t.key === key) ?? TEXT_STYLES[0];
+}
 
 export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [
   { key: "hero", name: "Hero", line: "The photo fills the top" },
@@ -305,19 +379,46 @@ export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [
   { key: "split", name: "Split", line: "Photo on one side, words on the other" },
 ];
 
+// Borders and decorations, drawn in code (components/event/borders.tsx) so
+// In2Min2 owns them outright and they take the event's colours.
+export type BorderKey =
+  | "none" | "fine_line" | "ornate" | "art_deco" | "laurel" | "floral" | "vines" | "marigold" | "dhaka" | "mandala"
+  | "balloons" | "confetti" | "bunting" | "stars" | "sunburst" | "rainbow" | "stripes" | "pitch";
+
+export const BORDERS: { key: BorderKey; name: string; line: string }[] = [
+  { key: "none", name: "Plain", line: "No border: let the words speak" },
+  { key: "fine_line", name: "Fine lines", line: "A thin double frame: formal and quiet" },
+  { key: "ornate", name: "Ornate scrolls", line: "Curled corners, like an engraved card" },
+  { key: "art_deco", name: "Art Deco", line: "Gold fans and steps: galas and anniversaries" },
+  { key: "laurel", name: "Laurel", line: "A laurel wreath: regiments, awards, remembrance" },
+  { key: "floral", name: "Flowers", line: "Flower sprays in the corners" },
+  { key: "vines", name: "Leafy vine", line: "A vine of many-coloured leaves" },
+  { key: "marigold", name: "Marigold garland", line: "Swags of marigolds, as at Tihar and weddings" },
+  { key: "dhaka", name: "Dhaka pattern", line: "Bands inspired by Nepali dhaka cloth" },
+  { key: "mandala", name: "Lotus & mandala", line: "Petal rings for pujas and ceremonies" },
+  { key: "balloons", name: "Balloons", line: "Balloon bunches for birthdays" },
+  { key: "confetti", name: "Confetti", line: "A shower of colour for parties" },
+  { key: "bunting", name: "Bunting", line: "Flags across the top: fêtes, melas, sport" },
+  { key: "stars", name: "Stars", line: "Stars and sparkles" },
+  { key: "sunburst", name: "Sunburst", line: "Rays behind the photo, like a festival poster" },
+  { key: "rainbow", name: "Festival frame", line: "A bold frame in a colour blend" },
+  { key: "stripes", name: "Sport stripes", line: "Diagonal stripes, top and bottom" },
+  { key: "pitch", name: "Pitch lines", line: "Football pitch markings" },
+];
+
 // ─────────────────────────────── Languages ───────────────────────────────
 
-export const LANGUAGES: { code: string; name: string; native: string; ready: boolean; ai: string }[] = [
-  { code: "en", name: "English", native: "English", ready: true, ai: "British English" },
-  { code: "ne", name: "Nepali", native: "नेपाली", ready: true, ai: "Nepali in Devanagari script" },
-  { code: "ne-Latn", name: "Nepali in English letters", native: "Nepali (Roman)", ready: true, ai: "Nepali written in English (Roman) letters" },
-  { code: "hi", name: "Hindi", native: "हिन्दी", ready: false, ai: "Hindi in Devanagari script" },
-  { code: "pa", name: "Punjabi", native: "ਪੰਜਾਬੀ", ready: false, ai: "Punjabi in Gurmukhi script" },
-  { code: "gu", name: "Gujarati", native: "ગુજરાતી", ready: false, ai: "Gujarati" },
-  { code: "bn", name: "Bengali", native: "বাংলা", ready: false, ai: "Bengali" },
-  { code: "ta", name: "Tamil", native: "தமிழ்", ready: false, ai: "Tamil" },
-  { code: "tl", name: "Tagalog (Filipino)", native: "Tagalog", ready: false, ai: "Tagalog (Filipino)" },
-  { code: "pl", name: "Polish", native: "Polski", ready: false, ai: "Polish" },
+export const LANGUAGES: { code: string; name: string; native: string; ready: boolean; ai: string; sample: string }[] = [
+  { code: "en", name: "English", native: "English", ready: true, ai: "British English", sample: "Aa" },
+  { code: "ne", name: "Nepali", native: "नेपाली", ready: true, ai: "Nepali in Devanagari script", sample: "अ" },
+  { code: "ne-Latn", name: "Nepali in English letters", native: "Nepali (Roman)", ready: true, ai: "Nepali written in English (Roman) letters", sample: "Aa" },
+  { code: "hi", name: "Hindi", native: "हिन्दी", ready: false, ai: "Hindi in Devanagari script", sample: "अ" },
+  { code: "pa", name: "Punjabi", native: "ਪੰਜਾਬੀ", ready: false, ai: "Punjabi in Gurmukhi script", sample: "ਅ" },
+  { code: "gu", name: "Gujarati", native: "ગુજરાતી", ready: false, ai: "Gujarati", sample: "અ" },
+  { code: "bn", name: "Bengali", native: "বাংলা", ready: false, ai: "Bengali", sample: "অ" },
+  { code: "ta", name: "Tamil", native: "தமிழ்", ready: false, ai: "Tamil", sample: "அ" },
+  { code: "tl", name: "Tagalog (Filipino)", native: "Tagalog", ready: false, ai: "Tagalog (Filipino)", sample: "Aa" },
+  { code: "pl", name: "Polish", native: "Polski", ready: false, ai: "Polish", sample: "Ąa" },
 ];
 
 export function language(code: string | undefined) {
