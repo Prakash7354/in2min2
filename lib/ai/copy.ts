@@ -42,7 +42,14 @@ export type CopyRequest = {
   dateAndVenue: string;
   languageMix: string;
   tone: string;
+  // Optional: a second language to write the same five boxes in (the page
+  // shows both), and extra facts such as the family to honour or parking.
+  secondLanguage?: string;
+  details?: string;
 };
+
+// The reply: the five boxes, plus the same five in the second language if one was asked for.
+export type CopyResponse = EventCopy & { translation?: EventCopy };
 
 // Character count as people (and Postgres char_length) see it, so an emoji or
 // a Devanagari letter counts once rather than as two UTF-16 units.

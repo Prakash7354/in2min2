@@ -21,16 +21,9 @@ Change `[ ]` to `[x]` when you finish a step, or just tell Claude Code it's done
 
 ## This week: free, about 45 minutes in all
 
-### [ ] 1. Answer six questions (5 minutes)
+### [x] 1. Answer six questions
 
-Reply in the chat with your answers, for example: *"1 yes, 2 yes, 3 yes, 4 network first, 5 A, 6 yes"*. The reasons are in `docs/CONCEPT.md`, sections 5 and 18d.
-
-1. **People included:** 200 on Pop-Up, 300 on Season, 400 on Half-Year, 500 on Keepsake? (Recommended: yes)
-2. **Discounts:** the same event next year 30% off; a different event within 12 months 20% off; applied automatically, never added together; keeping the guest list for next year free? (Recommended: yes)
-3. **Grace:** allow guests' replies up to 10% over the limit before they pause? (Recommended: yes)
-4. **`LAUNCH50`:** share it only with your network, or also publicly with "places left"? (Recommended: your network first)
-5. **Colours:** A, B or C? Look at the options here: https://claude.ai/artifact/3JA1Qkc6JzKqpjMoQwCP2v (Recommended: A, Marigold & Indigo)
-6. **Supabase:** stay on the free plan, with our own nightly backups, until the first community event takes money or income passes £25 a month? (Recommended: yes)
+Done 13 November: colours A (Marigold & Indigo) for In2Min2, with all three offered to hosts; "Yes" to the other five recommendations (200/300/400/500 people, 30% and 20% returning discounts, 10% grace, `LAUNCH50` to your network first, Supabase free plan with nightly backups). Say if any of those should change.
 
 ### [ ] 2. Switch on two-step sign-in (15 minutes)
 
@@ -137,7 +130,7 @@ You asked how to avoid paying for Supabase Pro ($25 a month) before there's inco
 
 ### [ ] 12. Design the logo, by mid-December (the website needs it in early January)
 
-What it needs is at the bottom of the colours page (question 5): a full logo, a square icon, a one-colour version, and SVG or PNG files. Put the files in the project's `public/brand/` folder, or send them in the chat.
+Use colours A, Marigold & Indigo: indigo `#2E2A6E`, marigold `#F4A522`, soft rose `#F2C4CB`, cream `#FFF9EF`, ink `#1C1A3A`. What it needs is at the bottom of the colours page (https://claude.ai/artifact/3JA1Qkc6JzKqpjMoQwCP2v): a full logo, a square icon, a one-colour version, and SVG or PNG files. Put the files in the project's `public/brand/` folder, or send them in the chat.
 
 ---
 

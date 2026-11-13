@@ -100,9 +100,13 @@ await expectError("three languages rejected", `update events set languages = '{e
 await expectError("badly written language code rejected", `update events set languages = '{EN}' where id = '${ev.id}'`, /check constraint/);
 await expectError("second-language headline over 45 chars rejected", `update events set copy_translations = '{"ne": {"card_headline": "${"क".repeat(46)}"}}' where id = '${ev.id}'`, /check constraint/);
 await expectError("unknown text style rejected", `update events set text_style = 'comic-sans' where id = '${ev.id}'`, /check constraint/);
+ok("a new event starts in the Marigold & Indigo palette", (await q(`select palette from events where id = $1`, [ev.id]))[0].palette === "marigold_indigo");
+await q(`update events set palette = 'lali_gurans' where id = $1`, [ev.id]);
+ok("host picks another palette", (await q(`select palette from events where id = $1`, [ev.id]))[0].palette === "lali_gurans");
+await expectError("a badly written palette name is rejected", `update events set palette = 'Red!' where id = '${ev.id}'`, /check constraint/);
 await q(`update events set text_style = 'calligraphy', photo_style = 'arch' where id = $1`, [ev.id]);
 const [st2] = await q(`select event_settings($1) as s`, [ev.id]);
-ok("settings carry scale, languages and styles", st2.s.scale === "celebration" && st2.s.languages[0] === "ne" && st2.s.theme_config.text_style === "calligraphy");
+ok("settings carry scale, languages, palette and styles", st2.s.scale === "celebration" && st2.s.languages[0] === "ne" && st2.s.theme_config.text_style === "calligraphy" && st2.s.theme_config.palette === "lali_gurans");
 
 console.log("The stars and the honoured family:");
 await q(`insert into event_people (event_id, role, relation, names, sort_order) values
@@ -164,6 +168,7 @@ ok("public page never includes guest list", !JSON.stringify(pe.p).includes("asha
 ok("invite-only Mehndi hidden from public", pe.p.sub_events.length === 1 && pe.p.sub_events[0].title === "Ceremony");
 ok("thank-you hidden before the event", pe.p.event.post_event_thank_you === null);
 ok("second-language thank-you hidden before the event too", pe.p.event.translations.en.card_headline === "Meenu & Jose" && !("post_event_thank_you" in pe.p.event.translations.en));
+ok("the public page carries the palette", pe.p.event.palette === "lali_gurans");
 ok("stars shown first, then the honoured family", pe.p.people.length === 2 && pe.p.people[0].role === "star" && pe.p.people[1].relation === "Parents");
 await expectError("anon cannot read event_people directly", `select * from event_people`, /permission denied/);
 [pe] = await q(`select public_event('wedding','meenu-jose', $1) as p`, [g1.invite_token]);

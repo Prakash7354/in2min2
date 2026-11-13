@@ -1,29 +1,21 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { fontVariables } from "./fonts";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import "@/components/event/event-view.css";
 
 export const metadata: Metadata = {
   title: "In2Min2",
-  description: "Event pages, invitations, RSVPs and photo walls, ready in two minutes.",
+  description: "Your event online in two minutes, from invitation to memory book, on one link.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#FFF9EF",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en-GB" className={`${fontVariables} h-full antialiased`}>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }

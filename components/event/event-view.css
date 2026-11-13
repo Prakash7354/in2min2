@@ -1,0 +1,510 @@
+/* Event page styles. Every class starts with ev- so nothing clashes with the
+   rest of the app (plain CSS: the project's Tailwind loader handles every .css
+   file as global). An event page drawn at any size. Everything is measured in container
+   units (cqi = 1% of the frame's width), capped in pixels, so a thumbnail in
+   the builder is an exact small copy of the full page on a phone. */
+
+.ev-frame {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.ev-root {
+  --u: 1cqi;
+  background: var(--ev-bg);
+  color: var(--ev-ink);
+  font-family: var(--ev-body);
+  font-size: min(calc(var(--u) * 4.3), 18px);
+  line-height: 1.5;
+  overflow: hidden;
+  position: relative;
+}
+
+.ev-root * {
+  box-sizing: border-box;
+}
+
+.ev-second {
+  display: block;
+  color: var(--ev-muted);
+  font-size: 0.92em;
+  margin-top: 0.35em;
+}
+
+/* ── Decorations by template ── */
+.ev-deco {
+  height: min(calc(var(--u) * 3.2), 16px);
+  width: 100%;
+}
+.ev-root[data-template="festive"] .ev-deco {
+  background:
+    radial-gradient(circle at 50% 100%, var(--ev-accent) 0 38%, transparent 40%) 0 0 / min(calc(var(--u) * 5), 24px) 100%,
+    linear-gradient(var(--ev-main), var(--ev-main)) 0 0 / 100% 30% no-repeat;
+}
+.ev-root[data-template="festive"] .ev-decoBottom {
+  transform: scaleY(-1);
+}
+.ev-root[data-template="sport"] .ev-deco {
+  height: min(calc(var(--u) * 4), 18px);
+  background: repeating-linear-gradient(-55deg, var(--ev-main) 0 min(calc(var(--u) * 3), 14px), var(--ev-accent) 0 min(calc(var(--u) * 4.4), 20px));
+}
+.ev-root[data-template="classic"] .ev-deco,
+.ev-root[data-template="modern"] .ev-deco {
+  display: none;
+}
+
+/* ── Invitation card ── */
+.ev-card {
+  margin: min(calc(var(--u) * 5), 28px);
+  background: var(--ev-bg);
+  border-radius: min(calc(var(--u) * 3), 16px);
+  padding: min(calc(var(--u) * 7), 40px) min(calc(var(--u) * 6), 32px);
+  display: grid;
+  gap: min(calc(var(--u) * 2.6), 14px);
+  justify-items: center;
+  text-align: center;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ev-ink) 8%, transparent), 0 min(calc(var(--u) * 3), 16px) min(calc(var(--u) * 8), 40px) -12px color-mix(in srgb, var(--ev-ink) 30%, transparent);
+}
+.ev-cardWrap {
+  background: var(--ev-soft);
+  padding-block: min(calc(var(--u) * 2), 10px);
+}
+.ev-root[data-template="classic"] .ev-card {
+  outline: min(calc(var(--u) * 0.9), 4px) double var(--ev-accent);
+  outline-offset: calc(min(calc(var(--u) * 2.2), 12px) * -1);
+}
+.ev-root[data-template="modern"] .ev-card,
+.ev-root[data-template="sport"] .ev-card {
+  justify-items: start;
+  text-align: left;
+}
+
+.ev-kicker {
+  font-size: 0.78em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ev-muted);
+  font-weight: 600;
+}
+.ev-headline {
+  font-family: var(--ev-display);
+  color: var(--ev-main);
+  font-size: min(calc(var(--u) * 10), 56px);
+  line-height: 1.08;
+  font-weight: 700;
+  margin: 0;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.ev-root[data-text="calligraphy"] .ev-headline {
+  font-weight: 400;
+  font-size: min(calc(var(--u) * 12.5), 68px);
+  line-height: 1.15;
+}
+.ev-root[data-text="bold"] .ev-headline {
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-size: min(calc(var(--u) * 12), 64px);
+  line-height: 1;
+}
+.ev-root[data-template="sport"] .ev-headline {
+  text-transform: uppercase;
+}
+.ev-root[data-text="elegant"] .ev-headline {
+  font-weight: 500;
+  font-style: italic;
+}
+.ev-headlineSecond {
+  display: block;
+  font-family: var(--ev-body);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.42em;
+  color: var(--ev-muted);
+  margin-top: 0.3em;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.ev-body {
+  max-width: 34em;
+  margin: 0;
+  white-space: pre-line;
+}
+.ev-when {
+  font-weight: 700;
+  color: var(--ev-ink);
+  margin: 0;
+}
+.ev-where {
+  color: var(--ev-muted);
+  margin: 0;
+}
+.ev-blessing {
+  font-size: 0.86em;
+  color: var(--ev-muted);
+  margin: 0;
+}
+.ev-blessing strong {
+  color: var(--ev-ink);
+  font-weight: 600;
+}
+
+.ev-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  border-radius: 999px;
+  padding: 0.6em 1.3em;
+  font-weight: 700;
+  font-size: 0.95em;
+  background: var(--ev-main);
+  color: var(--ev-on-main);
+  border: 0;
+  font-family: var(--ev-body);
+  text-decoration: none;
+  line-height: 1.2;
+}
+.ev-btnAccent {
+  background: var(--ev-accent);
+  color: var(--ev-on-accent);
+}
+.ev-btnGhost {
+  background: transparent;
+  color: var(--ev-main);
+  box-shadow: inset 0 0 0 2px var(--ev-main);
+}
+.ev-btnBig {
+  font-size: 1.1em;
+  padding: 0.85em 1.6em;
+  width: 100%;
+}
+
+/* ── Photo styles ── */
+.ev-photo {
+  position: relative;
+  overflow: hidden;
+  background: var(--ev-soft);
+  display: grid;
+  place-items: center;
+}
+.ev-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ev-root[data-motion="on"] .ev-photo img {
+  animation: slowZoom 18s ease-out both;
+}
+@keyframes slowZoom {
+  from { transform: scale(1.08); }
+  to { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-root[data-motion="on"] .ev-photo img { animation: none; }
+}
+.ev-mono {
+  font-family: var(--ev-display);
+  color: var(--ev-main);
+  font-size: min(calc(var(--u) * 12), 64px);
+  opacity: 0.55;
+  letter-spacing: 0.04em;
+}
+.ev-photoHero {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+}
+.ev-photoArch {
+  width: 58%;
+  aspect-ratio: 3 / 4;
+  border-radius: 999px 999px min(calc(var(--u) * 2), 10px) min(calc(var(--u) * 2), 10px);
+  box-shadow: 0 0 0 min(calc(var(--u) * 1.2), 6px) var(--ev-bg), 0 0 0 min(calc(var(--u) * 1.8), 9px) var(--ev-accent);
+}
+.ev-polaroids {
+  position: relative;
+  width: 62%;
+  aspect-ratio: 1 / 1.08;
+  margin-block: min(calc(var(--u) * 2), 10px);
+}
+.ev-polaroid {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  padding: 6% 6% 18%;
+  box-shadow: 0 min(calc(var(--u) * 1.2), 6px) min(calc(var(--u) * 3.6), 18px) -6px rgba(0, 0, 0, 0.35);
+}
+.ev-polaroid .ev-photo {
+  width: 100%;
+  height: 100%;
+}
+.ev-polaroid:nth-child(1) { transform: rotate(-8deg) translate(-8%, 2%); }
+.ev-polaroid:nth-child(2) { transform: rotate(6deg) translate(8%, 0); }
+.ev-polaroid:nth-child(3) { transform: rotate(-1.5deg); }
+.ev-polaroid:nth-child(1) .ev-photo,
+.ev-polaroid:nth-child(2) .ev-photo { background: var(--ev-soft); }
+.ev-photoSplit {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: min(calc(var(--u) * 2.4), 12px);
+}
+
+/* ── Event page ── */
+.ev-hero {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: min(calc(var(--u) * 2.6), 14px);
+  padding: min(calc(var(--u) * 6), 36px) min(calc(var(--u) * 6), 36px) min(calc(var(--u) * 7), 40px);
+}
+.ev-hero[data-photo="hero"] {
+  padding-top: 0;
+}
+.ev-hero[data-photo="hero"] .ev-photoHero {
+  margin-inline: calc(min(calc(var(--u) * 6), 36px) * -1);
+  width: calc(100% + 2 * min(calc(var(--u) * 6), 36px));
+  margin-bottom: min(calc(var(--u) * 2), 10px);
+}
+.ev-root[data-template="modern"] .ev-hero,
+.ev-root[data-template="sport"] .ev-hero {
+  justify-items: start;
+  text-align: left;
+}
+.ev-root[data-template="modern"] .ev-heroBand {
+  background: var(--ev-main);
+  color: var(--ev-on-main);
+}
+.ev-root[data-template="modern"] .ev-heroBand .ev-headline,
+.ev-root[data-template="modern"] .ev-heroBand .ev-when {
+  color: var(--ev-on-main);
+}
+.ev-root[data-template="modern"] .ev-heroBand .ev-kicker,
+.ev-root[data-template="modern"] .ev-heroBand .ev-headlineSecond,
+.ev-root[data-template="modern"] .ev-heroBand .ev-where {
+  color: color-mix(in srgb, var(--ev-on-main) 82%, transparent);
+}
+.ev-root[data-template="modern"] .ev-heroBand .ev-chip {
+  background: color-mix(in srgb, var(--ev-on-main) 16%, transparent);
+  color: var(--ev-on-main);
+}
+.ev-splitGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: min(calc(var(--u) * 5), 32px);
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  justify-items: start;
+}
+.ev-splitText {
+  display: grid;
+  gap: min(calc(var(--u) * 2.4), 12px);
+  justify-items: start;
+  min-width: 0;
+}
+.ev-chip {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.25em 0.9em;
+  background: var(--ev-soft);
+  color: var(--ev-ink);
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+.ev-section {
+  padding: min(calc(var(--u) * 6), 32px) min(calc(var(--u) * 6), 36px);
+  display: grid;
+  gap: min(calc(var(--u) * 2.4), 12px);
+  border-top: 1px solid color-mix(in srgb, var(--ev-ink) 10%, transparent);
+}
+.ev-sectionTitle {
+  font-family: var(--ev-display);
+  color: var(--ev-main);
+  font-size: min(calc(var(--u) * 6), 30px);
+  line-height: 1.15;
+  margin: 0;
+  font-weight: 700;
+}
+.ev-root[data-text="calligraphy"] .ev-sectionTitle {
+  font-family: var(--ev-body);
+  font-weight: 600;
+}
+.ev-root[data-text="bold"] .ev-sectionTitle {
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+.ev-story p {
+  margin: 0 0 0.8em;
+}
+.ev-storySecond {
+  padding-top: 0.6em;
+  border-top: 1px dashed color-mix(in srgb, var(--ev-ink) 15%, transparent);
+  color: var(--ev-muted);
+}
+.ev-people {
+  display: grid;
+  gap: min(calc(var(--u) * 2), 10px);
+}
+.ev-person {
+  display: grid;
+  gap: 0.1em;
+}
+.ev-relation {
+  font-size: 0.78em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ev-muted);
+  font-weight: 600;
+}
+.ev-names {
+  font-weight: 600;
+  font-size: 1.05em;
+}
+.ev-facts {
+  display: grid;
+  gap: min(calc(var(--u) * 3), 14px);
+}
+.ev-fact {
+  display: grid;
+  grid-template-columns: min(calc(var(--u) * 7), 32px) 1fr;
+  gap: min(calc(var(--u) * 2.4), 12px);
+  align-items: start;
+}
+.ev-icon {
+  width: min(calc(var(--u) * 7), 32px);
+  height: min(calc(var(--u) * 7), 32px);
+  border-radius: 50%;
+  background: var(--ev-soft);
+  color: var(--ev-main);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.85em;
+}
+.ev-icon svg {
+  width: 55%;
+  height: 55%;
+}
+.ev-factMain {
+  font-weight: 600;
+}
+.ev-factSub {
+  color: var(--ev-muted);
+  font-size: 0.92em;
+}
+.ev-schedule {
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ev-schedule li {
+  display: grid;
+  grid-template-columns: 5.4em 1fr;
+  gap: min(calc(var(--u) * 3), 14px);
+  padding: 0.65em 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--ev-ink) 8%, transparent);
+}
+.ev-schedule li:last-child {
+  border-bottom: 0;
+}
+.ev-schedTime {
+  font-weight: 700;
+  color: var(--ev-main);
+  font-variant-numeric: tabular-nums;
+  display: grid;
+  align-content: start;
+}
+.ev-schedDay {
+  font-weight: 500;
+  font-size: 0.8em;
+  color: var(--ev-muted);
+}
+.ev-now {
+  background: var(--ev-soft);
+  border-radius: 0.6em;
+  padding-inline: 0.6em;
+}
+.ev-note {
+  background: var(--ev-soft);
+  border-radius: min(calc(var(--u) * 2.4), 12px);
+  padding: 0.9em 1.1em;
+  margin: 0;
+}
+.ev-rsvpRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6em;
+}
+.ev-banner {
+  background: var(--ev-main);
+  color: var(--ev-on-main);
+  text-align: center;
+  padding: 0.7em 1em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.ev-wall {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: min(calc(var(--u) * 1.4), 8px);
+}
+.ev-wall span {
+  aspect-ratio: 1;
+  border-radius: min(calc(var(--u) * 1.6), 8px);
+  background: var(--ev-soft);
+}
+.ev-wall span:nth-child(3n + 2) {
+  background: color-mix(in srgb, var(--ev-accent) 35%, var(--ev-soft));
+}
+.ev-muted {
+  color: var(--ev-muted);
+  margin: 0;
+}
+.ev-footer {
+  padding: min(calc(var(--u) * 5), 28px) min(calc(var(--u) * 6), 36px) min(calc(var(--u) * 7), 40px);
+  display: grid;
+  gap: 0.6em;
+  justify-items: center;
+  text-align: center;
+  font-size: 0.85em;
+  color: var(--ev-muted);
+  border-top: 1px solid color-mix(in srgb, var(--ev-ink) 10%, transparent);
+}
+.ev-made {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  border-radius: 999px;
+  padding: 0.3em 0.9em;
+  background: #2E2A6E;
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.85em;
+  font-family: var(--f-mukta), system-ui, sans-serif;
+}
+.ev-made i {
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: #F4A522;
+}
+.ev-demo {
+  position: absolute;
+  top: min(calc(var(--u) * 3), 14px);
+  right: min(calc(var(--u) * 3), 14px);
+  z-index: 2;
+  background: #1C1A3A;
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.25em 0.7em;
+  border-radius: 999px;
+}
+.ev-placeholder {
+  opacity: 0.55;
+}

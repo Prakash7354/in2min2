@@ -1,26 +1,54 @@
 @import "tailwindcss";
 
+/* In2Min2's own colours: option A, Marigold & Indigo (owner's choice, 13 Nov 2026).
+   Event pages use their own palettes (lib/catalog.ts); these are for the
+   website, builder and dashboard only. Every text pair passes WCAG AA. */
+@theme {
+  --color-brand: #2E2A6E;      /* indigo: logo, headings, links, selected */
+  --color-brand-deep: #221F55;
+  --color-marigold: #F4A522;   /* highlight: the main button (with ink text) */
+  --color-marigold-deep: #E0901A;
+  --color-rose: #F2C4CB;       /* gentle panels */
+  --color-cream: #FFF9EF;      /* background */
+  --color-card: #FFFFFF;
+  --color-ink: #1C1A3A;        /* text */
+  --color-muted: #5C5878;      /* secondary text */
+  --color-line: #EADFCB;       /* borders */
+  --color-wash: #F6EEDD;       /* quiet fills */
+
+  --font-display: var(--f-bricolage), "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-sans: var(--f-mukta), "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

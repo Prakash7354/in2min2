@@ -18,7 +18,7 @@ npm run dev                   # http://localhost:3000
 | --- | --- |
 | `npm run dev` | Local development server |
 | `npm run typecheck` / `npm run lint` | Checks |
-| `npm run test:db` | Runs every migration on a real Postgres (PGlite) and checks each role's access |
+| `npm run test:db` | Runs every migration on a real Postgres (PGlite) and checks each role's access; checks the builder's catalogue matches the database |
 | `npm run preview` | Builds for Cloudflare and runs it locally in the Workers runtime |
 | `npm run deploy` | Builds and deploys to Cloudflare from this Mac |
 
@@ -26,8 +26,14 @@ npm run dev                   # http://localhost:3000
 
 ```
 app/                      Next.js pages and API routes
-  api/generate-copy/      AI writer (Gemini, strict JSON)
-  builder/                AI writer test page
+  api/generate-copy/      AI writer (Gemini, strict JSON, one or two languages)
+  builder/                The event builder: seven steps and a live preview
+  fonts.ts                Every font, self-hosted (brand and event text styles)
+components/event/         The event page itself (card, page, on the day, after),
+                          shared by the builder preview and the public page
+lib/catalog.ts            Event types, plans, prices, palettes, styles, languages
+                          (mirrors the database; checked by npm run test:db)
+lib/draft.ts              The host's event while building it
 lib/ai/copy.ts            The five AI text boxes and their limits
 supabase/migrations/      Database, in order (run in Supabase › SQL Editor)
 supabase/tests/           Database checks (npm run test:db)
