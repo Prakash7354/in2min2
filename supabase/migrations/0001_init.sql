@@ -51,17 +51,22 @@ create table public.plans (
   booking_fee_bps    integer not null default 0 check (booking_fee_bps between 0 and 2000), -- 400 = 4%
   booking_fee_pence  integer not null default 0 check (booking_fee_pence >= 0),
   scales             public.event_scale[] not null default '{personal,celebration}', -- offered to these scales
+  -- More guests without changing plan: each pack adds guest_pack_size guests
+  -- for guest_pack_pence. Null = not sold on this plan.
+  guest_pack_size    integer check (guest_pack_size > 0),
+  guest_pack_pence   integer check (guest_pack_pence >= 0),
   sort_order         integer not null default 0,
   is_active          boolean not null default true
 );
 
 insert into public.plans (key, name, price_pence, hosting_days_after, guest_limit, photo_limit, photos_per_guest, ai_writes,
-                          full_res_download, hide_branding, booking_fee_bps, booking_fee_pence, scales, sort_order) values
-  ('popup',     'Pop-Up',       0,   7,  50,   50, 10,  5, false, false,   0,  0, '{personal,celebration}', 1),
-  ('season',    'Season',     900,  90, 200,  300, 20, 30, false, false,   0,  0, '{personal,celebration}', 2),
-  ('half_year', 'Half-Year', 1500, 182, 400,  600, 20, 50, false, false,   0,  0, '{personal,celebration}', 3),
-  ('keepsake',  'Keepsake',  2500, 365, 800, 1000, 30, 100, true, true,    0,  0, '{personal,celebration}', 4),
-  ('community', 'Community',    0,  90, null, 2000, 20, 30, false, false, 400, 30, '{community}',            5);
+                          full_res_download, hide_branding, booking_fee_bps, booking_fee_pence, scales,
+                          guest_pack_size, guest_pack_pence, sort_order) values
+  ('popup',     'Pop-Up',       0,   7,  50,   50, 10,  5, false, false,   0,  0, '{personal,celebration}', 100, 300, 1),
+  ('season',    'Season',     900,  90, 200,  300, 20, 30, false, false,   0,  0, '{personal,celebration}', 100, 300, 2),
+  ('half_year', 'Half-Year', 1500, 182, 400,  600, 20, 50, false, false,   0,  0, '{personal,celebration}', 100, 300, 3),
+  ('keepsake',  'Keepsake',  2500, 365, 800, 1000, 30, 100, true, true,    0,  0, '{personal,celebration}', 100, 300, 4),
+  ('community', 'Community',    0,  90, null, 2000, 20, 30, false, false, 400, 30, '{community}',           null, null, 5);
 
 -- The first part of an event's address: in2min2.com/{event_type}/{slug}.
 -- A table rather than an enum so a new type needs no migration, and each type
@@ -87,10 +92,12 @@ insert into public.event_types (key, label, scale, default_theme, default_toggle
   ('engagement',  'Engagement',             'celebration', 'classic', '{"guestbook": true}', 6),
   ('anniversary', 'Wedding anniversary',    'celebration', 'classic', '{"guestbook": true}', 7),
   ('bratabandha', 'Bratabandha',            'celebration', 'festive', '{"gift_registry": true}', 8),
-  ('corporate',   'Corporate event',        'celebration', 'modern',  '{"sponsors": true}', 9),
-  ('mela',        'Mela / festival',        'community',   'festive', '{"rsvp": false, "tickets": true, "stalls": true, "parking": true, "sponsors": true}', 10),
-  ('sport',       'Sports tournament',      'community',   'sport',   '{"rsvp": false, "tickets": true, "team_entries": true, "stalls": true, "parking": true, "sponsors": true, "live_scores": true}', 11),
-  ('community',   'Community event',        'community',   'festive', '{"tickets": true, "sponsors": true}', 12);
+  ('reunion',     'Reunion or regimental day', 'celebration', 'classic', '{"guestbook": true}', 9),
+  ('corporate',   'Corporate event',        'celebration', 'modern',  '{"sponsors": true}', 10),
+  ('mela',        'Mela / festival',        'community',   'festive', '{"rsvp": false, "tickets": true, "stalls": true, "parking": true, "sponsors": true}', 11),
+  ('sport',       'Sports tournament',      'community',   'sport',   '{"rsvp": false, "tickets": true, "team_entries": true, "stalls": true, "parking": true, "sponsors": true, "live_scores": true}', 12),
+  ('charity',     'Charity or fundraiser',  'community',   'festive', '{"tickets": true, "sponsors": true}', 13),
+  ('community',   'Community event',        'community',   'festive', '{"tickets": true, "sponsors": true}', 14);
 
 -- ─────────────────────────────────── Types ───────────────────────────────────
 
@@ -157,6 +164,15 @@ create table public.events (
   venue_address       text check (char_length(venue_address) <= 300),
   venue_lat           numeric(9,6) check (venue_lat between -90 and 90),
   venue_lng           numeric(9,6) check (venue_lng between -180 and 180),
+  -- Shown to guests: is there parking, and is it free?
+  parking             text not null default 'unknown' check (parking in ('unknown', 'none', 'free', 'paid', 'street')),
+  parking_note        text check (char_length(parking_note) <= 140),  -- "Free car park behind the hall, 40 spaces"
+
+  -- Numbers for planning, never shown to guests. expected_guests is the
+  -- host's own estimate (it suggests the plan); venue_capacity is the most
+  -- people the venue safely holds (replies and tickets stop there, phase 2).
+  expected_guests     integer check (expected_guests between 1 and 100000),
+  venue_capacity      integer check (venue_capacity between 1 and 100000),
 
   -- The facts given to the AI, kept so "Generate again" needs no retyping.
   language_mix        text check (char_length(language_mix) <= 80),
@@ -190,6 +206,7 @@ create table public.events (
   -- (see the column grants at the end of this file).
   plan                text not null default 'popup' references public.plans(key),
   extra_hosting_days  integer not null default 0 check (extra_hosting_days >= 0),
+  extra_guests        integer not null default 0 check (extra_guests >= 0),  -- guest packs bought
   hosting_until       timestamptz,                -- filled in by set_hosting_until()
   custom_domain       text unique check (custom_domain = lower(custom_domain) and custom_domain ~ '^[a-z0-9.-]+\.[a-z]{2,}$'),
 
@@ -371,6 +388,33 @@ create table public.feature_toggles (
   updated_at      timestamptz not null default now()
 );
 
+-- ─────────────────────────────── Launch offers ───────────────────────────────
+-- "Free Keepsake for the first 50 families": a code with a fixed number of
+-- places. claim_offer() takes a place atomically, so the 51st family sees the
+-- normal price with no one counting by hand. One place per account.
+
+create table public.offers (
+  code        text primary key check (code ~ '^[A-Z0-9]{4,20}$'),
+  label       text not null,
+  plan        text not null references public.plans(key),
+  max_claims  integer not null check (max_claims > 0),
+  claims      integer not null default 0 check (claims >= 0),
+  ends_at     timestamptz,
+  is_active   boolean not null default true,
+  check (claims <= max_claims)
+);
+
+create table public.offer_claims (
+  offer_code text not null references public.offers(code),
+  owner_id   uuid not null references auth.users(id) on delete cascade,
+  event_id   uuid references public.events(id) on delete set null,  -- kept if the event is deleted, so it can't be claimed twice
+  claimed_at timestamptz not null default now(),
+  primary key (offer_code, owner_id)
+);
+
+insert into public.offers (code, label, plan, max_claims) values
+  ('LAUNCH50', 'Free Keepsake for the first 50 families', 'keepsake', 50);
+
 -- ─────────────────────────────── Triggers ───────────────────────────────
 
 create or replace function public.touch_updated_at() returns trigger
@@ -482,6 +526,80 @@ language sql stable security invoker set search_path = public as $$
   where e.id = p_event
 $$;
 
+-- The dashboard's "how full is my event" panel and the upgrade prompts.
+-- Head count = people invited or coming (declined and waiting list don't
+-- count). Levels: ok, near (80%), full (100%), over. Runs as the caller.
+create or replace function public.event_usage(p_event uuid) returns jsonb
+language sql stable security invoker set search_path = public as $$
+  with e as (
+    select ev.*, p.guest_limit + ev.extra_guests as guest_limit, p.guest_pack_size, p.guest_pack_pence,
+           greatest(p.ai_writes - ev.ai_writes_used, 0) as ai_writes_left
+    from public.events ev join public.plans p on p.key = ev.plan where ev.id = p_event),
+  g as (
+    select coalesce(sum(party_size) filter (where rsvp_status in ('invited', 'attending', 'maybe')), 0)::int as people,
+           coalesce(sum(party_size) filter (where rsvp_status = 'attending'), 0)::int as attending
+    from public.guest_crm where event_id = p_event)
+  select jsonb_build_object(
+    'people', g.people,
+    'attending', g.attending,
+    'guest_limit', e.guest_limit,
+    'level', case when e.guest_limit is null       then 'ok'
+                  when g.people >  e.guest_limit     then 'over'
+                  when g.people =  e.guest_limit     then 'full'
+                  when g.people >= e.guest_limit * 0.8 then 'near'
+                  else 'ok' end,
+    'guest_pack', case when e.guest_pack_size is null then null
+                       else jsonb_build_object('size', e.guest_pack_size, 'pence', e.guest_pack_pence) end,
+    'expected_guests', e.expected_guests,
+    'venue_capacity', e.venue_capacity,
+    'capacity_left', e.venue_capacity - g.attending,
+    'hosting_until', e.hosting_until,
+    'ai_writes_left', e.ai_writes_left)
+  from e, g
+$$;
+
+-- Take a launch-offer place for one of your own events. Locks the offer row,
+-- so two families can never both take the last place.
+create or replace function public.claim_offer(p_event uuid, p_code text) returns jsonb
+language plpgsql volatile security definer set search_path = public as $$
+declare
+  e public.events;
+  o public.offers;
+begin
+  select * into e from public.events where id = p_event;
+  if not found or e.owner_id is distinct from auth.uid() then
+    return jsonb_build_object('ok', false, 'reason', 'not_owner');
+  end if;
+  select * into o from public.offers where code = upper(trim(p_code)) for update;
+  if not found or not o.is_active or (o.ends_at is not null and now() >= o.ends_at) then
+    return jsonb_build_object('ok', false, 'reason', 'no_offer');
+  end if;
+  if not exists (select 1 from public.plans p where p.key = o.plan and e.scale = any (p.scales)) then
+    return jsonb_build_object('ok', false, 'reason', 'not_for_this_event');
+  end if;
+  if e.plan <> 'popup' then
+    return jsonb_build_object('ok', false, 'reason', 'already_upgraded');
+  end if;
+  if exists (select 1 from public.offer_claims c where c.offer_code = o.code and c.owner_id = e.owner_id) then
+    return jsonb_build_object('ok', false, 'reason', 'already_claimed');
+  end if;
+  if o.claims >= o.max_claims then
+    return jsonb_build_object('ok', false, 'reason', 'all_taken');
+  end if;
+
+  insert into public.offer_claims (offer_code, owner_id, event_id) values (o.code, e.owner_id, e.id);
+  update public.offers set claims = claims + 1 where code = o.code;
+  update public.events set plan = o.plan where id = e.id;
+  return jsonb_build_object('ok', true, 'plan', o.plan, 'places_left', o.max_claims - o.claims - 1);
+end $$;
+
+-- "12 of 50 free places left", for the pricing page. Anyone may ask.
+create or replace function public.offer_places_left(p_code text) returns integer
+language sql stable security definer set search_path = public as $$
+  select greatest(max_claims - claims, 0) from public.offers
+  where code = upper(trim(p_code)) and is_active and (ends_at is null or now() < ends_at)
+$$;
+
 -- The public event page's data. Only published events; only what a guest may
 -- see; never the guest list. A private event opens only with a guest's token,
 -- and invite-only sub-events show only to guests invited to them.
@@ -514,6 +632,7 @@ begin
       'title', e.title, 'host_names', e.host_names,
       'timezone', e.timezone, 'starts_at', e.starts_at, 'ends_at', e.ends_at,
       'venue_name', e.venue_name, 'venue_address', e.venue_address, 'venue_lat', e.venue_lat, 'venue_lng', e.venue_lng,
+      'parking', e.parking, 'parking_note', e.parking_note,
       'card_headline', e.card_headline, 'card_invite_body', e.card_invite_body,
       'landing_page_story', e.landing_page_story, 'guest_note_box', e.guest_note_box,
       'post_event_thank_you', case when s = 'post' then e.post_event_thank_you end,
@@ -567,6 +686,8 @@ alter table public.event_people     enable row level security;
 alter table public.guest_crm        enable row level security;
 alter table public.sub_event_guests enable row level security;
 alter table public.feature_toggles  enable row level security;
+alter table public.offers           enable row level security;  -- no policies: reached only through claim_offer()
+alter table public.offer_claims     enable row level security;
 
 -- Prices and event types are public (they are on the pricing page).
 create policy read_plans       on public.plans       for select to anon, authenticated using (is_active);
@@ -617,13 +738,15 @@ create policy toggles_edit on public.feature_toggles for update to authenticated
 
 revoke insert, update on public.events from anon, authenticated;
 grant insert (event_type, scale, slug, title, host_names, timezone, starts_at, ends_at,
-              venue_name, venue_address, venue_lat, venue_lng, language_mix, tone, languages,
+              venue_name, venue_address, venue_lat, venue_lng, parking, parking_note,
+              expected_guests, venue_capacity, language_mix, tone, languages,
               card_headline, card_invite_body, landing_page_story, guest_note_box, post_event_thank_you,
               copy_translations, theme, primary_color, text_style, photo_style, motion,
               cover_image_key, status, is_private)
   on public.events to authenticated;
 grant update (event_type, scale, slug, title, host_names, timezone, starts_at, ends_at,
-              venue_name, venue_address, venue_lat, venue_lng, language_mix, tone, languages,
+              venue_name, venue_address, venue_lat, venue_lng, parking, parking_note,
+              expected_guests, venue_capacity, language_mix, tone, languages,
               card_headline, card_invite_body, landing_page_story, guest_note_box, post_event_thank_you,
               copy_translations, theme, primary_color, text_style, photo_style, motion,
               cover_image_key, status, is_private)
@@ -650,10 +773,19 @@ revoke all on public.events, public.event_hosts, public.sub_events, public.event
               public.sub_event_guests, public.feature_toggles from anon;
 grant execute on function public.public_event(text, text, text) to anon, authenticated;
 grant execute on function public.resolve_short_code(text)       to anon, authenticated;
+grant execute on function public.offer_places_left(text)        to anon, authenticated;
+
+-- Offers: nobody reads or writes the tables; a signed-in host claims through
+-- the function, which checks they own the event.
+revoke all on public.offers, public.offer_claims from anon, authenticated;
+revoke execute on function public.claim_offer(uuid, text) from public, anon;
+grant  execute on function public.claim_offer(uuid, text) to authenticated;
 
 -- NEXT MIGRATIONS (docs/CONCEPT.md, "Build plan"):
 --   submit_rsvp(): security-definer, with golf's reply rules (0053 reply limit,
 --     0056 one reply each, 0058 first reply stands). Never open guest_crm to anon inserts.
+--     Stops at venue_capacity (waiting list after); past the plan's guest limit
+--     it allows 10% grace, then pauses replies and tells the host (CONCEPT 5c).
 --   photos, guestbook_entries
 --   products, orders, order_items, cash_sales (tickets, entries, stalls, parking, receipts)
 --   divisions, teams, matches (tournaments: draw, fixtures, live scores)

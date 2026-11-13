@@ -211,5 +211,91 @@ ok("after the event the thank-you appears", pe.p.stage === "post" && "post_event
 ok("…in both languages", pe.p.event.translations.en.post_event_thank_you === "Thank you for coming!");
 ok("keepsake hides branding", pe.p.event.hide_branding === true);
 
+console.log("New event types (13 Nov 2026):");
+await as(A);
+const [ch] = await q(`insert into events (event_type, slug, title, starts_at) values ('charity','walk-2027','Charity walk', '2027-06-01 09:00+00') returning id, scale, plan`);
+ok("charity is community scale on the Community plan", ch.scale === "community" && ch.plan === "community");
+const [ru] = await q(`insert into events (event_type, slug, title, starts_at) values ('reunion','2gr-reunion','Regimental reunion', '2027-04-10 18:00+00') returning id, scale, plan`);
+ok("reunion is celebration scale on Pop-Up", ru.scale === "celebration" && ru.plan === "popup");
+
+console.log("Venue, parking and planning numbers:");
+await q(`update events set parking = 'paid', parking_note = 'Pay at the gate, £5 a car', expected_guests = 180, venue_capacity = 200 where id = $1`, [ru.id]);
+ok("host sets parking, expected guests and venue capacity", true);
+await expectError("unknown parking value rejected", `update events set parking = 'valet' where id = '${ru.id}'`, /check constraint/);
+await expectError("host cannot give themselves extra guests", `update events set extra_guests = 500 where id = '${ru.id}'`, /permission denied/);
+await q(`update events set status = 'published' where id = $1`, [ru.id]);
+await as(null);
+[pe] = await q(`select public_event('reunion','2gr-reunion') as p`);
+ok("guests see parking but not the planning numbers", pe.p.event.parking === "paid" && pe.p.event.parking_note.startsWith("Pay at")
+  && !("venue_capacity" in pe.p.event) && !("expected_guests" in pe.p.event));
+
+console.log("How full is the event (plan limit and venue capacity):");
+await as(A);
+const usage = async () => (await q(`select event_usage($1) as u`, [ru.id]))[0].u;
+let u = await usage();
+ok("empty event: 0 people, Pop-Up limit 50, level ok", u.people === 0 && u.guest_limit === 50 && u.level === "ok", JSON.stringify(u));
+await q(`insert into guest_crm (event_id, full_name, party_size, rsvp_status) values
+  ($1, 'The Rai family', 4, 'attending'), ($1, 'B Company table', 36, 'invited'), ($1, 'Could not come', 6, 'declined')`, [ru.id]);
+u = await usage();
+ok("head count adds party sizes and skips those who declined", u.people === 40 && u.attending === 4, JSON.stringify(u));
+ok("80% of the limit → near", u.level === "near");
+await q(`insert into guest_crm (event_id, full_name, party_size) values ($1, 'Late additions', 12)`, [ru.id]);
+u = await usage();
+ok("over the limit → over, with the 100-guest pack at £3 offered", u.level === "over" && u.guest_pack.size === 100 && u.guest_pack.pence === 300, JSON.stringify(u));
+ok("venue capacity left counts only those attending", u.capacity_left === 196);
+await db.exec(`reset role; update events set extra_guests = 100 where id = '${ru.id}'`);
+await as(A);
+u = await usage();
+ok("after a pack is bought (server only) the limit is 150, level ok", u.guest_limit === 150 && u.level === "ok", JSON.stringify(u));
+await as(B);
+ok("another host gets nothing from event_usage", (await q(`select event_usage($1) as u`, [ru.id]))[0].u === null);
+
+console.log("Launch offer, first 50 families free:");
+await as(null);
+const placesLeft = async () => (await q(`select offer_places_left('launch50') as n`))[0].n;
+ok("anyone can see the places left (50)", (await placesLeft()) === 50);
+await expectError("the public cannot claim", `select claim_offer('${ru.id}', 'LAUNCH50')`, /permission denied/);
+await as(A);
+await expectError("hosts cannot read the offers table", `select * from offers`, /permission denied/);
+await expectError("hosts cannot change the count", `update offers set claims = 0`, /permission denied/);
+await as(B);
+let [cl] = await q(`select claim_offer($1, 'LAUNCH50') as r`, [ru.id]);
+ok("cannot claim for someone else's event", cl.r.ok === false && cl.r.reason === "not_owner");
+await as(A);
+[cl] = await q(`select claim_offer($1, ' launch50 ') as r`, [ru.id]);
+ok("owner claims a free Keepsake", cl.r.ok === true && cl.r.plan === "keepsake" && cl.r.places_left === 49, JSON.stringify(cl.r));
+const [ruk] = await q(`select plan, (hosting_until - starts_at) = interval '365 days' as year from events where id = $1`, [ru.id]);
+ok("plan is Keepsake and the page is kept 12 months", ruk.plan === "keepsake" && ruk.year === true);
+ok("places left drops to 49", (await placesLeft()) === 49);
+const [ab] = await q(`insert into events (event_type, slug, title, starts_at) values ('birthday','second-try','Second try', '2027-05-01 14:00+00') returning id`);
+[cl] = await q(`select claim_offer($1, 'LAUNCH50') as r`, [ab.id]);
+ok("one place per family", cl.r.reason === "already_claimed");
+[cl] = await q(`select claim_offer($1, 'LAUNCH50') as r`, [ch.id]);
+ok("not for community events", cl.r.reason === "not_for_this_event");
+await db.exec(`reset role; insert into offers (code, label, plan, max_claims) values ('LASTONE', 'Test: one place', 'season', 1)`);
+await as(B);
+const [bEv] = await q(`insert into events (event_type, slug, title, starts_at) values ('pasni','baby-b','Baby B', '2027-07-01 11:00+00') returning id`);
+[cl] = await q(`select claim_offer($1, 'LASTONE') as r`, [bEv.id]);
+ok("B takes the last place", cl.r.ok === true && cl.r.places_left === 0, JSON.stringify(cl.r));
+await as(C);
+const [cEv] = await q(`insert into events (event_type, slug, title, starts_at) values ('party','c-party','C party', '2027-08-01 19:00+00') returning id`);
+[cl] = await q(`select claim_offer($1, 'LASTONE') as r`, [cEv.id]);
+ok("the next family is told all places are taken", cl.r.ok === false && cl.r.reason === "all_taken");
+ok("…and stays on the normal plan", (await q(`select plan from events where id = $1`, [cEv.id]))[0].plan === "popup");
+
+console.log("Delete everything:");
+const hd = await db.query(`delete from events where id = $1`, [ev.id]);
+ok("a helper cannot delete the event", hd.affectedRows === 0);
+await as(A);
+await q(`delete from events where id = $1`, [ru.id]);
+await db.exec(`reset role`);
+const left = (await q(`select (select count(*) from guest_crm where event_id = $1) + (select count(*) from feature_toggles where event_id = $1)
+  + (select count(*) from event_hosts where event_id = $1) as n`, [ru.id]))[0].n;
+ok("one delete removes the guest list, switches and hosts", Number(left) === 0);
+ok("the offer place stays used", (await q(`select count(*)::int n from offer_claims where owner_id = $1 and event_id is null`, [A]))[0].n === 1);
+await as(A);
+[cl] = await q(`select claim_offer($1, 'LAUNCH50') as r`, [ab.id]);
+ok("…so deleting and starting again can't claim twice", cl.r.reason === "already_claimed");
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

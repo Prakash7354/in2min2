@@ -1,6 +1,6 @@
 # Instructions for Claude Code: In2Min2
 
-Read `docs/CONCEPT.md` first. It holds what In2Min2 is, the pricing, the build plan (section 19) and the open decisions (section 21). Statements marked **Recommended** there are not yet confirmed by the owner. Build them so they are easy to change.
+Read `docs/CONCEPT.md` first. It holds what In2Min2 is, the pricing, the build plan (section 20) and the decisions (section 23). His to-do list is `docs/ACTION-PLAN.md`; tick items off there as he confirms them. Statements marked **Recommended** there are not yet confirmed by the owner. Build them so they are easy to change.
 
 @AGENTS.md
 
@@ -19,7 +19,7 @@ Prakash is not a developer. Explain anything he must do step by step, naming exa
 - **Migrations:** new numbered files in `supabase/migrations/`, never edit one that has been run. Give him the file with exact steps (Supabase › SQL Editor › New query › paste › Run) and remind him until he confirms it ran.
 - **Next.js 16** differs from older versions. Read the guide in `node_modules/next/dist/docs/` before using an API. `cacheComponents` stays off (it hung the Cloudflare build). No `export const runtime = "edge"`.
 - **Ask before adding a library, a paid service or a screen not in the concept.**
-- Golf Society Home (`~/Desktop/GoChuchuro Folder/Golf Society Home Folder/golfsocietyhome/`) is a reference for patterns and SQL (`docs/CONCEPT.md` section 17). Read it; never change it from here.
+- Golf Society Home (`~/Desktop/GoChuchuro Folder/Golf Society Home Folder/golfsocietyhome/`) is a reference for patterns and SQL (`docs/CONCEPT.md` section 16). Read it; never change it from here.
 
 ## Before every commit
 

@@ -32,9 +32,10 @@ lib/ai/copy.ts            The five AI text boxes and their limits
 supabase/migrations/      Database, in order (run in Supabase › SQL Editor)
 supabase/tests/           Database checks (npm run test:db)
 docs/CONCEPT.md           The plan
+docs/ACTION-PLAN.md       The owner's step-by-step list
 wrangler.jsonc            Cloudflare Worker settings (public values only)
 ```
 
 ## Secrets
 
-Never in the code or on GitHub. Locally in `.env.local`; on Cloudflare with `npx wrangler secret put NAME`. See docs/CONCEPT.md section 16 for the list.
+Never in the code or on GitHub. Locally in `.env.local`; on Cloudflare with `npx wrangler secret put NAME`. See docs/CONCEPT.md section 17a for the list.
