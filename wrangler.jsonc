@@ -28,6 +28,12 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Guests' photos (0006, lib/photo-store.ts): Cloudflare R2, kept in the EU.
+  // OFF until the bucket exists (ACTION-PLAN step 2): deploying with a binding
+  // to a missing bucket fails. Once created, remove the two // below.
+  // "r2_buckets": [
+  //   { "binding": "PHOTOS", "bucket_name": "in2min2-photos", "jurisdiction": "eu" }
+  // ],
   "services": [
     // Lets the app call itself (used by OpenNext for caching). Must match "name".
     { "binding": "WORKER_SELF_REFERENCE", "service": "in2min2" }

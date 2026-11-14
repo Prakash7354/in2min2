@@ -7,6 +7,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { missingForPublish, unpublishedChanges, type Draft } from "@/lib/draft";
 import { shareLink } from "@/lib/share";
+import type { PhotosState } from "./photos";
 import { totals, type RepliesState } from "./replies";
 import { ShareLinks } from "./share-links";
 import { supabase } from "@/lib/supabase/client";
@@ -19,6 +20,8 @@ type Common = {
   say: (message: string) => void;
   replies?: RepliesState;
   openReplies?: () => void;
+  photos?: PhotosState;
+  openPhotos?: () => void;
 };
 
 export function eventLink(d: Draft): string | null {
@@ -111,7 +114,7 @@ function Popover({ label, icon, badge, children }: { label: string; icon: ReactN
 
 type Update = { tone: "todo" | "ok" | "info"; title: string; line?: string; action?: { label: string; run: () => void } };
 
-function Bell({ d, session, goTo, askSignIn, say, replies, openReplies }: Common) {
+function Bell({ d, session, goTo, askSignIn, say, replies, openReplies, photos, openPhotos }: Common) {
   const items: Update[] = [];
   const missing = missingForPublish(d);
   if (!session) items.push({ tone: "todo", title: "Sign in to keep your event safe", line: "Until then it's kept only on this phone.", action: { label: "Sign in", run: () => askSignIn("Sign in to keep your event safe in your account.") } });
@@ -132,7 +135,19 @@ function Bell({ d, session, goTo, askSignIn, say, replies, openReplies }: Common
   } else {
     items.push({ tone: "info", title: "Guests' replies", line: d.eventId ? "Sign in to see who's replied." : "Once your page is published, each reply appears here." });
   }
-  const count = todos + fresh;
+  const needsYou = photos?.needsYou ?? 0;
+  if (d.eventId && photos?.rows) {
+    const onWall = photos.rows.filter((p) => p.status === "shown").length;
+    items.push({
+      tone: needsYou ? "todo" : "info",
+      title: needsYou ? `${needsYou} ${needsYou === 1 ? "photo needs" : "photos need"} you` : "Guests' photos",
+      line: needsYou ? "Waiting for your OK, or asked to be removed." : onWall ? `${onWall} on the wall.` : "No photos yet. On the day, guests add them here.",
+      action: openPhotos ? { label: "See photos", run: openPhotos } : undefined,
+    });
+  } else if (d.eventId && session && photos?.notReady === false) {
+    items.push({ tone: "info", title: "Guests' photos", line: "On the day, guests' photos appear here.", action: openPhotos ? { label: "Photos and TV slideshow", run: openPhotos } : undefined });
+  }
+  const count = todos + fresh + needsYou;
 
   return (
     <Popover label="Updates" badge={count} icon={

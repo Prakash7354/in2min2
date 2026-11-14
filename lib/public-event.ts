@@ -31,7 +31,7 @@ type PublicEvent = {
     effect?: EffectKey; share_image_key?: string | null;
   };
   people?: { role: "star" | "honour"; relation: string | null; names: string; names_local: string | null }[];
-  features?: Partial<Record<ToggleKey, boolean>>;
+  features?: Partial<Record<ToggleKey, boolean>> & { settings?: { photo_wall?: { early?: boolean } } };
   sub_events?: {
     title: string; kind: string; starts_at: string; venue_name: string | null; description: string | null;
     menu?: { course?: string; dish?: string }[] | null;
@@ -44,7 +44,8 @@ export type PublicPage =
   | { kind: "private" }
   | { kind: "ended"; title: string }
   | { kind: "event"; view: EventStageView; data: EventViewData; title: string; guestName: string | null;
-      guestReply: { status: string; partySize: number } | null; shareImage: string | null; viaGuestLink: boolean };
+      guestReply: { status: string; partySize: number } | null; shareImage: string | null; viaGuestLink: boolean;
+      photosEarly: boolean };
 
 const copy = (c: Partial<EventCopy> | undefined): EventCopy => ({
   card_headline: c?.card_headline ?? "", card_invite_body: c?.card_invite_body ?? "", landing_page_story: c?.landing_page_story ?? "",
@@ -66,7 +67,7 @@ export const getPublicEvent = cache(async (type: string, slug: string, token?: s
   const people = p.people ?? [];
   const star = people.find((x) => x.role === "star");
   const features = p.features ?? {};
-  const toggles = Object.fromEntries((Object.keys(TOGGLE_DEFAULTS) as ToggleKey[]).map((k) => [k, features[k] ?? TOGGLE_DEFAULTS[k]])) as Record<ToggleKey, boolean>;
+  const toggles = Object.fromEntries((Object.keys(TOGGLE_DEFAULTS) as ToggleKey[]).map((k) => [k, (features[k] as boolean | undefined) ?? TOGGLE_DEFAULTS[k]])) as Record<ToggleKey, boolean>;
   const second = e.languages[1];
 
   const data: EventViewData = {
@@ -116,6 +117,7 @@ export const getPublicEvent = cache(async (type: string, slug: string, token?: s
     kind: "event", view, data, title: e.card_headline || e.title, guestName: p.guest?.name ?? null,
     guestReply: p.guest ? { status: p.guest.rsvp_status, partySize: p.guest.party_size } : null,
     shareImage: mediaUrl(e.share_image_key) ?? mediaUrl(e.cover_image_key), viaGuestLink: !!token && !!p.guest,
+    photosEarly: features.settings?.photo_wall?.early === true,
   };
 });
 

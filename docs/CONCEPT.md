@@ -1,11 +1,21 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.8, 14 November 2026 (late night). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.9, 14 November 2026 (late night). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.9 (14 Nov 2026, late night; owner: "go ahead"):**
+- 0004 and 0005 have run on the live database.
+- **The guests' photo wall** (0006, phase 3 brought forward; 12a):
+  - Guests add photos from the event page or a photos page, with no app and no account.
+  - Each phone shrinks its photos, turns them the right way up and removes the hidden location before sending. Photos wait on the phone when there's no signal and send by themselves later.
+  - Hosts approve, hide or remove photos in a Photos window and on the bell. Any guest can ask for a photo to be removed.
+  - A **TV slideshow** shows new photos first, with a QR code in the corner. **Printable table cards** (four A6 cards on A4) and an A4 poster each carry a QR code.
+  - Photos are kept in Cloudflare R2 in the EU.
+- **QR codes are made by In2Min2 itself** (`lib/qr.ts`), with no library. Apple's QR reader read every test code.
 
 **What changed in version 3.8 (14 Nov 2026, late night; owner: "go and build"):**
 - **Replies work** (0004): guests answer Yes, Maybe or Can't come, with how many and a message, then add it to their calendar. Hosts see every reply, totals and a waiting list in a Replies window and on the bell (7, 9).
@@ -722,6 +732,32 @@ The owner's aim is to replace paper lists, guesswork, extra volunteers and endle
 
 **The main photo and the preview picture (built 14 Nov 2026, 0005).** When the host publishes, their phone uploads the main photo and draws the preview picture (1200 × 630, in the event's colours and fonts) that WhatsApp, Messenger and iMessage show. Both go to the public `event-media` bucket in Supabase Storage, London, in the event's own folder (`events.cover_image_key`, `events.share_image_key`). Only the owner and co-hosts can write there, and nobody can list the files. They are redone only when something they show changes (`lib/media-upload.ts`). The guests' photo wall below still uses Cloudflare R2.
 
+**The guests' photo wall (built 14 Nov 2026, 0006).** How it works:
+- **Where guests add photos:** the event page's "Photos from today" section (on the day), "The gallery" (afterwards), or `/{type}/{slug}/photos`, where the table cards' QR code lands.
+- **On the guest's phone:**
+  - `lib/photo-prep.ts` makes a 1600 px JPEG and a 640 px thumbnail. Redrawing the photo drops its hidden details, including GPS, and turns it the right way up.
+  - Tested: a 6.7 MB phone photo with a GPS position and a "rotate" flag was stored as 112 KB, upright, with no location.
+  - `lib/photo-queue.ts` keeps photos in IndexedDB until they send.
+- **The app's upload route (`/api/photos`):**
+  - Checks both files are JPEGs.
+  - Asks `add_photo()` for a yes. The checks: the wall is on and open; the plan's photo limit; the phone's share (`photos_per_guest`); at most 300 photos in 10 minutes per event; a private event needs a guest's link or the event's `wall_key`.
+  - Stores both files in R2 at `{event}/p/{id}.jpg` and `{event}/t/{id}.jpg`, then calls `photo_stored()`.
+  - Files are served at `/m/…` with random ids that can't be listed.
+- **When guests can add photos:** from midnight on the day until the page closes. The host can open them earlier ("before the day").
+- **Approve-first:** the default for community events and memorials, and off for family events (Recommended). Changed in the builder's Photos window.
+- **Removal requests:** "Please remove this photo" takes a photo down at once. The host decides; a photo shown again stays up. At most 20 requests an hour per event.
+- **Removing for good** (owner and co-hosts) deletes the files too. Helpers can hide photos.
+- **TV slideshow (`/{type}/{slug}/tv`):**
+  - 8 seconds per photo, with new photos first.
+  - Checks for new photos every 15 seconds and keeps the screen awake.
+  - Has a Full screen button, and a QR code to the photos page.
+- **Table cards and poster (`/{type}/{slug}/print`):** print on any printer, or Save as PDF.
+- **Private events:** the TV, card and photo links carry the event's photo key (`?k=`), which opens the photos only, never the private page.
+- **Still to do:**
+  - A sweep that deletes R2 files of deleted events, and photos 30 days after a page closes. Needs the server key, with phase 2 backups.
+  - "Download all" as a ZIP, and the host's own uploads beyond the per-phone share.
+  - Turnstile before public launch.
+
 Most events need tens to a few hundred photos. A big mela or tournament may get 1,000–2,000 in a day, and the total across all events will be large. The design handles all of these cheaply:
 
 - **Limits per plan** (section 5) and **per guest**, so one phone can't fill the wall.
@@ -1099,11 +1135,12 @@ All three are also offered to hosts as event colours (7).
 - **`0002_grants_and_ai_limit.sql` (14 Nov 2026):** explicit rights for anon, authenticated and service_role, because Supabase stopped granting them automatically on 30 Oct 2026. Plus `ai_usage` and `take_ai_write()`: 20 AI writes a day per signed-in person. The test harness is now as strict as Supabase (no automatic rights), so a missing grant fails the checks.
 - **`0004_replies_festive_effects.sql` (14 Nov 2026):** `submit_rsvp()`; the Christmas party, New Year's Eve and Lhosar event types; `events.effect`; `events.share_image_key`, and both picture keys tied to the event's own folder; `public_event()` with these.
 - **`0005_event_photos.sql` (14 Nov 2026):** the `event-media` bucket and its four storage policies (`media_path_ok()`), kept separate so a storage problem can't block 0004.
+- **`0006_photo_wall.sql` (14 Nov 2026):** `event_photos` (Row Level Security: hosts read, helpers and up hide or show, nobody inserts or deletes from the browser), `events.wall_key`, `photo_access()`, `photo_rules()`, `public_photos()`, `add_photo()`, `photo_stored()`, `ask_photo_removal()` and `remove_photos()`. 49 checks.
 - `price_quote()`: plan plus packs, then the single best of fee level, same-again or welcome-back (phase 4, when payments need it; the builder already shows prices from `lib/catalog.ts` `quote()`, checked against the same numbers);
 - `repeat_event()`: "Run it again" into the same series (phase 6);
 - an admin list for the owner's page (phase 4);
 - `submit_rsvp()`, with capacity, the 10% grace and the waiting list;
-- `photos`, `guestbook_entries` and `video_links`;
+- `guestbook_entries` and `video_links`;
 - `products`, `orders`, `order_items`, `cash_sales` and `cash_ups`;
 - `competitions`, `teams` and `matches`;
 - `helpers_roles` and `stall_documents`;
@@ -1122,7 +1159,8 @@ Small events run all year, so the personal and celebration side comes first and 
 | 1b (built 14 Nov) | Sign-in by a 6-digit emailed code; publish and update to the database; `LAUNCH50`; the AI writer only for signed-in hosts, 20 a day; the public page `/{type}/{slug}` and short link `/e/{code}`, drawn by the same code as the preview; numbered steps; labels | Live once the owner runs 0002 and sets the email template | A host publishes from their phone and opens the guest link |
 | 1c (built 14 Nov, evening) | After the owner's first phone test: the running order with menus and two switches (0003); the photo above the border and "show the whole picture"; a smarter event page (countdown, date-and-place card, timeline, big reply buttons, minimum text sizes); Share, the bell and Settings at the top right; the AI writer panel; sign-in in its own window; Share on the public page | Live once the owner runs 0003 | The owner adds a running order with a menu on his phone and sees it on the guest link |
 | 1d (built 14 Nov, night) | The Share panel with every link and a ready-made message per moment; links to parts of the page; drafts of the privacy notice, terms and prices and fair fees | | Tested in Chrome at phone width |
-| 1e (built 14 Nov, late night) | Working replies with calendar links, the Replies window and bell; the main photo and WhatsApp preview picture; festive types, seasonal colours, three borders and moving effects; the festive banner on the home page | Live once the owner runs 0004 and 0005 | A guest replies from a WhatsApp link on a second phone and the host sees it |
+| 1e (built 14 Nov, late night) | Working replies with calendar links, the Replies window and bell; the main photo and WhatsApp preview picture; festive types, seasonal colours, three borders and moving effects; the festive banner on the home page | Live (0004 and 0005 run 14 Nov) | A guest replies from a WhatsApp link on a second phone and the host sees it |
+| 1f (built 14 Nov, late night) | The guests' photo wall from phase 3: adding photos with no app, shrinking and removing the location on the phone, sending after bad signal, approve-first, removal requests, the host's Photos window and bell, the TV slideshow, table cards and a poster with QR codes made in-house | Live once the owner runs 0006 and creates the R2 bucket | 20 photos from two phones reach the TV; the host hides one |
 | **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; **the guest dashboard (9)**; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
 | **Pilot 1** | 3–5 family events from the owner's network (Pop-Up and `LAUNCH50`) | From January 2027 | Real families use it; feedback collected |
 | **3** | Guest-list tools, the photo wall and gallery, video links, the event pack, feedback; closing emails with "Keep it for next year?" (5g) | January–February 2027 | 200 photos from 20 phones in an hour without failure |
@@ -1136,7 +1174,7 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
 ## 21. Security and resilience (owner: "crucial")
 
 **Against data leaks:**
-- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 210 checks today, plus 67 on the builder's catalogue and prices, and they run before every commit.
+- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 259 checks today, plus 67 on the builder's catalogue and prices, and they run before every commit.
 - **The public reads no table**, only functions that return what a guest may see. Server-only columns (plan, money, domain) can't be written from a browser.
 - **Hold as little as possible:**
   - no dates of birth, ID documents or player ages;
@@ -1312,6 +1350,15 @@ The same deletion runs automatically 30 days after a page closes.
 - hello@in2min2.com forwards to hello@gochuchuro.com until there is income for a paid mailbox.
 - Stripe kept for payments; its card cost (about 1.5% + 20p on standard UK cards) is stated on the prices page.
 - Build the "still to match" list and go beyond it for underserved communities (4c).
+
+**Decided by the owner, 14 Nov 2026 (late night, later):**
+- "Go ahead" with the recommended next build: the guests' photo wall with a QR code and a TV slideshow.
+
+**Recommended in that build (not yet confirmed):**
+- Guests add photos from midnight on the day; the host can open them earlier.
+- Approve-first is on by default for community events and memorials, and off for family events.
+- "Please remove this photo" hides the photo at once until the host decides.
+- QR codes are made in-house rather than with the `qrcode` library, so there is no extra code to trust or update.
 
 **Still open (Recommended answers in brackets):**
 1. (Answered: memorials free automatically.)

@@ -13,6 +13,7 @@ import { eventType } from "@/lib/catalog";
 import { applyType, clearDraft, loadDraft, newDraft, saveDraft, toViewData, type Draft } from "@/lib/draft";
 import type { EventStageView } from "@/lib/event-view";
 import { SignInDialog, useSession } from "./account";
+import { PhotosDialog, usePhotos } from "./photos";
 import { RepliesDialog, useReplies } from "./replies";
 import { StepLook, StepPublish, StepSwitches, StepType, StepWhen, StepWho, StepWords } from "./steps";
 import { eventLink, TopBar } from "./topbar";
@@ -66,6 +67,10 @@ export default function Builder() {
   const replies = useReplies(draft.eventId, session);
   const [showReplies, setShowReplies] = useState(false);
   const openReplies = useCallback(() => setShowReplies(true), []);
+  // Guests' photos (0006): the same, every minute.
+  const photos = usePhotos(draft.eventId, session, draft.scale, !!eventType(draft.eventType)?.sensitive);
+  const [showPhotos, setShowPhotos] = useState(false);
+  const openPhotos = useCallback(() => setShowPhotos(true), []);
 
   // Save shortly after each change, and at once if the page is closed,
   // reloaded or put in the background, so the last letters typed are kept.
@@ -119,7 +124,7 @@ export default function Builder() {
     <StepWords key="words" {...props} />,
     <StepLook key="look" {...props} />,
     <StepSwitches key="switches" {...props} />,
-    <StepPublish key="publish" {...props} goTo={goTo} replies={replies} openReplies={openReplies}
+    <StepPublish key="publish" {...props} goTo={goTo} replies={replies} openReplies={openReplies} photos={photos} openPhotos={openPhotos}
       onPreview={(v) => { setView(v); setFull(true); }}
       onStartAgain={startAgain} />,
   ][step];
@@ -135,7 +140,8 @@ export default function Builder() {
             <span className={`text-sm ${saveOk ? "text-muted max-[379px]:sr-only" : "font-semibold text-ink"}`} aria-live="polite">
               {saveOk ? "Saved" : "Not saved"}
             </span>
-            <TopBar d={draft} session={session} goTo={goTo} askSignIn={askSignIn} say={say} onStartAgain={startAgain} replies={replies} openReplies={openReplies} />
+            <TopBar d={draft} session={session} goTo={goTo} askSignIn={askSignIn} say={say} onStartAgain={startAgain} replies={replies} openReplies={openReplies}
+              photos={photos} openPhotos={openPhotos} />
           </span>
         </div>
         <nav aria-label="Steps" className="mx-auto w-full max-w-6xl px-4 pb-3">
@@ -220,6 +226,10 @@ export default function Builder() {
 
       {showReplies && (
         <RepliesDialog d={draft} state={replies} link={eventLink(draft)} onClose={() => setShowReplies(false)} say={say} />
+      )}
+
+      {showPhotos && draft.eventId && (
+        <PhotosDialog d={draft} eventId={draft.eventId} state={photos} onClose={() => setShowPhotos(false)} say={say} />
       )}
 
       {signIn && (

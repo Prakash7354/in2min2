@@ -131,3 +131,78 @@ h1, h2, h3 {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* ── TV slideshow (components/photos/slideshow.tsx) ── */
+.tv-slide { animation: tv-fade 1.2s ease both; }
+@keyframes tv-fade { from { opacity: 0; } to { opacity: 1; } }
+.tv-drift { animation: tv-drift 9s ease-out both; }
+@keyframes tv-drift { from { transform: scale(1); } to { transform: scale(1.05); } }
+@media (prefers-reduced-motion: reduce) {
+  .tv-slide, .tv-drift { animation: none; }
+}
+
+/* ── Printable table cards and posters (app/[type]/[slug]/print) ── */
+.print-sheet {
+  width: 210mm;
+  height: 297mm;
+  margin: 0 auto 10mm;
+  background: #fff;
+  box-shadow: 0 10px 40px -16px rgba(0, 0, 0, 0.35);
+  display: grid;
+  overflow: hidden;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.print-sheet[data-layout="cards"] {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+.print-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  justify-items: center;
+  gap: 3mm;
+  padding: 0 7mm 6mm;
+  text-align: center;
+  color: var(--ev-ink);
+  font-family: var(--ev-body);
+  outline: 0.3mm dashed #b8b8c8;
+  outline-offset: -0.15mm;
+}
+.print-band {
+  justify-self: stretch;
+  margin: 0 -7mm;
+  padding: 3mm 4mm;
+  background: var(--ev-main);
+  color: var(--ev-on-main);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 3.4mm;
+}
+.print-title {
+  margin: 1mm 0 0;
+  font-family: var(--ev-display);
+  color: var(--ev-main);
+  font-size: 7mm;
+  line-height: 1.1;
+  font-weight: 700;
+}
+.print-qr { width: 64mm; align-self: center; }
+.print-steps { margin: 0; font-size: 3.3mm; line-height: 1.45; }
+.print-small { margin: 0; font-size: 2.8mm; color: var(--ev-muted); }
+.print-sheet[data-layout="poster"] .print-card { outline: 0; padding: 0 18mm 14mm; gap: 7mm; }
+.print-sheet[data-layout="poster"] .print-band { margin: 0 -18mm; padding: 7mm; font-size: 7mm; }
+.print-sheet[data-layout="poster"] .print-title { font-size: 15mm; }
+.print-sheet[data-layout="poster"] .print-qr { width: 120mm; }
+.print-sheet[data-layout="poster"] .print-steps { font-size: 6mm; }
+.print-sheet[data-layout="poster"] .print-small { font-size: 4.6mm; }
+@media print {
+  @page { size: A4 portrait; margin: 0; }
+  html, body { background: #fff !important; }
+  .no-print { display: none !important; }
+  .print-sheet { margin: 0; box-shadow: none; break-after: page; }
+}
+@media screen and (max-width: 820px) {
+  .print-sheet { zoom: 0.45; }
+}

@@ -11,6 +11,7 @@ import EventView from "@/components/event/event-view";
 import { eventFontVariables } from "@/components/event/fonts";
 import { formatDate, formatTime } from "@/lib/event-view";
 import { getPublicEvent } from "@/lib/public-event";
+import { PhotoWall } from "@/components/photos/photo-wall";
 import { Rsvp } from "./rsvp";
 import { ShareButton } from "./share-button";
 
@@ -76,10 +77,13 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
       sensitive={d.sensitive} hostName={d.stars?.names.trim() || (d.sensitive ? "the family" : d.scale === "community" ? "the organisers" : "the hosts")}
       cal={{ title: page.title, date: d.date, startTime: d.startTime, endTime: d.endTime, timezone: d.timezone, venue: [d.venueName, d.venueAddress].filter(Boolean).join(", ") }} />
   ) : undefined;
+  const photos = d.toggles.photo_wall && (page.view !== "page" || page.photosEarly) ? (
+    <PhotoWall type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} sensitive={d.sensitive} live={page.view === "live"} />
+  ) : undefined;
   return (
     <main className={`${eventFontVariables} min-h-dvh sm:py-8`} style={{ background: p.gradient ? `linear-gradient(${p.soft}e6, ${p.soft}e6), ${p.gradient}` : p.soft }}>
       <div className="mx-auto w-full max-w-2xl overflow-hidden sm:rounded-3xl sm:shadow-[0_24px_60px_-28px_rgba(0,0,0,0.45)]">
-        <EventView data={page.data} view={page.view} now={serverNow()} anchors reply={reply} />
+        <EventView data={page.data} view={page.view} now={serverNow()} anchors reply={reply} photos={photos} />
       </div>
       <ShareButton title={page.title} colour={p.main} textColour={p.onMain} />
     </main>

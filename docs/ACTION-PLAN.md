@@ -1,6 +1,6 @@
 # Your action plan
 
-*For Prakash. Updated 14 November 2026 (late night). The full plan is `docs/CONCEPT.md`.*
+*For Prakash. Updated 14 November 2026 (late night, photo wall). The full plan is `docs/CONCEPT.md`.*
 
 Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks different from the steps, describe what you see. **Never paste a secret key into the chat or any file.**
 
@@ -9,7 +9,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 ## Done
 
 - [x] Design agreed, logo C chosen, six questions answered (13–14 Nov).
-- [x] Supabase set up. All three database files run: [0001](../supabase/migrations/0001_init.sql), [0002](../supabase/migrations/0002_grants_and_ai_limit.sql), [0003](../supabase/migrations/0003_running_order_and_menu.sql) (14 Nov).
+- [x] Supabase set up. Database files 0001 to 0005 run (14 Nov): replies, festive designs and the WhatsApp preview picture are live.
 - [x] Gemini key working. Check any time: https://in2min2.com/api/health should say `"ai":"ready"`.
 - [x] in2min2.com bought and connected (14 Nov).
 - [x] Email sender (Resend) and the code emails set up (14 Nov).
@@ -18,39 +18,45 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
-### [ ] 1. Run two database files (6 minutes)
+### [ ] 1. Switch on the photo wall: one database file and one photo store (5 minutes)
 
-They switch on guests' replies, the festive designs and effects, and the main photo and WhatsApp preview picture. Until they've run, guests see "Replies aren't open just yet".
-
-**First file:** [`0004_replies_festive_effects.sql`](../supabase/migrations/0004_replies_festive_effects.sql)
+**First, the database file:** [`0006_photo_wall.sql`](../supabase/migrations/0006_photo_wall.sql)
 1. In VS Code, open the file above. Press **Cmd+A**, then **Cmd+C**.
 2. In Supabase, click **SQL Editor** (left menu), then **New query**.
 3. Click in the empty box, press **Cmd+V**, then click **Run** (bottom right).
-4. It should say **Success. No rows returned.**
+4. It should say **Success. No rows returned.** If it shows a red error, copy the red text into the chat.
 
-**Second file:** [`0005_event_photos.sql`](../supabase/migrations/0005_event_photos.sql). Do the same four steps with this file. If it shows a red error, copy the red text into the chat.
+**Then, the photo store on Cloudflare** (free for the first 10 GB; your account already has storage switched on):
+1. In VS Code, click **Terminal** (top menu) › **New Terminal**.
+2. Paste this line and press **Enter**:
+   `npx wrangler r2 bucket create in2min2-photos --jurisdiction eu`
+3. It should say **Created bucket 'in2min2-photos'**. If a browser opens asking you to log in to Cloudflare, click **Allow**, then run the line again.
 
-Then tell Claude Code both ran.
+Then tell Claude Code both are done. It switches the photo wall on, puts it live and tests it.
 
-### [ ] 2. Test with a second phone, such as your wife's (15 minutes, after step 1)
+### [ ] 2. Test with a second phone, such as your wife's (20 minutes, after step 1)
 
 **On your phone:**
 1. Open **in2min2.com**. Under *Festive launch*, tap **Christmas party**. If your own event opens instead, either carry on with it, or tap **Settings** (top right) › **Start a new event** and tap Christmas party again.
 2. Fill in the steps. On **The look**, add a photo, then try a **Moving effect** (Snow, Fireworks, Petals).
 3. On **Check and publish**, press **Publish** (or **Update my page**) and wait for **Published!**
-4. Tap **Share** (top right) › **The invitation** › **WhatsApp**, and send it to your wife.
+4. Still on that step, tap **Photos, TV slideshow and table cards**. Turn on **Let guests add photos before the day** (your party is weeks away, so photos would otherwise open on the day). Close the window.
+5. Tap **Share** (top right) › **The invitation** › **WhatsApp**, and send it to your wife.
 
 **On her phone:**
-5. In WhatsApp, the message should show a picture with the event's name. If it doesn't, wait a minute and send the link again.
-6. Tap the link. Check the photo, the words, the running order, the menu and **Directions**.
-7. Under **Can you come?**, tap **Yes**. Type her name, choose **2** people, write a short message, and tap **Send my reply**.
-8. Tap **Add to Google Calendar** (Android) or **Add to iPhone or Outlook** (iPhone). Check the date and time.
-9. Close the page and open the link again. It should say **Thank you, …!** Tap **Change my reply** › **Maybe** › **Send my reply**.
-10. Optional: on her phone, open **in2min2.com/builder** › **Settings** (top right) › **Sign in** with her own email. This checks that sign-in codes reach someone new.
+6. In WhatsApp, the message should show a picture with the event's name. If it doesn't, wait a minute and send the link again.
+7. Tap the link. Check the photo, the words, the running order, the menu and **Directions**.
+8. Under **Can you come?**, tap **Yes**. Type her name, choose **2** people, write a short message, and tap **Send my reply**.
+9. Tap **Add to Google Calendar** (Android) or **Add to iPhone or Outlook** (iPhone). Check the date and time.
+10. Further down, under **Photos**, tap **Add your photos**. Choose 3 photos from her phone, and take one new photo with the camera.
+11. Close the page and open the link again. It should say **Thank you, …!**, and her photos should show under Photos. Tap one: it opens large.
 
 **Back on your phone:**
-11. Within a minute, the **bell** shows a new reply. Tap **See replies**: her name, the number and her message.
-12. Tell Claude Code what worked and what didn't. If a screen shows **"Details for Claude Code:"**, copy that line.
+12. Within a minute, the **bell** shows her reply. Tap **See replies**: her name, the number and her message.
+13. Tap the bell again › **See photos**. Her photos are **On the wall**. Tap one › **Hide it**, and check it has gone from her page.
+14. In the same window, tap **Print table cards with a QR code**. Point her phone's camera at a card on your screen: it should open the photos page.
+15. Optional, on a laptop: open the **TV slideshow** from the same window, press **Full screen**, then add a photo from her phone. Within 15 seconds it shows with **New**.
+16. Tell Claude Code what worked and what didn't. If a screen shows **"Details for Claude Code:"**, copy that line.
 
 ### [ ] 3. Read the three drafts again, and answer the 3 yellow boxes (10 minutes)
 

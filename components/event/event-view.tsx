@@ -7,7 +7,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
-import { partyColours, textStyle } from "@/lib/catalog";
+import { partyColours, textStyle, type Palette } from "@/lib/catalog";
 import {
   daysUntil, directionsUrl, formatDate, formatTime, monogram, runningOrder,
   type EventStageView, type EventViewData, type MenuItem,
@@ -25,18 +25,26 @@ const s = new Proxy({} as Record<string, string>, { get: (_, key) => `ev-${Strin
 // copies at once, so it leaves them out.
 // reply: the public page's working reply form (app/[type]/[slug]/rsvp.tsx).
 // Without it, the reply buttons are drawn as a preview.
-type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: boolean; anchors?: boolean; reply?: ReactNode };
+// photos: the public page's working photo wall (components/photos). Shown on
+// the day and afterwards; before the day only if the host opened it early.
+type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: boolean; anchors?: boolean; reply?: ReactNode; photos?: ReactNode };
 
-export default function EventView({ data, view, now, thumb = false, anchors = false, reply }: Props) {
-  const p = data.palette;
-  const ts = textStyle(data.textStyle);
+// The event's colours and fonts as CSS variables. Also used by the photos
+// page, the TV slideshow and the table cards, which wear the event's design.
+export function eventVars(p: Palette, textStyleKey: string): CSSProperties {
+  const ts = textStyle(textStyleKey);
   const party = partyColours(p);
-  const vars = {
+  return {
     "--ev-bg": p.bg, "--ev-main": p.main, "--ev-on-main": p.onMain, "--ev-accent": p.accent, "--ev-on-accent": p.onAccent,
     "--ev-soft": p.soft, "--ev-ink": p.ink, "--ev-muted": p.muted, "--ev-display": ts.display, "--ev-body": ts.body,
     ...(p.gradient ? { "--ev-gradient": p.gradient } : {}),
     ...Object.fromEntries(Array.from({ length: 6 }, (_, i) => [`--ev-c${i + 1}`, party[i % party.length]])),
   } as CSSProperties;
+}
+
+export default function EventView({ data, view, now, thumb = false, anchors = false, reply, photos }: Props) {
+  const p = data.palette;
+  const vars = eventVars(p, data.textStyle);
 
   return (
     <div className={s.frame}>
@@ -54,9 +62,9 @@ export default function EventView({ data, view, now, thumb = false, anchors = fa
         {data.demo && <span className={s.demo}>Demo</span>}
         {!thumb && data.motion && !data.sensitive && <Effect kind={data.effect} />}
         {view === "card" && <Card d={data} />}
-        {view === "page" && <Page d={data} now={now} a={anchors} reply={reply} />}
-        {view === "live" && <Live d={data} now={now} a={anchors} />}
-        {view === "after" && <After d={data} />}
+        {view === "page" && <Page d={data} now={now} a={anchors} reply={reply} photos={photos} />}
+        {view === "live" && <Live d={data} now={now} a={anchors} photos={photos} />}
+        {view === "after" && <After d={data} a={anchors} photos={photos} />}
       </div>
     </div>
   );
@@ -237,7 +245,7 @@ function Countdown({ d, now }: { d: EventViewData; now: number }) {
   );
 }
 
-function Page({ d, now, a, reply }: { d: EventViewData; now: number; a: boolean; reply?: ReactNode }) {
+function Page({ d, now, a, reply, photos }: { d: EventViewData; now: number; a: boolean; reply?: ReactNode; photos?: ReactNode }) {
   const { main, second, secondLang } = words(d);
   const story = main.landing_page_story.split(/\n\s*\n/).filter((x) => x.trim());
   return (
@@ -285,6 +293,13 @@ function Page({ d, now, a, reply }: { d: EventViewData; now: number; a: boolean;
               <span className={`${s.btn} ${s.btnGhost}`}>{d.sensitive ? "I can’t attend" : "Sorry, can’t come"}</span>
             </div>
           )}
+        </section>
+      )}
+
+      {d.toggles.photo_wall && photos && (
+        <section className={s.section} id={a ? "photos" : undefined}>
+          <h2 className={s.sectionTitle}>{d.sensitive ? "Photos and memories" : "Photos"}</h2>
+          {photos}
         </section>
       )}
 
@@ -442,7 +457,7 @@ function shortDate(date: string): string {
   return `${dow.slice(0, 3)} ${day} ${month.slice(0, 3)}`;
 }
 
-function Live({ d, now, a }: { d: EventViewData; now: number; a: boolean }) {
+function Live({ d, now, a, photos }: { d: EventViewData; now: number; a: boolean; photos?: ReactNode }) {
   return (
     <>
       <div className={s.banner}>{d.sensitive ? "Today" : "Happening today"}</div>
@@ -450,7 +465,13 @@ function Live({ d, now, a }: { d: EventViewData; now: number; a: boolean }) {
         <p className={s.when}>{whenLine(d)}</p>
       </Hero>
       {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} live a={a} />}
-      {d.toggles.photo_wall && (
+      {d.toggles.photo_wall && photos && (
+        <section className={s.section} id={a ? "photos" : undefined}>
+          <h2 className={s.sectionTitle}>{d.sensitive ? "Photos and memories" : "Photos from today"}</h2>
+          {photos}
+        </section>
+      )}
+      {d.toggles.photo_wall && !photos && (
         <section className={s.section}>
           <span className={`${s.btn} ${s.btnAccent} ${s.btnBig}`}>{d.sensitive ? "Share a photo or memory" : "Add your photos"}</span>
           <div className={s.wall} aria-hidden="true">{Array.from({ length: 6 }, (_, i) => <span key={i} />)}</div>
@@ -463,7 +484,7 @@ function Live({ d, now, a }: { d: EventViewData; now: number; a: boolean }) {
   );
 }
 
-function After({ d }: { d: EventViewData }) {
+function After({ d, a, photos }: { d: EventViewData; a: boolean; photos?: ReactNode }) {
   const { main, second, secondLang } = words(d);
   return (
     <>
@@ -473,7 +494,13 @@ function After({ d }: { d: EventViewData }) {
           <Second text={second?.post_event_thank_you} lang={secondLang} />
         </p>
       </Hero>
-      {d.toggles.photo_wall && (
+      {d.toggles.photo_wall && photos && (
+        <section className={s.section} id={a ? "photos" : undefined}>
+          <h2 className={s.sectionTitle}>{d.sensitive ? "Photos and memories" : "The gallery"}</h2>
+          {photos}
+        </section>
+      )}
+      {d.toggles.photo_wall && !photos && (
         <section className={s.section}>
           <h2 className={s.sectionTitle}>{d.sensitive ? "Photos and memories" : "The gallery"}</h2>
           <div className={s.wall} aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} />)}</div>

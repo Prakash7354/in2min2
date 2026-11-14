@@ -20,6 +20,7 @@ import EventView from "@/components/event/event-view";
 import { saveMedia } from "@/lib/media-upload";
 import { publishDraft } from "@/lib/publish";
 import { supabase } from "@/lib/supabase/client";
+import type { PhotosState } from "./photos";
 import { totals, type RepliesState } from "./replies";
 import { ShareLinks } from "./share-links";
 import { eventLink } from "./topbar";
@@ -849,9 +850,9 @@ export function StepSwitches({ d, update }: StepProps) {
 
 // ───────────────────────────── 7. Check and publish ─────────────────────────────
 
-export function StepPublish({ d, update, session, askSignIn, say, onPreview, onStartAgain, goTo, replies, openReplies }: StepProps & {
+export function StepPublish({ d, update, session, askSignIn, say, onPreview, onStartAgain, goTo, replies, openReplies, photos, openPhotos }: StepProps & {
   onPreview: (view: "card" | "page" | "live" | "after") => void; onStartAgain: () => void; goTo: (step: number) => void;
-  replies: RepliesState; openReplies: () => void;
+  replies: RepliesState; openReplies: () => void; photos: PhotosState; openPhotos: () => void;
 }) {
   const [confirmReset, setConfirmReset] = useState(false);
   const [pub, setPub] = useState<{ busy: boolean; error: string | null; offer: string | null; done: boolean }>({ busy: false, error: null, offer: null, done: false });
@@ -911,6 +912,16 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
             );
           })() : <p className="text-[15px] text-muted">{session ? "Loading…" : "Sign in to see who has replied."}</p>}
           <Button kind="main" onClick={session ? openReplies : () => askSignIn("Sign in to see your guests' replies.")}>See replies</Button>
+        </Group>
+      )}
+
+      {d.eventId && d.toggles.photo_wall && (
+        <Group title="Guests' photos" line="Guests add photos from their phones, with no app. Show them on a TV, and print table cards with a QR code.">
+          {photos.rows ? (
+            <p className="text-lg"><strong className="text-brand">{photos.rows.filter((p) => p.status === "shown").length}</strong> on the wall
+              {photos.needsYou ? <> · <strong>{photos.needsYou}</strong> {photos.needsYou === 1 ? "needs" : "need"} you</> : null}</p>
+          ) : <p className="text-[15px] text-muted">{session ? (photos.notReady ? "Photos switch on once database file 0006 has been run." : "Loading…") : "Sign in to see guests' photos."}</p>}
+          <Button kind="main" onClick={session ? openPhotos : () => askSignIn("Sign in to see your guests' photos.")}>Photos, TV slideshow and table cards</Button>
         </Group>
       )}
 

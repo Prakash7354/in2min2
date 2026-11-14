@@ -522,6 +522,129 @@ const adel = await db.query(`delete from storage.objects where name = $1`, [`${r
 ok("the owner can remove their photo", adel.affectedRows === 1);
 await q(`delete from events where slug in ('asha-rsvp', 'was-2020', 'not-yet')`);
 
+console.log("Photo wall (0006):");
+await as(A);
+const [pw] = await q(`insert into events (event_type, slug, title, starts_at, status) values ('birthday','photo-party','Photo party', '2027-06-01 14:00+00', 'published') returning id, wall_key`);
+ok("each event gets its own photo key for table cards and the TV", /^[0-9a-f]{24}$/.test(pw.wall_key));
+const DEV1 = "phoneone0000000000000001", DEV2 = "phonetwo0000000000000002";
+const addPhoto = async (dev = DEV1, slug = "photo-party", token = null, type = "birthday", name = "Sita") =>
+  (await q(`select add_photo($1, $2, $3, $4, $5, 1600, 1200, 350000) as r`, [type, slug, token, dev, name]))[0].r;
+const stored = async (id, secret) => (await q(`select photo_stored($1, $2) as r`, [id, secret]))[0].r;
+const wall = async (slug = "photo-party", token = null, dev = DEV1, type = "birthday") =>
+  (await q(`select public_photos($1, $2, $3, $4) as r`, [type, slug, token, dev]))[0].r;
+await as(null);
+let w = await wall();
+ok("before the day the wall is on but not open yet", w.rules.on === true && w.rules.open === false && w.photos.length === 0, JSON.stringify(w.rules));
+ok("a family event shows photos without waiting for the host (default)", w.rules.approve_first === false);
+ok("…so a photo can't be added before the day", (await addPhoto()).reason === "closed");
+await as(A);
+await q(`update feature_toggles set settings = jsonb_set(settings, '{photo_wall}', '{"early": true}') where event_id = $1`, [pw.id]);
+await as(null);
+let a1 = await addPhoto();
+ok("the host lets guests add photos early: a photo is reserved", a1.ok === true && /^[0-9a-f]{32}$/.test(a1.secret) && a1.event_id === pw.id, JSON.stringify(a1));
+await expectError("the public can't read the photos table", `select * from event_photos`, /permission denied/);
+await expectError("…or add to it directly", `insert into event_photos (event_id, width, height, bytes, device) values ('${pw.id}', 100, 100, 100, '${DEV1}')`, /permission denied/);
+ok("a reserved photo isn't on the wall until its files are stored", (await wall()).photos.length === 0);
+ok("the wrong secret can't finish it", (await stored(a1.id, "0".repeat(32))).reason === "no_upload");
+let s1 = await stored(a1.id, a1.secret);
+ok("the right secret shows it", s1.ok === true && s1.status === "shown");
+ok("…once only", (await stored(a1.id, a1.secret)).reason === "no_upload");
+w = await wall();
+ok("the wall lists it with its size and the guest's name", w.photos.length === 1 && w.photos[0].id === a1.id && w.photos[0].w === 1600 && w.photos[0].by === "Sita");
+ok("…and tells this phone how many it has added", w.mine.added === 1 && w.mine.waiting === 0 && w.per_guest === 10);
+ok("the wall never gives out the event's photo key", !JSON.stringify(w).includes(pw.wall_key));
+ok("a bad phone id is refused", (await addPhoto("NOT valid!")).reason === "bad_photo");
+ok("a photo too big is refused", (await q(`select add_photo('birthday','photo-party',null,$1,null,9000,1200,350000) as r`, [DEV1]))[0].r.reason === "bad_photo");
+for (let i = 0; i < 9; i++) { const a = await addPhoto(); await stored(a.id, a.secret); }
+const share = await addPhoto();
+ok("one phone can add its share (10 on Pop-Up), then no more", share.reason === "your_share" && share.per_guest === 10, JSON.stringify(share));
+ok("…while another phone still can", (await addPhoto(DEV2)).ok === true);
+await db.exec(`reset role; update event_photos set created_at = now() - interval '2 hours' where status = 'uploading'`);
+ok("a reservation never finished stops counting after an hour", (await wall("photo-party", null, DEV2)).mine.added === 0);
+await db.exec(`reset role; insert into event_photos (event_id, status, width, height, bytes, device, ready_at)
+  select '${pw.id}', 'shown', 100, 100, 100, 'filler' || lpad(i::text, 18, '0'), now() from generate_series(1, 40) i`);
+await as(null);
+ok("the plan's photos (50 on Pop-Up) fill up, then it says full", (await addPhoto(DEV2)).reason === "full");
+await db.exec(`reset role; delete from event_photos where device like 'filler%'`);
+await db.exec(`reset role; insert into event_photos (event_id, status, width, height, bytes, device)
+  select '${pw.id}', 'uploading', 100, 100, 100, 'flood' || lpad(i::text, 19, '0') from generate_series(1, 300) i`);
+await as(null);
+ok("more than 300 photos in 10 minutes: the next waits", (await addPhoto(DEV2)).reason === "busy");
+await db.exec(`reset role; delete from event_photos where device like 'flood%'`);
+
+await as(B);
+ok("another host sees none of A's photos", (await q(`select id from event_photos where event_id = $1`, [pw.id])).length === 0);
+const bh = await db.query(`update event_photos set status = 'hidden' where event_id = $1`, [pw.id]);
+ok("…and can't hide them", bh.affectedRows === 0);
+ok("…or remove them", (await q(`select remove_photos(array[$1]::uuid[]) as r`, [a1.id]))[0].r.length === 0);
+await as(A);
+await q(`insert into event_hosts (event_id, user_id, role) values ($1, $2, 'helper')`, [pw.id, C]);
+await as(C);
+const chp = await db.query(`update event_photos set status = 'hidden' where id = $1`, [a1.id]);
+ok("a helper can hide a photo", chp.affectedRows === 1);
+ok("…which comes off the wall", (await (async () => { await as(null); return (await wall()).photos.length; })()) === 9);
+await as(C);
+ok("a helper can't remove a photo for good", (await q(`select remove_photos(array[$1]::uuid[]) as r`, [a1.id]))[0].r.length === 0);
+await expectError("a host can't change a photo's size or phone", `update event_photos set width = 20 where id = '${a1.id}'`, /permission denied/);
+await expectError("…or put it back to uploading", `update event_photos set status = 'uploading' where id = '${a1.id}'`, /row-level security/);
+await as(A);
+await q(`update event_photos set status = 'shown' where id = $1`, [a1.id]);
+const [rv1] = await q(`select reviewed_at from event_photos where id = $1`, [a1.id]);
+ok("the owner shows it again; the change is noted", !!rv1.reviewed_at);
+
+await as(null);
+const rq = (await q(`select ask_photo_removal('birthday','photo-party',null,$1,'That is me, please remove') as r`, [a1.id]))[0].r;
+ok("a guest asks for a photo to be removed: it comes down at once", rq.ok === true && rq.hidden === true && !(await wall()).photos.some((x) => x.id === a1.id));
+await as(A);
+const [asked] = await q(`select status, removal_note from event_photos where id = $1`, [a1.id]);
+ok("…and the host sees why", asked.status === "hidden" && asked.removal_note === "That is me, please remove");
+await q(`update event_photos set status = 'shown' where id = $1`, [a1.id]);
+await as(null);
+const rq2 = (await q(`select ask_photo_removal('birthday','photo-party',null,$1,null) as r`, [a1.id]))[0].r;
+ok("if the host decides to keep it, a later request doesn't hide it again", rq2.ok === true && rq2.hidden === false);
+
+await as(A);
+const gone = (await q(`select remove_photos(array[$1]::uuid[]) as r`, [a1.id]))[0].r;
+ok("the owner removes a photo for good; the app is told which files to delete", gone.length === 1 && gone[0].id === a1.id && gone[0].event_id === pw.id);
+ok("…and the row is gone", (await q(`select id from event_photos where id = $1`, [a1.id])).length === 0);
+
+const [lw] = await q(`insert into events (event_type, slug, title, starts_at, status, organiser_name, organiser_type, for_profit)
+  values ('lhosar','photo-lhosar','Lhosar', now() - interval '1 hour', 'published', 'Riverside Community Association', 'community_group', false) returning id`);
+await as(null);
+w = await wall("photo-lhosar", null, DEV1, "lhosar");
+ok("on the day the wall is open by itself", w.stage === "live" && w.rules.open === true);
+ok("community events wait for the host's OK by default", w.rules.approve_first === true);
+const a2 = await addPhoto(DEV1, "photo-lhosar", null, "lhosar");
+const s2 = await stored(a2.id, a2.secret);
+ok("…so a new photo waits", s2.status === "waiting" && (await wall("photo-lhosar", null, DEV1, "lhosar")).photos.length === 0);
+ok("…and the guest's phone knows it is waiting", (await wall("photo-lhosar", null, DEV1, "lhosar")).mine.waiting === 1);
+await as(A);
+await q(`update event_photos set status = 'shown' where id = $1`, [a2.id]);
+await as(null);
+ok("the host approves it and it shows", (await wall("photo-lhosar", null, DEV1, "lhosar")).photos.length === 1);
+await as(A);
+await q(`update feature_toggles set photo_wall = false where event_id = $1`, [lw.id]);
+await as(null);
+ok("the wall switched off: no photos added", (await addPhoto(DEV1, "photo-lhosar", null, "lhosar")).reason === "off");
+ok("…or shown", (await wall("photo-lhosar", null, DEV1, "lhosar")).photos.length === 0);
+
+await as(A);
+await q(`update events set is_private = true where id = $1`, [pw.id]);
+const [pgu] = await q(`insert into guest_crm (event_id, full_name) values ($1, 'Invited Aunt') returning invite_token`, [pw.id]);
+await as(null);
+ok("a private event's photos are closed to strangers", (await wall()).private === true && (await addPhoto(DEV2)).reason === "private");
+ok("…open to a guest's own link", (await addPhoto(DEV2, "photo-party", pgu.invite_token)).ok === true);
+const wk = await wall("photo-party", pw.wall_key);
+ok("…and to the table card's photo key, for the photos only", wk.event?.title === "Photo party" && !("venue_name" in wk.event));
+ok("…but the photo key doesn't open the private page itself", (await q(`select public_event('birthday','photo-party',$1) as p`, [pw.wall_key]))[0].p.private === true);
+ok("a wrong key opens nothing", (await wall("photo-party", "f".repeat(24))).private === true);
+await expectError("a host can't change the photo key", `update events set wall_key = 'abc' where id = '${pw.id}'`, /permission denied/);
+
+await as(A);
+await q(`delete from events where id in ($1, $2)`, [pw.id, lw.id]);
+await db.exec(`reset role`);
+ok("deleting an event deletes its photos' rows too", (await q(`select count(*)::int n from event_photos where event_id in ($1, $2)`, [pw.id, lw.id]))[0].n === 0);
+
 console.log("Delete everything:");
 await as(C);  // C is a helper on A's wedding
 const hd = await db.query(`delete from events where id = $1`, [ev.id]);
