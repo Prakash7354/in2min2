@@ -6,7 +6,7 @@
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
 import {
   eventType, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
-  type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
+  type CoverFit, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
 import type { EventViewData, ViewFunction, ViewPerson } from "@/lib/event-view";
 
@@ -46,6 +46,7 @@ export type Draft = {
   photoStyle: PhotoStyle;
   motion: boolean;
   cover: string | null;
+  coverFit: CoverFit;
   toggles: Record<ToggleKey, boolean>;
   slug: string;
   isPrivate: boolean;
@@ -56,6 +57,7 @@ export type Draft = {
   eventId?: string;
   publishedPath?: string;
   offerClaimed?: boolean;
+  publishedHash?: string; // fingerprint() when last published, to spot changes not yet live
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;
@@ -97,6 +99,7 @@ export function newDraft(): Draft {
     photoStyle: "arch",
     motion: true,
     cover: null,
+    coverFit: "fill",
     toggles: togglesFor(null),
     slug: "",
     isPrivate: false,
@@ -185,6 +188,41 @@ export function slugOk(slug: string): boolean {
   return /^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug) && slug.length >= 3 && slug.length <= 60;
 }
 
+// A short fingerprint of everything that publishing sends, so the builder can
+// say "you have changes that aren't live yet". The photo isn't sent yet
+// (photo storage comes later), so it's left out.
+const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "offerClaimed", "publishedHash", "cover", "offerCode"] as const;
+export function fingerprint(d: Draft): string {
+  const rest: Record<string, unknown> = { ...d };
+  for (const k of LOCAL_ONLY) delete rest[k];
+  const s = JSON.stringify(rest);
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(h, 33) ^ s.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+
+export function unpublishedChanges(d: Draft): boolean {
+  return !!d.eventId && !!d.publishedHash && d.publishedHash !== fingerprint(d);
+}
+
+// What still has to be filled in before the event can be published, and the
+// step (0-based) where each thing is asked.
+export function missingForPublish(d: Draft): { text: string; step: number }[] {
+  const t = eventType(d.eventType);
+  const community = d.scale === "community";
+  const slug = d.slug || slugify(d.title || d.stars.names);
+  const missing: { text: string; step: number }[] = [];
+  if (!t) missing.push({ text: "What you're celebrating", step: 0 });
+  if (!d.title.trim()) missing.push({ text: "The name of the event", step: 1 });
+  if (community && !d.organiserName.trim()) missing.push({ text: "The organiser's name", step: 1 });
+  if (community && !d.organiserType) missing.push({ text: "What kind of organiser", step: 1 });
+  if (community && d.forProfit === null) missing.push({ text: "Whether anyone makes a profit", step: 1 });
+  if (!d.date) missing.push({ text: "The date", step: 2 });
+  if (!d.startTime) missing.push({ text: "The start time", step: 2 });
+  if (!slugOk(slug)) missing.push({ text: "A web address", step: 6 });
+  return missing;
+}
+
 export function people(d: Draft): number {
   return Math.max(0, Math.floor(d.expectedGuests ?? 0));
 }
@@ -211,7 +249,7 @@ export function toViewData(d: Draft): EventViewData {
     venueAddress: d.venueAddress,
     parking: d.parking,
     parkingNote: d.parkingNote,
-    functions: d.scale === "personal" ? [] : d.functions,
+    functions: d.functions,
     languages: d.languages.filter((c) => language(c)),
     copy: d.copy,
     translation: d.languages.length > 1 ? d.translation : null,
@@ -222,6 +260,7 @@ export function toViewData(d: Draft): EventViewData {
     photoStyle: d.photoStyle,
     motion: d.motion,
     cover: d.cover,
+    coverFit: d.coverFit,
     toggles: d.toggles,
     hideBranding: plan(d.plan).hideBranding,
   };

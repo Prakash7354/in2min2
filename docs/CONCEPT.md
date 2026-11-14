@@ -1,6 +1,6 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.5, 14 November 2026 (afternoon). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.6, 14 November 2026 (evening). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
@@ -362,15 +362,16 @@ There is never a separate "preview mode" that looks different from the real page
    - Date and time.
    - Venue: type the address or paste a Google Maps link.
    - **Parking**, with one tap: *Free car park · Paid parking · Street parking · No parking*, plus a short note ("40 spaces behind the hall"). Shown to guests with a directions button. Built: `events.parking`, `events.parking_note`.
+   - **Running order (owner's request, 14 Nov 2026, from Golf Society Home's running order and menu; built).** What happens when: quick-add buttons for each kind of event, then a time, what, and optionally a place, a date and a short note. Anything that is a meal carries its **menu** (course and dish, up to 20 dishes), shown under that meal on the page like a printed menu card. Guests see it in time order on the event page; on the day it marks **On now** and **Next**. Two switches: **Running order** (`feature_toggles.schedule`) and **Food menu** (`feature_toggles.menu`, 0003). Stored in `sub_events` (a meal is `kind = 'meal'` with `details.menu`).
    - **About how many people?** This sets the plan and price (5c).
    - **Venue's safe capacity** (optional; asked straight away for community events).
 4. **The words.**
    - Choose up to two languages (section 8b).
-   - Press **"Write it for me"** and the boxes fill in both languages, each with a character counter.
+   - Press **"Write it for me"** and the boxes fill in both languages, each with a character counter. It sits in its own highlighted panel (owner, 14 Nov 2026: "make the AI writing a bit obvious"); without an account it says "Sign in and write it for me" and writes straight after sign-in.
    - Every box has small buttons: *Shorter · Warmer · More formal · More fun · Rewrite*.
    - Edit anything.
 5. **The look (Decided in outline, owner, 13 Nov 2026: "verities makes people … feel good like shopping in the high street").** Every choice is shown on the host's own card, never as a settings form. Suggestions for this kind of event come first, then everything else. Built in `lib/catalog.ts` and `components/event/`; checked by `npm run test:db`.
-   - **Main photo**, made smaller on the phone with its location data removed.
+   - **Main photo**, made smaller on the phone with its location data removed. **How it fits** (0003, `events.cover_fit`): *Fill the space* (photos) or *Show the whole picture* (logos and posters: never cropped, on a soft blurred copy of itself). A square or tall picture starts as "whole". A Hero photo runs edge to edge above the border, so the border never sits under it (owner's test, 14 Nov 2026).
    - **Border (18, drawn in code, in the event's own colours):**
 
      | Border | Suggested for |
@@ -422,6 +423,12 @@ There is never a separate "preview mode" that looks different from the real page
    - Previews in tabs: **Invitation card · Event page · On the day · After the event**, with a phone/computer toggle.
    - The price, if any, and a short checklist: "I've checked the names, date, venue and numbers."
    - Then **Publish**, which opens the share screen (section 11).
+
+**Top-right corner, as in most apps (owner's request, 14 Nov 2026; built):**
+- **Share**: the phone's own share menu, or the link is copied; before publishing it explains that publishing comes first. Step 7 also has **Share the link**, **WhatsApp** and **Copy link**, and the public page has **Share this page** for guests.
+- **The bell (Updates)**: what needs doing (sign in, still needed to publish, changes not live yet), and later each guest's reply (phase 2).
+- **Settings** (a cog, or the host's initial once signed in): who is signed in, shortcuts to switches, the look and publishing, start a new event, sign out.
+- **Sign-in** opens in its own window (a sheet from the bottom on a phone) with two numbered steps, so it never looks like part of the page.
 
 **Flow of the words (Decided):** AI suggests → host edits → saved automatically → host approves (the checklist) → publish. Nothing goes live unapproved.
 
@@ -1022,6 +1029,7 @@ Small events run all year, so the personal and celebration side comes first and 
 | 1a (done 13 Nov) | In2Min2 colours and fonts; the seven builder steps; the live preview (card, page, on the day, after) drawn by the same code the public page will use; ten palettes; prices with packs; the draft saved on the device; the AI writer in two languages | | Tested in Chrome at phone and computer width |
 | 1a+ (done 13 Nov) | Design review: 18 borders, 30 colour sets in 8 families, 10 text styles with fonts for six scripts, layouts, the wordmark logo and icon, a more formal In2Min2 look | | Tested in Chrome at phone and computer width |
 | 1b (built 14 Nov) | Sign-in by a 6-digit emailed code; publish and update to the database; `LAUNCH50`; the AI writer only for signed-in hosts, 20 a day; the public page `/{type}/{slug}` and short link `/e/{code}`, drawn by the same code as the preview; numbered steps; labels | Live once the owner runs 0002 and sets the email template | A host publishes from their phone and opens the guest link |
+| 1c (built 14 Nov, evening) | After the owner's first phone test: the running order with menus and two switches (0003); the photo above the border and "show the whole picture"; a smarter event page (countdown, date-and-place card, timeline, big reply buttons, minimum text sizes); Share, the bell and Settings at the top right; the AI writer panel; sign-in in its own window; Share on the public page | Live once the owner runs 0003 | The owner adds a running order with a menu on his phone and sees it on the guest link |
 | **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; **the guest dashboard (9)**; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
 | **Pilot 1** | 3–5 family events from the owner's network (Pop-Up and `LAUNCH50`) | From January 2027 | Real families use it; feedback collected |
 | **3** | Guest-list tools, the photo wall and gallery, video links, the event pack, feedback; closing emails with "Keep it for next year?" (5g) | January–February 2027 | 200 photos from 20 phones in an hour without failure |
@@ -1035,7 +1043,7 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
 ## 21. Security and resilience (owner: "crucial")
 
 **Against data leaks:**
-- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 140 checks today, plus 49 on the builder's catalogue and prices, and they run before every commit.
+- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 165 checks today, plus 63 on the builder's catalogue and prices, and they run before every commit.
 - **The public reads no table**, only functions that return what a guest may see. Server-only columns (plan, money, domain) can't be written from a browser.
 - **Hold as little as possible:**
   - no dates of birth, ID documents or player ages;
@@ -1162,6 +1170,7 @@ The same deletion runs automatically 30 days after a page closes.
   - the wordmark is the logo;
   - a guest dashboard by category.
 - Design agreed (14 Nov 2026), refined as we go, with "Popular", "New" and "Coming soon" labels and big step numbers.
+- After the first phone test (14 Nov 2026, evening): a running order with a food menu, each with an on/off switch, shown on the page before the event; Share, a notification bell and Settings at the top right; a more obvious AI writer; sign-in that stands apart from the page; the photo no longer too big or cropped.
 - Stripe: the owner is opening the account; nothing is needed from it until phase 4.
 - ICO fee and the domain: once the foundation is ready, before the pilot. The domain is now needed before the pilot for sign-in emails.
 - "Yes, go" (13 Nov 2026, night), taken as yes to the five other recommendations below; any can still be changed:

@@ -3,10 +3,15 @@
 // components/event/event-view.tsx, so the preview is exactly what guests see.
 
 import type { EventCopy } from "@/lib/ai/copy";
-import type { Palette, Parking, PhotoStyle, Scale, Template, TextStyle, ToggleKey } from "@/lib/catalog";
+import type { CoverFit, Palette, Parking, PhotoStyle, Scale, Template, TextStyle, ToggleKey } from "@/lib/catalog";
 
 export type ViewPerson = { relation: string; names: string };
-export type ViewFunction = { title: string; date: string; time: string; place: string };
+export type MenuItem = { course: string; dish: string };
+// One line of the running order. A meal can carry its menu (0003).
+export type ViewFunction = {
+  title: string; date: string; time: string; place: string;
+  note?: string; meal?: boolean; menu?: MenuItem[];
+};
 
 export type EventViewData = {
   typeKey: string;
@@ -36,6 +41,7 @@ export type EventViewData = {
   photoStyle: PhotoStyle;
   motion: boolean;
   cover: string | null; // image URL (a data: URL while it's a draft)
+  coverFit: CoverFit;   // fill the space, or show the whole picture (logos, posters)
   toggles: Record<ToggleKey, boolean>;
   hideBranding: boolean;
   demo?: boolean;
@@ -70,6 +76,32 @@ export function formatTime(time: string): string {
   const suffix = h >= 12 ? "pm" : "am";
   const h12 = h % 12 === 0 ? 12 : h % 12;
   return min ? `${h12}:${String(min).padStart(2, "0")}${suffix}` : `${h12}${suffix}`;
+}
+
+// The date and time now on the event's own clock, as "YYYY-MM-DD" and "HH:MM".
+export function zonedNow(now: number, timezone: string): { date: string; time: string } {
+  try {
+    const p = Object.fromEntries(new Intl.DateTimeFormat("en-GB", {
+      timeZone: timezone, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+    }).formatToParts(now).map((x) => [x.type, x.value]));
+    return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` };
+  } catch {
+    const iso = new Date(now).toISOString();
+    return { date: iso.slice(0, 10), time: iso.slice(11, 16) };
+  }
+}
+
+// The running order in time order, and which item is on now and which is next.
+export function runningOrder(items: ViewFunction[], fallbackDate: string, now: number, timezone: string) {
+  const sorted = items
+    .map((f) => ({ ...f, date: f.date || fallbackDate }))
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  const z = zonedNow(now, timezone);
+  const at = `${z.date} ${z.time}`;
+  let current = -1;
+  sorted.forEach((f, i) => { if (`${f.date} ${f.time || "00:00"}` <= at) current = i; });
+  const next = current + 1 < sorted.length ? current + 1 : -1;
+  return { items: sorted, current, next, multiDay: new Set(sorted.map((f) => f.date)).size > 1 };
 }
 
 // Whole days from today (in the event's time zone) to the event date.

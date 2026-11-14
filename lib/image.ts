@@ -2,7 +2,8 @@
 // on a canvas also throws away everything hidden in the file, including the GPS
 // location the camera stored (docs/CONCEPT.md, 12a).
 
-export async function resizePhoto(file: File, maxSide = 1280, quality = 0.8): Promise<string> {
+// Returns the smaller photo as a data: URL, with its width and height.
+export async function resizePhoto(file: File, maxSide = 1280, quality = 0.8): Promise<{ url: string; width: number; height: number }> {
   if (!file.type.startsWith("image/")) throw new Error("That file isn't a photo.");
   // createImageBitmap turns the picture the right way up from the camera's
   // orientation tag before the tag is thrown away.
@@ -17,7 +18,7 @@ export async function resizePhoto(file: File, maxSide = 1280, quality = 0.8): Pr
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("This phone couldn't prepare the photo.");
     ctx.drawImage(bitmap, 0, 0, w, h);
-    return canvas.toDataURL("image/jpeg", quality);
+    return { url: canvas.toDataURL("image/jpeg", quality), width: w, height: h };
   } finally {
     bitmap.close();
   }

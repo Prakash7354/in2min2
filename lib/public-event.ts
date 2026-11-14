@@ -4,7 +4,7 @@
 
 import { cache } from "react";
 import type { EventCopy } from "@/lib/ai/copy";
-import { eventType, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
+import { eventType, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type CoverFit, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
 import type { EventStageView, EventViewData } from "@/lib/event-view";
 import { rpc } from "@/lib/supabase/rest";
 import { utcToZoned } from "@/lib/time";
@@ -26,11 +26,14 @@ type PublicEvent = {
     languages: string[];
     translations: Record<string, Partial<EventCopy>>;
     scale: Scale; theme: Template; palette: string; primary_color: string; text_style: TextStyle; border: string;
-    photo_style: PhotoStyle; motion: boolean; cover_image_key: string | null; hide_branding: boolean;
+    photo_style: PhotoStyle; motion: boolean; cover_image_key: string | null; cover_fit?: CoverFit; hide_branding: boolean;
   };
   people?: { role: "star" | "honour"; relation: string | null; names: string; names_local: string | null }[];
   features?: Partial<Record<ToggleKey, boolean>>;
-  sub_events?: { title: string; starts_at: string; venue_name: string | null }[];
+  sub_events?: {
+    title: string; kind: string; starts_at: string; venue_name: string | null; description: string | null;
+    menu?: { course?: string; dish?: string }[] | null;
+  }[];
   guest?: { name: string; rsvp_status: string; party_size: number } | null;
 };
 
@@ -86,7 +89,8 @@ export const getPublicEvent = cache(async (type: string, slug: string, token?: s
     parkingNote: e.parking_note ?? "",
     functions: (p.sub_events ?? []).map((s) => {
       const z = utcToZoned(s.starts_at, e.timezone);
-      return { title: s.title, date: z.date, time: z.time, place: s.venue_name ?? "" };
+      const menu = (s.menu ?? []).filter((m) => m?.dish).map((m) => ({ course: m.course ?? "", dish: m.dish ?? "" }));
+      return { title: s.title, date: z.date, time: z.time, place: s.venue_name ?? "", note: s.description ?? "", meal: s.kind === "meal", menu };
     }),
     languages: e.languages,
     copy: copy({ ...e, post_event_thank_you: e.post_event_thank_you ?? "" } as Partial<EventCopy>),
@@ -98,6 +102,7 @@ export const getPublicEvent = cache(async (type: string, slug: string, token?: s
     photoStyle: e.photo_style,
     motion: e.motion,
     cover: null, // photos come with photo storage (phase 3)
+    coverFit: e.cover_fit ?? "fill",
     toggles,
     hideBranding: e.hide_branding,
     demo: e.is_demo,

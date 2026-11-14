@@ -7,20 +7,26 @@ import { useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { COPY_FIELDS, COPY_KEYS, charCount, type CopyKey, type CopyResponse } from "@/lib/ai/copy";
 import {
-  BORDERS, EVENT_TYPES, LANGUAGES, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
+  BORDERS, COVER_FITS, EVENT_TYPES, LANGUAGES, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
   TEMPLATES, TEXT_STYLES, TOGGLES, TONES, eventType, formatPence, language, paletteFor, plan, plansFor, quote,
-  type Palette, type PhotoStyle, type Scale, type Tag,
+  type CoverFit, type Palette, type PhotoStyle, type Scale, type Tag,
 } from "@/lib/catalog";
-import { applyScale, applyType, people, slugify, slugOk, toViewData, type Draft } from "@/lib/draft";
-import { formatDate, formatTime } from "@/lib/event-view";
+import {
+  applyScale, applyType, fingerprint, missingForPublish, people, slugify, toViewData, unpublishedChanges, type Draft,
+} from "@/lib/draft";
+import { formatDate, formatTime, type MenuItem } from "@/lib/event-view";
 import { resizePhoto } from "@/lib/image";
 import EventView from "@/components/event/event-view";
 import { publishDraft } from "@/lib/publish";
+import { copyLink, whatsappUrl } from "@/lib/share";
 import { supabase } from "@/lib/supabase/client";
-import { SignIn } from "./account";
+import { eventLink, shareEvent } from "./topbar";
 import { Badge, Button, Choices, Field, Group, Notice, Soon, Switch, Tick, inputClass } from "./ui";
 
-export type StepProps = { d: Draft; update: (fn: (d: Draft) => Draft) => void; now: number; session?: Session | null };
+export type StepProps = {
+  d: Draft; update: (fn: (d: Draft) => Draft) => void; now: number; session?: Session | null;
+  askSignIn: (why: string, then?: () => void) => void; say: (message: string) => void;
+};
 
 const set = <K extends keyof Draft>(key: K, value: Draft[K]) => (d: Draft): Draft => ({ ...d, [key]: value });
 
@@ -182,13 +188,159 @@ function Organiser({ d, update }: Pick<StepProps, "d" | "update">) {
 
 // ───────────────────────────── 3. When, where and how many ─────────────────────────────
 
-const FUNCTION_SUGGESTIONS: Record<string, string[]> = {
-  wedding: ["Mehndi", "Haldi", "Ceremony", "Reception", "Janti departure"],
-  engagement: ["Tika", "Ring ceremony", "Dinner"],
+// Quick-add ideas for the running order. Anything that sounds like a meal
+// starts as a meal, ready for its menu.
+const RUN_SUGGESTIONS: Record<string, string[]> = {
+  wedding: ["Mehndi", "Haldi", "Janti arrives", "Ceremony", "Photos", "Reception", "Dinner", "First dance"],
+  engagement: ["Guests arrive", "Tika", "Ring ceremony", "Dinner"],
+  anniversary: ["Guests arrive", "Welcome", "Cake", "Dinner", "Dancing"],
+  birthday: ["Guests arrive", "Games", "Cake", "Food", "Party ends"],
+  party: ["Guests arrive", "Food", "Cake", "Dancing"],
+  pasni: ["Guests arrive", "Puja", "Rice feeding", "Lunch", "Tika and blessings"],
+  ceremony: ["Guests arrive", "Puja", "Lunch", "Tika and blessings"],
+  bratabandha: ["Puja", "Bratabandha ceremony", "Lunch", "Tika and blessings"],
+  reunion: ["Guests arrive", "Welcome speech", "Lunch", "Cultural programme", "Raffle", "Close"],
   memorial: ["Funeral", "Prayers", "13th-day rites", "Remembrance meal"],
-  sport: ["Opening ceremony", "Group games", "Semi-finals", "Final", "Prize-giving"],
-  mela: ["Opening", "Cultural show", "Food stalls open", "Raffle draw"],
+  sport: ["Opening ceremony", "Group games", "Lunch", "Semi-finals", "Final", "Prize-giving"],
+  mela: ["Opening", "Cultural show", "Food stalls open", "Raffle draw", "Close"],
+  charity: ["Registration", "Start", "Lunch", "Prize-giving"],
+  community: ["Welcome", "Programme", "Food", "Close"],
+  corporate: ["Arrival drinks", "Welcome", "Dinner", "Awards", "Close"],
 };
+const DEFAULT_RUN = ["Guests arrive", "Welcome", "Lunch", "Dinner"];
+const MEAL_WORDS = /\b(lunch|dinner|breakfast|brunch|meal|food|tea|buffet|bhoj|canap|supper|feast)/i;
+const COURSES = ["Starter", "Main", "Side", "Dessert", "Drinks", "Snacks", "Sweets"];
+
+// The next item's time: an hour after the latest one, or the start time.
+function nextTime(d: Draft): string {
+  const times = d.functions.map((f) => f.time).filter(Boolean).sort();
+  const last = times[times.length - 1] ?? d.startTime;
+  if (!last) return "";
+  const [h, m] = last.split(":").map(Number);
+  const t = Math.min(h * 60 + m + (times.length ? 60 : 0), 23 * 60 + 59);
+  return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
+}
+
+function RunningOrderEditor({ d, update }: Pick<StepProps, "d" | "update">) {
+  const community = d.scale === "community";
+  const suggestions = RUN_SUGGESTIONS[d.eventType ?? ""] ?? DEFAULT_RUN;
+  const used = new Set(d.functions.map((f) => f.title.trim().toLowerCase()));
+  type Item = Draft["functions"][number];
+  const edit = (id: string, patch: Partial<Item>) =>
+    update((x) => ({ ...x, functions: x.functions.map((f) => (f.id === id ? { ...f, ...patch } : f)) }));
+  const add = (title = "") => update((x) => {
+    const meal = MEAL_WORDS.test(title);
+    const id = `${Date.now().toString(36)}${x.functions.length}`;
+    return { ...x, functions: [...x.functions, { id, title, date: x.date, time: nextTime(x), place: "", note: "", meal, menu: meal ? [{ course: "Main", dish: "" }] : [] }] };
+  });
+  const full = d.functions.length >= 15;
+  return (
+    <Group title={community ? "Programme" : "Running order"}
+      line="What happens when, with a menu for each meal. Guests see it on the event page, and on the day it shows what's on now. Optional.">
+      {!d.toggles.schedule && <Notice tone="warn">The running order is switched off in step 6, so guests won&apos;t see it.</Notice>}
+      {!full && (
+        <div className="grid gap-2">
+          <p className="text-[15px] font-semibold">Quick add</p>
+          <div className="flex flex-wrap gap-2">
+            {suggestions.filter((t) => !used.has(t.toLowerCase())).map((t) => (
+              <button key={t} type="button" onClick={() => add(t)}
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-line bg-card px-4 font-semibold hover:border-brand/50">
+                <span aria-hidden="true" className="text-brand">+</span> {t}
+                {MEAL_WORDS.test(t) && <span aria-hidden="true">🍽</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      <datalist id="run-names">{suggestions.map((t) => <option key={t} value={t} />)}</datalist>
+      <datalist id="courses">{COURSES.map((c) => <option key={c} value={c} />)}</datalist>
+      {d.functions.map((f, i) => (
+        <RunItem key={f.id} f={f} n={i + 1} d={d} edit={(patch) => edit(f.id, patch)}
+          remove={() => update((x) => ({ ...x, functions: x.functions.filter((g) => g.id !== f.id) }))} />
+      ))}
+      {!full && (
+        <Button kind="ghost" onClick={() => add()} className="justify-self-start">
+          {d.functions.length ? "Add another" : community ? "Add to the programme" : "Add to the running order"}
+        </Button>
+      )}
+      {d.functions.length > 1 && <p className="text-[15px] text-muted">Guests see these in time order, whatever order you add them in.</p>}
+    </Group>
+  );
+}
+
+function RunItem({ f, n, d, edit, remove }: {
+  f: Draft["functions"][number]; n: number; d: Draft; edit: (patch: Partial<Draft["functions"][number]>) => void; remove: () => void;
+}) {
+  const [more, setMore] = useState(!!(f.place || f.note || (f.date && f.date !== d.date)));
+  const menu = f.menu ?? [];
+  const setMenu = (next: MenuItem[]) => edit({ menu: next });
+  return (
+    <div className="grid gap-3 rounded-2xl border border-line bg-card p-3 sm:p-4">
+      <div className="grid grid-cols-[minmax(0,7.5rem)_minmax(0,1fr)] gap-3">
+        <Field id={`run-time-${f.id}`} label="Time">
+          <input id={`run-time-${f.id}`} type="time" className={inputClass} value={f.time} onChange={(e) => edit({ time: e.target.value })} />
+        </Field>
+        <Field id={`run-what-${f.id}`} label={`What (${n})`}>
+          <input id={`run-what-${f.id}`} list="run-names" className={inputClass} value={f.title} maxLength={80} placeholder="Welcome speech"
+            onChange={(e) => edit({ title: e.target.value })} />
+        </Field>
+      </div>
+      {more ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field id={`run-place-${f.id}`} label="Where, if different">
+            <input id={`run-place-${f.id}`} className={inputClass} value={f.place} maxLength={120} placeholder="Main hall"
+              onChange={(e) => edit({ place: e.target.value })} />
+          </Field>
+          {d.scale !== "personal" && (
+            <Field id={`run-date-${f.id}`} label="Date, if a different day">
+              <input id={`run-date-${f.id}`} type="date" className={inputClass} value={f.date} onChange={(e) => edit({ date: e.target.value })} />
+            </Field>
+          )}
+          <div className="sm:col-span-2">
+            <Field id={`run-note-${f.id}`} label="A short note" aside={`${(f.note ?? "").length}/140`}>
+              <input id={`run-note-${f.id}`} className={inputClass} value={f.note ?? ""} maxLength={140} placeholder="Tea and coffee in the foyer"
+                onChange={(e) => edit({ note: e.target.value })} />
+            </Field>
+          </div>
+        </div>
+      ) : (
+        <button type="button" onClick={() => setMore(true)} className="justify-self-start text-[15px] font-semibold text-brand underline underline-offset-4">
+          Add a place, date or note
+        </button>
+      )}
+      <label className="flex min-h-11 items-center gap-3 font-semibold">
+        <input type="checkbox" className="size-6 accent-[#2E2A6E]" checked={!!f.meal}
+          onChange={(e) => edit({ meal: e.target.checked, menu: e.target.checked && !menu.length ? [{ course: "Main", dish: "" }] : menu })} />
+        <span>It&apos;s a meal: add the menu <span aria-hidden="true">🍽</span></span>
+      </label>
+      {f.meal && (
+        <div className="grid gap-2 rounded-xl bg-wash/70 p-3">
+          <p className="font-semibold">Menu for {f.title || "this meal"}</p>
+          {!d.toggles.menu && <Notice tone="warn">The food menu is switched off in step 6, so guests won&apos;t see it.</Notice>}
+          {menu.map((m, j) => (
+            <div key={j} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1.5 rounded-xl bg-card p-2 sm:grid-cols-[minmax(0,9rem)_minmax(0,1fr)_auto]">
+              <input aria-label={`Course for dish ${j + 1}`} list="courses" className={`${inputClass} px-3 py-2 text-[15px] font-semibold sm:col-start-1`} value={m.course} maxLength={40} placeholder="Course, e.g. Main"
+                onChange={(e) => setMenu(menu.map((x, k) => (k === j ? { ...x, course: e.target.value } : x)))} />
+              <button type="button" aria-label={`Remove dish ${j + 1}`} onClick={() => setMenu(menu.filter((_, k) => k !== j))}
+                className="grid size-11 place-items-center rounded-full text-muted hover:bg-line hover:text-ink sm:col-start-3 sm:row-start-1">
+                <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+              </button>
+              <input aria-label={`Dish ${j + 1}`} className={`${inputClass} col-span-2 px-3 py-2.5 text-[16px] sm:col-span-1 sm:col-start-2 sm:row-start-1`} value={m.dish} maxLength={160} placeholder="Dish, e.g. Dal bhat with goat curry"
+                onChange={(e) => setMenu(menu.map((x, k) => (k === j ? { ...x, dish: e.target.value } : x)))} />
+            </div>
+          ))}
+          {menu.length < 20 && (
+            <Button kind="ghost" className="justify-self-start" onClick={() => setMenu([...menu, { course: menu[menu.length - 1]?.course ?? "Main", dish: "" }])}>
+              Add a dish
+            </Button>
+          )}
+          <p className="text-[15px] leading-snug text-muted">Tip: mark dishes (V) vegetarian, (VG) vegan or (GF) gluten-free. Dishes under the same course are grouped.</p>
+        </div>
+      )}
+      <Button kind="quiet" onClick={remove} className="justify-self-start">Remove</Button>
+    </div>
+  );
+}
 
 export function StepWhen({ d, update }: StepProps) {
   const community = d.scale === "community";
@@ -238,7 +390,7 @@ export function StepWhen({ d, update }: StepProps) {
         )}
       </Group>
 
-      {d.scale !== "personal" && <Functions d={d} update={update} />}
+      <RunningOrderEditor d={d} update={update} />
 
       <Group title="How many people?" line="Count everyone, children too. It sets your price and tells the venue and caterer what to expect.">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -256,45 +408,6 @@ export function StepWhen({ d, update }: StepProps) {
 
       {community ? <CommunityPrice /> : <PlanPicker d={d} update={update} />}
     </div>
-  );
-}
-
-function Functions({ d, update }: Pick<StepProps, "d" | "update">) {
-  const suggestions = FUNCTION_SUGGESTIONS[d.eventType ?? ""] ?? ["Welcome", "Main event", "Dinner"];
-  const edit = (i: number, key: "title" | "date" | "time" | "place", value: string) =>
-    update((x) => ({ ...x, functions: x.functions.map((f, j) => (j === i ? { ...f, [key]: value } : f)) }));
-  return (
-    <Group title={d.scale === "community" ? "Programme" : "Functions"} line={d.scale === "community" ? "The main moments of the day, in order. Optional." : "Mehndi, ceremony, reception… each with its own time. Optional."}>
-      <datalist id="function-names">{suggestions.map((s) => <option key={s} value={s} />)}</datalist>
-      {d.functions.map((f, i) => (
-        <div key={f.id} className="grid gap-3 rounded-2xl bg-wash/60 p-3 sm:grid-cols-2">
-          <Field id={`fn-title-${i}`} label="What">
-            <input id={`fn-title-${i}`} list="function-names" className={inputClass} value={f.title} maxLength={80} placeholder={suggestions[0]}
-              onChange={(e) => edit(i, "title", e.target.value)} />
-          </Field>
-          <Field id={`fn-place-${i}`} label="Where (if different)">
-            <input id={`fn-place-${i}`} className={inputClass} value={f.place} maxLength={120} onChange={(e) => edit(i, "place", e.target.value)} />
-          </Field>
-          <Field id={`fn-date-${i}`} label="Date">
-            <input id={`fn-date-${i}`} type="date" className={inputClass} value={f.date} onChange={(e) => edit(i, "date", e.target.value)} />
-          </Field>
-          <Field id={`fn-time-${i}`} label="Time">
-            <input id={`fn-time-${i}`} type="time" className={inputClass} value={f.time} onChange={(e) => edit(i, "time", e.target.value)} />
-          </Field>
-          <div className="sm:col-span-2">
-            <Button kind="quiet" onClick={() => update((x) => ({ ...x, functions: x.functions.filter((_, j) => j !== i) }))}>Remove</Button>
-          </div>
-        </div>
-      ))}
-      {d.functions.length < 8 && (
-        <Button kind="ghost" onClick={() => {
-          const id = Date.now().toString(36);
-          update((x) => ({ ...x, functions: [...x.functions, { id, title: "", date: x.date, time: "", place: "" }] }));
-        }}>
-          {d.scale === "community" ? "Add to the programme" : "Add a function"}
-        </Button>
-      )}
-    </Group>
   );
 }
 
@@ -347,23 +460,30 @@ function CommunityPrice() {
 
 // ───────────────────────────── 4. The words ─────────────────────────────
 
-type WriteState = { busy: boolean; error: string | null; trimmed: string[] };
+type WriteState = { busy: boolean; error: string | null; trimmed: string[]; done: boolean };
 
-export function StepWords({ d, update, session }: StepProps) {
-  const [w, setW] = useState<WriteState>({ busy: false, error: null, trimmed: [] });
+export function StepWords({ d, update, session, askSignIn }: StepProps) {
+  const [w, setW] = useState<WriteState>({ busy: false, error: null, trimmed: [], done: false });
   const main = language(d.languages[0]) ?? LANGUAGES[0];
   const second = language(d.languages[1]);
   const t = eventType(d.eventType);
 
   async function writeForMe() {
-    setW({ busy: true, error: null, trimmed: [] });
+    // The token is read fresh, so this also works straight after signing in.
+    const { data: auth } = await supabase().auth.getSession();
+    const token = auth.session?.access_token;
+    if (!token) {
+      askSignIn("Sign in (free) and the AI will write your words straight away.", () => void writeForMe());
+      return;
+    }
+    setW({ busy: true, error: null, trimmed: [], done: false });
     const fam = d.family.map((f) => [f.relation, f.names].filter(Boolean).join(": ")).filter(Boolean);
     const parking = PARKING_OPTIONS.find((p) => p.key === d.parking);
     const details = [
       d.stars.names && `${d.stars.relation || "For"}: ${d.stars.names}`,
       fam.length && `${t?.sensitive ? "With love from" : "With blessings from"} ${fam.join("; ")}`,
       parking && `Parking: ${parking.label}${d.parkingNote ? ` (${d.parkingNote})` : ""}`,
-      d.functions.length && `Functions: ${d.functions.map((f) => [f.title, f.date && formatDate(f.date, false), f.time && formatTime(f.time)].filter(Boolean).join(" ")).join("; ")}`,
+      d.functions.length && `Running order: ${d.functions.map((f) => [f.time && formatTime(f.time), f.title, f.date && f.date !== d.date && formatDate(f.date, false)].filter(Boolean).join(" ")).join("; ")}`,
       d.scale === "community" && d.organiserName && `Organised by ${d.organiserName}`,
     ].filter(Boolean).join(". ");
     const body = {
@@ -379,12 +499,12 @@ export function StepWords({ d, update, session }: StepProps) {
     try {
       const res = await fetch("/api/generate-copy", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(body),
       });
       const data = (await res.json().catch(() => ({}))) as Partial<CopyResponse> & { error?: string };
       if (!res.ok) {
-        setW({ busy: false, trimmed: [], error: res.status === 503
+        setW({ busy: false, trimmed: [], done: false, error: res.status === 503
           ? "The AI writer isn't switched on yet. You can type your own words below for now."
           : data.error ?? "Something went wrong. Please try again." });
         return;
@@ -394,56 +514,83 @@ export function StepWords({ d, update, session }: StepProps) {
         copy: Object.fromEntries(COPY_KEYS.map((k) => [k, data[k] ?? ""])) as Draft["copy"],
         translation: data.translation ? { ...x.translation, ...data.translation } : x.translation,
       }));
-      setW({ busy: false, error: null, trimmed: res.headers.get("X-Copy-Trimmed")?.split(",").filter(Boolean) ?? [] });
+      setW({ busy: false, error: null, done: true, trimmed: res.headers.get("X-Copy-Trimmed")?.split(",").filter(Boolean) ?? [] });
     } catch {
-      setW({ busy: false, trimmed: [], error: "Couldn't reach In2Min2. Check your signal and try again." });
+      setW({ busy: false, trimmed: [], done: false, error: "Couldn't reach In2Min2. Check your signal and try again." });
     }
   }
+  const languagesText = second ? `${main.name} and ${second.name}` : main.name;
 
   return (
     <div className="grid gap-6">
-      <Group title="Languages" line="Up to two. Guests see both, one under the other.">
-        <div className="grid gap-4 sm:grid-cols-2">
+      <section aria-labelledby="ai-title"
+        className="relative grid gap-4 overflow-hidden rounded-3xl bg-gradient-to-br from-brand via-brand to-[#5A4CB0] p-5 text-white shadow-[0_18px_40px_-20px_rgba(46,42,110,0.9)] sm:p-6">
+        <span aria-hidden="true" className="pointer-events-none absolute -right-10 -top-10 size-44 rounded-full bg-marigold/30 blur-2xl" />
+        <div className="relative grid gap-1.5">
+          <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-marigold px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-ink">
+            <Sparkle /> AI writer
+          </span>
+          <h2 id="ai-title" className="font-display text-2xl font-extrabold leading-tight sm:text-3xl">Let AI write it for you</h2>
+          <p className="text-[16px] leading-snug text-white/90">
+            All five boxes below, in <strong className="text-white">{languagesText}</strong>, in about ten seconds. You check and change every word before it goes live.
+          </p>
+        </div>
+        <div className="relative grid gap-3 sm:grid-cols-3 [&_label]:text-white">
           <Field id="lang-main" label="Main language">
             <select id="lang-main" className={inputClass} value={main.code}
               onChange={(e) => update((x) => ({ ...x, languages: [e.target.value, ...x.languages.slice(1).filter((c) => c !== e.target.value)] }))}>
               {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.name}{l.ready ? "" : " (beta)"}</option>)}
             </select>
           </Field>
-          <Field id="lang-second" label="Second language (optional)">
+          <Field id="lang-second" label="Second language">
             <select id="lang-second" className={inputClass} value={second?.code ?? ""}
               onChange={(e) => update((x) => ({ ...x, languages: e.target.value ? [x.languages[0], e.target.value] : [x.languages[0]] }))}>
               <option value="">None</option>
               {LANGUAGES.filter((l) => l.code !== main.code).map((l) => <option key={l.code} value={l.code}>{l.name}{l.ready ? "" : " (beta)"}</option>)}
             </select>
           </Field>
+          <Field id="tone" label="Tone">
+            <select id="tone" className={inputClass} value={d.tone} onChange={(e) => update(set("tone", e.target.value))}>
+              {TONES.map((x) => <option key={x}>{x}</option>)}
+            </select>
+          </Field>
         </div>
         {[main, second].some((l) => l && !l.ready) && (
-          <Notice>Beta language: the AI writes it well, but please ask a native speaker to read it before you publish.</Notice>
+          <p className="relative rounded-2xl bg-white/12 px-4 py-3 text-[15px] leading-snug">
+            Beta language: the AI writes it well, but please ask a native speaker to read it before you publish.
+          </p>
         )}
-        <Field id="tone" label="Tone">
-          <select id="tone" className={inputClass} value={d.tone} onChange={(e) => update(set("tone", e.target.value))}>
-            {TONES.map((x) => <option key={x}>{x}</option>)}
-          </select>
-        </Field>
-        {session ? (
-          <Button kind="main" onClick={writeForMe} disabled={w.busy} className="w-full sm:w-auto">
-            {w.busy ? "Writing…" : "Write it for me"}
-          </Button>
-        ) : (
-          <SignIn why="Sign in (free) to let the AI write it for you. You can also type your own words below." />
-        )}
+        <button type="button" onClick={() => void writeForMe()} disabled={w.busy}
+          className="relative inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-marigold px-7 text-lg font-extrabold text-ink shadow-[0_10px_24px_-12px_rgba(0,0,0,0.6)] transition hover:brightness-105 disabled:opacity-70 sm:w-auto sm:justify-self-start">
+          <Sparkle />
+          {w.busy ? "Writing your words…" : session ? (w.done ? "Write it again" : "Write it for me") : "Sign in and write it for me"}
+        </button>
+        <p className="relative text-sm text-white/80">
+          {session ? "Free, up to 20 times a day." : "Signing in is free and takes a minute. Or type your own words below."}
+        </p>
         {w.error && <Notice tone="warn">{w.error}</Notice>}
+        {w.done && !w.error && <Notice>Done! Read every word below and change anything you like.</Notice>}
         {w.trimmed.length > 0 && <Notice>Some boxes were a little long, so they were shortened to fit. Check them below.</Notice>}
-      </Group>
+      </section>
 
       <div className="grid gap-5">
-        <p className="text-[15px] text-muted">Edit anything. You approve every word before it goes live.</p>
+        <div className="grid gap-1">
+          <h2 className="font-display text-xl font-bold text-brand">Your words</h2>
+          <p className="text-[15px] text-muted">Type your own, or edit what the AI wrote. You approve every word before it goes live.</p>
+        </div>
         {COPY_KEYS.map((key) => (
           <CopyBox key={key} id={key} d={d} update={update} secondName={second?.name} secondCode={second?.code} />
         ))}
       </div>
     </div>
+  );
+}
+
+function Sparkle() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5" fill="currentColor" aria-hidden="true">
+      <path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9L12 2.5zM19 15l.9 2.6 2.6.9-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z" />
+    </svg>
   );
 }
 
@@ -498,8 +645,11 @@ export function StepLook({ d, update, now }: StepProps) {
     setPhotoBusy(true);
     setPhotoError(null);
     try {
-      const url = await resizePhoto(file);
-      update(set("cover", url));
+      const r = await resizePhoto(file);
+      // A landscape photo fills the space; a square or tall one (a logo, a
+      // poster) is shown whole. The host can change it below.
+      const fit: CoverFit = r.width / r.height >= 1.25 ? "fill" : "whole";
+      update((x) => ({ ...x, cover: r.url, coverFit: fit }));
     } catch (e) {
       setPhotoError(e instanceof Error ? e.message : "That photo couldn't be used. Try another.");
     } finally {
@@ -518,6 +668,14 @@ export function StepLook({ d, update, now }: StepProps) {
           {d.cover && <Button kind="quiet" onClick={() => update(set("cover", null))}>Remove photo</Button>}
         </div>
         {photoError && <Notice tone="warn">{photoError}</Notice>}
+        {d.cover && (
+          <div className="grid gap-2">
+            <p className="font-semibold">How should it fit?</p>
+            <Choices<CoverFit> label="How the photo fits" value={d.coverFit} columns="grid-cols-1 sm:grid-cols-2"
+              onChange={(k) => update(set("coverFit", k))}
+              options={COVER_FITS.map((f) => ({ key: f.key, label: f.name, line: f.line }))} />
+          </div>
+        )}
       </Group>
 
       <Group title="Border" line={allBorders ? "All borders. Each one takes your colours." : `Suggested for ${t ? t.label.toLowerCase() : "your event"}. Each one takes your colours.`}>
@@ -525,7 +683,7 @@ export function StepLook({ d, update, now }: StepProps) {
           {shownBorders.map((b) => (
             <Tile key={b.key} tag={b.tag} on={d.border === b.key} onClick={() => update(set("border", b.key))} label={b.name} line={b.line}>
               <span className="pointer-events-none block overflow-hidden rounded-lg" aria-hidden="true">
-                <EventView data={{ ...data, border: b.key }} view="card" now={now} />
+                <EventView data={{ ...data, border: b.key }} view="card" now={now} thumb />
               </span>
             </Tile>
           ))}
@@ -582,7 +740,7 @@ export function StepLook({ d, update, now }: StepProps) {
           {TEMPLATES.map((tp) => (
             <Tile key={tp.key} on={d.template === tp.key} onClick={() => update(set("template", tp.key))} label={tp.name} line={tp.line}>
               <span className="pointer-events-none block h-44 overflow-hidden rounded-lg" aria-hidden="true">
-                <EventView data={{ ...data, template: tp.key }} view="page" now={now} />
+                <EventView data={{ ...data, template: tp.key }} view="page" now={now} thumb />
               </span>
             </Tile>
           ))}
@@ -673,7 +831,7 @@ export function StepSwitches({ d, update }: StepProps) {
 
 // ───────────────────────────── 7. Check and publish ─────────────────────────────
 
-export function StepPublish({ d, update, session, onPreview, onStartAgain, goTo }: StepProps & {
+export function StepPublish({ d, update, session, askSignIn, say, onPreview, onStartAgain, goTo }: StepProps & {
   onPreview: (view: "card" | "page" | "live" | "after") => void; onStartAgain: () => void; goTo: (step: number) => void;
 }) {
   const [confirmReset, setConfirmReset] = useState(false);
@@ -684,15 +842,7 @@ export function StepPublish({ d, update, session, onPreview, onStartAgain, goTo 
   const p = plan(d.plan);
   const q = quote(d.plan, people(d));
 
-  const missing: { text: string; step: number }[] = [];
-  if (!t) missing.push({ text: "What you're celebrating", step: 0 });
-  if (!d.title.trim()) missing.push({ text: "The name of the event", step: 1 });
-  if (community && !d.organiserName.trim()) missing.push({ text: "The organiser's name", step: 1 });
-  if (community && !d.organiserType) missing.push({ text: "What kind of organiser", step: 1 });
-  if (community && d.forProfit === null) missing.push({ text: "Whether anyone makes a profit", step: 1 });
-  if (!d.date) missing.push({ text: "The date", step: 2 });
-  if (!d.startTime) missing.push({ text: "The start time", step: 2 });
-  if (!slugOk(slug)) missing.push({ text: "A web address (below)", step: 6 });
+  const missing = missingForPublish(d);
 
   async function publish() {
     setPub({ busy: true, error: null, offer: null, done: false });
@@ -701,20 +851,38 @@ export function StepPublish({ d, update, session, onPreview, onStartAgain, goTo 
       setPub({ busy: false, error: r.message, offer: null, done: false });
       return;
     }
-    update((x) => ({ ...x, eventId: r.eventId, publishedPath: r.path, offerClaimed: x.offerClaimed || !!r.offer?.ok }));
+    update((x) => {
+      const next = { ...x, eventId: r.eventId, publishedPath: r.path, offerClaimed: x.offerClaimed || !!r.offer?.ok };
+      return { ...next, publishedHash: fingerprint(next) };
+    });
     setPub({ busy: false, error: null, offer: r.offer?.message ?? null, done: true });
   }
 
   const ready = missing.length === 0 && d.checked;
-  const link = d.publishedPath && typeof window !== "undefined" ? `${window.location.origin}${d.publishedPath}` : null;
+  const link = eventLink(d);
+  const changed = unpublishedChanges(d);
+  const name = d.title.trim() || "Our event";
 
   return (
     <div className="grid gap-6">
       {link && (
-        <Group title={pub.done ? "Published!" : "Your event is live"} line="Share this link on WhatsApp, by text or anywhere.">
-          <a href={d.publishedPath} target="_blank" rel="noreferrer" className="break-all font-semibold text-brand underline underline-offset-4">{link}</a>
+        <Group title={pub.done ? "Published!" : "Your event is live"} line="Send this link to your guests. It's the invitation now, the live page on the day, and the memory book afterwards.">
+          <a href={d.publishedPath} target="_blank" rel="noreferrer" className="break-all rounded-2xl bg-wash px-4 py-3 font-semibold text-brand underline underline-offset-4">{link}</a>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Button kind="main" onClick={() => void shareEvent(d, say)}>Share the link</Button>
+            <a href={whatsappUrl(link, name)} target="_blank" rel="noreferrer"
+              className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#25D366] px-6 py-3 font-bold text-[#073B1C] hover:brightness-95">
+              WhatsApp
+            </a>
+            <Button kind="quiet" onClick={async () => {
+              const r = await copyLink(link);
+              say(r === "copied" ? "Link copied." : "Couldn't copy here. Press and hold the link above to copy it.");
+            }}>Copy link</Button>
+          </div>
           {pub.offer && <Notice>{pub.offer}</Notice>}
-          <p className="text-[15px] text-muted">Change anything and press &ldquo;Update my page&rdquo; below; the link stays the same.</p>
+          {changed
+            ? <Notice tone="warn">You&apos;ve changed things since publishing. Press &ldquo;Update my page&rdquo; below to put them live; the link stays the same.</Notice>
+            : <p className="text-[15px] text-muted">Change anything, then press &ldquo;Update my page&rdquo; below; the link stays the same.</p>}
         </Group>
       )}
 
@@ -796,7 +964,9 @@ export function StepPublish({ d, update, session, onPreview, onStartAgain, goTo 
             {!ready && <p className="text-[15px] text-muted">Fill in what&apos;s still needed and tick the box to publish.</p>}
           </>
         ) : (
-          <SignIn why="Sign in to publish. It's free, and it keeps your event safe in your account." />
+          <Button kind="main" className="w-full" onClick={() => askSignIn("Sign in to publish. It's free, and it keeps your event safe in your account.")}>
+            Sign in to publish
+          </Button>
         )}
         {pub.error && <Notice tone="warn">{pub.error}</Notice>}
         <p className="text-[15px] text-muted">The main photo shows in your preview; adding it to the live page comes with photo storage in January.</p>

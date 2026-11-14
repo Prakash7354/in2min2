@@ -11,8 +11,9 @@ import { Wordmark } from "@/components/brand/wordmark";
 import EventView from "@/components/event/event-view";
 import { clearDraft, loadDraft, newDraft, saveDraft, toViewData, type Draft } from "@/lib/draft";
 import type { EventStageView } from "@/lib/event-view";
-import { SignedInAs, useSession } from "./account";
+import { SignInDialog, useSession } from "./account";
 import { StepLook, StepPublish, StepSwitches, StepType, StepWhen, StepWho, StepWords } from "./steps";
+import { TopBar } from "./topbar";
 import { Button } from "./ui";
 
 const STEPS = [
@@ -40,6 +41,17 @@ export default function Builder() {
   const [full, setFull] = useState(false);
   const [device, setDevice] = useState<"phone" | "computer">("phone");
   const { session } = useSession();
+  // The sign-in window: why it's asked for, and what to do once signed in.
+  const [signIn, setSignIn] = useState<{ why: string; then?: () => void } | null>(null);
+  const askSignIn = useCallback((why: string, then?: () => void) => setSignIn({ why, then }), []);
+  // A short message at the bottom ("Link copied").
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<number | undefined>(undefined);
+  const say = useCallback((message: string) => {
+    setToast(message);
+    window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(null), 3200);
+  }, []);
 
   const update = useCallback((fn: (d: Draft) => Draft) => setDraft((d) => fn(d)), []);
 
@@ -86,7 +98,8 @@ export default function Builder() {
   const canNext = step !== 0 || !!draft.eventType;
   const data = toViewData(draft);
 
-  const props = { d: draft, update, now, session };
+  const props = { d: draft, update, now, session, askSignIn, say };
+  const startAgain = () => { clearDraft(); setDraft(newDraft()); setView("card"); goTo(0); };
   const body = [
     <StepType key="type" {...props} />,
     <StepWho key="who" {...props} />,
@@ -96,7 +109,7 @@ export default function Builder() {
     <StepSwitches key="switches" {...props} />,
     <StepPublish key="publish" {...props} goTo={goTo}
       onPreview={(v) => { setView(v); setFull(true); }}
-      onStartAgain={() => { clearDraft(); setDraft(newDraft()); setView("card"); }} />,
+      onStartAgain={startAgain} />,
   ][step];
 
   return (
@@ -106,11 +119,11 @@ export default function Builder() {
           <Link href="/" className="text-[22px]" aria-label="In2Min2 home">
             <Wordmark />
           </Link>
-          <span className="flex items-center gap-3">
-            <span className={`text-sm ${saveOk ? "text-muted" : "font-semibold text-ink"}`} aria-live="polite">
-              {saveOk ? "Saved" : "Not saved: this browser won’t store it"}
+          <span className="flex min-w-0 items-center gap-1 sm:gap-3">
+            <span className={`text-sm ${saveOk ? "text-muted max-[379px]:sr-only" : "font-semibold text-ink"}`} aria-live="polite">
+              {saveOk ? "Saved" : "Not saved"}
             </span>
-            {session && <SignedInAs session={session} />}
+            <TopBar d={draft} session={session} goTo={goTo} askSignIn={askSignIn} say={say} onStartAgain={startAgain} />
           </span>
         </div>
         <nav aria-label="Steps" className="mx-auto w-full max-w-6xl px-4 pb-3">
@@ -144,7 +157,7 @@ export default function Builder() {
             <button type="button" onClick={() => setFull(true)}
               className="flex items-center gap-4 rounded-2xl border border-line bg-card p-3 text-left lg:hidden">
               <span className="pointer-events-none block h-28 w-24 shrink-0 overflow-hidden rounded-lg border border-line" aria-hidden="true">
-                <EventView data={data} view={view} now={now} />
+                <EventView data={data} view={view} now={now} thumb />
               </span>
               <span className="grid gap-0.5">
                 <span className="font-semibold">Live preview</span>
@@ -186,6 +199,17 @@ export default function Builder() {
           )}
         </div>
       </nav>
+
+      {toast && (
+        <p role="status" className="fixed inset-x-4 bottom-24 z-[70] mx-auto max-w-sm rounded-2xl bg-ink px-4 py-3 text-center font-semibold text-white shadow-lg">
+          {toast}
+        </p>
+      )}
+
+      {signIn && (
+        <SignInDialog why={signIn.why} onClose={() => setSignIn(null)}
+          onDone={() => { const then = signIn.then; setSignIn(null); say("You're signed in."); then?.(); }} />
+      )}
 
       {full && (
         <div role="dialog" aria-modal="true" aria-label="Full-screen preview" className="fixed inset-0 z-50 flex flex-col bg-ink/80"

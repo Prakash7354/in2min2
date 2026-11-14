@@ -9,17 +9,19 @@ import type { CSSProperties, ReactNode } from "react";
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
 import { partyColours, textStyle } from "@/lib/catalog";
 import {
-  daysUntil, directionsUrl, formatDate, formatTime, monogram,
-  type EventStageView, type EventViewData,
+  daysUntil, directionsUrl, formatDate, formatTime, monogram, runningOrder,
+  type EventStageView, type EventViewData, type MenuItem,
 } from "@/lib/event-view";
 import BorderArt from "./borders";
 // Styles: components/event/event-view.css, loaded once in app/layout.tsx.
 // Class names: s.card → "ev-card" (see event-view.css).
 const s = new Proxy({} as Record<string, string>, { get: (_, key) => `ev-${String(key)}` });
 
-type Props = { data: EventViewData; view: EventStageView; now: number };
+// thumb: a small copy in the builder (a tile or the little preview). Full-size
+// pages get minimum text sizes; thumbnails shrink everything evenly.
+type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: boolean };
 
-export default function EventView({ data, view, now }: Props) {
+export default function EventView({ data, view, now, thumb = false }: Props) {
   const p = data.palette;
   const ts = textStyle(data.textStyle);
   const party = partyColours(p);
@@ -41,11 +43,12 @@ export default function EventView({ data, view, now }: Props) {
         data-motion={data.motion ? "on" : "off"}
         data-border={data.border}
         data-gradient={p.gradient ? "on" : "off"}
+        data-thumb={thumb ? "" : undefined}
       >
         {data.demo && <span className={s.demo}>Demo</span>}
         {view === "card" && <Card d={data} />}
         {view === "page" && <Page d={data} now={now} />}
-        {view === "live" && <Live d={data} />}
+        {view === "live" && <Live d={data} now={now} />}
         {view === "after" && <After d={data} />}
       </div>
     </div>
@@ -116,12 +119,19 @@ function Blessing({ d }: { d: EventViewData }) {
 
 // ─────────────── photos ───────────────
 
+// "whole": the whole picture, never cropped, on a soft blurred copy of itself
+// (for logos, posters, and photos with words on them). "fill": cropped to fill.
 function PhotoBox({ d, className }: { d: EventViewData; className: string }) {
+  const whole = d.coverFit === "whole";
   return (
-    <div className={`${s.photo} ${className}`}>
+    <div className={`${s.photo} ${className}`} data-fit={d.cover ? d.coverFit : undefined}>
       {d.cover ? (
-        // eslint-disable-next-line @next/next/no-img-element -- a local data: URL while drafting; R2 images later
-        <img src={d.cover} alt="" />
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element -- a local data: URL while drafting; R2 images later */}
+          {whole && <img src={d.cover} alt="" aria-hidden="true" className={s.photoBlur} />}
+          {/* eslint-disable-next-line @next/next/no-img-element -- as above */}
+          <img src={d.cover} alt="" className={s.photoImg} />
+        </>
       ) : (
         <span className={s.mono} aria-hidden="true">{monogram((d.scale === "community" ? d.title : d.stars?.names) || d.title || d.typeLabel)}</span>
       )}
@@ -174,45 +184,61 @@ function Card({ d }: { d: EventViewData }) {
   );
 }
 
+// The top of the page. A "hero" photo runs edge to edge ABOVE the border, so
+// the border frames the words and never sits under the picture.
 function Hero({ d, children }: { d: EventViewData; children?: ReactNode }) {
   const kicker = d.sensitive ? "In loving memory" : d.typeLabel;
   if (d.photoStyle === "split") {
     return (
-      <header className={`${s.hero} ${s.heroBand}`} data-photo="split">
-        <BorderArt kind={d.border} className={s.heroArt} />
-        <div className={s.splitGrid}>
-          <Photo d={d} />
-          <div className={s.splitText}>
-            <Kicker>{kicker}</Kicker>
-            <Headline d={d} as="h1" />
-            {children}
+      <header className={s.hero} data-photo="split">
+        <div className={`${s.heroBody} ${s.heroBand}`}>
+          <BorderArt kind={d.border} className={s.heroArt} />
+          <div className={s.splitGrid}>
+            <Photo d={d} />
+            <div className={s.splitText}>
+              <Kicker>{kicker}</Kicker>
+              <Headline d={d} as="h1" />
+              {children}
+            </div>
           </div>
         </div>
       </header>
     );
   }
+  const top = d.photoStyle === "hero";
   return (
-    <header className={`${s.hero} ${s.heroBand}`} data-photo={d.photoStyle}>
-      <BorderArt kind={d.border} className={s.heroArt} />
-      <Photo d={d} />
-      <Kicker>{kicker}</Kicker>
-      <Headline d={d} as="h1" />
-      {children}
+    <header className={s.hero} data-photo={d.photoStyle}>
+      {top && <Photo d={d} />}
+      <div className={`${s.heroBody} ${s.heroBand}`}>
+        <BorderArt kind={d.border} className={s.heroArt} />
+        {!top && <Photo d={d} />}
+        <Kicker>{kicker}</Kicker>
+        <Headline d={d} as="h1" />
+        {children}
+      </div>
     </header>
+  );
+}
+
+function Countdown({ d, now }: { d: EventViewData; now: number }) {
+  const days = d.toggles.countdown && d.date ? daysUntil(d.date, d.timezone, now) : null;
+  if (days === null || days < 0) return null;
+  return (
+    <span className={s.count}>
+      {days === 0 ? <b>Today</b> : days === 1 ? <b>Tomorrow</b> : <><b>{days}</b> days to go</>}
+    </span>
   );
 }
 
 function Page({ d, now }: { d: EventViewData; now: number }) {
   const { main, second, secondLang } = words(d);
-  const days = d.toggles.countdown && d.date ? daysUntil(d.date, d.timezone, now) : null;
-  const countdown = days === null || days < 0 ? null : days === 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
   const story = main.landing_page_story.split(/\n\s*\n/).filter((x) => x.trim());
   return (
     <>
       <Hero d={d}>
         <p className={s.when}>{whenLine(d)}</p>
         {d.venueName && <p className={s.where}>{d.venueName}</p>}
-        {countdown && <span className={s.chip}>{countdown}</span>}
+        <Countdown d={d} now={now} />
       </Hero>
 
       {(story.length > 0 || main.card_invite_body) && (
@@ -228,19 +254,22 @@ function Page({ d, now }: { d: EventViewData; now: number }) {
 
       <People d={d} />
       <WhenWhere d={d} />
-      {d.toggles.schedule && d.functions.length > 0 && <Schedule d={d} />}
+      {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} />}
 
       {main.guest_note_box && (
         <section className={s.section}>
           <p className={s.note}>
-            {main.guest_note_box}
-            <Second text={second?.guest_note_box} lang={secondLang} />
+            <span className={s.noteIcon} aria-hidden="true">i</span>
+            <span>
+              {main.guest_note_box}
+              <Second text={second?.guest_note_box} lang={secondLang} />
+            </span>
           </p>
         </section>
       )}
 
       {d.toggles.rsvp && (
-        <section className={s.section}>
+        <section className={`${s.section} ${s.rsvp}`}>
           <h2 className={s.sectionTitle}>{d.sensitive ? "Will you attend?" : "Can you come?"}</h2>
           <div className={s.rsvpRow}>
             <span className={s.btn}>{d.sensitive ? "I’ll be there" : "Yes, we’ll come"}</span>
@@ -250,15 +279,21 @@ function Page({ d, now }: { d: EventViewData; now: number }) {
         </section>
       )}
 
-      {(d.toggles.gift_registry || d.toggles.guestbook) && !d.sensitive && (
+      {(d.toggles.gift_registry || d.toggles.guestbook) && (
         <section className={s.section}>
-          {d.toggles.gift_registry && <p className={s.muted}>Gifts: details from the family will appear here.</p>}
-          {d.toggles.guestbook && <p className={s.muted}>Guestbook: leave a message for {d.stars?.names || "the family"}.</p>}
-        </section>
-      )}
-      {d.toggles.guestbook && d.sensitive && (
-        <section className={s.section}>
-          <p className={s.muted}>Book of condolence: share a memory or a message for the family.</p>
+          <div className={s.extras}>
+            {d.toggles.gift_registry && !d.sensitive && (
+              <div className={s.extra}><span className={s.icon} aria-hidden="true"><GiftIcon /></span>
+                <span><span className={s.factMain}>Gifts</span><span className={s.factSub}>Details from the family will appear here.</span></span></div>
+            )}
+            {d.toggles.guestbook && (
+              <div className={s.extra}><span className={s.icon} aria-hidden="true"><PenIcon /></span>
+                <span>
+                  <span className={s.factMain}>{d.sensitive ? "Book of condolence" : "Guestbook"}</span>
+                  <span className={s.factSub}>{d.sensitive ? "Share a memory or a message for the family." : `Leave a message for ${d.stars?.names || "the family"}.`}</span>
+                </span></div>
+            )}
+          </div>
         </section>
       )}
 
@@ -301,7 +336,7 @@ function WhenWhere({ d }: { d: EventViewData }) {
   return (
     <section className={s.section}>
       <h2 className={s.sectionTitle}>When and where</h2>
-      <div className={s.facts}>
+      <div className={`${s.facts} ${s.panel}`}>
         <div className={s.fact}>
           <span className={s.icon}><CalendarIcon /></span>
           <div>
@@ -330,34 +365,65 @@ function WhenWhere({ d }: { d: EventViewData }) {
       </div>
       {url && (
         <div>
-          <a className={`${s.btn} ${s.btnAccent}`} href={url} target="_blank" rel="noreferrer">Directions</a>
+          <a className={`${s.btn} ${s.btnAccent}`} href={url} target="_blank" rel="noreferrer"><PinIcon /> Directions</a>
         </div>
       )}
     </section>
   );
 }
 
-function Schedule({ d, highlightFirst = false }: { d: EventViewData; highlightFirst?: boolean }) {
-  const items = [...d.functions].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
-  const multiDay = new Set(items.map((f) => f.date)).size > 1;
+// What happens when. A meal shows its menu underneath. On the day, the item
+// on now and the one coming next are marked.
+function RunningOrder({ d, now, live = false }: { d: EventViewData; now: number; live?: boolean }) {
+  const ro = runningOrder(d.functions, d.date, now, d.timezone);
   return (
     <section className={s.section}>
-      <h2 className={s.sectionTitle}>{d.scale === "community" ? "Programme" : "Schedule"}</h2>
-      <ol className={s.schedule}>
-        {items.map((f, i) => (
-          <li key={i} className={highlightFirst && i === 0 ? s.now : undefined}>
-            <span className={s.schedTime}>
-              {formatTime(f.time) || "Time to follow"}
-              {multiDay && f.date && <span className={s.schedDay}>{shortDate(f.date)}</span>}
-            </span>
-            <span>
-              <span className={s.factMain}>{f.title || "Function"}</span>
-              {f.place && <span className={s.factSub}> · {f.place}</span>}
-            </span>
-          </li>
-        ))}
+      <h2 className={s.sectionTitle}>{d.scale === "community" ? "Programme" : "Running order"}</h2>
+      <ol className={s.timeline}>
+        {ro.items.map((f, i) => {
+          const state = live ? (i === ro.current ? "now" : i === ro.next ? "next" : i < ro.current ? "done" : undefined) : undefined;
+          return (
+            <li key={i} className={s.tItem} data-state={state} data-meal={f.meal ? "" : undefined}>
+              <span className={s.tTime}>
+                {formatTime(f.time) || "Time to follow"}
+                {ro.multiDay && f.date && <span className={s.tDay}>{shortDate(f.date)}</span>}
+              </span>
+              <span className={s.tDot} aria-hidden="true">{f.meal && <ForkIcon />}</span>
+              <span className={s.tBody}>
+                {state === "now" && <span className={s.tTag}>On now</span>}
+                {state === "next" && <span className={`${s.tTag} ${s.tTagNext}`}>Next</span>}
+                <span className={s.tTitle}>{f.title || "To follow"}</span>
+                {f.place && <span className={s.factSub}>{f.place}</span>}
+                {f.note && <span className={s.tNote}>{f.note}</span>}
+                {d.toggles.menu && f.meal && (f.menu?.length ?? 0) > 0 && <MenuCard items={f.menu ?? []} />}
+              </span>
+            </li>
+          );
+        })}
       </ol>
     </section>
+  );
+}
+
+// A menu card, like a printed one. Dishes under the same course are grouped.
+function MenuCard({ items }: { items: MenuItem[] }) {
+  const groups: { course: string; dishes: string[] }[] = [];
+  for (const m of items) {
+    if (!m.dish.trim()) continue;
+    const last = groups[groups.length - 1];
+    if (last && last.course === m.course.trim()) last.dishes.push(m.dish.trim());
+    else groups.push({ course: m.course.trim(), dishes: [m.dish.trim()] });
+  }
+  return (
+    <span className={s.menu}>
+      <span className={s.menuHead}>Menu</span>
+      {groups.map((g, i) => (
+        <span key={i} className={s.menuGroup}>
+          {g.course && <span className={s.menuCourse}>{g.course}</span>}
+          {g.dishes.map((dish, j) => <span key={j} className={s.menuDish}>{dish}</span>)}
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -367,13 +433,14 @@ function shortDate(date: string): string {
   return `${dow.slice(0, 3)} ${day} ${month.slice(0, 3)}`;
 }
 
-function Live({ d }: { d: EventViewData }) {
+function Live({ d, now }: { d: EventViewData; now: number }) {
   return (
     <>
       <div className={s.banner}>{d.sensitive ? "Today" : "Happening today"}</div>
       <Hero d={d}>
         <p className={s.when}>{whenLine(d)}</p>
       </Hero>
+      {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} live />}
       {d.toggles.photo_wall && (
         <section className={s.section}>
           <span className={`${s.btn} ${s.btnAccent} ${s.btnBig}`}>{d.sensitive ? "Share a photo or memory" : "Add your photos"}</span>
@@ -381,7 +448,6 @@ function Live({ d }: { d: EventViewData }) {
           <p className={s.muted}>Guests’ photos appear here as they are added.</p>
         </section>
       )}
-      {d.toggles.schedule && d.functions.length > 0 && <Schedule d={d} highlightFirst />}
       <WhenWhere d={d} />
       <Footer d={d} />
     </>
@@ -438,6 +504,30 @@ function CalendarIcon() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
       <rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" />
       <path d="M3.5 10h17M8 3v4M16 3v4" />
+    </svg>
+  );
+}
+
+function ForkIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10M17 21V3c-2.2 1.2-3.5 3.8-3.5 7.5V13H17" />
+    </svg>
+  );
+}
+
+function GiftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3.5" y="8.5" width="17" height="4" rx="1" /><path d="M5 12.5V20h14v-7.5M12 8.5V20M12 8.5S10.5 4 8 4.5 7 8.5 12 8.5zM12 8.5s1.5-4.5 4-4 1 4-4 4z" />
+    </svg>
+  );
+}
+
+function PenIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4zM13.5 6.5l4 4" />
     </svg>
   );
 }

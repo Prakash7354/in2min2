@@ -5,6 +5,10 @@ import fs from "node:fs";
 import * as cat from "../../lib/catalog.ts";
 
 const sql = fs.readFileSync(new URL("../migrations/0001_init.sql", import.meta.url), "utf8");
+// The migrations after 0001, for what they add (new switches).
+const migDir = new URL("../migrations/", import.meta.url);
+const later = fs.readdirSync(migDir).filter((f) => f.endsWith(".sql") && f !== "0001_init.sql").sort()
+  .map((f) => fs.readFileSync(new URL(f, migDir), "utf8")).join("\n");
 let pass = 0, fail = 0;
 const ok = (name, cond, extra = "") => { if (cond) { pass++; console.log("  ok  ", name); } else { fail++; console.log("  FAIL", name, extra); } };
 
@@ -45,6 +49,8 @@ ok("repeat_as matches (wedding → anniversary)", JSON.stringify(Object.fromEntr
 // Switch defaults
 const toggleBlock = sql.slice(sql.indexOf("create table public.feature_toggles"), sql.indexOf("settings        jsonb"));
 const dbToggles = Object.fromEntries([...toggleBlock.matchAll(/^\s+([a-z_]+)\s+boolean not null default (true|false)/gm)].map((m) => [m[1], m[2] === "true"]));
+// Switches added by later migrations ("alter table public.feature_toggles add column menu boolean not null default true")
+for (const m of later.matchAll(/alter table public\.feature_toggles\s+add column ([a-z_]+) boolean not null default (true|false)/g)) dbToggles[m[1]] = m[2] === "true";
 ok("switch defaults match", JSON.stringify(dbToggles) === JSON.stringify(cat.TOGGLE_DEFAULTS), JSON.stringify(dbToggles));
 ok("every switch in a type's defaults exists", cat.EVENT_TYPES.every((t) => Object.keys(t.toggles).every((k) => k in cat.TOGGLE_DEFAULTS)));
 
@@ -58,6 +64,8 @@ ok("no two palettes, text styles or borders share a name", new Set(cat.PALETTES.
   && new Set(cat.TEXT_STYLES.map((t) => t.key)).size === cat.TEXT_STYLES.length && new Set(cat.BORDERS.map((b) => b.key)).size === cat.BORDERS.length);
 const dbPhotoStyles = sql.match(/photo_style in \(([^)]+)\)/)[1].replace(/'|\s/g, "").split(",");
 ok("photo styles match", JSON.stringify(dbPhotoStyles) === JSON.stringify(cat.PHOTO_STYLES.map((s) => s.key)));
+const dbFits = later.match(/cover_fit in \(([^)]+)\)/)?.[1].replace(/'|\s/g, "").split(",");
+ok("photo fits match (0003)", JSON.stringify(dbFits) === JSON.stringify(cat.COVER_FITS.map((f) => f.key)), JSON.stringify(dbFits));
 const dbOrganiser = sql.match(/organiser_type in \(([^)]+)\)/)[1].replace(/'|\s/g, "").split(",");
 ok("organiser types match", JSON.stringify([...dbOrganiser].sort()) === JSON.stringify(cat.ORGANISER_TYPES.map((o) => o.key).sort()));
 ok("every event type's starting palette, text style and borders exist", cat.EVENT_TYPES.every((t) =>

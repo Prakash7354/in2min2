@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import EventView from "@/components/event/event-view";
 import { eventFontVariables } from "@/components/event/fonts";
 import { getPublicEvent } from "@/lib/public-event";
+import { ShareButton } from "./share-button";
 
 const token = (sp: Record<string, string | string[] | undefined>) => (typeof sp.g === "string" && /^[A-Za-z0-9]{16,64}$/.test(sp.g) ? sp.g : undefined);
 
@@ -51,11 +52,13 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
     );
   }
 
+  const p = page.data.palette;
   return (
-    <main className={`${eventFontVariables} min-h-dvh`} style={{ background: page.data.palette.soft }}>
-      <div className="mx-auto w-full max-w-2xl">
+    <main className={`${eventFontVariables} min-h-dvh sm:py-8`} style={{ background: p.gradient ? `linear-gradient(${p.soft}e6, ${p.soft}e6), ${p.gradient}` : p.soft }}>
+      <div className="mx-auto w-full max-w-2xl overflow-hidden sm:rounded-3xl sm:shadow-[0_24px_60px_-28px_rgba(0,0,0,0.45)]">
         <EventView data={page.data} view={page.view} now={serverNow()} />
       </div>
+      <ShareButton title={page.title} colour={p.main} textColour={p.onMain} />
     </main>
   );
 }

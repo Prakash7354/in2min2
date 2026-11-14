@@ -62,6 +62,7 @@ function eventRow(d: Draft, slug: string) {
     text_style: d.textStyle,
     border: d.border,
     photo_style: d.photoStyle,
+    cover_fit: d.coverFit,
     motion: d.motion,
     status: "published",
     is_private: d.isPrivate,
@@ -70,6 +71,8 @@ function eventRow(d: Draft, slug: string) {
 
 function explain(e: { code?: string; message?: string }): PublishResult {
   const m = e.message ?? "";
+  // A column the live database doesn't have yet: a migration still to run.
+  if (e.code === "PGRST204" || e.code === "42703") return { ok: false, message: "In2Min2's database needs its latest update before this can be published. (For Claude Code: a migration hasn't been run.)" };
   if (e.code === "23505") return { ok: false, step: 6, message: "That web address is already taken. Change it under “Web address” and publish again." };
   if (m.includes("community_organiser_named")) return { ok: false, step: 1, message: "A public event needs the organiser's name, what kind of organiser, and whether anyone profits." };
   if (e.code === "23514") return { ok: false, message: "Something is too long or not filled in properly. Check the words and numbers, then try again." };
@@ -99,13 +102,19 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
     if (r.error) return explain(r.error);
   }
 
-  // 3. Functions or programme
+  // 3. The running order, each meal with its menu
   await sb.from("sub_events").delete().eq("event_id", ev.id);
-  const fns = d.scale === "personal" ? [] : d.functions.filter((f) => f.title.trim() && (f.date || d.date)).map((f, i) => ({
-    event_id: ev.id, title: f.title.trim().slice(0, 80), kind: "other",
-    starts_at: zonedToUtcIso(f.date || d.date, f.time || d.startTime, d.timezone),
-    venue_name: nz(f.place), sort_order: i,
-  }));
+  const fns = d.functions.filter((f) => f.title.trim() && (f.date || d.date)).map((f, i) => {
+    const menu = f.meal
+      ? (f.menu ?? []).filter((m) => m.dish.trim()).slice(0, 20).map((m) => ({ course: m.course.trim().slice(0, 40), dish: m.dish.trim().slice(0, 160) }))
+      : [];
+    return {
+      event_id: ev.id, title: f.title.trim().slice(0, 80), kind: f.meal ? "meal" : "other",
+      starts_at: zonedToUtcIso(f.date || d.date, f.time || d.startTime, d.timezone),
+      venue_name: nz(f.place), description: nz((f.note ?? "").slice(0, 500)), sort_order: i,
+      details: menu.length ? { menu } : {},
+    };
+  });
   if (fns.length) {
     const r = await sb.from("sub_events").insert(fns);
     if (r.error) return explain(r.error);

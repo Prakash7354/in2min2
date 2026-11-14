@@ -353,6 +353,49 @@ await expectError("a host cannot reset their own AI count", `delete from ai_usag
 await as(C);
 ok("another host still has their own 20", (await q(`select take_ai_write() as ok`))[0].ok === true);
 
+console.log("Running order, food menu and photo fit (0003):");
+await as(A);
+const [ro] = await q(`insert into events (event_type, slug, title, starts_at, status, cover_fit)
+  values ('reunion','rgr-2027','1 RGR Reunion 2027', '2027-07-01 11:30+00', 'published', 'whole') returning id`);
+ok("a host can choose 'show the whole picture'", (await q(`select cover_fit from events where id = $1`, [ro.id]))[0].cover_fit === "whole");
+await expectError("an unknown photo fit is rejected", `update events set cover_fit = 'stretch' where id = '${ro.id}'`, /check constraint/);
+ok("the menu switch starts on", (await q(`select menu from feature_toggles where event_id = $1`, [ro.id]))[0].menu === true);
+await q(`insert into sub_events (event_id, title, kind, starts_at, description, details) values
+  ($1, 'Guests arrive', 'other', '2027-07-01 11:30+00', 'Tea and coffee in the foyer', '{}'),
+  ($1, 'Lunch', 'meal', '2027-07-01 12:30+00', 'Vegetarian dishes marked (V)',
+   '{"menu": [{"course": "Starter", "dish": "Chicken momo"}, {"course": "Main", "dish": "Dal bhat with goat curry"}]}')`, [ro.id]);
+ok("a host adds a meal with its menu", (await q(`select count(*)::int n from sub_events where event_id = $1`, [ro.id]))[0].n === 2);
+await expectError("a dish over 160 characters is rejected", `insert into sub_events (event_id, title, kind, starts_at, details)
+  values ('${ro.id}', 'Dinner', 'meal', '2027-07-01 18:00+00', '{"menu": [{"course": "Main", "dish": "${"x".repeat(161)}"}]}')`, /check constraint/);
+await expectError("an empty dish is rejected", `insert into sub_events (event_id, title, kind, starts_at, details)
+  values ('${ro.id}', 'Dinner', 'meal', '2027-07-01 18:00+00', '{"menu": [{"course": "Main", "dish": ""}]}')`, /check constraint/);
+await expectError("more than 20 dishes is rejected", `insert into sub_events (event_id, title, kind, starts_at, details)
+  values ('${ro.id}', 'Dinner', 'meal', '2027-07-01 18:00+00', '{"menu": [${Array.from({ length: 21 }, (_, i) => `{"dish": "Dish ${i}"}`).join(",")}]}')`, /check constraint/);
+await as(B);
+await expectError("another host cannot add to A's running order", `insert into sub_events (event_id, title, starts_at) values ('${ro.id}', 'Intruder', now())`, /row-level security/);
+ok("another host cannot see A's running order", (await q(`select id from sub_events where event_id = $1`, [ro.id])).length === 0);
+await as(null);
+[pe] = await q(`select public_event('reunion','rgr-2027') as p`);
+ok("the public page carries the running order in time order", pe.p.sub_events.map((x) => x.title).join() === "Guests arrive,Lunch");
+ok("…with each item's note", pe.p.sub_events[0].description === "Tea and coffee in the foyer");
+ok("…and the lunch menu", pe.p.sub_events[1].menu?.length === 2 && pe.p.sub_events[1].menu[0].dish === "Chicken momo");
+ok("…and how the photo fits", pe.p.event.cover_fit === "whole");
+await as(A);
+await q(`update feature_toggles set menu = false where event_id = $1`, [ro.id]);
+await as(null);
+[pe] = await q(`select public_event('reunion','rgr-2027') as p`);
+ok("menu switched off: the meal stays, its menu is not sent", pe.p.sub_events.length === 2 && pe.p.sub_events[1].menu === null);
+await as(A);
+await q(`update feature_toggles set schedule = false where event_id = $1`, [ro.id]);
+await as(null);
+[pe] = await q(`select public_event('reunion','rgr-2027') as p`);
+ok("running order switched off: nothing of it is sent", pe.p.sub_events.length === 0);
+await as(C);
+const hro = await db.query(`update feature_toggles set schedule = true where event_id = $1`, [ro.id]);
+ok("a helper of another event cannot switch it back", hro.affectedRows === 0);
+await as(A);
+await q(`delete from events where id = $1`, [ro.id]);
+
 console.log("Delete everything:");
 await as(C);  // C is a helper on A's wedding
 const hd = await db.query(`delete from events where id = $1`, [ev.id]);

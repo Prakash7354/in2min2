@@ -25,6 +25,8 @@
   line-height: 1.5;
   overflow: hidden;
   position: relative;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 .ev-root * {
   box-sizing: border-box;
@@ -195,9 +197,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4em;
+  gap: 0.45em;
   border-radius: 999px;
-  padding: 0.6em 1.3em;
+  padding: 0.8em 1.5em;
   font-weight: 700;
   font-size: 0.95em;
   background: var(--ev-main);
@@ -210,6 +212,11 @@
 .ev-btnAccent {
   background: var(--ev-accent);
   color: var(--ev-on-accent);
+}
+.ev-btn svg {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
 }
 .ev-btnGhost {
   background: transparent;
@@ -231,12 +238,24 @@
   place-items: center;
 }
 .ev-photo img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-.ev-root[data-motion="on"] .ev-photo img {
+/* "Show the whole picture": the picture is never cropped; a blurred copy of it
+   fills the space around it. */
+.ev-photo[data-fit="whole"] .ev-photoImg {
+  object-fit: contain;
+}
+.ev-photoBlur {
+  filter: blur(22px) saturate(1.15);
+  transform: scale(1.2);
+  opacity: 0.7;
+}
+.ev-root[data-motion="on"] .ev-photo[data-fit="fill"] .ev-photoImg {
   animation: ev-slowZoom 18s ease-out both;
 }
 @keyframes ev-slowZoom {
@@ -244,7 +263,7 @@
   to { transform: scale(1); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ev-root[data-motion="on"] .ev-photo img { animation: none; }
+  .ev-root[data-motion="on"] .ev-photo .ev-photoImg { animation: none; }
 }
 .ev-mono {
   font-family: var(--ev-display);
@@ -295,32 +314,35 @@
 /* ── Event page ── */
 .ev-hero {
   position: relative;
+}
+/* A "hero" photo: edge to edge above the bordered part, never taller than 460px. */
+.ev-hero > .ev-photoHero {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-height: 460px;
+}
+.ev-heroBody {
+  position: relative;
   display: grid;
   justify-items: center;
   text-align: center;
   gap: min(calc(var(--u) * 2.6), 14px);
-  padding: calc(min(100cqi, 560px) * var(--bt) + min(calc(var(--u) * 6), 36px)) min(calc(var(--u) * 6), 36px)
+  /* The words stay inside the border, which is never wider than 560px. */
+  padding: calc(min(100cqi, 560px) * var(--bt) + min(calc(var(--u) * 6), 36px))
+    calc((100% - min(100%, 560px)) / 2 + min(calc(var(--u) * 6), 36px) + var(--side))
     calc(min(100cqi, 560px) * var(--bb) + min(calc(var(--u) * 7), 40px));
 }
-.ev-hero > :not(.ev-heroArt) {
+.ev-heroBody > :not(.ev-heroArt) {
   position: relative;
   z-index: 1;
-}
-.ev-hero[data-photo="hero"] {
-  padding-top: calc(min(100cqi, 560px) * var(--bt));
-}
-.ev-hero[data-photo="hero"] .ev-photoHero {
-  margin-inline: calc(min(calc(var(--u) * 6), 36px) * -1);
-  width: calc(100% + 2 * min(calc(var(--u) * 6), 36px));
-  margin-bottom: min(calc(var(--u) * 2), 10px);
 }
 .ev-art.ev-heroArt {
   inset: 0 auto 0 50%;
   width: min(100%, 560px);
   transform: translateX(-50%);
 }
-.ev-root[data-template="modern"] .ev-hero,
-.ev-root[data-template="sport"] .ev-hero {
+.ev-root[data-template="modern"] .ev-heroBody,
+.ev-root[data-template="sport"] .ev-heroBody {
   justify-items: start;
   text-align: left;
 }
@@ -341,7 +363,7 @@
   background: color-mix(in srgb, var(--ev-on-main) 16%, transparent);
   color: var(--ev-on-main);
 }
-.ev-root[data-gradient="on"] .ev-hero:not(.ev-heroBand) {
+.ev-root[data-gradient="on"]:not([data-template="modern"]) .ev-heroBody {
   background: linear-gradient(180deg, color-mix(in srgb, var(--ev-bg) 88%, transparent), var(--ev-bg)), var(--ev-gradient);
 }
 .ev-splitGrid {
@@ -368,12 +390,46 @@
   font-weight: 600;
   font-size: 0.85em;
 }
+/* "229 days to go" */
+.ev-count {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
+  margin-top: 0.3em;
+  border-radius: 999px;
+  padding: 0.35em 1.1em;
+  background: var(--ev-soft);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ev-accent) 70%, transparent);
+  color: var(--ev-ink);
+  font-weight: 600;
+  font-size: 0.92em;
+}
+.ev-count b {
+  font-family: var(--ev-display);
+  color: var(--ev-main);
+  font-size: 1.45em;
+  line-height: 1;
+  font-weight: 700;
+}
+.ev-root[data-template="modern"] .ev-heroBand .ev-count {
+  background: color-mix(in srgb, var(--ev-on-main) 14%, transparent);
+  color: var(--ev-on-main);
+}
+.ev-root[data-template="modern"] .ev-heroBand .ev-count b {
+  color: var(--ev-on-main);
+}
 
 .ev-section {
-  padding: min(calc(var(--u) * 6), 32px) min(calc(var(--u) * 6), 36px);
+  padding: min(calc(var(--u) * 7), 36px) min(calc(var(--u) * 6), 36px);
   display: grid;
-  gap: min(calc(var(--u) * 2.4), 12px);
+  gap: min(calc(var(--u) * 3), 16px);
   border-top: 1px solid color-mix(in srgb, var(--ev-ink) 10%, transparent);
+}
+/* On a wide screen the words stay a comfortable width. */
+.ev-section,
+.ev-footer {
+  max-width: 720px;
+  margin-inline: auto;
 }
 .ev-sectionTitle {
   font-family: var(--ev-display);
@@ -382,6 +438,15 @@
   line-height: 1.15;
   margin: 0;
   font-weight: 700;
+}
+.ev-sectionTitle::after {
+  content: "";
+  display: block;
+  width: 2.2em;
+  height: 3px;
+  margin-top: 0.4em;
+  border-radius: 3px;
+  background: var(--ev-accent);
 }
 .ev-root[data-text="calligraphy"] .ev-sectionTitle,
 .ev-root[data-text="handwritten"] .ev-sectionTitle {
@@ -400,6 +465,9 @@
 }
 .ev-story p {
   margin: 0 0 0.8em;
+}
+.ev-story p:first-child {
+  font-size: 1.06em;
 }
 .ev-storySecond {
   padding-top: 0.6em;
@@ -431,13 +499,13 @@
 }
 .ev-fact {
   display: grid;
-  grid-template-columns: min(calc(var(--u) * 7), 32px) 1fr;
+  grid-template-columns: min(calc(var(--u) * 8), 36px) 1fr;
   gap: min(calc(var(--u) * 2.4), 12px);
   align-items: start;
 }
 .ev-icon {
-  width: min(calc(var(--u) * 7), 32px);
-  height: min(calc(var(--u) * 7), 32px);
+  width: min(calc(var(--u) * 8), 36px);
+  height: min(calc(var(--u) * 8), 36px);
   border-radius: 50%;
   background: var(--ev-soft);
   color: var(--ev-main);
@@ -457,50 +525,227 @@
   color: var(--ev-muted);
   font-size: 0.92em;
 }
-.ev-schedule {
-  display: grid;
-  gap: 0;
+/* ── Running order ── */
+.ev-timeline {
   list-style: none;
   margin: 0;
   padding: 0;
-}
-.ev-schedule li {
   display: grid;
-  grid-template-columns: 5.4em 1fr;
-  gap: min(calc(var(--u) * 3), 14px);
-  padding: 0.65em 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--ev-ink) 8%, transparent);
 }
-.ev-schedule li:last-child {
-  border-bottom: 0;
+.ev-tItem {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4.6em 1.7em minmax(0, 1fr);
+  column-gap: 0.7em;
+  padding-bottom: 1.15em;
 }
-.ev-schedTime {
+/* the line joining the dots */
+.ev-tItem::before {
+  content: "";
+  position: absolute;
+  left: calc(4.6em + 0.7em + 0.85em - 1px);
+  top: 1.2em;
+  bottom: 0;
+  width: 2px;
+  background: color-mix(in srgb, var(--ev-main) 22%, transparent);
+}
+.ev-tItem:last-child {
+  padding-bottom: 0;
+}
+.ev-tItem:last-child::before {
+  display: none;
+}
+.ev-tTime {
   font-weight: 700;
   color: var(--ev-main);
   font-variant-numeric: tabular-nums;
+  text-align: right;
+  line-height: 1.35;
+  padding-top: 0.12em;
   display: grid;
   align-content: start;
 }
-.ev-schedDay {
+.ev-tDay {
   font-weight: 500;
-  font-size: 0.8em;
+  font-size: 0.78em;
   color: var(--ev-muted);
 }
-.ev-now {
-  background: var(--ev-soft);
-  border-radius: 0.6em;
-  padding-inline: 0.6em;
+.ev-tDot {
+  position: relative;
+  z-index: 1;
+  justify-self: center;
+  width: 0.85em;
+  height: 0.85em;
+  margin-top: 0.35em;
+  border-radius: 50%;
+  background: var(--ev-bg);
+  box-shadow: inset 0 0 0 3px var(--ev-main);
 }
-.ev-note {
+.ev-tItem[data-meal] .ev-tDot {
+  width: 1.7em;
+  height: 1.7em;
+  margin-top: -0.05em;
+  display: grid;
+  place-items: center;
+  background: var(--ev-accent);
+  color: var(--ev-on-accent);
+  box-shadow: 0 0 0 3px var(--ev-bg);
+}
+.ev-tDot svg {
+  width: 62%;
+  height: 62%;
+}
+.ev-tBody {
+  display: grid;
+  gap: 0.15em;
+  justify-items: start;
+  min-width: 0;
+}
+.ev-tTitle {
+  font-weight: 700;
+  line-height: 1.35;
+}
+.ev-tNote {
+  color: var(--ev-muted);
+  font-size: 0.92em;
+}
+.ev-tTag {
+  border-radius: 999px;
+  padding: 0.1em 0.7em;
+  background: var(--ev-main);
+  color: var(--ev-on-main);
+  font-size: 0.75em;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ev-tTagNext {
   background: var(--ev-soft);
+  color: var(--ev-main);
+}
+.ev-tItem[data-state="now"] .ev-tDot {
+  background: var(--ev-main);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ev-main) 25%, transparent);
+}
+.ev-tItem[data-state="done"] {
+  opacity: 0.55;
+}
+.ev-root[data-motion="on"] .ev-tItem[data-state="now"] .ev-tDot {
+  animation: ev-pulse 2.4s ease-out infinite;
+}
+@keyframes ev-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ev-main) 45%, transparent); }
+  100% { box-shadow: 0 0 0 0.9em transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-root[data-motion="on"] .ev-tItem[data-state="now"] .ev-tDot { animation: none; }
+}
+
+/* A menu card under its meal, like a printed one */
+.ev-menu {
+  justify-self: stretch;
+  display: grid;
+  gap: 0.75em;
+  justify-items: center;
+  text-align: center;
+  margin-top: 0.6em;
+  padding: 1.1em 1em 1.2em;
+  background: var(--ev-bg);
+  border: 1px solid color-mix(in srgb, var(--ev-accent) 60%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--ev-accent) 35%, transparent);
+  outline-offset: -5px;
+  border-radius: min(calc(var(--u) * 2), 10px);
+}
+.ev-menuHead {
+  font-family: var(--ev-display);
+  color: var(--ev-main);
+  font-size: 1.15em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.ev-menuHead::before,
+.ev-menuHead::after {
+  content: "·";
+  color: var(--ev-accent);
+  margin-inline: 0.5em;
+}
+.ev-menuGroup {
+  display: grid;
+  gap: 0.15em;
+}
+.ev-menuCourse {
+  font-size: 0.74em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ev-muted);
+}
+.ev-menuDish {
+  line-height: 1.4;
+}
+
+.ev-note {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.8em;
+  align-items: start;
+  background: var(--ev-soft);
+  border-left: 4px solid var(--ev-accent);
   border-radius: min(calc(var(--u) * 2.4), 12px);
-  padding: 0.9em 1.1em;
+  padding: 1em 1.1em;
   margin: 0;
 }
+.ev-noteIcon {
+  display: grid;
+  place-items: center;
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 50%;
+  background: var(--ev-main);
+  color: var(--ev-on-main);
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 0.85em;
+  margin-top: 0.15em;
+}
+/* A soft card around the date, place and parking. */
+.ev-panel {
+  background: color-mix(in srgb, var(--ev-soft) 55%, var(--ev-bg));
+  border: 1px solid color-mix(in srgb, var(--ev-ink) 8%, transparent);
+  border-radius: min(calc(var(--u) * 3), 16px);
+  padding: min(calc(var(--u) * 4), 20px);
+}
+.ev-rsvp {
+  background: color-mix(in srgb, var(--ev-soft) 60%, var(--ev-bg));
+}
 .ev-rsvpRow {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.6em;
+}
+@container (min-width: 520px) {
+  .ev-rsvpRow {
+    grid-template-columns: 1.5fr 1fr 1fr;
+  }
+}
+.ev-extras {
+  display: grid;
+  gap: min(calc(var(--u) * 3), 14px);
+}
+.ev-extra {
+  display: grid;
+  grid-template-columns: min(calc(var(--u) * 8), 36px) 1fr;
+  gap: min(calc(var(--u) * 2.6), 14px);
+  align-items: start;
+}
+.ev-extra .ev-icon {
+  width: min(calc(var(--u) * 8), 36px);
+  height: min(calc(var(--u) * 8), 36px);
+}
+.ev-extra .ev-factMain,
+.ev-extra .ev-factSub {
+  display: block;
 }
 .ev-banner {
   background: var(--ev-main);
@@ -542,7 +787,7 @@
   align-items: center;
   gap: 0.45em;
   border-radius: 999px;
-  padding: 0.3em 0.9em;
+  padding: 0.4em 1em;
   background: #2e2a6e;
   color: #ffffff;
   font-weight: 700;
@@ -678,3 +923,15 @@
 .ev-sl { stroke: var(--ev-leaf); fill: none; }
 .ev-si { stroke: var(--ev-ink); fill: none; }
 .ev-sb { stroke: var(--ev-bg); fill: none; }
+
+/* ── Minimum sizes on a full page (not on the builder's small copies) ──
+   Small labels never go below a size that's easy to read on a phone. */
+.ev-root:not([data-thumb]) .ev-kicker,
+.ev-root:not([data-thumb]) .ev-relation,
+.ev-root:not([data-thumb]) .ev-menuCourse { font-size: max(0.78em, 12.5px); }
+.ev-root:not([data-thumb]) .ev-btn { font-size: max(0.95em, 15px); }
+.ev-root:not([data-thumb]) .ev-count,
+.ev-root:not([data-thumb]) .ev-factSub,
+.ev-root:not([data-thumb]) .ev-tNote { font-size: max(0.9em, 14px); }
+.ev-root:not([data-thumb]) .ev-made { font-size: max(0.85em, 12.5px); }
+.ev-root:not([data-thumb]) .ev-tTag { font-size: max(0.75em, 11.5px); }

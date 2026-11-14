@@ -1,6 +1,6 @@
 # Your action plan
 
-*For Prakash. Updated 14 November 2026 (afternoon). The full plan is `docs/CONCEPT.md`.*
+*For Prakash. Updated 14 November 2026 (evening). The full plan is `docs/CONCEPT.md`.*
 
 Change `[ ]` to `[x]` when you finish a step, or just tell Claude Code it's done. If a screen looks different from these steps, describe what you see and you'll get the right step.
 
@@ -30,12 +30,24 @@ Change `[ ]` to `[x]` when you finish a step, or just tell Claude Code it's done
 - [x] **4. New Gemini key saved and working** (14 November). Check any time at https://in2min2.com/api/health: it should say `"ai":"ready"`.
 - [x] **6. Logo chosen: C, the stopwatch 2s** (14 November). Now in the app and the browser-tab icon.
 - [x] **in2min2.com bought and connected** (14 November). https://in2min2.com and https://www.in2min2.com both open the app. The old preview address keeps working too.
+- [x] **First phone test** (14 November): signed in, "Write it for me" worked, the preview showed. Your notes from it are built (see step 2b).
 
 ## Now: about 30 minutes, in this order
+
+### [ ] 2b. Run the third database file: [`0003_running_order_and_menu.sql`](../supabase/migrations/0003_running_order_and_menu.sql) (3 minutes)
+
+It adds the running order's food menu, the "Food menu" switch, and "Show the whole picture" for logos. **Until it has run, pressing Publish shows "In2Min2's database needs its latest update".**
+
+1. In VS Code, open [`supabase/migrations/0003_running_order_and_menu.sql`](../supabase/migrations/0003_running_order_and_menu.sql). Press **Cmd+A**, then **Cmd+C**.
+2. In Supabase, click **SQL Editor** (left menu), then **New query**.
+3. Click in the empty box, press **Cmd+V**, then click **Run** (bottom right).
+4. It should say **Success. No rows returned.** Tell Claude Code it ran.
 
 Your sign-in on 14 November failed because Supabase's built-in sender only emails members of your Supabase team. Steps 3 and 3b fix that for good.
 
 ### [ ] 3. Make the email show the code (5 minutes; skip if you've done it)
+
+Your own sign-in worked on 14 November. That may be because your email is on the Supabase team, which the built-in sender allows (2 emails an hour). Steps 3 and 3b make it work for everyone else. Tell Claude Code if you've already done them.
 
 1. In Supabase, click **Authentication** (left menu), then **Emails** (it may be called **Email Templates**).
 2. Open the **Magic Link** template.
@@ -91,13 +103,14 @@ The sender is Resend: free for 3,000 emails a month, up to 100 a day. Codes will
    - Under **Redirect URLs**, click **Add URL** and add both `https://in2min2.pksgrg.workers.dev/**` and `http://localhost:3000/**`.
    - Click **Save**.
 
-### [ ] 5. Test it on your phone (10 minutes), then tell Claude Code what happened
+### [ ] 5. Test it on your phone again (10 minutes), after step 2b, then tell Claude Code what happened
 
 1. Open **https://in2min2.com/builder**.
-2. Make a test event: for example a Birthday, with a date, a start time and a venue.
-3. On **The words**, sign in with your email and type the 6-digit code from the email, then press **Write it for me**.
-4. On **Check and publish**, tick the box and press **Publish**.
-5. Open the link it gives you. That's the page your guests will see.
+2. On **When, where and how many**, add a **Running order**: tap the quick-add buttons (for example *Guests arrive*, *Lunch*). Lunch starts as a meal: type a few dishes in its menu.
+3. On **The look**, under your photo, try **Show the whole picture** and **Fill the space**.
+4. Try the three buttons at the top right: **Share**, the **bell**, and **Settings** (the cog).
+5. On **Check and publish**, press **Update my page** (or **Publish**), then **Share the link** or **WhatsApp**.
+6. Open the link. Check the running order and menu on the page.
 
 If anything goes wrong, the screen shows a line starting **"Details for Claude Code:"**. Copy that line into the chat.
 

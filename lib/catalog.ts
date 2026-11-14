@@ -20,7 +20,8 @@ export const TAG_LABELS: Record<Tag, string> = { popular: "Popular", new: "New",
 export type ToggleKey =
   | "ai_copy" | "rsvp" | "countdown" | "schedule" | "map_directions" | "photo_wall" | "auto_reminders"
   | "gift_registry" | "guestbook"
-  | "tickets" | "team_entries" | "stalls" | "parking" | "live_scores" | "sponsors";
+  | "tickets" | "team_entries" | "stalls" | "parking" | "live_scores" | "sponsors"
+  | "menu";
 
 // ─────────────────────────────── Scales ───────────────────────────────
 
@@ -210,12 +211,14 @@ export const TOGGLE_DEFAULTS: Record<ToggleKey, boolean> = {
   ai_copy: true, rsvp: true, countdown: true, schedule: true, map_directions: true, photo_wall: true, auto_reminders: true,
   gift_registry: false, guestbook: false,
   tickets: false, team_entries: false, stalls: false, parking: false, live_scores: false, sponsors: false,
+  menu: true, // 0003
 };
 
 export const TOGGLES: { key: ToggleKey; label: string; line: string; scales: Scale[]; later?: string }[] = [
   { key: "rsvp", label: "Replies (RSVP)", line: "Guests say yes, no or maybe, and how many are coming", scales: ["personal", "celebration", "community"] },
   { key: "countdown", label: "Countdown", line: "Shows how many days are left", scales: ["personal", "celebration", "community"] },
-  { key: "schedule", label: "Schedule", line: "The functions or programme of the day, in order", scales: ["personal", "celebration", "community"] },
+  { key: "schedule", label: "Running order", line: "What happens when on the day, in time order", scales: ["personal", "celebration", "community"] },
+  { key: "menu", label: "Food menu", line: "What's being served, shown with its meal in the running order", scales: ["personal", "celebration", "community"] },
   { key: "map_directions", label: "Map and directions", line: "One tap opens directions on the guest's phone", scales: ["personal", "celebration", "community"] },
   { key: "photo_wall", label: "Photo wall", line: "Guests add photos on the day; a gallery afterwards", scales: ["personal", "celebration", "community"] },
   { key: "auto_reminders", label: "Reminders", line: "A reminder to guests the day before", scales: ["personal", "celebration", "community"] },
@@ -378,6 +381,13 @@ export const TEXT_STYLES: TextStyleDef[] = [
 export function textStyle(key: string): TextStyleDef {
   return TEXT_STYLES.find((t) => t.key === key) ?? TEXT_STYLES[0];
 }
+
+// How the main photo fits its space (events.cover_fit, 0003).
+export type CoverFit = "fill" | "whole";
+export const COVER_FITS: { key: CoverFit; name: string; line: string }[] = [
+  { key: "fill", name: "Fill the space", line: "Best for photos of people and places. The edges may be trimmed." },
+  { key: "whole", name: "Show the whole picture", line: "Best for logos, posters and photos with words on them." },
+];
 
 export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [
   { key: "hero", name: "Hero", line: "The photo fills the top" },
