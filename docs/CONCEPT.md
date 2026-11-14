@@ -1,11 +1,17 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.4, 14 November 2026. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.5, 14 November 2026 (afternoon). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.5 (14 Nov 2026, afternoon):**
+- in2min2.com is bought and connected.
+- Logo C (stopwatch 2s) is in the app.
+- Migration 0002 has run, and the Gemini key works (checked at /api/health).
+- Next is our own email sender (Resend), so sign-in codes reach everyone (17a).
 
 **What changed in version 3.4 (14 Nov 2026):**
 - The owner agreed the design.
@@ -899,7 +905,7 @@ Even if only 3 in 10 of those events paid £9, income would be about £2,700 a m
 
 Event types can never clash with app routes; the database checks this. Event pages are never listed by search engines (`noindex`), because they carry names. Offer a random slug for private events.
 
-**Domain: in2min2.com (Decided).** It is distinctive and neutral enough for every kind of event.
+**Domain: in2min2.com (Decided; bought and connected 14 Nov 2026).** It is distinctive and neutral enough for every kind of event. It is attached to the Worker as a custom domain (with www) in `wrangler.jsonc`, so Cloudflare makes the DNS records and certificate. Sign-in emails will come from `codes@in2min2.com` through Resend.
 - **Still unregistered on 13 Nov 2026** (WHOIS check).
 - The owner will buy it once he has seen the Phase 1 preview working. It costs about £8–10 a year at Cloudflare. Until it's bought, someone else could register it.
 - Also check the name on the UK IPO trade mark search (classes 41 and 42) and reserve the social media handles.
@@ -1175,9 +1181,12 @@ The same deletion runs automatically 30 days after a page closes.
 - Video by connecting YouTube and Facebook, not uploading.
 - The preview is a live mirror of the real page.
 
+- Logo: idea C, each 2 in a stopwatch face (14 Nov 2026). `components/brand/wordmark.tsx`, `app/icon.svg`.
+- in2min2.com bought and connected (14 Nov 2026).
+- Two-step sign-in on the owner's accounts: postponed by the owner for now; keep reminding him.
+
 **Still open (Recommended answers in brackets):**
-1. Logo: which of the six wordmark ideas (https://claude.ai/artifact/VqJaNQjoEiWG6JBJYnnzZE)? (C, Timer 2s)
-2. Launch offer: "Festive launch: free until 31 January 2027", plus "no In2Min2 fee on an organiser's first event" for sign-ups before 31 March (5e)? (Yes)
+1. Launch offer: "Festive launch: free until 31 January 2027", plus "no In2Min2 fee on an organiser's first event" for sign-ups before 31 March (5e)? (Yes)
 
 ## 24. More ideas (backlog)
 

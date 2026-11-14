@@ -4,6 +4,7 @@ import "./globals.css";
 import "@/components/event/event-view.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://in2min2.com"),
   title: "In2Min2",
   description: "Your event online in two minutes, from invitation to memory book, on one link.",
 };

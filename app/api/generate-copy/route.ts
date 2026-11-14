@@ -18,10 +18,9 @@
 // host's own sign-in token before calling Gemini.
 
 import { ApiError, GoogleGenAI, Type, type Schema } from "@google/genai/web";
-import { COPY_FIELDS, COPY_KEYS, clampText, type CopyRequest, type CopyResponse, type EventCopy } from "@/lib/ai/copy";
+import { COPY_FIELDS, COPY_KEYS, DEFAULT_MODEL, clampText, type CopyRequest, type CopyResponse, type EventCopy } from "@/lib/ai/copy";
 import { rpc } from "@/lib/supabase/rest";
 
-const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 
 // Longest value accepted for each input. Keeps prompts small and cheap, and
 // limits what can be smuggled into the prompt.

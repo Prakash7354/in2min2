@@ -18,6 +18,12 @@
   // preview address for every branch. Keep both until in2min2.com is live.
   "workers_dev": true,
   "preview_urls": true,
+  // The real address (bought 14 Nov 2026 at Cloudflare). Cloudflare makes the
+  // DNS records and the security certificate for each one on deploy.
+  "routes": [
+    { "pattern": "in2min2.com", "custom_domain": true },
+    { "pattern": "www.in2min2.com", "custom_domain": true }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

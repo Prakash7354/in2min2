@@ -22,6 +22,12 @@ export function useSession(): { session: Session | null; ready: boolean } {
 
 function friendly(message: string): string {
   const m = message.toLowerCase();
+  if (m.includes("fetch") || m.includes("load failed") || m.includes("network")) {
+    return "Couldn't connect to the sign-in service. Check your signal and try again.";
+  }
+  if (m.includes("sending")) {
+    return "The email with your code couldn't be sent. In2Min2's own email sender is being set up (see the action plan); until then codes only reach the Supabase team's address.";
+  }
   if (m.includes("not authorized") || m.includes("not allowed")) {
     return "While In2Min2 is being tested, codes are only sent to its own team's email addresses. This opens to everyone before the pilot.";
   }
@@ -39,23 +45,28 @@ export function SignIn({ why }: { why: string }) {
   const [stage, setStage] = useState<"email" | "code">("email");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [detail, setDetail] = useState<string | null>(null);
+  const fail = (e: { message: string; status?: number }) => {
+    setError(friendly(e.message));
+    setDetail(`${e.message}${e.status ? ` (${e.status})` : ""}`);
+  };
 
   async function sendCode() {
     const clean = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { setError("Please check the email address."); return; }
-    setBusy(true); setError(null);
+    setBusy(true); setError(null); setDetail(null);
     const { error: e } = await supabase().auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } });
     setBusy(false);
-    if (e) { setError(friendly(e.message)); return; }
+    if (e) { fail(e); return; }
     setEmail(clean);
     setStage("code");
   }
 
   async function checkCode() {
-    setBusy(true); setError(null);
+    setBusy(true); setError(null); setDetail(null);
     const { error: e } = await supabase().auth.verifyOtp({ email, token: code.trim(), type: "email" });
     setBusy(false);
-    if (e) setError(friendly(e.message));
+    if (e) fail(e);
   }
 
   return (
@@ -82,6 +93,7 @@ export function SignIn({ why }: { why: string }) {
         </form>
       )}
       {error && <Notice tone="warn">{error}</Notice>}
+      {detail && <p className="text-xs text-muted">Details for Claude Code: {detail}</p>}
     </div>
   );
 }

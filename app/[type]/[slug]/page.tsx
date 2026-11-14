@@ -5,6 +5,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Wordmark } from "@/components/brand/wordmark";
 import { notFound } from "next/navigation";
 import EventView from "@/components/event/event-view";
 import { eventFontVariables } from "@/components/event/fonts";
@@ -32,7 +33,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
     return (
       <main className="grid min-h-dvh place-items-center bg-cream px-4">
         <div className="grid max-w-md gap-4 text-center">
-          <p className="font-display text-xl font-extrabold text-brand">In<span className="text-marigold-deep">2</span>Min<span className="text-marigold-deep">2</span></p>
+          <p className="text-2xl"><Wordmark /></p>
           {page.kind === "private" ? (
             <>
               <h1 className="font-display text-3xl font-extrabold">This is a private event</h1>

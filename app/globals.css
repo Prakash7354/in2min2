@@ -55,3 +55,43 @@ h1, h2, h3 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* The In2Min2 wordmark (components/brand/wordmark.tsx): each 2 in a stopwatch
+   face. Sizes follow the font size, so it scales anywhere. */
+.in2-wm {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--color-brand);
+  white-space: nowrap;
+}
+.in2-timer {
+  display: inline-grid;
+  place-items: center;
+  position: relative;
+  width: 0.92em;
+  height: 0.92em;
+  margin-inline: 0.04em;
+  border-radius: 50%;
+  background: var(--color-marigold);
+  color: var(--color-ink);
+  font-size: 0.86em;
+  vertical-align: 0.02em;
+}
+.in2-timer::before {
+  content: "";
+  position: absolute;
+  top: -0.13em;
+  left: 50%;
+  width: 0.16em;
+  height: 0.12em;
+  transform: translateX(-50%);
+  border-radius: 0.04em;
+  background: var(--color-marigold);
+}
+.in2-timer > span {
+  font-size: 0.82em;
+  line-height: 1;
+  transform: translateY(0.02em);
+}

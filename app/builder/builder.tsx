@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Wordmark } from "@/components/brand/wordmark";
 import EventView from "@/components/event/event-view";
 import { clearDraft, loadDraft, newDraft, saveDraft, toViewData, type Draft } from "@/lib/draft";
 import type { EventStageView } from "@/lib/event-view";
@@ -102,8 +103,8 @@ export default function Builder() {
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b border-line bg-cream/95 backdrop-blur" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4">
-          <Link href="/" className="font-display text-xl font-extrabold tracking-tight text-brand">
-            In<span className="text-marigold-deep">2</span>Min<span className="text-marigold-deep">2</span>
+          <Link href="/" className="text-[22px]" aria-label="In2Min2 home">
+            <Wordmark />
           </Link>
           <span className="flex items-center gap-3">
             <span className={`text-sm ${saveOk ? "text-muted" : "font-semibold text-ink"}`} aria-live="polite">

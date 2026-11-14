@@ -17,7 +17,7 @@ Prakash is not a developer. Explain anything he must do step by step, naming exa
 - **Plan, hosting, custom domain, AI usage and money are written only by the server** (service key, after payment). The column grants at the end of `0001_init.sql` enforce this; keep them when adding columns.
 - **IDs, never names** for people, events and photos. Money in whole pence.
 - **Text limits** for the five AI boxes live in `lib/ai/copy.ts` and in the database. Change both together.
-- **Migrations:** new numbered files in `supabase/migrations/`, never edit one that has been run. Give him the file with exact steps (Supabase › SQL Editor › New query › paste › Run) and remind him until he confirms it ran. Run on the live project so far: `0001_init.sql` (14 Nov 2026). Waiting: `0002_grants_and_ai_limit.sql`.
+- **Migrations:** new numbered files in `supabase/migrations/`, never edit one that has been run. Give him the file with exact steps (Supabase › SQL Editor › New query › paste › Run) and remind him until he confirms it ran. Run on the live project so far: `0001_init.sql` and `0002_grants_and_ai_limit.sql` (both 14 Nov 2026). In every summary, link each SQL file he must run, e.g. [0003_x.sql](supabase/migrations/0003_x.sql) (his request, 14 Nov 2026).
 - **Next.js 16** differs from older versions. Read the guide in `node_modules/next/dist/docs/` before using an API. `cacheComponents` stays off (it hung the Cloudflare build). No `export const runtime = "edge"`.
 - **Ask before adding a library, a paid service or a screen not in the concept.**
 - Golf Society Home (`~/Desktop/GoChuchuro Folder/Golf Society Home Folder/golfsocietyhome/`) is a reference for patterns and SQL (`docs/CONCEPT.md` section 16). Read it; never change it from here.
@@ -30,7 +30,7 @@ npm run typecheck && npm run lint && npm run test:db && npx opennextjs-cloudflar
 
 ## Deploying
 
-- **Preview address:** https://in2min2.pksgrg.workers.dev (until in2min2.com is bought).
+- **Live address:** https://in2min2.com (and www), attached as Worker custom domains in `wrangler.jsonc` `routes` (14 Nov 2026). The preview address https://in2min2.pksgrg.workers.dev keeps working. https://in2min2.com/api/health says whether the AI key and database are ready.
 - `npm run deploy` builds and deploys from this Mac.
 - Pushing to `main` on GitHub deploys through Cloudflare's own build (Workers › in2min2 › Settings › Build), so it uses no GitHub Actions minutes. Build command `npx opennextjs-cloudflare build`, deploy command `npx opennextjs-cloudflare deploy` (set and working, 13 Nov 2026). Branch builds are not switched on; if they ever are, the non-production command is `npx opennextjs-cloudflare upload`.
 - The Worker name `in2min2` in `wrangler.jsonc` must match the dashboard, or the Git build fails.

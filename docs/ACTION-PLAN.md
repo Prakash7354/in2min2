@@ -1,6 +1,6 @@
 # Your action plan
 
-*For Prakash. Updated 14 November 2026. The full plan is `docs/CONCEPT.md`.*
+*For Prakash. Updated 14 November 2026 (afternoon). The full plan is `docs/CONCEPT.md`.*
 
 Change `[ ]` to `[x]` when you finish a step, or just tell Claude Code it's done. If a screen looks different from these steps, describe what you see and you'll get the right step.
 
@@ -19,28 +19,23 @@ Change `[ ]` to `[x]` when you finish a step, or just tell Claude Code it's done
 - A website with a top menu, How it works, sign-up, sign-in and contact.
 - VAT: not close to the threshold.
 - **Design agreed (14 November).** Refine as we go, with "Popular", "New" and "Coming soon" labels.
-- The In2Min2 wordmark is the logo. Choose how the 2s look (step 5 below).
+- The logo is the In2Min2 wordmark with stopwatch 2s (idea C).
 
 ## Done
 
 - [x] **0. Design agreed** (14 November).
 - [x] **1. Six questions answered** (13 November).
-- [x] **Supabase project made and `0001_init.sql` run** (14 November). Its two public values are in the app.
+- [x] **Supabase project made; [`0001_init.sql`](../supabase/migrations/0001_init.sql) run** (14 November).
+- [x] **2. [`0002_grants_and_ai_limit.sql`](../supabase/migrations/0002_grants_and_ai_limit.sql) run** (14 November).
+- [x] **4. New Gemini key saved and working** (14 November). Check any time at https://in2min2.com/api/health: it should say `"ai":"ready"`.
+- [x] **6. Logo chosen: C, the stopwatch 2s** (14 November). Now in the app and the browser-tab icon.
+- [x] **in2min2.com bought and connected** (14 November). https://in2min2.com and https://www.in2min2.com both open the app. The old preview address keeps working too.
 
 ## Now: about 30 minutes, in this order
 
-### [ ] 2. Run the second database file (5 minutes)
+Your sign-in on 14 November failed because Supabase's built-in sender only emails members of your Supabase team. Steps 3 and 3b fix that for good.
 
-Supabase changed its rules on 30 October: tables are no longer open to the app until they are given permission one by one. This file gives exactly the permissions In2Min2 needs, and adds a daily limit of 20 AI writes per person.
-
-1. In VS Code, open `supabase/migrations/0002_grants_and_ai_limit.sql`. Press **Cmd+A**, then **Cmd+C**.
-2. In Supabase, click **SQL Editor** (left menu), then **+** for a new query.
-3. Click into the editor, press **Cmd+V**, then click **Run**.
-4. You should see *Success. No rows returned*. If you see red text, copy it to Claude Code. **Run it only once.**
-
-### [ ] 3. Let Supabase email a sign-in code (5 minutes)
-
-In2Min2 signs people in with a 6-digit code by email, with no password. Supabase's standard email sends a link instead, so change its wording:
+### [ ] 3. Make the email show the code (5 minutes; skip if you've done it)
 
 1. In Supabase, click **Authentication** (left menu), then **Emails** (it may be called **Email Templates**).
 2. Open the **Magic Link** template.
@@ -54,37 +49,59 @@ In2Min2 signs people in with a 6-digit code by email, with no password. Supabase
      ```
    - Click **Save**.
 3. Do the same for the **Confirm signup** template (new people get this one), with the same subject and body.
-4. Click **Authentication** › **URL Configuration**. Set **Site URL** to `https://in2min2.pksgrg.workers.dev` and click **Save**.
 
-**For now, codes only go to your own email.** Supabase's built-in sender emails only members of your Supabase team, at most 2 emails an hour. That's fine for your testing. Before the pilot, we connect our own email sender (step 12), which needs the domain.
+### [ ] 3b. In2Min2's own email sender, so codes reach anyone (20 minutes)
 
-### [ ] 4. A new Gemini key (5 minutes)
+The sender is Resend: free for 3,000 emails a month, up to 100 a day. Codes will come from `codes@in2min2.com`.
 
-The key you saved was refused by Google ("API key not valid"). It was probably a code sample rather than the key itself.
+**Part A: Resend**
+1. Go to **resend.com** and click **Sign up**. Use your own email.
+2. Click **Domains**, then **Add domain**.
+   - Domain: `in2min2.com`
+   - Region: **Ireland (eu-west-1)**, the closest to the UK.
+   - Click **Add**.
+3. Resend shows 3 or 4 **DNS records**.
+   - If it offers to add them to **Cloudflare** automatically, click that and sign in to Cloudflare when asked.
+   - Otherwise, add each one by hand. In the Cloudflare dashboard click **in2min2.com** › **DNS** › **Records** › **Add record**. Copy the **Type**, **Name** and **Content** exactly as Resend shows them; for the MX record also copy the **Priority** (usually 10). Click **Save**.
+4. While you're in Cloudflare's DNS page, add one more record. It helps the emails land in the inbox, not in junk:
+   - **Type:** TXT
+   - **Name:** `_dmarc`
+   - **Content:** `v=DMARC1; p=none;`
+5. Back in Resend, click **Verify DNS records**. Wait until it says **Verified**. It usually takes a few minutes; if not, refresh after half an hour.
+6. In Resend click **API Keys** › **Create API key**.
+   - Name: `supabase`
+   - Permission: **Sending access**
+   - Domain: `in2min2.com`
+   - Click **Add**, then **copy** the key. It's shown only once.
+   - **Don't paste it into the chat.** It goes straight into Supabase in Part B.
 
-1. Go to **aistudio.google.com/api-keys** and sign in.
-2. Click **Create API key**. If it asks for a project, choose or create one called `in2min2`.
-3. In the list of keys, click the **copy** icon next to the new key. It's one long line of letters and numbers, often starting `AIza`. Don't copy any example code.
-4. In VS Code: **Terminal › New Terminal**, type `npx wrangler secret put GEMINI_API_KEY`, press **Enter**, then **Cmd+V** and **Enter**.
-5. Wait for *Success! Uploaded secret GEMINI_API_KEY*. This replaces the old key.
+**Part B: Supabase**
 
-**Don't switch on billing in Google.** The free allowance is plenty, and each person is now limited to 20 AI writes a day.
+7. Click **Authentication**, then **Emails**, then **SMTP Settings**. It may instead be under **Project Settings** › **Authentication**. Switch on **Enable custom SMTP** and fill in:
+   - **Sender email:** `codes@in2min2.com`
+   - **Sender name:** `In2Min2`
+   - **Host:** `smtp.resend.com`
+   - **Port:** `465`
+   - **Username:** `resend`
+   - **Password:** paste the Resend key
+   - Click **Save**.
+8. Click **Authentication** › **Rate Limits**. Set the number of emails per hour to `60`, then click **Save**.
+9. Click **Authentication** › **URL Configuration**.
+   - **Site URL:** `https://in2min2.com`
+   - Under **Redirect URLs**, click **Add URL** and add both `https://in2min2.pksgrg.workers.dev/**` and `http://localhost:3000/**`.
+   - Click **Save**.
 
 ### [ ] 5. Test it on your phone (10 minutes), then tell Claude Code what happened
 
-1. Open https://in2min2.pksgrg.workers.dev/builder.
+1. Open **https://in2min2.com/builder**.
 2. Make a test event: for example a Birthday, with a date, a start time and a venue.
-3. On **The words**, sign in with **your own email**. Type the 6-digit code from the email, then press **Write it for me**.
+3. On **The words**, sign in with your email and type the 6-digit code from the email, then press **Write it for me**.
 4. On **Check and publish**, tick the box and press **Publish**.
 5. Open the link it gives you. That's the page your guests will see.
 
-### [ ] 6. Choose the logo (2 minutes)
+If anything goes wrong, the screen shows a line starting **"Details for Claude Code:"**. Copy that line into the chat.
 
-Look at the six ideas: https://claude.ai/artifact/VqJaNQjoEiWG6JBJYnnzZE
-
-Reply with a letter, for example **"Logo C"**.
-
-### [ ] 7. Switch on two-step sign-in (15 minutes)
+### [ ] 7. Switch on two-step sign-in (later, when you have 15 minutes; Claude Code will keep reminding you)
 
 You asked what the rules say. No UK law names two-step sign-in, but data-protection law requires security that fits the risk, and the ICO recommends it for any account that can reach other people's data. Your accounts can reach every family's data, so for you it's essential. Families and organisers get an easier version (section 21 of the plan).
 
@@ -136,16 +153,9 @@ Your decision: hosts and organisers check and approve their own words, in any la
 
 Claude Code drafts them in phase 2. Read them, and ask about anything unclear. Before the first paid community event, a one-off check by a solicitor is worth it.
 
-### [ ] 12. Buy in2min2.com, before the pilot (it's now needed for sign-in emails)
+### [x] 12. in2min2.com: bought and connected (14 November)
 
-Sign-in codes must reach families' inboxes. Supabase's built-in sender only emails your own team, so before the pilot we connect our own sender (Resend: free for 3,000 emails a month, 100 a day). Its emails must come from a domain you own, such as `codes@in2min2.com`.
-
-1. In the Cloudflare dashboard, open **Domain Registration › Register Domains**.
-2. Search for `in2min2.com`.
-3. Click **Purchase**. It costs about £8–10 a year.
-4. Tell Claude Code. You'll then get the steps for Resend and for pointing the address at the app.
-
-It was still free on 13 November 2026, but anyone can buy it until you do.
+The next part, the email sender, is step 3b above.
 
 ### [ ] 13. Supabase Pro: not yet
 

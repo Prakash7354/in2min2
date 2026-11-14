@@ -30,6 +30,9 @@ export const COPY_FIELDS = {
   },
 } as const;
 
+// The Gemini model, unless the Worker's GEMINI_MODEL setting names another.
+export const DEFAULT_MODEL = "gemini-3.5-flash-lite";
+
 export type CopyKey = keyof typeof COPY_FIELDS;
 export type EventCopy = Record<CopyKey, string>;
 

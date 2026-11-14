@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Wordmark } from "@/components/brand/wordmark";
 
 // Holding page for the preview address. The full website (top menu, How it
 // works, pricing, communities, contact) comes in phase 2 (docs/CONCEPT.md 18b).
@@ -13,9 +14,7 @@ export default function Home() {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4">
-        <span className="font-display text-2xl font-extrabold tracking-tight text-brand">
-          In<span className="text-marigold-deep">2</span>Min<span className="text-marigold-deep">2</span>
-        </span>
+        <Wordmark className="text-[28px]" />
         <Link href="/builder" className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 font-bold text-white hover:bg-brand-deep">
           Start free
         </Link>

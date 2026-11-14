@@ -551,8 +551,17 @@
   letter-spacing: -0.01em;
 }
 .ev-made b {
-  color: #f4a522;
+  display: inline-grid;
+  place-items: center;
+  width: 1.05em;
+  height: 1.05em;
+  margin-inline: 0.04em;
+  border-radius: 50%;
+  background: #f4a522;
+  color: #1c1a3a;
+  font-size: 0.86em;
   font-weight: 800;
+  line-height: 1;
 }
 .ev-demo {
   position: absolute;
