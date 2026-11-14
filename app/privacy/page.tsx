@@ -4,7 +4,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ADDRESS, Ask, CONTACT, Items, LegalPage, OWNER, legalMetadata } from "@/components/legal/legal-page";
+import { ADDRESS, CONTACT, Items, LegalPage, OWNER, legalMetadata } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = legalMetadata("Privacy notice", "What In2Min2 collects, why, where it's kept, and for how long.");
 
@@ -17,7 +17,7 @@ export default function Privacy() {
       title="Privacy notice"
       intro={<p>This explains what In2Min2 collects about hosts, organisers and guests, why, where it&apos;s kept and for how long, and your rights.</p>}
       short={[
-        <>We collect as little as we can: your email to sign in, what you type about your event, and guests&apos; replies. Guests&apos; photos come in 2027.</>,
+        <>We collect as little as we can: your email to sign in, what you type about your event, guests&apos; replies, and the photos guests choose to add.</>,
         <>Your data is stored in London. We never sell it, never show adverts and never track you around the internet.</>,
         <>Event pages are never listed on Google or other search engines. Photos have their hidden location removed.</>,
         <>Everything is deleted on a timetable. Guest details and photos go 30 days after an event page closes.</>,
@@ -83,8 +83,9 @@ export default function Privacy() {
           ["Legal reason", "Your explicit consent. You can withdraw it at any time."],
           ["How long", "Deleted 30 days after the event page closes. Only the host sees them."],
         ] },
-        { what: "Photos you add (from 2027)", lines: [
-          ["Why", "To share them with the other guests on the event page."],
+        { what: "Photos you add", lines: [
+          ["What", "Each photo, made smaller on your phone with its hidden location removed before it is sent, a small copy for the gallery, and your name if you type one."],
+          ["Why", "To share them with the other guests on the event page, and on a screen at the event."],
           ["Legal reason", "We hold them for the host (section 4)."],
           ["How long", "Deleted 30 days after the event page closes. Every photo has a “Please remove this photo” button."],
         ] },
@@ -125,7 +126,7 @@ export default function Privacy() {
       <p>These companies run parts of In2Min2 for us. Each may use your data only to do that job, under a contract.</p>
       <Items items={[
         { what: "Supabase", lines: [["Does", "Our database, sign-in, and each event's main photo and preview picture"], ["Where", "London, UK"]] },
-        { what: "Cloudflare", lines: [["Does", "Hosting, security, and (from 2027) guests' photos"], ["Where", "Worldwide network; stored files in Europe"]] },
+        { what: "Cloudflare", lines: [["Does", "Hosting, security, and guests' photos"], ["Where", "Worldwide network; stored files in Europe"]] },
         { what: "Google (Gemini)", lines: [["Does", "The AI writer"], ["Where", "Google's data centres, including the USA"]] },
         { what: "Resend", lines: [["Does", "Sends sign-in codes and event emails"], ["Where", "Sent from Ireland; a US company"]] },
         { what: "Stripe (from February 2027)", lines: [["Does", "Takes payments"], ["Where", "UK, Europe and the USA"]] },
@@ -140,12 +141,11 @@ export default function Privacy() {
         <li><strong>An event page</strong> is online until its plan ends: 7 days to 12 months after the event.</li>
         <li><strong>Guest details, photos and messages</strong> are deleted 30 days after the page closes. The host gets a warning email first, and can download the photos. A host can press &ldquo;Delete everything&rdquo; at any time.</li>
         <li><strong>Kept for next year</strong>, only if the host chooses: the guest list and the page details, offline, for up to 13 months after the event. Any guest can ask to be taken off.</li>
-        <li><strong>Your account:</strong> until you delete it, or 2 years without use.</li>
+        <li><strong>Your account:</strong> until you delete it, or after 2 years without use. We email you first.</li>
         <li><strong>Payment records:</strong> 6 years, for tax.</li>
         <li><strong>Backups:</strong> 30 days.</li>
         <li><strong>A draft on your phone</strong> stays in your browser until you start a new event or clear your browser.</li>
       </ul>
-      <Ask>Accounts unused for 2 years are deleted (after an email). This is a recommendation; change the number if you prefer.</Ask>
 
       <h2 id="children">7. Children</h2>
       <p>
@@ -157,7 +157,8 @@ export default function Privacy() {
       <h2 id="cookies">8. Cookies and storage on your device</h2>
       <p>
         We use no advertising or tracking cookies, so there&apos;s no cookie banner. Your browser stores only what In2Min2 needs to work: that
-        you&apos;re signed in, the event you&apos;re building, and, if you reply to an invitation, your reply, so you can change it later.
+        you&apos;re signed in, the event you&apos;re building, and, if you reply to an invitation, your reply, so you can change it later. If you add
+        photos, it also keeps a random number that counts how many your phone has added, and any photos still waiting to send.
       </p>
 
       <h2 id="rights">9. Your rights</h2>

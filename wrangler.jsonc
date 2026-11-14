@@ -9,37 +9,53 @@
 // and Stripe keys) are set with `npx wrangler secret put NAME` or in the
 // dashboard as type "Secret". Never put them in this file.
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "in2min2",
-  "main": ".open-next/worker.js",
-  "compatibility_date": "2026-11-01",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
-  // The free preview address (in2min2.pksgrg.workers.dev) and a separate
-  // preview address for every branch. Keep both until in2min2.com is live.
-  "workers_dev": true,
-  "preview_urls": true,
-  // The real address (bought 14 Nov 2026 at Cloudflare). Cloudflare makes the
-  // DNS records and the security certificate for each one on deploy.
-  "routes": [
-    { "pattern": "in2min2.com", "custom_domain": true },
-    { "pattern": "www.in2min2.com", "custom_domain": true }
-  ],
-  "assets": {
-    "directory": ".open-next/assets",
-    "binding": "ASSETS"
-  },
-  // Guests' photos (0006, lib/photo-store.ts): Cloudflare R2, kept in the EU.
-  // OFF until the bucket exists (ACTION-PLAN step 2): deploying with a binding
-  // to a missing bucket fails. Once created, remove the two // below.
-  // "r2_buckets": [
-  //   { "binding": "PHOTOS", "bucket_name": "in2min2-photos", "jurisdiction": "eu" }
-  // ],
-  "services": [
-    // Lets the app call itself (used by OpenNext for caching). Must match "name".
-    { "binding": "WORKER_SELF_REFERENCE", "service": "in2min2" }
-  ],
-  "vars": {
-    "GEMINI_MODEL": "gemini-3.5-flash-lite"
-  },
-  "observability": { "enabled": true }
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "in2min2",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2026-11-01",
+	"compatibility_flags": [
+		"nodejs_compat",
+		"global_fetch_strictly_public"
+	],
+	// The free preview address (in2min2.pksgrg.workers.dev) and a separate
+	// preview address for every branch. Keep both until in2min2.com is live.
+	"workers_dev": true,
+	"preview_urls": true,
+	// The real address (bought 14 Nov 2026 at Cloudflare). Cloudflare makes the
+	// DNS records and the security certificate for each one on deploy.
+	"routes": [
+		{
+			"pattern": "in2min2.com",
+			"custom_domain": true
+		},
+		{
+			"pattern": "www.in2min2.com",
+			"custom_domain": true
+		}
+	],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	// Guests' photos (0006, lib/photo-store.ts): Cloudflare R2, kept in the EU
+	// (bucket created by the owner, 14 Nov 2026). The binding name PHOTOS is
+	// what the code uses; "jurisdiction" must stay "eu" or Cloudflare looks for
+	// a different bucket. Local `npm run dev` uses a local stand-in, never the
+	// real photos.
+	"r2_buckets": [
+		{ "binding": "PHOTOS", "bucket_name": "in2min2-photos", "jurisdiction": "eu" }
+	],
+	"services": [
+		// Lets the app call itself (used by OpenNext for caching). Must match "name".
+		{
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "in2min2"
+		}
+	],
+	"vars": {
+		"GEMINI_MODEL": "gemini-3.5-flash-lite"
+	},
+	"observability": {
+		"enabled": true
+	}
 }

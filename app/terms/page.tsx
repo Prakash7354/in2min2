@@ -5,7 +5,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ADDRESS, Ask, CONTACT, LegalPage, OWNER, legalMetadata } from "@/components/legal/legal-page";
+import { ADDRESS, CONTACT, LegalPage, OWNER, legalMetadata } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = legalMetadata("Terms", "The rules for using In2Min2: accounts, event pages, payments, refunds and public events.");
 
@@ -121,7 +121,6 @@ export default function Terms() {
         <li>If In2Min2 lets you down on the day (for example, your page doesn&apos;t work), we refund what you paid for that event.</li>
         <li>None of this affects your legal rights as a consumer.</li>
       </ul>
-      <Ask>Is this refund rule right? It&apos;s generous on purpose: a full refund within 14 days, and money back if In2Min2 fails on the day.</Ask>
 
       <h2 id="public-events">9. Public events, tickets and sales (from February 2027)</h2>
       <ul>
@@ -144,7 +143,6 @@ export default function Terms() {
           these terms: we can change the event&apos;s fee level or take the page down.
         </li>
       </ul>
-      <Ask>When an organiser cancels, should our booking fee go back to buyers too? Recommended yes: it&apos;s fair, and builds trust.</Ask>
 
       <h2 id="service">10. Our service</h2>
       <ul>

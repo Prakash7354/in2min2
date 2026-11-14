@@ -1160,7 +1160,7 @@ Small events run all year, so the personal and celebration side comes first and 
 | 1c (built 14 Nov, evening) | After the owner's first phone test: the running order with menus and two switches (0003); the photo above the border and "show the whole picture"; a smarter event page (countdown, date-and-place card, timeline, big reply buttons, minimum text sizes); Share, the bell and Settings at the top right; the AI writer panel; sign-in in its own window; Share on the public page | Live once the owner runs 0003 | The owner adds a running order with a menu on his phone and sees it on the guest link |
 | 1d (built 14 Nov, night) | The Share panel with every link and a ready-made message per moment; links to parts of the page; drafts of the privacy notice, terms and prices and fair fees | | Tested in Chrome at phone width |
 | 1e (built 14 Nov, late night) | Working replies with calendar links, the Replies window and bell; the main photo and WhatsApp preview picture; festive types, seasonal colours, three borders and moving effects; the festive banner on the home page | Live (0004 and 0005 run 14 Nov) | A guest replies from a WhatsApp link on a second phone and the host sees it |
-| 1f (built 14 Nov, late night) | The guests' photo wall from phase 3: adding photos with no app, shrinking and removing the location on the phone, sending after bad signal, approve-first, removal requests, the host's Photos window and bell, the TV slideshow, table cards and a poster with QR codes made in-house | Live once the owner runs 0006 and creates the R2 bucket | 20 photos from two phones reach the TV; the host hides one |
+| 1f (built 14 Nov, late night) | The guests' photo wall from phase 3: adding photos with no app, shrinking and removing the location on the phone, sending after bad signal, approve-first, removal requests, the host's Photos window and bell, the TV slideshow, table cards and a poster with QR codes made in-house | Live (0006 run and the bucket created, 14 Nov) | 20 photos from two phones reach the TV; the host hides one |
 | **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; **the guest dashboard (9)**; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
 | **Pilot 1** | 3–5 family events from the owner's network (Pop-Up and `LAUNCH50`) | From January 2027 | Real families use it; feedback collected |
 | **3** | Guest-list tools, the photo wall and gallery, video links, the event pack, feedback; closing emails with "Keep it for next year?" (5g) | January–February 2027 | 200 photos from 20 phones in an hour without failure |
@@ -1360,11 +1360,16 @@ The same deletion runs automatically 30 days after a page closes.
 - "Please remove this photo" hides the photo at once until the host decides.
 - QR codes are made in-house rather than with the `qrcode` library, so there is no extra code to trust or update.
 
+**Decided by the owner, 14 Nov 2026 (late night, after the photo wall):**
+- 0006 run and the R2 bucket `in2min2-photos` (EU) created; hello@ forwarding works.
+- Refunds: full within 14 days of paying; the unused part if the event has passed; what was paid if In2Min2 fails on the day (`/terms` 8).
+- If an organiser cancels, the booking fee goes back to buyers too (`/terms` 9).
+- Accounts unused for 2 years are deleted, after an email (`/privacy` 6).
+
 **Still open (Recommended answers in brackets):**
 1. (Answered: memorials free automatically.)
-2. Refunds: full within 14 days of paying; the unused part if the event has passed; a full refund if In2Min2 fails on the day (`/terms` 8)? (Yes)
-3. If an organiser cancels, the booking fee goes back to buyers too (`/terms` 9)? (Yes)
-4. Accounts unused for 2 years are deleted after an email (`/privacy` 6)? (Yes)
+2. (Answered: the refund rule, the booking fee on cancellation and 2-year account deletion, all as recommended.)
+3. Approve the three drafts so they lose the "Draft" label and are linked from every page? (Yes, once he has reread them)
 5. What to build next (4b). (Working replies and the guest list; the photo on the guest page and the WhatsApp preview picture; then festive designs and the festive offer on the home page, all by about 1 December.)
 
 ## 24. More ideas (backlog)
