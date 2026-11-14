@@ -11,7 +11,7 @@ import { slugify, type Draft } from "@/lib/draft";
 import { addDays, zonedToUtcIso } from "@/lib/time";
 
 export type PublishResult =
-  | { ok: true; eventId: string; path: string; offer?: { ok: boolean; message: string } }
+  | { ok: true; eventId: string; path: string; shortPath: string; offer?: { ok: boolean; message: string } }
   | { ok: false; message: string; step?: number };
 
 const nz = (s: string) => (s.trim() ? s.trim() : null);
@@ -86,10 +86,10 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
 
   // 1. The event itself
   const saved = d.eventId
-    ? await sb.from("events").update(row).eq("id", d.eventId).select("id, event_type, slug").single()
-    : await sb.from("events").insert(row).select("id, event_type, slug").single();
+    ? await sb.from("events").update(row).eq("id", d.eventId).select("id, event_type, slug, short_code").single()
+    : await sb.from("events").insert(row).select("id, event_type, slug, short_code").single();
   if (saved.error) return explain(saved.error);
-  const ev = saved.data as { id: string; event_type: string; slug: string };
+  const ev = saved.data as { id: string; event_type: string; slug: string; short_code: string };
 
   // 2. The stars and the honoured family
   await sb.from("event_people").delete().eq("event_id", ev.id);
@@ -137,5 +137,5 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
     offer = { ok: !!res?.ok, message };
   }
 
-  return { ok: true, eventId: ev.id, path: `/${ev.event_type}/${ev.slug}`, offer };
+  return { ok: true, eventId: ev.id, path: `/${ev.event_type}/${ev.slug}`, shortPath: `/e/${ev.short_code}`, offer };
 }

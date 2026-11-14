@@ -56,6 +56,7 @@ export type Draft = {
   // Once published (signed in): the event's id and address, and whether the code was used.
   eventId?: string;
   publishedPath?: string;
+  shortPath?: string; // "/e/x9k2b": the short link, easy to read aloud or put on a poster
   offerClaimed?: boolean;
   publishedHash?: string; // fingerprint() when last published, to spot changes not yet live
 };
@@ -191,7 +192,7 @@ export function slugOk(slug: string): boolean {
 // A short fingerprint of everything that publishing sends, so the builder can
 // say "you have changes that aren't live yet". The photo isn't sent yet
 // (photo storage comes later), so it's left out.
-const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "offerClaimed", "publishedHash", "cover", "offerCode"] as const;
+const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "shortPath", "offerClaimed", "publishedHash", "cover", "offerCode"] as const;
 export function fingerprint(d: Draft): string {
   const rest: Record<string, unknown> = { ...d };
   for (const k of LOCAL_ONLY) delete rest[k];

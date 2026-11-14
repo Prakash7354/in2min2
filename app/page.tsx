@@ -28,7 +28,7 @@ export default function Home() {
           </h1>
           <p className="text-xl text-muted" lang="ne">तपाईंको कार्यक्रम, दुई मिनेटमा</p>
           <p className="max-w-2xl text-xl">
-            From a child’s birthday to a Gurkha Cup-style tournament, a charity walk or a regimental reunion. One link, from
+            From a child’s birthday to a community tournament, a charity walk or a regimental reunion. One link, from
             invitation to memory book.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">

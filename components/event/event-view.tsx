@@ -19,9 +19,12 @@ const s = new Proxy({} as Record<string, string>, { get: (_, key) => `ev-${Strin
 
 // thumb: a small copy in the builder (a tile or the little preview). Full-size
 // pages get minimum text sizes; thumbnails shrink everything evenly.
-type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: boolean };
+// anchors: the public page only. Sections get ids (#running-order, #where,
+// #reply) so a shared link can jump straight to them; the builder shows several
+// copies at once, so it leaves them out.
+type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: boolean; anchors?: boolean };
 
-export default function EventView({ data, view, now, thumb = false }: Props) {
+export default function EventView({ data, view, now, thumb = false, anchors = false }: Props) {
   const p = data.palette;
   const ts = textStyle(data.textStyle);
   const party = partyColours(p);
@@ -47,8 +50,8 @@ export default function EventView({ data, view, now, thumb = false }: Props) {
       >
         {data.demo && <span className={s.demo}>Demo</span>}
         {view === "card" && <Card d={data} />}
-        {view === "page" && <Page d={data} now={now} />}
-        {view === "live" && <Live d={data} now={now} />}
+        {view === "page" && <Page d={data} now={now} a={anchors} />}
+        {view === "live" && <Live d={data} now={now} a={anchors} />}
         {view === "after" && <After d={data} />}
       </div>
     </div>
@@ -230,7 +233,7 @@ function Countdown({ d, now }: { d: EventViewData; now: number }) {
   );
 }
 
-function Page({ d, now }: { d: EventViewData; now: number }) {
+function Page({ d, now, a }: { d: EventViewData; now: number; a: boolean }) {
   const { main, second, secondLang } = words(d);
   const story = main.landing_page_story.split(/\n\s*\n/).filter((x) => x.trim());
   return (
@@ -253,8 +256,8 @@ function Page({ d, now }: { d: EventViewData; now: number }) {
       )}
 
       <People d={d} />
-      <WhenWhere d={d} />
-      {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} />}
+      <WhenWhere d={d} a={a} />
+      {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} a={a} />}
 
       {main.guest_note_box && (
         <section className={s.section}>
@@ -269,7 +272,7 @@ function Page({ d, now }: { d: EventViewData; now: number }) {
       )}
 
       {d.toggles.rsvp && (
-        <section className={`${s.section} ${s.rsvp}`}>
+        <section className={`${s.section} ${s.rsvp}`} id={a ? "reply" : undefined}>
           <h2 className={s.sectionTitle}>{d.sensitive ? "Will you attend?" : "Can you come?"}</h2>
           <div className={s.rsvpRow}>
             <span className={s.btn}>{d.sensitive ? "I’ll be there" : "Yes, we’ll come"}</span>
@@ -331,10 +334,10 @@ const PARKING_TEXT: Record<string, string> = {
   free: "Free car park", paid: "Paid parking", street: "Street parking nearby", none: "No parking at the venue",
 };
 
-function WhenWhere({ d }: { d: EventViewData }) {
+function WhenWhere({ d, a = false }: { d: EventViewData; a?: boolean }) {
   const url = d.toggles.map_directions ? directionsUrl(d) : null;
   return (
-    <section className={s.section}>
+    <section className={s.section} id={a ? "where" : undefined}>
       <h2 className={s.sectionTitle}>When and where</h2>
       <div className={`${s.facts} ${s.panel}`}>
         <div className={s.fact}>
@@ -374,10 +377,10 @@ function WhenWhere({ d }: { d: EventViewData }) {
 
 // What happens when. A meal shows its menu underneath. On the day, the item
 // on now and the one coming next are marked.
-function RunningOrder({ d, now, live = false }: { d: EventViewData; now: number; live?: boolean }) {
+function RunningOrder({ d, now, live = false, a = false }: { d: EventViewData; now: number; live?: boolean; a?: boolean }) {
   const ro = runningOrder(d.functions, d.date, now, d.timezone);
   return (
-    <section className={s.section}>
+    <section className={s.section} id={a ? "running-order" : undefined}>
       <h2 className={s.sectionTitle}>{d.scale === "community" ? "Programme" : "Running order"}</h2>
       <ol className={s.timeline}>
         {ro.items.map((f, i) => {
@@ -433,14 +436,14 @@ function shortDate(date: string): string {
   return `${dow.slice(0, 3)} ${day} ${month.slice(0, 3)}`;
 }
 
-function Live({ d, now }: { d: EventViewData; now: number }) {
+function Live({ d, now, a }: { d: EventViewData; now: number; a: boolean }) {
   return (
     <>
       <div className={s.banner}>{d.sensitive ? "Today" : "Happening today"}</div>
       <Hero d={d}>
         <p className={s.when}>{whenLine(d)}</p>
       </Hero>
-      {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} live />}
+      {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} live a={a} />}
       {d.toggles.photo_wall && (
         <section className={s.section}>
           <span className={`${s.btn} ${s.btnAccent} ${s.btnBig}`}>{d.sensitive ? "Share a photo or memory" : "Add your photos"}</span>
@@ -448,7 +451,7 @@ function Live({ d, now }: { d: EventViewData; now: number }) {
           <p className={s.muted}>Guests’ photos appear here as they are added.</p>
         </section>
       )}
-      <WhenWhere d={d} />
+      <WhenWhere d={d} a={a} />
       <Footer d={d} />
     </>
   );

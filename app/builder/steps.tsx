@@ -18,9 +18,9 @@ import { formatDate, formatTime, type MenuItem } from "@/lib/event-view";
 import { resizePhoto } from "@/lib/image";
 import EventView from "@/components/event/event-view";
 import { publishDraft } from "@/lib/publish";
-import { copyLink, whatsappUrl } from "@/lib/share";
 import { supabase } from "@/lib/supabase/client";
-import { eventLink, shareEvent } from "./topbar";
+import { ShareLinks } from "./share-links";
+import { eventLink } from "./topbar";
 import { Badge, Button, Choices, Field, Group, Notice, Soon, Switch, Tick, inputClass } from "./ui";
 
 export type StepProps = {
@@ -154,7 +154,7 @@ function Organiser({ d, update }: Pick<StepProps, "d" | "update">) {
   return (
     <Group title="Who's organising?" line="Shown on the page so people know who they're dealing with. Needed before a public event can be published.">
       <Field id="org-name" label="Organiser's name" aside={`${charCount(d.organiserName)}/120`}>
-        <input id="org-name" className={inputClass} value={d.organiserName} maxLength={120} placeholder="Andover Gurkha Welfare Group"
+        <input id="org-name" className={inputClass} value={d.organiserName} maxLength={120} placeholder="Riverside Community Association"
           onChange={(e) => update(set("organiserName", e.target.value))} />
       </Field>
       <Field id="org-type" label="What kind of organiser?">
@@ -852,7 +852,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
       return;
     }
     update((x) => {
-      const next = { ...x, eventId: r.eventId, publishedPath: r.path, offerClaimed: x.offerClaimed || !!r.offer?.ok };
+      const next = { ...x, eventId: r.eventId, publishedPath: r.path, shortPath: r.shortPath, offerClaimed: x.offerClaimed || !!r.offer?.ok };
       return { ...next, publishedHash: fingerprint(next) };
     });
     setPub({ busy: false, error: null, offer: r.offer?.message ?? null, done: true });
@@ -861,28 +861,16 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
   const ready = missing.length === 0 && d.checked;
   const link = eventLink(d);
   const changed = unpublishedChanges(d);
-  const name = d.title.trim() || "Our event";
 
   return (
     <div className="grid gap-6">
       {link && (
-        <Group title={pub.done ? "Published!" : "Your event is live"} line="Send this link to your guests. It's the invitation now, the live page on the day, and the memory book afterwards.">
-          <a href={d.publishedPath} target="_blank" rel="noreferrer" className="break-all rounded-2xl bg-wash px-4 py-3 font-semibold text-brand underline underline-offset-4">{link}</a>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Button kind="main" onClick={() => void shareEvent(d, say)}>Share the link</Button>
-            <a href={whatsappUrl(link, name)} target="_blank" rel="noreferrer"
-              className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#25D366] px-6 py-3 font-bold text-[#073B1C] hover:brightness-95">
-              WhatsApp
-            </a>
-            <Button kind="quiet" onClick={async () => {
-              const r = await copyLink(link);
-              say(r === "copied" ? "Link copied." : "Couldn't copy here. Press and hold the link above to copy it.");
-            }}>Copy link</Button>
-          </div>
+        <Group title={pub.done ? "Published!" : "Your event is live"} line="Your links, and a ready-made message for each moment.">
           {pub.offer && <Notice>{pub.offer}</Notice>}
           {changed
             ? <Notice tone="warn">You&apos;ve changed things since publishing. Press &ldquo;Update my page&rdquo; below to put them live; the link stays the same.</Notice>
             : <p className="text-[15px] text-muted">Change anything, then press &ldquo;Update my page&rdquo; below; the link stays the same.</p>}
+          <ShareLinks d={d} say={say} link={link} />
         </Group>
       )}
 

@@ -323,13 +323,13 @@ await as(A);
 await expectError("a community event can't be published without its organiser", `update events set status = 'published' where id = '${ch.id}'`, /community_organiser_named/);
 await expectError("a badly written charity number is rejected", `update events set charity_number = 'no. 123' where id = '${ch.id}'`, /check constraint/);
 await expectError("an unknown organiser type is rejected", `update events set organiser_type = 'secret' where id = '${ch.id}'`, /check constraint/);
-await q(`update events set organiser_name = 'Andover Gurkha Welfare Group', organiser_type = 'charity', for_profit = false,
+await q(`update events set organiser_name = 'Riverside Community Association', organiser_type = 'charity', for_profit = false,
   charity_number = '1234567', organiser_contact = '07700 900456', keep_for_next_year = true, status = 'published' where id = $1`, [ch.id]);
 ok("with name, type and profit answered it publishes", (await q(`select status from events where id = $1`, [ch.id]))[0].status === "published");
 ok("the host can keep the guest list for next year", (await q(`select keep_for_next_year k from events where id = $1`, [ch.id]))[0].k === true);
 await as(null);
 [pe] = await q(`select public_event('charity','walk-2027') as p`);
-ok("the public sees who organises it and that nobody profits", pe.p.event.organiser_name === "Andover Gurkha Welfare Group"
+ok("the public sees who organises it and that nobody profits", pe.p.event.organiser_name === "Riverside Community Association"
   && pe.p.event.organiser_type === "charity" && pe.p.event.for_profit === false && pe.p.event.charity_number === "1234567");
 ok("the public never sees the fee level or its note", !("charge_percent" in pe.p.event) && !JSON.stringify(pe.p).includes("checked on the register"));
 ok("not a demo", pe.p.event.is_demo === false);

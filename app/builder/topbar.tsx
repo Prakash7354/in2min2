@@ -7,6 +7,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { missingForPublish, unpublishedChanges, type Draft } from "@/lib/draft";
 import { shareLink } from "@/lib/share";
+import { ShareLinks } from "./share-links";
 import { supabase } from "@/lib/supabase/client";
 
 type Common = {
@@ -42,18 +43,33 @@ export function TopBar(props: Common & { onStartAgain: () => void }) {
 
 const iconButton = "relative grid size-11 place-items-center rounded-full text-ink transition hover:bg-wash aria-expanded:bg-wash";
 
+const shareIcon = (
+  <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 3v12M7.5 7.5L12 3l4.5 4.5" /><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H16" />
+  </svg>
+);
+
+// Before publishing: explains that publishing comes first. After: every link
+// and a ready-made message for each moment (share-links.tsx).
 function ShareButton({ d, goTo, say }: Common) {
-  const live = !!d.publishedPath;
+  const link = eventLink(d);
+  if (!link) {
+    return (
+      <button type="button" className={iconButton} aria-label="Share (publish first)"
+        onClick={() => { goTo(6); say("Publish your page first, then share its link."); }}>
+        {shareIcon}
+      </button>
+    );
+  }
   return (
-    <button type="button" className={iconButton} aria-label={live ? "Share your event's link" : "Share (publish first)"}
-      onClick={() => {
-        if (live) void shareEvent(d, say);
-        else { goTo(6); say("Publish your page first, then share its link."); }
-      }}>
-      <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M12 3v12M7.5 7.5L12 3l4.5 4.5" /><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H16" />
-      </svg>
-    </button>
+    <Popover label="Share your event" icon={shareIcon}>
+      {() => (
+        <>
+          <p className="px-2 pb-1 pt-1.5 text-sm font-bold uppercase tracking-wider text-muted">Share</p>
+          <ShareLinks d={d} say={say} link={link} />
+        </>
+      )}
+    </Popover>
   );
 }
 
@@ -82,7 +98,7 @@ function Popover({ label, icon, badge, children }: { label: string; icon: ReactN
         )}
       </button>
       {open && (
-        <div id={id} className="absolute right-0 top-[calc(100%+6px)] z-40 grid w-[min(92vw,340px)] gap-1 rounded-2xl border border-line bg-card p-2 text-left shadow-[0_18px_40px_-14px_rgba(28,26,58,0.45)]">
+        <div id={id} className="absolute right-0 top-[calc(100%+6px)] z-40 grid max-h-[min(80dvh,680px)] w-[min(92vw,360px)] gap-1 overflow-y-auto overscroll-contain rounded-2xl border border-line bg-card p-2 text-left shadow-[0_18px_40px_-14px_rgba(28,26,58,0.45)]">
           {children(() => setOpen(false))}
         </div>
       )}

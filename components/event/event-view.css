@@ -424,6 +424,18 @@
   display: grid;
   gap: min(calc(var(--u) * 3), 16px);
   border-top: 1px solid color-mix(in srgb, var(--ev-ink) 10%, transparent);
+  scroll-margin-top: 12px; /* a shared link with #running-order lands just above the title */
+}
+/* A section opened from a shared link (#running-order, #where, #reply) glows briefly. */
+.ev-section:target {
+  animation: ev-target 2.4s ease-out 1;
+}
+@keyframes ev-target {
+  0%, 30% { background: color-mix(in srgb, var(--ev-accent) 18%, transparent); }
+  100% { background: transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-section:target { animation: none; }
 }
 /* On a wide screen the words stay a comfortable width. */
 .ev-section,

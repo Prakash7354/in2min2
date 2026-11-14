@@ -1,11 +1,18 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.6, 14 November 2026 (evening). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.7, 14 November 2026 (night). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.7 (14 Nov 2026, night):**
+- Migration 0003 has run, and our own email sender (Resend) is set up. Nothing is waiting in the database.
+- **Share** (top right, and step 7) lists every link with a ready-made message for each moment, and links can jump to a part of the page (7, 11).
+- Drafts of the privacy notice, the terms (with the data agreement for guests' details) and **Prices and fair fees** (the written fee rules) are at `/privacy`, `/terms` and `/pricing`, waiting for the owner's approval (22).
+- The owner said yes to the festive launch, postponed two-step sign-in, and asked that no event or organiser be named publicly (23).
+- A market check and free-licence design sources (4b).
 
 **What changed in version 3.5 (14 Nov 2026, afternoon):**
 - in2min2.com is bought and connected.
@@ -60,7 +67,7 @@ Also: In2Min2's own screens look more formal; the wordmark is the logo (18d); th
 
 ## 1. The idea
 
-**Your event online in two minutes, from invitation to memory book, on one link. From a child's birthday to a Gurkha Cup, a charity walk or a regimental reunion.** (Decided)
+**Your event online in two minutes, from invitation to memory book, on one link. From a child's birthday to a community tournament, a charity walk or a regimental reunion.** (Decided)
 
 A host picks what they are celebrating and how big it is, types a few facts, and presses one button. In2Min2 writes the words in their languages, dresses them in a ready-made design, and gives back one link to share anywhere.
 
@@ -81,7 +88,7 @@ The first question in the builder is "How big is your event?". The answer decide
 | --- | --- | --- | --- |
 | **Personal**: friends and family | Birthday, Pasni (rice feeding), party, house-warming | About a week either side | Invitation card, RSVP, map, parking, photos, thank-you |
 | **Celebration**: a big family or group occasion | Wedding, engagement, wedding anniversary, Bratabandha, **reunion, regimental day**, **memorial or funeral** (handled quietly, 5g) | Planned over weeks; **90 days is the sweet spot** | Several functions (Mehndi, Ceremony, Reception), separate guest lists, honoured family, gifts, guestbook, two languages, guest numbers for the venue and caterer |
-| **Community and sport**: a public event | Mela, Gurkha Cup or Nepal Cup-style tournament, **charity fundraiser**, cultural show | Months of entries and sales before; results and photos after | Tickets (paid or free), team entries, the draw, fixtures, live scores, stalls, sponsors, parking, receipts, cash on the day, head count against capacity |
+| **Community and sport**: a public event | Mela, community football or volleyball tournament, **charity fundraiser**, cultural show | Months of entries and sales before; results and photos after | Tickets (paid or free), team entries, the draw, fixtures, live scores, stalls, sponsors, parking, receipts, cash on the day, head count against capacity |
 
 The scale is stored on the event (`events.scale`, filled from the event type) and the host can change it. Event types live in a table, so adding one (school reunion, Teej, Dashain party) needs no code change. Each type also says whether it comes round every year, and whether it is a sensitive occasion (5g).
 
@@ -131,6 +138,40 @@ Golf Society Home keeps its own social-event builder for golf days. In2Min2 is f
 | Challonge | $0.75 per paid order; Premier $14.99 a year |
 
 **Conclusion:** today a wedding host who pays for an invitation, a website and a photo app spends £40–200. A tournament organiser pays a ticketing site per ticket **and** a tournament tool. In2Min2 does all of it, so it can charge less than any one of them and still make money, because serving an event costs pennies (section 17).
+
+### 4b. Getting to a competitive level (researched 14 Nov 2026; Recommended)
+
+*Most comparison pages are written by competitors, so treat their claims with care.*
+
+**What others offer now:**
+- **Free party apps** (Partiful, Evite): free invitations, replies and updates to guests. Partiful added paid tickets in June 2026, starting in the USA.
+- **Wedding suites** (Joy, Zola): a free website and replies; premium digital cards cost extra.
+- **Guest photo apps** (Kululu, GuestPix, Wedibox, GuestCam): guests scan a QR code and upload with no app. Most add a live slideshow for a TV, and some an audio or video guestbook. Usually a one-off fee of about $39–99.
+- **Event and ticket platforms** (Luma, Eventbrite): registration, QR check-in and messages to attendees. Luma's free plan takes 5% of paid tickets.
+
+**Where In2Min2 is already ahead:** two languages including Nepali; one link through every stage; a running order with menus; community tools; lower fees than any ticketing rival (5d).
+
+**Gaps to close, in order:**
+1. **Replies that work**, with the guest list, numbers and "Add to calendar". Today the reply buttons are only a preview.
+2. **The main photo on the guest page**, and the **picture WhatsApp shows** when the link is pasted (`opengraph-image`). WhatsApp is how these invitations travel.
+3. **Updates to guests:** reminders, and "something changed" messages.
+4. **The photo wall:** a QR code on table cards, no app needed, and a live slideshow for a TV.
+5. **Small delights:** the invitation opening like an envelope; seasonal effects (snow, fireworks, marigold petals); a voice-note guestbook (24).
+6. **Posters with a QR code**, print-ready.
+
+**Free-licence sources that are safe to build in** (ask the owner before adding each one; CLAUDE.md):
+- **Icons:** Lucide (ISC licence) or Tabler (MIT), one consistent set for the whole app.
+- **Festive pictures:** Microsoft's Fluent Emoji (MIT; commercial use allowed). These are 3D-style pictures such as a Christmas tree, gift, fireworks, party popper and diya lamp, for seasonal designs and the share images.
+- **Moving stickers:** Google's Noto Emoji Animation (CC BY 4.0: allowed if we credit Google).
+- **Effects:** canvas-confetti (ISC) for petals, snow and fireworks; already planned (17a).
+- **QR codes and print-ready posters:** `qrcode` and `pdf-lib` (both MIT).
+- **Fonts:** Google Fonts (Open Font Licence), already in use.
+- **Not used:** Canva elements, Freepik, Pinterest, or stock photos built into templates (7d). Hosts use their own photos.
+
+**Seasonal showcase for the festive launch (Recommended):** Christmas party, New Year's Eve and Tamu Lhosar (30 December) designs, each with:
+- its own colours and border;
+- an effect: snow, fireworks or marigold petals;
+- the home page banner "Festive launch: free until 31 January 2027".
 
 ## 5. Pricing (Decided by the owner, 13 Nov 2026, as launch prices)
 
@@ -253,9 +294,9 @@ Re-check them every three months.
   - The pricing page can show *"12 of 50 free places left"*.
   - One place per account. Deleting the event and starting again doesn't give a second place.
   - Built: `offers`, `offer_claims`, `claim_offer()`, `offer_places_left()`, with checks.
-  - More offers (e.g. `NEPALCUP` for 5 organisers) are one row each in the `offers` table.
+  - More offers (e.g. `ORGANISER5` for 5 organisers) are one row each in the `offers` table.
 - **Free Organiser for the first 5 community events**, in return for feedback and permission to show their page as an example (phase 6).
-- **Festive launch (Recommended, owner's question of 14 Nov 2026: "first 30 days free for all?").** Paying only opens in February (phase 4), so every event published before then is free in any case. Say so proudly:
+- **Festive launch (Decided, owner, 14 Nov 2026: "seasonal event design would be a lovely way to showcase the free launch offer until 31 January").** Paying only opens in February (phase 4), so every event published before then is free in any case. Say so proudly:
   - **"Festive launch: In2Min2 is free until 31 January 2027."** It's a clear end date, it ties in with Christmas, New Year and the pilot, and it's honest.
   - Then the normal prices start. Pop-Up stays free for ever, and `LAUNCH50` carries on for the first 50 families.
   - **Organisers:** "No In2Min2 fee on your first event's online sales", for organisers who sign up before 31 March 2027. Stripe's own card cost still applies. This beats a 30-day trial, because their sales come in April–May.
@@ -274,13 +315,13 @@ Re-check them every three months.
 
 ### 5g. Next year, and more than one event (Decided, owner's idea of 13 Nov 2026)
 
-Many events come round every year: birthdays, anniversaries, a Gurkha Cup, a regimental day, a charity walk. Others happen once: a wedding, a Pasni. The event type knows which (`event_types.repeats_yearly`, built), and a wedding comes back as its anniversary (`event_types.repeat_as`, built).
+Many events come round every year: birthdays, anniversaries, a community tournament, a regimental day, a charity walk. Others happen once: a wedding, a Pasni. The event type knows which (`event_types.repeats_yearly`, built), and a wedding comes back as its anniversary (`event_types.repeat_as`, built).
 
 **1. The same event next year: "Run it again", 30% off.**
 - When the page closes, the host is asked: *"Will you hold this again next year?"*
   - **Yes, keep it** (free): the guest list, functions, honoured family, words, look and switches are kept for up to 13 months after the event, with the page offline (`events.keep_for_next_year`, built). Photos follow the plan as normal.
   - **No**: everything is deleted 30 days after closing, as now.
-- About 8 weeks before the date next year: *"Your Gurkha Cup is coming up. Set up 2027 in one tap."* One tap makes a draft copy with next year's date and everything carried over. The host checks it and publishes.
+- About 8 weeks before the date next year: *"Your tournament is coming up. Set up 2027 in one tap."* One tap makes a draft copy with next year's date and everything carried over. The host checks it and publishes.
 - **30% off** the plan and guest packs, applied by itself. There's no code to type, so nothing to lose or pass around.
 - A wedding's "next year" is its first anniversary: *"Your first anniversary is on 14 March. Make a page for it, 30% off, with your wedding guest list ready."*
 - Community events carry over their competitions, products and prices, stalls and sponsors. Their booking fee is per sale, so the 30% doesn't apply to them. The carry-over and the same address every year are their hook. A fee level the owner set (5h) carries over too, and he can change it.
@@ -309,7 +350,7 @@ The system can't know whether an event is sensitive or deserving, so it never de
 | --- | --- | --- |
 | **Full** (default) | 100%: the normal plan, packs and booking fee | Almost everything |
 | **Half** | 50%: e.g. Season £4.50; booking fee 2% + 15p | A registered charity's fundraiser |
-| **Free** | Nothing | A funeral; an Army-side Nepal Cup as a showcase |
+| **Free** | Nothing | A funeral; a large free community tournament as a showcase |
 
 - Stripe's own card cost (about 1.5% + 20p) still applies to online sales on Half and Free. In2Min2 can't waive it, just as a card machine still charges.
 - **How organisers ask:** an *"Ask about a reduced fee"* link on the pricing page and the organiser dashboard opens a short form: organiser, event, why, and a charity number if they have one. It goes to the owner by email. Nobody gets a reduction without asking.
@@ -328,7 +369,7 @@ The system can't know whether an event is sensitive or deserving, so it never de
   - a charity number, if any;
   - a contact to show.
 - The database refuses to publish a community event without the first three (built and tested).
-- The public page shows it: *"Organised by Andover Gurkha Welfare Group · Charity 1234567 · Not for profit"*. Buyers see who they are paying and whether anyone profits.
+- The public page shows it: *"Organised by Riverside Community Association · Charity 1234567 · Not for profit"*. Buyers see who they are paying and whether anyone profits.
 - Anyone who takes money online also passes Stripe's identity check (name, address, date of birth, bank). So nobody sells tickets anonymously.
 - Prices are the same for profit and not-for-profit events by default. The answer helps the owner judge fee requests. A false answer breaks the terms: the owner can move the event to Full or take it down.
 
@@ -425,7 +466,13 @@ There is never a separate "preview mode" that looks different from the real page
    - Then **Publish**, which opens the share screen (section 11).
 
 **Top-right corner, as in most apps (owner's request, 14 Nov 2026; built):**
-- **Share**: the phone's own share menu, or the link is copied; before publishing it explains that publishing comes first. Step 7 also has **Share the link**, **WhatsApp** and **Copy link**, and the public page has **Share this page** for guests.
+- **Share** (owner, 14 Nov 2026 night: "all of these links made available here"): before publishing it explains that publishing comes first. After publishing it opens a panel, also shown on step 7 (`app/builder/share-links.tsx`):
+  - "One link does it all": the event link is the whole page and changes by itself through the stages;
+  - the link and the short link (`/e/{code}`, for posters and reading aloud);
+  - a ready-made message for each moment, each with **Share**, **WhatsApp** and **Copy**: the invitation, the running order (jumps to `#running-order`), directions and parking (`#where`), a reminder, on the day, and thank you;
+  - what's coming: a personal link per guest, and a poster with a QR code.
+
+  The public page has **Share this page** for guests.
 - **The bell (Updates)**: what needs doing (sign in, still needed to publish, changes not live yet), and later each guest's reply (phase 2).
 - **Settings** (a cog, or the host's initial once signed in): who is signed in, shortcuts to switches, the look and publishing, start a new event, sign out.
 - **Sign-in** opens in its own window (a sheet from the bottom on a phone) with two numbered steps, so it never looks like part of the page.
@@ -626,7 +673,8 @@ The owner's aim is to replace paper lists, guesswork, extra volunteers and endle
   - It is drawn **on the host's own phone or computer** (free, no server cost), and the host taps **Download poster** to get a print-ready PDF or picture. They print at home or at any print shop.
   - The same goes for table cards ("Scan to add your photos"), the "Pay here" gate poster, and numbered car park slips.
   - Melas put the posters in shop windows.
-- **Short links**: `in2min2.com/e/x9k2`, easy to read aloud or type from a poster.
+- **Short links**: `in2min2.com/e/x9k2`, easy to read aloud or type from a poster. Shown in the Share panel (7).
+- **Links to a part of the page** (built 14 Nov 2026): `#running-order`, `#where` and `#reply` open the page at that section, which glows briefly. Only the public page has these ids (`EventView anchors`).
 - **Where replies came from**: each shared link carries its channel (`?via=wa`), so the host sees "most replies came from WhatsApp".
 - **Calendar**: "Add to calendar" (`.ics` and Google Calendar) after every RSVP or purchase.
 
@@ -692,7 +740,7 @@ Every paid or free item is a **product** with switches. One screen, one row per 
 | Business stall | £40 small, £60 food | Not sold on the day | Charity stalls | 30 pitches |
 | Sponsorship | Gold £500 / Silver £250 / Bronze £100 | — | — | Logos on page, big screen and results |
 | Donation | Any amount | Any amount | — | Fundraisers |
-| **Free ticket** | £0 | £0 | Everyone | A free Nepal Cup-style event that still needs numbers and parking control |
+| **Free ticket** | £0 | £0 | Everyone | A free community tournament that still needs numbers and parking control |
 
 - **The online price ends at a set time** (e.g. Friday 23:59) and the on-the-day price takes over automatically.
 - **Capacity** is set per product ("300 spaces"). It shows sold out by itself.
@@ -702,7 +750,7 @@ Every paid or free item is a **product** with switches. One screen, one row per 
 ### 13b. Competitions, teams, the draw, fixtures and live scores (reuses golf's draw and live score card)
 
 - **Any sport, any group.**
-  - One event can hold several **competitions**, e.g. men's football Open, Veterans football and Ladies volleyball at the same Nepal Cup-style event.
+  - One event can hold several **competitions**, e.g. men's football Open, Veterans football and Ladies volleyball at the same community tournament.
   - Each has its own sport, entry fee, format, draw and fixtures, all on one page.
   - The organiser names the groups (Open, Veterans 35+, Ladies, Under-16, Army, Civilian…).
 - **Eligibility is the organiser's job, not the system's (Decided).**
@@ -721,7 +769,7 @@ Every paid or free item is a **product** with switches. One screen, one row per 
 - **Big-screen mode** (`/live/{code}`) runs on a TV or projector. It cycles through live scores, next fixtures, sponsor logos and the photo wall.
 - **Results and awards**: winners, runners-up, top scorer, best goalkeeper, fair play. A results image is made automatically, ready to share.
 
-**A free showcase.** A large, free, Army-side event such as a Nepal Cup costs In2Min2 almost nothing to support. It is a perfect public showcase. Whether it's free is the owner's call (5h): he sets its fee level to Free and asks the organisers' permission to show it.
+**A free showcase.** A large, free community tournament costs In2Min2 almost nothing to support. It is a perfect public showcase. Whether it's free is the owner's call (5h): he sets its fee level to Free and asks the organisers' permission to show it.
 
 ### 13c. Business stalls and sponsors
 
@@ -744,7 +792,7 @@ Sponsors choose a tier and pay online, or are added by hand. Their logos appear 
 
 Many people in the community still prefer cash and distrust paying online. In2Min2 never forces online payment, and makes it feel safe:
 
-- **Plain words at the moment of paying:** *"Pay safely by card, Apple Pay or Google Pay. Your card details go straight to Stripe, a payment company used by millions of businesses. In2Min2 never sees them. Your money goes to Gurkha Cup Committee's bank account."*
+- **Plain words at the moment of paying:** *"Pay safely by card, Apple Pay or Google Pay. Your card details go straight to Stripe, a payment company used by millions of businesses. In2Min2 never sees them. Your money goes to Riverside Community Association's bank account."*
 - **Who you're paying**, always visible:
   - the organiser's name, contact and refund policy;
   - the event's real-world details;
@@ -796,7 +844,7 @@ Many people in the community still prefer cash and distrust paying online. In2Mi
 
 | How they pay | What they get as proof | How it is checked |
 | --- | --- | --- |
-| **Online in advance** (card, Apple Pay, Google Pay) | Instantly: a confirmation page and an email with an order number (e.g. `GC-000123`) and **one QR code per item** (entry, car park pass, team entry, stall). A "My tickets" page they can reopen from the email, with no account. Stripe's own receipt too. Later: Add to Google Wallet (free) and Apple Wallet (needs an Apple developer account, £79 a year) | Gate helpers scan the QR with their phone's camera in the In2Min2 **Gate** screen: green tick, "already used", or "wrong day" |
+| **Online in advance** (card, Apple Pay, Google Pay) | Instantly: a confirmation page and an email with an order number (e.g. `EV-000123`) and **one QR code per item** (entry, car park pass, team entry, stall). A "My tickets" page they can reopen from the email, with no account. Stripe's own receipt too. Later: Add to Google Wallet (free) and Apple Wallet (needs an Apple developer account, £79 a year) | Gate helpers scan the QR with their phone's camera in the In2Min2 **Gate** screen: green tick, "already used", or "wrong day" |
 | **Card on the day** | The buyer scans a **"Pay here" QR poster** at the gate and pays on their own phone at the on-the-day price. They get the same email and QR, so no card reader is needed | Same scan |
 | **Cash on the day** | The helper taps "+1 car park £5 cash" in the Gate screen. That makes a numbered receipt the buyer can photograph from the helper's screen (as a QR), or have sent by text or email. For cars: **pre-printed numbered dashboard slips** from a free In2Min2 PDF, each with a QR; the helper marks the slip number as sold | Marshals check the slip on the windscreen; the QR proves it is genuine |
 
@@ -904,9 +952,10 @@ Even if only 3 in 10 of those events paid £9, income would be about £2,700 a m
 
 | Address | What |
 | --- | --- |
-| `in2min2.com/{type}/{slug}` | The event page, e.g. `/wedding/meenu-jose`, `/sport/gurkha-cup-2027` |
+| `in2min2.com/{type}/{slug}` | The event page, e.g. `/wedding/meenu-jose`, `/sport/riverside-cup-2027` |
 | `in2min2.com/e/{code}` and `?g={token}` | Short link, and a guest's personal link |
 | `in2min2.com/live/{code}` | Big screen |
+| `in2min2.com/privacy`, `/terms`, `/pricing` | Privacy notice, terms, and prices and fair fees (drafts, 14 Nov 2026) |
 | `in2min2.com/dashboard/…` | Host and organiser area |
 | `jamesandangeeta.com` | Own-domain add-on |
 
@@ -1030,6 +1079,7 @@ Small events run all year, so the personal and celebration side comes first and 
 | 1a+ (done 13 Nov) | Design review: 18 borders, 30 colour sets in 8 families, 10 text styles with fonts for six scripts, layouts, the wordmark logo and icon, a more formal In2Min2 look | | Tested in Chrome at phone and computer width |
 | 1b (built 14 Nov) | Sign-in by a 6-digit emailed code; publish and update to the database; `LAUNCH50`; the AI writer only for signed-in hosts, 20 a day; the public page `/{type}/{slug}` and short link `/e/{code}`, drawn by the same code as the preview; numbered steps; labels | Live once the owner runs 0002 and sets the email template | A host publishes from their phone and opens the guest link |
 | 1c (built 14 Nov, evening) | After the owner's first phone test: the running order with menus and two switches (0003); the photo above the border and "show the whole picture"; a smarter event page (countdown, date-and-place card, timeline, big reply buttons, minimum text sizes); Share, the bell and Settings at the top right; the AI writer panel; sign-in in its own window; Share on the public page | Live once the owner runs 0003 | The owner adds a running order with a menu on his phone and sees it on the guest link |
+| 1d (built 14 Nov, night) | The Share panel with every link and a ready-made message per moment; links to parts of the page; drafts of the privacy notice, terms and prices and fair fees | | Tested in Chrome at phone width |
 | **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; **the guest dashboard (9)**; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
 | **Pilot 1** | 3–5 family events from the owner's network (Pop-Up and `LAUNCH50`) | From January 2027 | Real families use it; feedback collected |
 | **3** | Guest-list tools, the photo wall and gallery, video links, the event pack, feedback; closing emails with "Keep it for next year?" (5g) | January–February 2027 | 200 photos from 20 phones in an hour without failure |
@@ -1056,7 +1106,7 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
   - private events are available.
 - **Secrets** are only in Cloudflare and `.env.local`, never in GitHub. The service key is used only on the server.
 - **Two-step sign-in (owner's question, 14 Nov 2026: single or double, and how much burden?).** No UK law names it. UK GDPR requires security "appropriate to the risk", and the ICO recommends multi-factor sign-in for accounts that reach other people's data. The balance:
-  - **The owner's own accounts** (GitHub, Cloudflare, Supabase, Stripe, Google, domain registrar): two-step, always. They can reach every family's data.
+  - **The owner's own accounts** (GitHub, Cloudflare, Supabase, Stripe, Google, domain registrar): two-step recommended, because they can reach every family's data. **Postponed by the owner on 14 Nov 2026**; remind him once, before the pilot. Checked steps are in `docs/ACTION-PLAN.md` step 9.
   - **Hosts:** a 6-digit code by email each time they use a new device, and no password at all. That is already "something you have" (the inbox). They stay signed in on their own phone. Risky actions ask for a fresh code: deleting everything, exporting a guest list, changing who can help.
   - **Organisers taking money:** Stripe checks their identity and protects their payouts with its own two-step sign-in. In2Min2 offers an authenticator app as an option (phase 4) and may require it for organisers with large sales.
   - **Guests:** no account at all. Their personal link is the key.
@@ -1117,7 +1167,16 @@ For community events:
 
 The **Children's Code** applies to online services likely to be seen by children. Accounts are for adults (18+). Guest pages may be seen by children, so the defaults stay high-privacy: no tracking, no adverts, no location, no nudges.
 
-**The documents needed before the pilot** (Claude Code drafts them in phase 2; a one-off check by a solicitor is worth it before the first paid community event):
+**The documents needed before the pilot** (a one-off check by a solicitor is worth it before the first paid community event).
+
+**Drafted 14 Nov 2026 (owner's request), waiting for his approval:** `/privacy`, `/terms` (including the data agreement for guests' details, section 5) and `/pricing` (prices, launch offers and the written fee rules), built on `components/legal/legal-page.tsx`.
+- While `DRAFT` is true, each says so at the top and is `noindex`, and nothing links to it.
+- On approval: set `DRAFT` to false; fill the marked gaps (owner's full name, business address, ICO number); link the pages from sign-in, publishing and the page footers.
+- Contact everywhere: `hello@in2min2.com`, forwarded to the owner by Cloudflare Email Routing (free; ACTION-PLAN step 3).
+- **Name and address:** the Electronic Commerce Regulations 2002 require the trader's name, a postal address and an email on the website. The owner plans a virtual business address for GoChuchuro, which also keeps his home off the ICO's public register.
+- Photo storage (phase 3) must use an R2 bucket with the EU jurisdiction, as the privacy notice says "stored files in Europe".
+
+The full list:
 1. A privacy notice in plain English, with a short version a child could follow.
 2. Terms for hosts and organisers, including a data-processing section: In2Min2 processes guest data on their behalf.
 3. A DPIA (data protection impact assessment, using the ICO's free template), because of children's photos and public events.
@@ -1159,7 +1218,6 @@ The same deletion runs automatically 30 days after a page closes.
 - The host or organiser checks and approves every word, in any language, before publishing.
 - A private demo account; no public demo log-in.
 - A marketing website with a top menu, How it works, sign-up, sign-in and contact.
-- Two-step sign-in on every account (agreed; still to switch on).
 - Colours: A, Marigold & Indigo, for In2Min2's own screens; hosts choose from all three brand palettes and more (13 Nov 2026, night).
 - The design review (13 Nov 2026, late):
   - more variety and modern mixes, fewer pinks;
@@ -1192,10 +1250,23 @@ The same deletion runs automatically 30 days after a page closes.
 
 - Logo: idea C, each 2 in a stopwatch face (14 Nov 2026). `components/brand/wordmark.tsx`, `app/icon.svg`.
 - in2min2.com bought and connected (14 Nov 2026).
-- Two-step sign-in on the owner's accounts: postponed by the owner for now; keep reminding him.
+- Two-step sign-in on the owner's accounts: postponed by the owner (14 Nov 2026: "if not required by law, stay without for now"). Remind him once, before the pilot.
+
+**Decided by the owner, 14 Nov 2026 (night):**
+- Festive launch: free until 31 January 2027, shown off with seasonal designs (5e). Taken as yes to the whole recommendation, including the organisers' first event fee-free before 31 March.
+- No event or organiser is named in public material. In2Min2 is built ready for large community events, whoever signs up, and is advertised as early as possible.
+- Share: all the links in one place, to share any or all of them when the host wants (7).
+- Fee rules, terms and privacy: drafted for him to read (22).
+- ICO fee before January, or before links go to people beyond the pilot.
+- Sole trader in his own name, with a virtual business address for GoChuchuro.
+- Posters and car park slips: made by In2Min2 as print-ready PDF or PNG, printed at home on any connected printer or at a print shop (11).
 
 **Still open (Recommended answers in brackets):**
-1. Launch offer: "Festive launch: free until 31 January 2027", plus "no In2Min2 fee on an organiser's first event" for sign-ups before 31 March (5e)? (Yes)
+1. Memorials and funerals free automatically, by his written rule (`/pricing`)? (Yes)
+2. Refunds: full within 14 days of paying; the unused part if the event has passed; a full refund if In2Min2 fails on the day (`/terms` 8)? (Yes)
+3. If an organiser cancels, the booking fee goes back to buyers too (`/terms` 9)? (Yes)
+4. Accounts unused for 2 years are deleted after an email (`/privacy` 6)? (Yes)
+5. What to build next (4b). (Working replies and the guest list; the photo on the guest page and the WhatsApp preview picture; then festive designs and the festive offer on the home page, all by about 1 December.)
 
 ## 24. More ideas (backlog)
 
@@ -1267,6 +1338,21 @@ The same deletion runs automatically 30 days after a page closes.
 - **Domains:**
   - [.events prices](https://domainoffer.net/tld/events/namecheap)
   - [.day at Cloudflare](https://domainoffer.net/tld/day/cloudflare)
+- **Market check, 14 Nov 2026:**
+  - [Partiful adds ticketing (Pulse)](https://www.pulse.bot/marketing/news/partiful-adds-inapp-ticketing-turning-its-social-platform-into-a-paidevent-marketplace-f1e21f34-b773-4906-b34f-19f859e5747b/)
+  - [Luma vs Partiful (Luma)](https://help.luma.com/p/luma-vs-partiful)
+  - [Greenvelope: digital invitation platforms](https://www.greenvelope.com/resources/best-digital-invitation-platforms)
+  - [Kululu wedding photo app](https://www.kululu.com/wedding-photo-sharing-app)
+  - [Wedibox: wedding photo apps 2026](https://www.wedibox.com/compare/best-wedding-photo-sharing-apps)
+  - [Fotify: wedding photo apps 2026](https://fotify.app/blog/best-wedding-photo-sharing-apps-2026/)
+  - [Fluent Emoji licence (Iconify)](https://icon-sets.iconify.design/fluent-emoji-high-contrast/)
+  - [Google: Noto Emoji animation, CC BY 4.0](https://developers.googleblog.com/updates-to-emoji-new-characters-new-animation-new-color-customization-and-more)
+  - [Tamu Lhosar 2026 date](https://www.officeholidays.com/amp/holidays/nepal/tamu-lhosar)
+- **Two-step sign-in, checked 14 Nov 2026:**
+  - [GitHub](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication)
+  - [Cloudflare](https://developers.cloudflare.com/fundamentals/user-profiles/2fa/)
+  - [Google](https://support.google.com/accounts/answer/185839)
+  - [Supabase](https://supabase.com/docs/guides/platform/multi-factor-authentication)
 - **Market:**
   - [Guides for Brides: South Asian wedding trends](https://guidesforbrides.co.uk/wedding-ideas/south-asian-wedding-trends)
   - [Hitched: average wedding cost 2026](https://www.theknotww.com/press-releases/the-average-cost-of-a-wedding-in-2026-around-21990-according-to-hitched)

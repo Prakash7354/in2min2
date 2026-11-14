@@ -56,7 +56,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
   return (
     <main className={`${eventFontVariables} min-h-dvh sm:py-8`} style={{ background: p.gradient ? `linear-gradient(${p.soft}e6, ${p.soft}e6), ${p.gradient}` : p.soft }}>
       <div className="mx-auto w-full max-w-2xl overflow-hidden sm:rounded-3xl sm:shadow-[0_24px_60px_-28px_rgba(0,0,0,0.45)]">
-        <EventView data={page.data} view={page.view} now={serverNow()} />
+        <EventView data={page.data} view={page.view} now={serverNow()} anchors />
       </div>
       <ShareButton title={page.title} colour={p.main} textColour={p.onMain} />
     </main>
