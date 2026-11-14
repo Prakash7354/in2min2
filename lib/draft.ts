@@ -52,6 +52,10 @@ export type Draft = {
   offerCode: string;
   checked: boolean;
   step: number;
+  // Once published (signed in): the event's id and address, and whether the code was used.
+  eventId?: string;
+  publishedPath?: string;
+  offerClaimed?: boolean;
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;

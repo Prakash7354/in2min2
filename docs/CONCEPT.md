@@ -1,11 +1,22 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.3, 13 November 2026 (late). Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.4, 14 November 2026. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.4 (14 Nov 2026):**
+- The owner agreed the design.
+- Steps now carry big numbers, and tiles carry "Popular", "New" and "Coming soon" labels (7).
+- Supabase is connected: sign-in by emailed code, publishing, and the public event page (20, phase 1b).
+- A second migration gives the permissions Supabase no longer grants by default, and limits AI writes to 20 a day per person (19).
+- Advice recorded on:
+  - a festive launch offer (5e);
+  - two-step sign-in (21);
+  - Canva (7d);
+  - the email sender and domain needed before the pilot (17a).
 
 **What changed in version 3.3 (owner's design review, 13 Nov 2026):** far more choice in the look, "like shopping on the high street", with a professional side for regiments, charities, memorials and corporate events (7, step 5; 7d):
 - 18 borders drawn for each kind of event;
@@ -238,6 +249,12 @@ Re-check them every three months.
   - Built: `offers`, `offer_claims`, `claim_offer()`, `offer_places_left()`, with checks.
   - More offers (e.g. `NEPALCUP` for 5 organisers) are one row each in the `offers` table.
 - **Free Organiser for the first 5 community events**, in return for feedback and permission to show their page as an example (phase 6).
+- **Festive launch (Recommended, owner's question of 14 Nov 2026: "first 30 days free for all?").** Paying only opens in February (phase 4), so every event published before then is free in any case. Say so proudly:
+  - **"Festive launch: In2Min2 is free until 31 January 2027."** It's a clear end date, it ties in with Christmas, New Year and the pilot, and it's honest.
+  - Then the normal prices start. Pop-Up stays free for ever, and `LAUNCH50` carries on for the first 50 families.
+  - **Organisers:** "No In2Min2 fee on your first event's online sales", for organisers who sign up before 31 March 2027. Stripe's own card cost still applies. This beats a 30-day trial, because their sales come in April–May.
+  - **Why not "30 days free on every plan" for good:** events are one-off, so a 30-day trial is the whole event for free for most families. A dated launch offer creates urgency and then ends.
+- **"Coming soon" labels** show what isn't finished: Sports tournament (team tools in March) and Mela (ticket sales in February). The page itself can be made now.
 
 ### 5f. Add-ons and subscriptions
 
@@ -465,6 +482,8 @@ Code drawing suits crisp, modern, flat designs: garlands, laurels, Art Deco, con
 3. **Figma**, the free design tool, if a designer joins: Claude Code can read Figma designs once the owner connects it.
 
 Canva stays useful for the owner's own posters and social posts.
+
+**Canva on a paid plan (owner's question, 14 Nov 2026).** A paid plan does not change this. Canva's licence lets Pro elements be used inside Canva designs. It does not allow them to be taken out and built into another app, or used as files that customers design with. The owner can send Canva patterns as *inspiration*, and In2Min2 draws its own versions in code, which is legal and owned outright. One exception is worth checking: Canva says images made with its AI tools fall under separate AI terms that allow commercial use. If wanted, read those terms before relying on it.
 
 ### 8a. "Trained" without the cost of training (Recommended)
 
@@ -826,7 +845,7 @@ It is **not Next.js** and has **no Stripe**. Reuse its database patterns, rules,
 | Part | Service | Free allowance (check current terms) | When to pay |
 | --- | --- | --- | --- |
 | App | Next.js 16 on **Cloudflare Workers** (OpenNext) | 100,000 requests a day; 10 ms CPU per request | Workers Paid ($5 a month) at launch: share pictures and busy events need more CPU |
-| Database, sign-in, live updates | **Supabase** (London) | 500 MB, 50,000 monthly users, 2 free projects. **Free projects pause after a week without use, and have no backups** | **Stay free until income covers it** (Recommended, owner's question): our own nightly backup replaces Supabase's (section 21). Move to Pro ($25 a month) when the first community event takes money, or when income passes £25 a month, whichever comes first |
+| Database, sign-in, live updates | **Supabase** (London; project `txwpptuijtfeomzmakdx`, made 14 Nov 2026) | 500 MB, 50,000 monthly users, 2 free projects. **Built-in email only reaches the project's own team, 2 an hour**, so the pilot needs our own sender (Resend) and the domain. **Free projects pause after a week without use, and have no backups** | **Stay free until income covers it** (Recommended, owner's question): our own nightly backup replaces Supabase's (section 21). Move to Pro ($25 a month) when the first community event takes money, or when income passes £25 a month, whichever comes first |
 | Photos | **Cloudflare R2** | 10 GB | About $0.015 per GB a month; no download fees |
 | AI words | **Gemini** `gemini-3.5-flash-lite` through `@google/genai` | Free quota; UK users get the paid-tier data terms (prompts not used to improve Google's products) | Turn on billing only after sign-in protects the writer (section 21) |
 | Email | **Resend** | 3,000 a month, **but only 100 a day** | Pro ($20 a month) before an event that sends hundreds of confirmations in a day |
@@ -951,7 +970,7 @@ All three are also offered to hosts as event colours (7).
 - `stage()`, `event_settings()`, `public_event()`, `resolve_short_code()`, `is_event_host()` and `copy_fits()`;
 - `event_usage()`, `claim_offer()` and `offer_places_left()`.
 
-`npm run test:db` runs it on real Postgres 17 (PGlite, with stand-ins for Supabase's `auth`) and checks **140 rules**, plus **49 checks** that the builder's catalogue (`lib/catalog.ts`) still matches the database and that prices add up. Among them:
+`npm run test:db` runs it on real Postgres 17 (PGlite, with stand-ins for Supabase's `auth`) and checks **149 rules**, plus **62 checks** that the builder's catalogue (`lib/catalog.ts`) still matches the database and that prices add up. Among them:
 - Each host sees only their own events. Helpers read, co-hosts edit, owners manage and delete.
 - The public reads no table. Drafts are invisible. Private events and invite-only functions open only with a guest's link.
 - The browser can never set a plan, hosting length, guest packs, own domain, AI usage or money.
@@ -975,6 +994,7 @@ All three are also offered to hosts as event colours (7).
 - A demo event tells its page to show the "Demo" label; hosts can't set it.
 
 **Next migrations:**
+- **`0002_grants_and_ai_limit.sql` (14 Nov 2026):** explicit rights for anon, authenticated and service_role, because Supabase stopped granting them automatically on 30 Oct 2026. Plus `ai_usage` and `take_ai_write()`: 20 AI writes a day per signed-in person. The test harness is now as strict as Supabase (no automatic rights), so a missing grant fails the checks.
 - `price_quote()`: plan plus packs, then the single best of fee level, same-again or welcome-back (phase 4, when payments need it; the builder already shows prices from `lib/catalog.ts` `quote()`, checked against the same numbers);
 - `repeat_event()`: "Run it again" into the same series (phase 6);
 - an admin list for the owner's page (phase 4);
@@ -995,7 +1015,7 @@ Small events run all year, so the personal and celebration side comes first and 
 | **1** | **The builder** (section 7): live preview, styles, honoured family, parking and numbers, the price from "About how many people?", AI in two languages, Supabase sign-in, save and publish, launch-offer code | Mid-December 2026 | A new host publishes a good-looking event in under 2 minutes on the owner's own phone |
 | 1a (done 13 Nov) | In2Min2 colours and fonts; the seven builder steps; the live preview (card, page, on the day, after) drawn by the same code the public page will use; ten palettes; prices with packs; the draft saved on the device; the AI writer in two languages | | Tested in Chrome at phone and computer width |
 | 1a+ (done 13 Nov) | Design review: 18 borders, 30 colour sets in 8 families, 10 text styles with fonts for six scripts, layouts, the wordmark logo and icon, a more formal In2Min2 look | | Tested in Chrome at phone and computer width |
-| 1b (next, once the owner agrees the design) | Supabase sign-in by email code, saving and publishing to the database, the launch-offer code, the AI writer only for signed-in hosts | Needs the owner's Supabase URL and publishable key | |
+| 1b (built 14 Nov) | Sign-in by a 6-digit emailed code; publish and update to the database; `LAUNCH50`; the AI writer only for signed-in hosts, 20 a day; the public page `/{type}/{slug}` and short link `/e/{code}`, drawn by the same code as the preview; numbered steps; labels | Live once the owner runs 0002 and sets the email template | A host publishes from their phone and opens the guest link |
 | **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; **the guest dashboard (9)**; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
 | **Pilot 1** | 3–5 family events from the owner's network (Pop-Up and `LAUNCH50`) | From January 2027 | Real families use it; feedback collected |
 | **3** | Guest-list tools, the photo wall and gallery, video links, the event pack, feedback; closing emails with "Keep it for next year?" (5g) | January–February 2027 | 200 photos from 20 phones in an hour without failure |
@@ -1021,7 +1041,12 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
   - pages are never listed by search engines;
   - private events are available.
 - **Secrets** are only in Cloudflare and `.env.local`, never in GitHub. The service key is used only on the server.
-- **Two-step sign-in** on every account that controls In2Min2: GitHub, Cloudflare, Supabase, Stripe, Google and the domain registrar.
+- **Two-step sign-in (owner's question, 14 Nov 2026: single or double, and how much burden?).** No UK law names it. UK GDPR requires security "appropriate to the risk", and the ICO recommends multi-factor sign-in for accounts that reach other people's data. The balance:
+  - **The owner's own accounts** (GitHub, Cloudflare, Supabase, Stripe, Google, domain registrar): two-step, always. They can reach every family's data.
+  - **Hosts:** a 6-digit code by email each time they use a new device, and no password at all. That is already "something you have" (the inbox). They stay signed in on their own phone. Risky actions ask for a fresh code: deleting everything, exporting a guest list, changing who can help.
+  - **Organisers taking money:** Stripe checks their identity and protects their payouts with its own two-step sign-in. In2Min2 offers an authenticator app as an option (phase 4) and may require it for organisers with large sales.
+  - **Guests:** no account at all. Their personal link is the key.
+  - **Card payments:** the bank's own checks (Strong Customer Authentication) run inside Stripe, so In2Min2 adds nothing there.
 - **Bots and abuse:**
   - Turnstile on forms;
   - rate limits on the AI writer and replies;
@@ -1130,7 +1155,9 @@ The same deletion runs automatically 30 days after a page closes.
   - lots of text styles;
   - the wordmark is the logo;
   - a guest dashboard by category.
-- The owner's set-up steps wait until he agrees the design.
+- Design agreed (14 Nov 2026), refined as we go, with "Popular", "New" and "Coming soon" labels and big step numbers.
+- Stripe: the owner is opening the account; nothing is needed from it until phase 4.
+- ICO fee and the domain: once the foundation is ready, before the pilot. The domain is now needed before the pilot for sign-in emails.
 - "Yes, go" (13 Nov 2026, night), taken as yes to the five other recommendations below; any can still be changed:
   - people included 200, 300, 400 and 500;
   - same event next year 30% off, a different event 20% off, automatic and never stacked; keeping the guest list for next year free;
@@ -1148,7 +1175,9 @@ The same deletion runs automatically 30 days after a page closes.
 - Video by connecting YouTube and Facebook, not uploading.
 - The preview is a live mirror of the real page.
 
-**Still open:** nothing at the moment.
+**Still open (Recommended answers in brackets):**
+1. Logo: which of the six wordmark ideas (https://claude.ai/artifact/VqJaNQjoEiWG6JBJYnnzZE)? (C, Timer 2s)
+2. Launch offer: "Festive launch: free until 31 January 2027", plus "no In2Min2 fee on an organiser's first event" for sign-ups before 31 March (5e)? (Yes)
 
 ## 24. More ideas (backlog)
 

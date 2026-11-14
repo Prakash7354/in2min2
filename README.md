@@ -34,6 +34,10 @@ components/event/         The event page itself (card, page, on the day, after),
 lib/catalog.ts            Event types, plans, prices, palettes, styles, languages
                           (mirrors the database; checked by npm run test:db)
 lib/draft.ts              The host's event while building it
+lib/publish.ts            Publishing a draft as the signed-in host
+lib/public-event.ts       The public page's data (public_event() → the same view)
+lib/supabase/             Public project values, browser client, server calls
+app/[type]/[slug]/        The page guests open; app/e/[code] is the short link
 lib/ai/copy.ts            The five AI text boxes and their limits
 supabase/migrations/      Database, in order (run in Supabase › SQL Editor)
 supabase/tests/           Database checks (npm run test:db)

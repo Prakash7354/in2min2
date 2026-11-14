@@ -13,11 +13,13 @@
 // Secrets: GEMINI_API_KEY is never in the code. Locally it lives in .env.local
 // (git-ignored); on Cloudflare it is a Worker secret. GEMINI_MODEL is optional.
 //
-// BEFORE LAUNCH: this route spends money on every call. Once Supabase sign-in
-// exists, only a signed-in host may call it (see README, "Before launch").
+// Only a signed-in host may call it, and each person gets 20 AI writes a day:
+// the route asks the database's take_ai_write() (migration 0002) with the
+// host's own sign-in token before calling Gemini.
 
 import { ApiError, GoogleGenAI, Type, type Schema } from "@google/genai/web";
 import { COPY_FIELDS, COPY_KEYS, clampText, type CopyRequest, type CopyResponse, type EventCopy } from "@/lib/ai/copy";
+import { rpc } from "@/lib/supabase/rest";
 
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 
@@ -132,6 +134,23 @@ export async function POST(request: Request) {
   }
   const input = readInput(body);
   if (typeof input === "string") return badRequest(input);
+
+  // Signed in, and within today's allowance?
+  const token = request.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1]?.trim();
+  if (!token) {
+    return Response.json({ error: "Please sign in to use the AI writer." }, { status: 401 });
+  }
+  const allowance = await rpc<boolean>("take_ai_write", {}, token);
+  if (!allowance.ok) {
+    if (allowance.status === 401 || allowance.status === 403) {
+      return Response.json({ error: "Please sign in again to use the AI writer." }, { status: 401 });
+    }
+    console.error("generate-copy: allowance check failed", { status: allowance.status, message: allowance.message });
+    return Response.json({ error: "The AI writer is busy. Please try again in a minute." }, { status: 503 });
+  }
+  if (allowance.data !== true) {
+    return Response.json({ error: "You've used today's 20 AI writes. They come back tomorrow; you can still type or edit the words yourself." }, { status: 429 });
+  }
 
   const ai = new GoogleGenAI({ apiKey, httpOptions: { timeout: 25_000 } });
   const model = process.env.GEMINI_MODEL || DEFAULT_MODEL;

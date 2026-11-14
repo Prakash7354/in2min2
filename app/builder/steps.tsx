@@ -4,19 +4,23 @@
 // screen; every change is saved straight away by the parent.
 
 import { useState, type ReactNode } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { COPY_FIELDS, COPY_KEYS, charCount, type CopyKey, type CopyResponse } from "@/lib/ai/copy";
 import {
   BORDERS, EVENT_TYPES, LANGUAGES, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
   TEMPLATES, TEXT_STYLES, TOGGLES, TONES, eventType, formatPence, language, paletteFor, plan, plansFor, quote,
-  type Palette, type PhotoStyle, type Scale,
+  type Palette, type PhotoStyle, type Scale, type Tag,
 } from "@/lib/catalog";
 import { applyScale, applyType, people, slugify, slugOk, toViewData, type Draft } from "@/lib/draft";
 import { formatDate, formatTime } from "@/lib/event-view";
 import { resizePhoto } from "@/lib/image";
 import EventView from "@/components/event/event-view";
-import { Button, Choices, Field, Group, Notice, Soon, Switch, Tick, inputClass } from "./ui";
+import { publishDraft } from "@/lib/publish";
+import { supabase } from "@/lib/supabase/client";
+import { SignIn } from "./account";
+import { Badge, Button, Choices, Field, Group, Notice, Soon, Switch, Tick, inputClass } from "./ui";
 
-export type StepProps = { d: Draft; update: (fn: (d: Draft) => Draft) => void; now: number };
+export type StepProps = { d: Draft; update: (fn: (d: Draft) => Draft) => void; now: number; session?: Session | null };
 
 const set = <K extends keyof Draft>(key: K, value: Draft[K]) => (d: Draft): Draft => ({ ...d, [key]: value });
 
@@ -41,7 +45,8 @@ export function StepType({ d, update }: StepProps) {
             >
               <span className="relative flex h-14 items-end px-3 pb-2" style={{ background: p.soft }} aria-hidden="true">
                 <span className="font-display text-2xl font-extrabold leading-none" style={{ color: p.main }}>{Array.from(et.label)[0]}</span>
-                <span className="absolute right-3 top-3 flex gap-1">
+                <Badge tag={et.tag} className="absolute right-2 top-2" />
+                <span className="absolute bottom-2.5 right-3 flex gap-1">
                   <i className="size-3 rounded-full" style={{ background: p.main }} />
                   <i className="size-3 rounded-full" style={{ background: p.accent }} />
                 </span>
@@ -54,6 +59,7 @@ export function StepType({ d, update }: StepProps) {
           );
         })}
       </div>
+      {t?.soonNote && <Notice>{t.soonNote}</Notice>}
       {t && (
         <Group title={`This looks like ${SCALES[d.scale].label.toLowerCase()}`} line="This decides which switches you see. Change it if it doesn't fit.">
           <Choices<Scale>
@@ -343,7 +349,7 @@ function CommunityPrice() {
 
 type WriteState = { busy: boolean; error: string | null; trimmed: string[] };
 
-export function StepWords({ d, update }: StepProps) {
+export function StepWords({ d, update, session }: StepProps) {
   const [w, setW] = useState<WriteState>({ busy: false, error: null, trimmed: [] });
   const main = language(d.languages[0]) ?? LANGUAGES[0];
   const second = language(d.languages[1]);
@@ -371,11 +377,15 @@ export function StepWords({ d, update }: StepProps) {
       details: details.slice(0, 400) || undefined,
     };
     try {
-      const res = await fetch("/api/generate-copy", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res = await fetch("/api/generate-copy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
+        body: JSON.stringify(body),
+      });
       const data = (await res.json().catch(() => ({}))) as Partial<CopyResponse> & { error?: string };
       if (!res.ok) {
         setW({ busy: false, trimmed: [], error: res.status === 503
-          ? "The AI writer isn't switched on yet: that's step 3 of the action plan (the Gemini key). You can type your own words below for now."
+          ? "The AI writer isn't switched on yet. You can type your own words below for now."
           : data.error ?? "Something went wrong. Please try again." });
         return;
       }
@@ -416,9 +426,13 @@ export function StepWords({ d, update }: StepProps) {
             {TONES.map((x) => <option key={x}>{x}</option>)}
           </select>
         </Field>
-        <Button kind="main" onClick={writeForMe} disabled={w.busy} className="w-full sm:w-auto">
-          {w.busy ? "Writing…" : "Write it for me"}
-        </Button>
+        {session ? (
+          <Button kind="main" onClick={writeForMe} disabled={w.busy} className="w-full sm:w-auto">
+            {w.busy ? "Writing…" : "Write it for me"}
+          </Button>
+        ) : (
+          <SignIn why="Sign in (free) to let the AI write it for you. You can also type your own words below." />
+        )}
         {w.error && <Notice tone="warn">{w.error}</Notice>}
         {w.trimmed.length > 0 && <Notice>Some boxes were a little long, so they were shortened to fit. Check them below.</Notice>}
       </Group>
@@ -509,7 +523,7 @@ export function StepLook({ d, update, now }: StepProps) {
       <Group title="Border" line={allBorders ? "All borders. Each one takes your colours." : `Suggested for ${t ? t.label.toLowerCase() : "your event"}. Each one takes your colours.`}>
         <div role="radiogroup" aria-label="Border" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {shownBorders.map((b) => (
-            <Tile key={b.key} on={d.border === b.key} onClick={() => update(set("border", b.key))} label={b.name} line={b.line}>
+            <Tile key={b.key} tag={b.tag} on={d.border === b.key} onClick={() => update(set("border", b.key))} label={b.name} line={b.line}>
               <span className="pointer-events-none block overflow-hidden rounded-lg" aria-hidden="true">
                 <EventView data={{ ...data, border: b.key }} view="card" now={now} />
               </span>
@@ -527,7 +541,7 @@ export function StepLook({ d, update, now }: StepProps) {
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted">{family === "In2Min2" ? "In2Min2 colours" : family}</h3>
             <div role="radiogroup" aria-label={`${family} colours`} className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {PALETTES.filter((p) => p.family === family).map((p) => (
-                <Tile key={p.key} on={d.palette === p.key} onClick={() => update(set("palette", p.key))} label={p.name}>
+                <Tile key={p.key} tag={p.tag} on={d.palette === p.key} onClick={() => update(set("palette", p.key))} label={p.name}>
                   <Swatch p={p} />
                 </Tile>
               ))}
@@ -591,10 +605,11 @@ export function StepLook({ d, update, now }: StepProps) {
   );
 }
 
-function Tile({ on, onClick, label, line, children }: { on: boolean; onClick: () => void; label: string; line?: string; children: ReactNode }) {
+function Tile({ on, onClick, label, line, tag, children }: { on: boolean; onClick: () => void; label: string; line?: string; tag?: Tag; children: ReactNode }) {
   return (
     <button type="button" role="radio" aria-checked={on} onClick={onClick}
-      className={`grid content-start gap-2 rounded-2xl border-2 p-2.5 text-left transition ${on ? "border-brand bg-card shadow-[0_6px_18px_-10px_rgba(46,42,110,0.6)]" : "border-line bg-card/80 hover:border-brand/40"}`}>
+      className={`relative grid content-start gap-2 rounded-2xl border-2 p-2.5 text-left transition ${on ? "border-brand bg-card shadow-[0_6px_18px_-10px_rgba(46,42,110,0.6)]" : "border-line bg-card/80 hover:border-brand/40"}`}>
+      <Badge tag={tag} className="absolute left-1.5 top-1.5 z-10 shadow" />
       {children}
       <span className="flex items-start justify-between gap-2 px-0.5">
         <span className="font-semibold leading-tight">{label}</span>
@@ -658,10 +673,11 @@ export function StepSwitches({ d, update }: StepProps) {
 
 // ───────────────────────────── 7. Check and publish ─────────────────────────────
 
-export function StepPublish({ d, update, onPreview, onStartAgain, goTo }: StepProps & {
+export function StepPublish({ d, update, session, onPreview, onStartAgain, goTo }: StepProps & {
   onPreview: (view: "card" | "page" | "live" | "after") => void; onStartAgain: () => void; goTo: (step: number) => void;
 }) {
   const [confirmReset, setConfirmReset] = useState(false);
+  const [pub, setPub] = useState<{ busy: boolean; error: string | null; offer: string | null; done: boolean }>({ busy: false, error: null, offer: null, done: false });
   const t = eventType(d.eventType);
   const slug = d.slug || slugify(d.title || d.stars.names);
   const community = d.scale === "community";
@@ -675,10 +691,33 @@ export function StepPublish({ d, update, onPreview, onStartAgain, goTo }: StepPr
   if (community && !d.organiserType) missing.push({ text: "What kind of organiser", step: 1 });
   if (community && d.forProfit === null) missing.push({ text: "Whether anyone makes a profit", step: 1 });
   if (!d.date) missing.push({ text: "The date", step: 2 });
+  if (!d.startTime) missing.push({ text: "The start time", step: 2 });
   if (!slugOk(slug)) missing.push({ text: "A web address (below)", step: 6 });
+
+  async function publish() {
+    setPub({ busy: true, error: null, offer: null, done: false });
+    const r = await publishDraft(supabase(), d);
+    if (!r.ok) {
+      setPub({ busy: false, error: r.message, offer: null, done: false });
+      return;
+    }
+    update((x) => ({ ...x, eventId: r.eventId, publishedPath: r.path, offerClaimed: x.offerClaimed || !!r.offer?.ok }));
+    setPub({ busy: false, error: null, offer: r.offer?.message ?? null, done: true });
+  }
+
+  const ready = missing.length === 0 && d.checked;
+  const link = d.publishedPath && typeof window !== "undefined" ? `${window.location.origin}${d.publishedPath}` : null;
 
   return (
     <div className="grid gap-6">
+      {link && (
+        <Group title={pub.done ? "Published!" : "Your event is live"} line="Share this link on WhatsApp, by text or anywhere.">
+          <a href={d.publishedPath} target="_blank" rel="noreferrer" className="break-all font-semibold text-brand underline underline-offset-4">{link}</a>
+          {pub.offer && <Notice>{pub.offer}</Notice>}
+          <p className="text-[15px] text-muted">Change anything and press &ldquo;Update my page&rdquo; below; the link stays the same.</p>
+        </Group>
+      )}
+
       <Group title="See it as guests will" line="Tap to open full-screen.">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {([["card", "Invitation card"], ["page", "Event page"], ["live", "On the day"], ["after", "After the event"]] as const).map(([v, label]) => (
@@ -697,7 +736,7 @@ export function StepPublish({ d, update, onPreview, onStartAgain, goTo }: StepPr
 
       <Group title="Price">
         {community ? (
-          <p>Free to set up. 4% + 30p on each online order; nothing on cash or free events.</p>
+          <p>Free to set up. 4% + 30p on each online order; nothing on cash or free events. Online sales open in February.</p>
         ) : (
           <div className="grid gap-1">
             <p className="flex items-baseline justify-between gap-4">
@@ -715,6 +754,12 @@ export function StepPublish({ d, update, onPreview, onStartAgain, goTo }: StepPr
               <strong className="font-display text-2xl text-brand tabular-nums">{formatPence(q.totalPence)}</strong>
             </p>
           </div>
+        )}
+        {!community && (
+          <Notice>
+            Paying for a plan opens in February. Until then, a published page is on the free plan: online 7 days after the event,
+            up to 200 people. With the code <strong>LAUNCH50</strong> the first 50 families get a free Keepsake (12 months).
+          </Notice>
         )}
         {!community && (
           <Field id="offer" label="Have a code?" hint="For example LAUNCH50: a free Keepsake for the first 50 families. Checked when you publish.">
@@ -743,11 +788,18 @@ export function StepPublish({ d, update, onPreview, onStartAgain, goTo }: StepPr
           <input type="checkbox" className="mt-1 size-6 accent-[#2E2A6E]" checked={d.checked} onChange={(e) => update(set("checked", e.target.checked))} />
           <span>I&apos;ve checked the names, date, venue and numbers, and every word in every language.</span>
         </label>
-        <Button kind="main" disabled className="w-full">Publish</Button>
-        <Notice>
-          Publishing switches on as soon as In2Min2&apos;s database is connected (the Supabase step in your action plan).
-          Until then, everything you do is saved on this phone and will be kept.
-        </Notice>
+        {session ? (
+          <>
+            <Button kind="main" disabled={!ready || pub.busy} onClick={publish} className="w-full">
+              {pub.busy ? "Publishing…" : d.eventId ? "Update my page" : "Publish"}
+            </Button>
+            {!ready && <p className="text-[15px] text-muted">Fill in what&apos;s still needed and tick the box to publish.</p>}
+          </>
+        ) : (
+          <SignIn why="Sign in to publish. It's free, and it keeps your event safe in your account." />
+        )}
+        {pub.error && <Notice tone="warn">{pub.error}</Notice>}
+        <p className="text-[15px] text-muted">The main photo shows in your preview; adding it to the live page comes with photo storage in January.</p>
       </Group>
 
       <div className="grid gap-3">

@@ -29,9 +29,11 @@ await db.exec(`
   create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
   grant usage on schema public, auth, extensions to anon, authenticated, service_role;
   grant execute on function auth.uid() to anon, authenticated;
-  alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
-  alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
-  alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+  -- Since 30 Oct 2026 Supabase gives the API roles NO automatic rights on new
+  -- tables (changelog 45329), so neither does this stand-in: every right a
+  -- role needs must be granted in a migration. Functions are also locked by
+  -- default here, stricter than plain Postgres, so each grant is deliberate.
+  alter default privileges in schema public revoke execute on functions from public;
   insert into auth.users values ('aaaaaaaa-0000-0000-0000-000000000001'), ('bbbbbbbb-0000-0000-0000-000000000002'), ('cccccccc-0000-0000-0000-000000000003');
 `);
 
@@ -336,6 +338,20 @@ await as(null);
 [pe] = await q(`select public_event('charity','walk-2027') as p`);
 ok("a demo event tells the page to show its Demo label", pe.p.event.is_demo === true);
 ok("a family event needs no organiser to publish (wedding above)", true);
+
+console.log("Rights on a strict Supabase (0002) and the AI writes cap:");
+await as(null);
+ok("the public can read plans and event types (pricing page)", (await q(`select key from plans`)).length === 5 && (await q(`select key from event_types`)).length === 15);
+await expectError("the public cannot read the AI usage table", `select * from ai_usage`, /permission denied/);
+ok("the public gets no AI writes", (await q(`select take_ai_write() as ok`).catch(() => [{ ok: "refused" }]))[0].ok !== true);
+await as(B);
+ok("a host can list their own events", Array.isArray(await q(`select id from events`)));
+let allowed = 0;
+for (let i = 0; i < 22; i++) if ((await q(`select take_ai_write() as ok`))[0].ok === true) allowed++;
+ok("a signed-in host gets 20 AI writes a day, then no more", allowed === 20, String(allowed));
+await expectError("a host cannot reset their own AI count", `delete from ai_usage`, /permission denied/);
+await as(C);
+ok("another host still has their own 20", (await q(`select take_ai_write() as ok`))[0].ok === true);
 
 console.log("Delete everything:");
 await as(C);  // C is a helper on A's wedding

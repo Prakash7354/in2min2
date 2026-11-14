@@ -12,11 +12,12 @@ Prakash is not a developer. Explain anything he must do step by step, naming exa
 
 - **Never write a secret into a file that could be committed.** Locally: `.env.local` and `.dev.vars` (both git-ignored). On Cloudflare: `npx wrangler secret put NAME`. If a secret appears in chat, tell him to replace it.
 - **Every event-owned table** has `event_id`, Row Level Security, and a check in `supabase/tests/schema.test.mjs` for each role (owner, co-host, helper, another host, the public).
+- **Every new table needs explicit GRANTs** for `anon`, `authenticated` and `service_role`, in the same migration. Since 30 Oct 2026 Supabase grants nothing automatically (changelog 45329). The test harness is just as strict, so a missing grant fails `npm run test:db`.
 - **The public never reads a table directly.** Public pages use security-definer functions (`public_event()`) that return only what a guest may see. Never open `guest_crm` to anonymous inserts; RSVPs go through a function.
 - **Plan, hosting, custom domain, AI usage and money are written only by the server** (service key, after payment). The column grants at the end of `0001_init.sql` enforce this; keep them when adding columns.
 - **IDs, never names** for people, events and photos. Money in whole pence.
 - **Text limits** for the five AI boxes live in `lib/ai/copy.ts` and in the database. Change both together.
-- **Migrations:** new numbered files in `supabase/migrations/`, never edit one that has been run. Give him the file with exact steps (Supabase › SQL Editor › New query › paste › Run) and remind him until he confirms it ran.
+- **Migrations:** new numbered files in `supabase/migrations/`, never edit one that has been run. Give him the file with exact steps (Supabase › SQL Editor › New query › paste › Run) and remind him until he confirms it ran. Run on the live project so far: `0001_init.sql` (14 Nov 2026). Waiting: `0002_grants_and_ai_limit.sql`.
 - **Next.js 16** differs from older versions. Read the guide in `node_modules/next/dist/docs/` before using an API. `cacheComponents` stays off (it hung the Cloudflare build). No `export const runtime = "edge"`.
 - **Ask before adding a library, a paid service or a screen not in the concept.**
 - Golf Society Home (`~/Desktop/GoChuchuro Folder/Golf Society Home Folder/golfsocietyhome/`) is a reference for patterns and SQL (`docs/CONCEPT.md` section 16). Read it; never change it from here.

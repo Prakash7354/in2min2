@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import EventView from "@/components/event/event-view";
 import { clearDraft, loadDraft, newDraft, saveDraft, toViewData, type Draft } from "@/lib/draft";
 import type { EventStageView } from "@/lib/event-view";
+import { SignedInAs, useSession } from "./account";
 import { StepLook, StepPublish, StepSwitches, StepType, StepWhen, StepWho, StepWords } from "./steps";
 import { Button } from "./ui";
 
@@ -37,6 +38,7 @@ export default function Builder() {
   const [view, setView] = useState<EventStageView>(STEPS[draft.step]?.view ?? "card");
   const [full, setFull] = useState(false);
   const [device, setDevice] = useState<"phone" | "computer">("phone");
+  const { session } = useSession();
 
   const update = useCallback((fn: (d: Draft) => Draft) => setDraft((d) => fn(d)), []);
 
@@ -83,7 +85,7 @@ export default function Builder() {
   const canNext = step !== 0 || !!draft.eventType;
   const data = toViewData(draft);
 
-  const props = { d: draft, update, now };
+  const props = { d: draft, update, now, session };
   const body = [
     <StepType key="type" {...props} />,
     <StepWho key="who" {...props} />,
@@ -103,22 +105,34 @@ export default function Builder() {
           <Link href="/" className="font-display text-xl font-extrabold tracking-tight text-brand">
             In<span className="text-marigold-deep">2</span>Min<span className="text-marigold-deep">2</span>
           </Link>
-          <span className={`text-sm ${saveOk ? "text-muted" : "font-semibold text-ink"}`} aria-live="polite">
-            {saveOk ? "Saved on this device" : "Not saved: this browser won’t store it"}
+          <span className="flex items-center gap-3">
+            <span className={`text-sm ${saveOk ? "text-muted" : "font-semibold text-ink"}`} aria-live="polite">
+              {saveOk ? "Saved" : "Not saved: this browser won’t store it"}
+            </span>
+            {session && <SignedInAs session={session} />}
           </span>
         </div>
-        <nav aria-label="Steps" className="mx-auto w-full max-w-6xl px-4 pb-2">
-          <ol className="flex gap-1">
-            {STEPS.map((s, i) => (
-              <li key={s.short} className="flex-1">
-                <button type="button" onClick={() => (i === 0 || draft.eventType ? goTo(i) : undefined)}
-                  aria-current={i === step ? "step" : undefined}
-                  className="grid w-full gap-1 text-left">
-                  <span className={`h-1.5 rounded-full ${i < step ? "bg-brand" : i === step ? "bg-marigold" : "bg-line"}`} />
-                  <span className={`hidden text-xs sm:block ${i === step ? "font-bold text-ink" : "text-muted"}`}>{s.short}</span>
-                </button>
-              </li>
-            ))}
+        <nav aria-label="Steps" className="mx-auto w-full max-w-6xl px-4 pb-3">
+          <ol className="flex items-start">
+            {STEPS.map((s, i) => {
+              const done = i < step, here = i === step;
+              return (
+                <li key={s.short} className="flex flex-1 items-center last:flex-none">
+                  <button type="button" onClick={() => (i === 0 || draft.eventType ? goTo(i) : undefined)}
+                    aria-current={here ? "step" : undefined} aria-label={`Step ${i + 1}: ${s.title}${done ? " (done)" : ""}`}
+                    className="grid justify-items-center gap-1">
+                    <span className={`grid size-8 place-items-center rounded-full font-display text-[15px] font-extrabold transition ${
+                      here ? "bg-marigold text-ink ring-4 ring-marigold/30" : done ? "bg-brand text-white" : "border-2 border-line bg-card text-muted"}`}>
+                      {done ? (
+                        <svg viewBox="0 0 16 16" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" /></svg>
+                      ) : i + 1}
+                    </span>
+                    <span className={`hidden text-xs sm:block ${here ? "font-bold text-ink" : "text-muted"}`}>{s.short}</span>
+                  </button>
+                  {i < STEPS.length - 1 && <span className={`mx-1 mb-0 h-0.5 flex-1 rounded-full sm:mb-5 ${done ? "bg-brand" : "bg-line"}`} aria-hidden="true" />}
+                </li>
+              );
+            })}
           </ol>
         </nav>
       </header>
@@ -137,9 +151,14 @@ export default function Builder() {
               </span>
             </button>
           )}
-          <div className="grid gap-1">
-            <p className="text-sm font-semibold uppercase tracking-wider text-muted">Step {step + 1} of {STEPS.length}</p>
-            <h1 id="step-title" className="font-display text-3xl font-extrabold tracking-tight sm:text-4xl">{STEPS[step].title}</h1>
+          <div className="flex items-center gap-4">
+            <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-brand font-display text-4xl font-extrabold text-white shadow-[0_8px_20px_-10px_rgba(46,42,110,0.7)]" aria-hidden="true">
+              {step + 1}
+            </span>
+            <div className="grid gap-0.5">
+              <p className="text-sm font-semibold uppercase tracking-wider text-muted">Step {step + 1} of {STEPS.length}</p>
+              <h1 id="step-title" className="font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">{STEPS[step].title}</h1>
+            </div>
           </div>
           {body}
         </section>

@@ -4,6 +4,7 @@
 // line under each choice saying what it does (docs/CONCEPT.md, section 7).
 
 import type { ReactNode } from "react";
+import { TAG_LABELS, type Tag } from "@/lib/catalog";
 
 export const inputClass =
   "w-full rounded-xl border-2 border-line bg-card px-4 py-3 text-[17px] text-ink placeholder:text-muted/70 outline-none transition focus:border-brand";
@@ -139,4 +140,11 @@ export function Notice({ tone = "info", children }: { tone?: "info" | "warn"; ch
 
 export function Soon({ when }: { when: string }) {
   return <span className="rounded-full bg-wash px-2 py-0.5 text-xs font-bold text-muted">Works from {when}</span>;
+}
+
+// "Popular", "New" or "Coming soon" on a tile.
+export function Badge({ tag, className = "" }: { tag?: Tag; className?: string }) {
+  if (!tag) return null;
+  const look = { popular: "bg-brand text-white", new: "bg-marigold text-ink", soon: "bg-ink/80 text-white" }[tag];
+  return <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${look} ${className}`}>{TAG_LABELS[tag]}</span>;
 }
