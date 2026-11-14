@@ -1,11 +1,17 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.7, 14 November 2026 (night). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.8, 14 November 2026 (late night). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.8 (14 Nov 2026, late night; owner: "go and build"):**
+- **Replies work** (0004): guests answer Yes, Maybe or Can't come, with how many and a message, then add it to their calendar. Hosts see every reply, totals and a waiting list in a Replies window and on the bell (7, 9).
+- **The main photo reaches guests, and WhatsApp shows a preview picture**, drawn on the host's phone and kept in Supabase Storage in London (0005; 11, 12a).
+- **Festive designs** for the festive launch: Christmas party, New Year's Eve and Lhosar, four seasonal colour sets, snowflake, firework and prayer-flag borders, and moving effects (snow, fireworks, marigold petals, confetti). The home page has a festive launch banner (5e, 7).
+- The drafts have the owner's details, the memorial rule and the charity rules (22). Market gaps for underserved communities (4c).
 
 **What changed in version 3.7 (14 Nov 2026, night):**
 - Migration 0003 has run, and our own email sender (Resend) is set up. Nothing is waiting in the database.
@@ -172,6 +178,36 @@ Golf Society Home keeps its own social-event builder for golf days. In2Min2 is f
 - its own colours and border;
 - an effect: snow, fireworks or marigold petals;
 - the home page banner "Festive launch: free until 31 January 2027".
+
+### 4c. Serving the communities others overlook (owner's request, 14 Nov 2026; Recommended)
+
+The owner's aim: *"find the gaps and fill them for the unserved community, by language or technical knowledge, who equally want to celebrate their pride and worth"*. The big platforms design for confident English-speaking users and celebrity-style weddings.
+
+**What the research says:**
+- Age is the strongest predictor of digital exclusion in the UK. 7.9 million people lack basic digital skills (Good Things Foundation, 2025).
+- Limited internet use rises to 26% among older Asian people and 32% among older Black people (Age UK, July 2025).
+- Ofcom names minority ethnic groups and people with limited English as at greater risk of digital disadvantage (April 2025).
+- WhatsApp is the most used messaging app in the UK. Most over-65s are comfortable with it, so In2Min2 stays WhatsApp-first.
+
+**The gaps, and what to build (in order of value for cost):**
+1. **"Make it from my card or my voice."** Many families already have a printed card, or would rather speak than type.
+   - The host photographs the paper card, or records a short voice note in Nepali or English.
+   - The AI fills in the builder: names, date, venue and running order.
+   - Gemini reads pictures and sound, at about the cost of a normal AI write, so it fits the plan's AI writes.
+2. **Help from family, and from us.**
+   - "Ask someone to help": a co-host link for a son, daughter or neighbour who builds it with them.
+   - A **"We'll make it for you"** service: send the details and photos to GoChuchuro on WhatsApp, and we build the page. Free during the festive launch, then a small fee, for example £5.
+3. **Easier sign-in.** **"Continue with Google"**: one tap on almost every Android phone, with no code to type, and free. Phone-number sign-in later (about 4p a text).
+4. **A "Listen" button** that reads the invitation aloud, in English or Nepali where the phone has a voice. It uses the phone's own speech, at no cost, and helps elders and anyone who finds reading hard.
+5. **Printed cards for elders** who want paper: the same design as an A6 or A5 card with a QR code, to print at home or at a shop.
+6. **Their own calendar and words:** the Bikram Sambat date and *sait* time beside the English date (24), and the buttons in Nepali (24), sooner rather than later.
+7. **Light pages for old phones and weak signal,** checked on a budget Android over slow 4G before the pilot.
+8. **Pride and worth:**
+   - certificates of thanks for volunteers, sponsors and teams, printable;
+   - a memory book PDF to keep;
+   - "With blessings from" for the family, already built.
+9. **Family abroad:** times in their own time zone, a live-stream link (12b), and blessings sent from abroad into the guestbook.
+10. **Price:** Pop-Up stays free for good; written fee rules (5h) make reduced fees fair and predictable.
 
 ## 5. Pricing (Decided by the owner, 13 Nov 2026, as launch prices)
 
@@ -473,7 +509,7 @@ There is never a separate "preview mode" that looks different from the real page
   - what's coming: a personal link per guest, and a poster with a QR code.
 
   The public page has **Share this page** for guests.
-- **The bell (Updates)**: what needs doing (sign in, still needed to publish, changes not live yet), and later each guest's reply (phase 2).
+- **The bell (Updates)**: what needs doing (sign in, still needed to publish, changes not live yet), and new guests' replies with the totals (built 14 Nov 2026, 0004). **See replies** opens the Replies window: coming, maybe, can't come and waiting list in people; the plan's limit and the venue's places; every reply with its message; "Same name as another reply"; Remove; Copy the list (for the caterer); and Send a reminder on WhatsApp (`app/builder/replies.tsx`).
 - **Settings** (a cog, or the host's initial once signed in): who is signed in, shortcuts to switches, the look and publishing, start a new event, sign out.
 - **Sign-in** opens in its own window (a sheet from the bottom on a phone) with two numbered steps, so it never looks like part of the page.
 
@@ -596,6 +632,8 @@ Filipino families can use In2Min2 from day one: Tagalog uses English letters, so
 
 ## 9. Guest list (the CRM)
 
+**Replies (built 14 Nov 2026, 0004).** On the event page, three big buttons (Yes, Maybe, Can't come; a memorial has no Maybe), then a name, how many (1 to 20), an optional message, and **Send my reply**. Then **Add to Google Calendar** or **Add to iPhone or Outlook**. No account and no email. The guest's private token stays on their phone, so **Change my reply** changes it instead of adding another. Everything goes through `submit_rsvp()`, which checks the stage, the switch, private links, the plan's limit with 10% grace, the venue's capacity (then a waiting list that moves up by itself), and at most 60 new replies in 10 minutes (Turnstile comes before public launch). Two different guests with the same name both stay, and the host sees a note.
+
 **The guest dashboard: who's coming, by category (owner's request, 13 Nov 2026; phase 2, with the replies).** One screen, always up to date, shows:
 - **Coming, maybe, can't come, not replied yet**, counted in people (a family of four is 4).
 - **By category:** family, friends, VIPs, children, teams, sponsors, stall holders, plus the host's own tags (e.g. "Bride's side").
@@ -681,6 +719,8 @@ The owner's aim is to replace paper lists, guesswork, extra volunteers and endle
 ## 12. Photos and video
 
 ### 12a. Photos (Recommended)
+
+**The main photo and the preview picture (built 14 Nov 2026, 0005).** When the host publishes, their phone uploads the main photo and draws the preview picture (1200 × 630, in the event's colours and fonts) that WhatsApp, Messenger and iMessage show. Both go to the public `event-media` bucket in Supabase Storage, London, in the event's own folder (`events.cover_image_key`, `events.share_image_key`). Only the owner and co-hosts can write there, and nobody can list the files. They are redone only when something they show changes (`lib/media-upload.ts`). The guests' photo wall below still uses Cloudflare R2.
 
 Most events need tens to a few hundred photos. A big mela or tournament may get 1,000–2,000 in a day, and the total across all events will be large. The design handles all of these cheaply:
 
@@ -1057,6 +1097,8 @@ All three are also offered to hosts as event colours (7).
 
 **Next migrations:**
 - **`0002_grants_and_ai_limit.sql` (14 Nov 2026):** explicit rights for anon, authenticated and service_role, because Supabase stopped granting them automatically on 30 Oct 2026. Plus `ai_usage` and `take_ai_write()`: 20 AI writes a day per signed-in person. The test harness is now as strict as Supabase (no automatic rights), so a missing grant fails the checks.
+- **`0004_replies_festive_effects.sql` (14 Nov 2026):** `submit_rsvp()`; the Christmas party, New Year's Eve and Lhosar event types; `events.effect`; `events.share_image_key`, and both picture keys tied to the event's own folder; `public_event()` with these.
+- **`0005_event_photos.sql` (14 Nov 2026):** the `event-media` bucket and its four storage policies (`media_path_ok()`), kept separate so a storage problem can't block 0004.
 - `price_quote()`: plan plus packs, then the single best of fee level, same-again or welcome-back (phase 4, when payments need it; the builder already shows prices from `lib/catalog.ts` `quote()`, checked against the same numbers);
 - `repeat_event()`: "Run it again" into the same series (phase 6);
 - an admin list for the owner's page (phase 4);
@@ -1080,6 +1122,7 @@ Small events run all year, so the personal and celebration side comes first and 
 | 1b (built 14 Nov) | Sign-in by a 6-digit emailed code; publish and update to the database; `LAUNCH50`; the AI writer only for signed-in hosts, 20 a day; the public page `/{type}/{slug}` and short link `/e/{code}`, drawn by the same code as the preview; numbered steps; labels | Live once the owner runs 0002 and sets the email template | A host publishes from their phone and opens the guest link |
 | 1c (built 14 Nov, evening) | After the owner's first phone test: the running order with menus and two switches (0003); the photo above the border and "show the whole picture"; a smarter event page (countdown, date-and-place card, timeline, big reply buttons, minimum text sizes); Share, the bell and Settings at the top right; the AI writer panel; sign-in in its own window; Share on the public page | Live once the owner runs 0003 | The owner adds a running order with a menu on his phone and sees it on the guest link |
 | 1d (built 14 Nov, night) | The Share panel with every link and a ready-made message per moment; links to parts of the page; drafts of the privacy notice, terms and prices and fair fees | | Tested in Chrome at phone width |
+| 1e (built 14 Nov, late night) | Working replies with calendar links, the Replies window and bell; the main photo and WhatsApp preview picture; festive types, seasonal colours, three borders and moving effects; the festive banner on the home page | Live once the owner runs 0004 and 0005 | A guest replies from a WhatsApp link on a second phone and the host sees it |
 | **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; **the guest dashboard (9)**; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
 | **Pilot 1** | 3–5 family events from the owner's network (Pop-Up and `LAUNCH50`) | From January 2027 | Real families use it; feedback collected |
 | **3** | Guest-list tools, the photo wall and gallery, video links, the event pack, feedback; closing emails with "Keep it for next year?" (5g) | January–February 2027 | 200 photos from 20 phones in an hour without failure |
@@ -1093,7 +1136,7 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
 ## 21. Security and resilience (owner: "crucial")
 
 **Against data leaks:**
-- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 165 checks today, plus 63 on the builder's catalogue and prices, and they run before every commit.
+- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 210 checks today, plus 67 on the builder's catalogue and prices, and they run before every commit.
 - **The public reads no table**, only functions that return what a guest may see. Server-only columns (plan, money, domain) can't be written from a browser.
 - **Hold as little as possible:**
   - no dates of birth, ID documents or player ages;
@@ -1261,8 +1304,17 @@ The same deletion runs automatically 30 days after a page closes.
 - Sole trader in his own name, with a virtual business address for GoChuchuro.
 - Posters and car park slips: made by In2Min2 as print-ready PDF or PNG, printed at home on any connected printer or at a print shop (11).
 
+**Decided by the owner, 14 Nov 2026 (late night):**
+- Festive launch confirmed again ("yes for confirmation").
+- Memorials and funerals are free automatically when the event is listed as one; misuse breaks the terms (done in `/pricing` and `/terms` 6). Build in phase 4: the server sets the memorial fee level to Free.
+- Half price for registered charities, small charities and armed forces welfare events, on request with evidence by email or letter.
+- The owner's name (Prakash Gurung, until incorporation) and, for now, his home address go on the drafts; the ICO number "to be provided at launch".
+- hello@in2min2.com forwards to hello@gochuchuro.com until there is income for a paid mailbox.
+- Stripe kept for payments; its card cost (about 1.5% + 20p on standard UK cards) is stated on the prices page.
+- Build the "still to match" list and go beyond it for underserved communities (4c).
+
 **Still open (Recommended answers in brackets):**
-1. Memorials and funerals free automatically, by his written rule (`/pricing`)? (Yes)
+1. (Answered: memorials free automatically.)
 2. Refunds: full within 14 days of paying; the unused part if the event has passed; a full refund if In2Min2 fails on the day (`/terms` 8)? (Yes)
 3. If an organiser cancels, the booking fee goes back to buyers too (`/terms` 9)? (Yes)
 4. Accounts unused for 2 years are deleted after an email (`/privacy` 6)? (Yes)
@@ -1348,6 +1400,13 @@ The same deletion runs automatically 30 days after a page closes.
   - [Fluent Emoji licence (Iconify)](https://icon-sets.iconify.design/fluent-emoji-high-contrast/)
   - [Google: Noto Emoji animation, CC BY 4.0](https://developers.googleblog.com/updates-to-emoji-new-characters-new-animation-new-color-customization-and-more)
   - [Tamu Lhosar 2026 date](https://www.officeholidays.com/amp/holidays/nepal/tamu-lhosar)
+- **Underserved communities and payments, 14 Nov 2026:**
+  - [Good Things Foundation: UK digital inclusion datasets](https://www.goodthingsfoundation.org/policy-and-research/research-and-evidence/research-2024/digital-inclusion-datasets)
+  - [Age UK: internet use statistics, July 2025](https://www.ageuk.org.uk/siteassets/documents/reports-and-publications/reports-and-briefings/switched-off/internet-use-statistics-july-2025.pdf)
+  - [Ofcom: digital adoption and digital disadvantage (2025)](https://www.ofcom.org.uk/internet-based-services/technology/digital-adoption-and-digital-disadvantage-today-what-has-changed-and-what-barriers-remain)
+  - [AbilityNet: what older people want to do with tech](https://abilitynet.org.uk/news-blogs/survey-reveals-what-older-people-want-do-tech)
+  - [Stripe UK fees 2026](https://www.wearefounders.uk/stripe-fees-uk-2026/)
+  - [Supabase: storage access control](https://supabase.com/docs/guides/storage/security/access-control)
 - **Two-step sign-in, checked 14 Nov 2026:**
   - [GitHub](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication)
   - [Cloudflare](https://developers.cloudflare.com/fundamentals/user-profiles/2fa/)

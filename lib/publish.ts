@@ -64,6 +64,7 @@ function eventRow(d: Draft, slug: string) {
     photo_style: d.photoStyle,
     cover_fit: d.coverFit,
     motion: d.motion,
+    effect: d.effect,
     status: "published",
     is_private: d.isPrivate,
   };

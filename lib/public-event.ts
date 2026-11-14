@@ -4,8 +4,9 @@
 
 import { cache } from "react";
 import type { EventCopy } from "@/lib/ai/copy";
-import { eventType, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type CoverFit, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
+import { eventType, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type CoverFit, type EffectKey, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
 import type { EventStageView, EventViewData } from "@/lib/event-view";
+import { mediaUrl } from "@/lib/media";
 import { rpc } from "@/lib/supabase/rest";
 import { utcToZoned } from "@/lib/time";
 
@@ -27,6 +28,7 @@ type PublicEvent = {
     translations: Record<string, Partial<EventCopy>>;
     scale: Scale; theme: Template; palette: string; primary_color: string; text_style: TextStyle; border: string;
     photo_style: PhotoStyle; motion: boolean; cover_image_key: string | null; cover_fit?: CoverFit; hide_branding: boolean;
+    effect?: EffectKey; share_image_key?: string | null;
   };
   people?: { role: "star" | "honour"; relation: string | null; names: string; names_local: string | null }[];
   features?: Partial<Record<ToggleKey, boolean>>;
@@ -41,7 +43,8 @@ export type PublicPage =
   | { kind: "missing" }
   | { kind: "private" }
   | { kind: "ended"; title: string }
-  | { kind: "event"; view: EventStageView; data: EventViewData; title: string; guestName: string | null };
+  | { kind: "event"; view: EventStageView; data: EventViewData; title: string; guestName: string | null;
+      guestReply: { status: string; partySize: number } | null; shareImage: string | null; viaGuestLink: boolean };
 
 const copy = (c: Partial<EventCopy> | undefined): EventCopy => ({
   card_headline: c?.card_headline ?? "", card_invite_body: c?.card_invite_body ?? "", landing_page_story: c?.landing_page_story ?? "",
@@ -101,14 +104,19 @@ export const getPublicEvent = cache(async (type: string, slug: string, token?: s
     border: e.border,
     photoStyle: e.photo_style,
     motion: e.motion,
-    cover: null, // photos come with photo storage (phase 3)
+    effect: e.effect ?? "none",
+    cover: mediaUrl(e.cover_image_key),
     coverFit: e.cover_fit ?? "fill",
     toggles,
     hideBranding: e.hide_branding,
     demo: e.is_demo,
   };
   const view: EventStageView = p.stage === "live" ? "live" : p.stage === "post" ? "after" : "page";
-  return { kind: "event", view, data, title: e.card_headline || e.title, guestName: p.guest?.name ?? null };
+  return {
+    kind: "event", view, data, title: e.card_headline || e.title, guestName: p.guest?.name ?? null,
+    guestReply: p.guest ? { status: p.guest.rsvp_status, partySize: p.guest.party_size } : null,
+    shareImage: mediaUrl(e.share_image_key) ?? mediaUrl(e.cover_image_key), viaGuestLink: !!token && !!p.guest,
+  };
 });
 
 export const resolveShortCode = cache(async (code: string): Promise<{ type: string; slug: string } | null> => {

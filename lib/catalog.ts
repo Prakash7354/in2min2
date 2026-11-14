@@ -51,6 +51,7 @@ export type EventType = {
   soonNote?: string;     // what is still to come, for "Coming soon" types
   photoStyle: PhotoStyle;
   tone: string;
+  effect?: EffectKey;    // a moving effect it starts with (EFFECTS); none if not set
 };
 
 export const EVENT_TYPES: EventType[] = [
@@ -86,6 +87,13 @@ export const EVENT_TYPES: EventType[] = [
     line: "Dashain, Teej, cultural show", starLabel: "The event", palette: "dhaka", textStyle: "heritage", borders: ["dhaka", "bunting", "rainbow", "marigold", "sunburst"], photoStyle: "hero", tone: "Festive and joyful" },
   { key: "memorial", tag: "new", label: "Memorial or funeral", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: false, sensitive: true,
     line: "Funeral, prayers, remembrance", starLabel: "In memory of", palette: "calm", textStyle: "formal", borders: ["fine_line", "laurel", "vines", "none"], photoStyle: "arch", tone: "Gentle and respectful" },
+  // Festive season (owner, 14 Nov 2026: seasonal designs to show off the festive launch; 0004)
+  { key: "christmas", tag: "new", label: "Christmas party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,
+    line: "Family, friends or work", starLabel: "Who it's for", palette: "christmas", textStyle: "classic", borders: ["snowflakes", "stars", "floral", "bunting"], photoStyle: "hero", tone: "Festive and joyful", effect: "snow" },
+  { key: "new-year", tag: "new", label: "New Year’s Eve party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,
+    line: "Countdown to midnight", starLabel: "Who it's for", palette: "midnight_gold", textStyle: "contemporary", borders: ["fireworks", "stars", "art_deco", "confetti"], photoStyle: "hero", tone: "Festive and joyful", effect: "fireworks" },
+  { key: "lhosar", tag: "new", label: "Lhosar celebration", scale: "community", theme: "festive", toggles: { tickets: true, sponsors: true }, repeatsYearly: true, sensitive: false,
+    line: "Tamu, Sonam or Gyalpo Lhosar", starLabel: "The celebration", palette: "prayer_flags", textStyle: "heritage", borders: ["prayer_flags", "dhaka", "bunting", "marigold"], photoStyle: "hero", tone: "Festive and joyful", effect: "petals" },
 ];
 
 export const REPEAT_AS: Record<string, string> = { wedding: "anniversary" };
@@ -238,7 +246,7 @@ export function togglesFor(typeKey: string | null): Record<ToggleKey, boolean> {
 
 // ─────────────────────────────── The look ───────────────────────────────
 
-export type PaletteFamily = "In2Min2" | "Formal" | "Nepali and South Asian" | "Modern" | "Festival colours" | "Party" | "Sport" | "Calm";
+export type PaletteFamily = "In2Min2" | "Seasonal" | "Formal" | "Nepali and South Asian" | "Modern" | "Festival colours" | "Party" | "Sport" | "Calm";
 
 export type Palette = {
   key: string;
@@ -258,6 +266,15 @@ export const PALETTES: Palette[] = [
   { key: "marigold_indigo", tag: "popular", name: "Marigold & Indigo", family: "In2Min2", bg: "#FFF9EF", main: "#2E2A6E", onMain: "#FFFFFF", accent: "#F4A522", onAccent: "#1C1A3A", soft: "#F7E6C4", ink: "#1C1A3A", muted: "#5C5878" },
   { key: "lali_gurans", name: "Lali Gurans", family: "In2Min2", bg: "#FFF8F4", main: "#C0163D", onMain: "#FFFFFF", accent: "#F2B134", onAccent: "#15203B", soft: "#F3DCD6", ink: "#15203B", muted: "#5E5A66" },
   { key: "himalayan_dusk", name: "Himalayan Dusk", family: "In2Min2", bg: "#F6F7FA", main: "#4A2545", onMain: "#FFFFFF", accent: "#F7A072", onAccent: "#4A2545", soft: "#CFE6E4", ink: "#22172A", muted: "#5D5866" },
+  // Seasonal: Christmas, New Year and Lhosar (14 Nov 2026)
+  { key: "christmas", tag: "new", name: "Christmas Red & Green", family: "Seasonal", bg: "#FFF8F0", main: "#A3172B", onMain: "#FFFFFF", accent: "#1F6B45", onAccent: "#FFFFFF", soft: "#F3E1D6", ink: "#2A1215", muted: "#6A4F52",
+    party: ["#A3172B", "#1F6B45", "#D4AF37", "#C8102E", "#2E8B57", "#E9DCC9"] },
+  { key: "winter_night", tag: "new", name: "Winter Night", family: "Seasonal", dark: true, bg: "#0F1B2D", main: "#CFE3F7", onMain: "#0F1B2D", accent: "#E9C46A", onAccent: "#0F1B2D", soft: "#1A2B44", ink: "#F2F6FB", muted: "#A9B8CC",
+    gradient: "linear-gradient(170deg, #0F1B2D 0%, #1D3557 60%, #457B9D 100%)", party: ["#CFE3F7", "#E9C46A", "#FFFFFF", "#8FB8DE", "#F4F1DE"] },
+  { key: "midnight_gold", tag: "new", name: "Midnight & Gold", family: "Seasonal", dark: true, bg: "#0B0B1A", main: "#F2C14E", onMain: "#0B0B1A", accent: "#C9A0FF", onAccent: "#0B0B1A", soft: "#1B1B33", ink: "#F6F1E4", muted: "#B9B3C9",
+    gradient: "linear-gradient(160deg, #0B0B1A 0%, #241A4A 60%, #4A2E7A 100%)", party: ["#F2C14E", "#C9A0FF", "#FF7AB6", "#7FDBFF", "#FFFFFF"] },
+  { key: "prayer_flags", tag: "new", name: "Prayer Flags", family: "Seasonal", bg: "#FFFBF2", main: "#1F4E9A", onMain: "#FFFFFF", accent: "#F2C230", onAccent: "#1A1A1A", soft: "#EAF0FA", ink: "#161B29", muted: "#525A6B",
+    gradient: "linear-gradient(90deg, #1F5FBF 0 20%, #F4F1E8 20% 40%, #C8102E 40% 60%, #1E8C45 60% 80%, #F2C230 80% 100%)", party: ["#1F5FBF", "#F4F1E8", "#C8102E", "#1E8C45", "#F2C230"] },
   // Formal: regimental days, memorials, corporate, charities, anniversaries
   { key: "navy_gold", tag: "popular", name: "Navy & Gold", family: "Formal", bg: "#FBF8F1", main: "#14213D", onMain: "#FFFFFF", accent: "#C9A23F", onAccent: "#14213D", soft: "#ECE5D3", ink: "#14213D", muted: "#535A6B" },
   { key: "regimental", name: "Regimental Green", family: "Formal", bg: "#F7F5EE", main: "#1F3A2E", onMain: "#FFFFFF", accent: "#B8973A", onAccent: "#13261D", soft: "#E3E6D8", ink: "#13261D", muted: "#4F5B52" },
@@ -304,7 +321,7 @@ export const PALETTES: Palette[] = [
   { key: "lily", name: "Lily White & Sage", family: "Calm", bg: "#FFFFFF", main: "#47604F", onMain: "#FFFFFF", accent: "#B9C7B5", onAccent: "#1D2A21", soft: "#EEF2EC", ink: "#1D2A21", muted: "#56645A" },
 ];
 
-export const PALETTE_FAMILIES: PaletteFamily[] = ["In2Min2", "Formal", "Nepali and South Asian", "Modern", "Festival colours", "Party", "Sport", "Calm"];
+export const PALETTE_FAMILIES: PaletteFamily[] = ["In2Min2", "Seasonal", "Formal", "Nepali and South Asian", "Modern", "Festival colours", "Party", "Sport", "Calm"];
 
 function luminance(hex: string): number {
   const n = hex.replace("#", "");
@@ -400,7 +417,8 @@ export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [
 // In2Min2 owns them outright and they take the event's colours.
 export type BorderKey =
   | "none" | "fine_line" | "ornate" | "art_deco" | "laurel" | "floral" | "vines" | "marigold" | "dhaka" | "mandala"
-  | "balloons" | "confetti" | "bunting" | "stars" | "sunburst" | "rainbow" | "stripes" | "pitch";
+  | "balloons" | "confetti" | "bunting" | "stars" | "sunburst" | "rainbow" | "stripes" | "pitch"
+  | "snowflakes" | "fireworks" | "prayer_flags";
 
 export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[] = [
   { key: "none", name: "Plain", line: "No border: let the words speak" },
@@ -421,6 +439,21 @@ export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[
   { key: "rainbow", tag: "new", name: "Festival frame", line: "A bold frame in a colour blend" },
   { key: "stripes", name: "Sport stripes", line: "Diagonal stripes, top and bottom" },
   { key: "pitch", tag: "new", name: "Pitch lines", line: "Football pitch markings" },
+  { key: "snowflakes", tag: "new", name: "Snowflakes", line: "Falling snowflakes: Christmas and winter" },
+  { key: "fireworks", tag: "new", name: "Fireworks", line: "Bursts of colour: New Year and Diwali" },
+  { key: "prayer_flags", tag: "new", name: "Prayer flags", line: "Five-colour flags: Lhosar and Buddhist festivals" },
+];
+
+// A gentle moving effect over the page (0004, events.effect). Only when
+// Motion is on, never on the builder's small copies, and never for people who
+// have asked their phone for less motion.
+export type EffectKey = "none" | "snow" | "fireworks" | "petals" | "confetti";
+export const EFFECTS: { key: EffectKey; name: string; line: string }[] = [
+  { key: "none", name: "None", line: "Still and calm" },
+  { key: "snow", name: "Snow", line: "Soft snow drifting down" },
+  { key: "fireworks", name: "Fireworks", line: "Bursts of light, now and then" },
+  { key: "petals", name: "Marigold petals", line: "Petals falling, as at Tihar and weddings" },
+  { key: "confetti", name: "Confetti", line: "A shower of party colours" },
 ];
 
 // ─────────────────────────────── Languages ───────────────────────────────

@@ -514,6 +514,85 @@ function Pitch() {
   );
 }
 
+// ─────────────── festive (14 Nov 2026) ───────────────
+
+function snowflakePath(cx: number, cy: number, r: number): string {
+  let d = "";
+  for (let i = 0; i < 6; i++) {
+    const a = (Math.PI / 3) * i - Math.PI / 2;
+    d += `M${r1(cx)} ${r1(cy)} L${r1(cx + r * Math.cos(a))} ${r1(cy + r * Math.sin(a))} `;
+    const bx = cx + r * 0.58 * Math.cos(a), by = cy + r * 0.58 * Math.sin(a);
+    for (const side of [-1, 1]) {
+      const b = a + (side * Math.PI) / 4;
+      d += `M${r1(bx)} ${r1(by)} L${r1(bx + r * 0.3 * Math.cos(b))} ${r1(by + r * 0.3 * Math.sin(b))} `;
+    }
+  }
+  return d.trim();
+}
+const SNOW_TOP = scatter(91, 26, 120);
+const SNOW_BOTTOM = scatter(57, 18, 100);
+function snowBits(bits: Bit[]) {
+  return bits.map((b, i) => b.kind === 3
+    ? <circle key={i} cx={b.x} cy={b.y} r={r1(1.2 + b.size)} className={b.colour % 2 ? "ev-fa" : "ev-fm"} opacity="0.6" />
+    : <path key={i} d={snowflakePath(b.x, b.y, 4 + b.size * 6)} className={b.colour % 2 ? "ev-sa" : "ev-sm"} strokeWidth="1.3" strokeLinecap="round" />);
+}
+
+function Snowflakes() {
+  return (
+    <>
+      <Svg vb="0 0 400 120" className="ev-top">{snowBits(SNOW_TOP)}</Svg>
+      <Svg vb="0 0 400 100" className="ev-bottom ev-flipY">{snowBits(SNOW_BOTTOM)}</Svg>
+    </>
+  );
+}
+
+// A firework burst: rays from the centre, each ending in a spark.
+function burst(cx: number, cy: number, r: number, rays: number, colour: number, key: string): ReactNode[] {
+  const out: ReactNode[] = [];
+  for (let i = 0; i < rays; i++) {
+    const a = (2 * Math.PI * i) / rays;
+    const c = `var(--ev-c${((colour + (i % 2)) % 6) + 1})`;
+    out.push(<path key={`${key}${i}`} d={`M${r1(cx + r * 0.32 * Math.cos(a))} ${r1(cy + r * 0.32 * Math.sin(a))} L${r1(cx + r * Math.cos(a))} ${r1(cy + r * Math.sin(a))}`}
+      strokeWidth="1.6" strokeLinecap="round" fill="none" style={{ stroke: c }} />);
+    out.push(<circle key={`${key}d${i}`} cx={r1(cx + r * 1.14 * Math.cos(a))} cy={r1(cy + r * 1.14 * Math.sin(a))} r="1.7" style={{ fill: c }} />);
+  }
+  return out;
+}
+
+function Fireworks() {
+  return (
+    <>
+      <Svg vb="0 0 400 130" className="ev-top">
+        {burst(50, 50, 34, 14, 0, "a")}{burst(120, 22, 16, 10, 2, "b")}{burst(350, 54, 38, 16, 3, "c")}{burst(284, 20, 15, 10, 4, "d")}
+        <path d={sparklePath(200, 16, 6)} className="ev-fa" /><path d={sparklePath(170, 58, 4)} className="ev-fm" /><path d={sparklePath(236, 50, 4)} className="ev-fm" />
+      </Svg>
+      <Svg vb="0 0 400 80" className="ev-bottom ev-flipY">{burst(30, 30, 20, 12, 1, "e")}{burst(370, 32, 22, 12, 5, "f")}</Svg>
+    </>
+  );
+}
+
+// Lung ta: blue, white, red, green and yellow, always in that order.
+const FLAG_COLOURS = ["#1F5FBF", "#F4F1E8", "#C8102E", "#1E8C45", "#F2C230"];
+function PrayerFlags() {
+  const flags: ReactNode[] = [];
+  const strings: string[] = [];
+  [[0, 200], [200, 400]].forEach(([a, b], s) => {
+    const p0 = { x: a, y: 4 }, p2 = { x: b, y: 4 }, c = { x: (a + b) / 2, y: 40 };
+    strings.push(`M${p0.x} ${p0.y} Q${c.x} ${c.y} ${p2.x} ${p2.y}`);
+    for (let i = 0; i < 10; i++) {
+      const q = quad(p0, c, p2, 0.05 + i * 0.1);
+      flags.push(<rect key={`${s}-${i}`} x="-7" y="0" width="14" height="17" rx="1" transform={`translate(${r1(q.x)} ${r1(q.y)}) rotate(${r1(q.a)})`}
+        fill={FLAG_COLOURS[i % 5]} stroke="rgba(0,0,0,0.18)" strokeWidth="0.6" />);
+    }
+  });
+  return (
+    <Svg vb="0 0 400 62" className="ev-top">
+      {strings.map((d, i) => <path key={i} d={d} className="ev-si" strokeWidth="1" opacity="0.55" fill="none" />)}
+      {flags}
+    </Svg>
+  );
+}
+
 const ART: Record<BorderKey, () => ReactNode> = {
   none: () => null,
   fine_line: FineLine,
@@ -533,6 +612,9 @@ const ART: Record<BorderKey, () => ReactNode> = {
   rainbow: Rainbow,
   stripes: Stripes,
   pitch: Pitch,
+  snowflakes: Snowflakes,
+  fireworks: Fireworks,
+  prayer_flags: PrayerFlags,
 };
 
 export default function BorderArt({ kind, className = "" }: { kind: string; className?: string }) {

@@ -4,7 +4,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Ask, CONTACT, Fill, Items, LegalPage, legalMetadata } from "@/components/legal/legal-page";
+import { ADDRESS, Ask, CONTACT, Items, LegalPage, OWNER, legalMetadata } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = legalMetadata("Privacy notice", "What In2Min2 collects, why, where it's kept, and for how long.");
 
@@ -17,7 +17,7 @@ export default function Privacy() {
       title="Privacy notice"
       intro={<p>This explains what In2Min2 collects about hosts, organisers and guests, why, where it&apos;s kept and for how long, and your rights.</p>}
       short={[
-        <>We collect as little as we can: your email to sign in, what you type about your event, and (from January 2027) guests&apos; replies and photos.</>,
+        <>We collect as little as we can: your email to sign in, what you type about your event, and guests&apos; replies. Guests&apos; photos come in 2027.</>,
         <>Your data is stored in London. We never sell it, never show adverts and never track you around the internet.</>,
         <>Event pages are never listed on Google or other search engines. Photos have their hidden location removed.</>,
         <>Everything is deleted on a timetable. Guest details and photos go 30 days after an event page closes.</>,
@@ -26,13 +26,13 @@ export default function Privacy() {
     >
       <h2 id="who">1. Who we are</h2>
       <p>
-        In2Min2 is a service of GoChuchuro, run by <Fill>owner&apos;s full name</Fill> as a sole trader in the UK. Under data protection law we
+        In2Min2 is a service of GoChuchuro, run by {OWNER} as a sole trader in the UK. Under data protection law we
         are the &ldquo;controller&rdquo; of the information in this notice, except where section 4 says the host is responsible.
       </p>
       <ul>
         <li>Email: {mail}</li>
-        <li>Post: <Fill>business address</Fill></li>
-        <li>ICO registration number: <Fill>number, after paying the ICO fee</Fill></li>
+        <li>Post: {ADDRESS}</li>
+        <li>ICO registration number: to be provided at launch</li>
       </ul>
 
       <h2 id="what">2. What we collect, and why</h2>
@@ -46,7 +46,7 @@ export default function Privacy() {
           ["How long", "Until you delete your account. If an account isn't used for 2 years, we email you, then delete it."],
         ] },
         { what: "Your event's details", lines: [
-          ["What", "Names of the people you celebrate and their family, the date, the place, the words, the running order and menu, and your main photo."],
+          ["What", "Names of the people you celebrate and their family, the date, the place, the words, the running order and menu, your main photo, and the preview picture made from it."],
           ["Why", "To make your page and show it to the people you share it with."],
           ["Legal reason", "Contract."],
           ["How long", "Until your page closes, plus 30 days. Longer only if you choose to keep it for next year (section 6)."],
@@ -69,21 +69,21 @@ export default function Privacy() {
         ] },
       ]} />
 
-      <h3>If you&apos;re a guest (from January 2027)</h3>
+      <h3>If you&apos;re a guest</h3>
       <Items items={[
         { what: "Your reply", lines: [
-          ["What", "Your name, whether you're coming, how many of you, and a contact if the host asks for one."],
+          ["What", "Your name, whether you're coming, how many of you, and a message for the host if you write one."],
           ["Why", "So the host knows who's coming."],
           ["Legal reason", "We hold it for the host (section 4)."],
           ["How long", "Deleted 30 days after the event page closes."],
         ] },
-        { what: "Diet and access needs", lines: [
+        { what: "Diet and access needs (coming later)", lines: [
           ["What", "Only if the host asks, and only if you choose to tell them. These can say something about your health or beliefs, so they're treated with extra care."],
           ["Why", "So the host and caterer can look after you."],
           ["Legal reason", "Your explicit consent. You can withdraw it at any time."],
           ["How long", "Deleted 30 days after the event page closes. Only the host sees them."],
         ] },
-        { what: "Photos and messages you add", lines: [
+        { what: "Photos you add (from 2027)", lines: [
           ["Why", "To share them with the other guests on the event page."],
           ["Legal reason", "We hold them for the host (section 4)."],
           ["How long", "Deleted 30 days after the event page closes. Every photo has a “Please remove this photo” button."],
@@ -124,8 +124,8 @@ export default function Privacy() {
       <h2 id="helpers">5. Who helps us</h2>
       <p>These companies run parts of In2Min2 for us. Each may use your data only to do that job, under a contract.</p>
       <Items items={[
-        { what: "Supabase", lines: [["Does", "Our database and sign-in"], ["Where", "London, UK"]] },
-        { what: "Cloudflare", lines: [["Does", "Hosting, security, and (from January 2027) photo storage"], ["Where", "Worldwide network; stored files in Europe"]] },
+        { what: "Supabase", lines: [["Does", "Our database, sign-in, and each event's main photo and preview picture"], ["Where", "London, UK"]] },
+        { what: "Cloudflare", lines: [["Does", "Hosting, security, and (from 2027) guests' photos"], ["Where", "Worldwide network; stored files in Europe"]] },
         { what: "Google (Gemini)", lines: [["Does", "The AI writer"], ["Where", "Google's data centres, including the USA"]] },
         { what: "Resend", lines: [["Does", "Sends sign-in codes and event emails"], ["Where", "Sent from Ireland; a US company"]] },
         { what: "Stripe (from February 2027)", lines: [["Does", "Takes payments"], ["Where", "UK, Europe and the USA"]] },
@@ -157,7 +157,7 @@ export default function Privacy() {
       <h2 id="cookies">8. Cookies and storage on your device</h2>
       <p>
         We use no advertising or tracking cookies, so there&apos;s no cookie banner. Your browser stores only what In2Min2 needs to work: that
-        you&apos;re signed in, and the event you&apos;re building.
+        you&apos;re signed in, the event you&apos;re building, and, if you reply to an invitation, your reply, so you can change it later.
       </p>
 
       <h2 id="rights">9. Your rights</h2>

@@ -13,6 +13,7 @@ import {
   type EventStageView, type EventViewData, type MenuItem,
 } from "@/lib/event-view";
 import BorderArt from "./borders";
+import Effect from "./effects";
 // Styles: components/event/event-view.css, loaded once in app/layout.tsx.
 // Class names: s.card → "ev-card" (see event-view.css).
 const s = new Proxy({} as Record<string, string>, { get: (_, key) => `ev-${String(key)}` });
@@ -22,9 +23,11 @@ const s = new Proxy({} as Record<string, string>, { get: (_, key) => `ev-${Strin
 // anchors: the public page only. Sections get ids (#running-order, #where,
 // #reply) so a shared link can jump straight to them; the builder shows several
 // copies at once, so it leaves them out.
-type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: boolean; anchors?: boolean };
+// reply: the public page's working reply form (app/[type]/[slug]/rsvp.tsx).
+// Without it, the reply buttons are drawn as a preview.
+type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: boolean; anchors?: boolean; reply?: ReactNode };
 
-export default function EventView({ data, view, now, thumb = false, anchors = false }: Props) {
+export default function EventView({ data, view, now, thumb = false, anchors = false, reply }: Props) {
   const p = data.palette;
   const ts = textStyle(data.textStyle);
   const party = partyColours(p);
@@ -49,8 +52,9 @@ export default function EventView({ data, view, now, thumb = false, anchors = fa
         data-thumb={thumb ? "" : undefined}
       >
         {data.demo && <span className={s.demo}>Demo</span>}
+        {!thumb && data.motion && !data.sensitive && <Effect kind={data.effect} />}
         {view === "card" && <Card d={data} />}
-        {view === "page" && <Page d={data} now={now} a={anchors} />}
+        {view === "page" && <Page d={data} now={now} a={anchors} reply={reply} />}
         {view === "live" && <Live d={data} now={now} a={anchors} />}
         {view === "after" && <After d={data} />}
       </div>
@@ -233,7 +237,7 @@ function Countdown({ d, now }: { d: EventViewData; now: number }) {
   );
 }
 
-function Page({ d, now, a }: { d: EventViewData; now: number; a: boolean }) {
+function Page({ d, now, a, reply }: { d: EventViewData; now: number; a: boolean; reply?: ReactNode }) {
   const { main, second, secondLang } = words(d);
   const story = main.landing_page_story.split(/\n\s*\n/).filter((x) => x.trim());
   return (
@@ -274,11 +278,13 @@ function Page({ d, now, a }: { d: EventViewData; now: number; a: boolean }) {
       {d.toggles.rsvp && (
         <section className={`${s.section} ${s.rsvp}`} id={a ? "reply" : undefined}>
           <h2 className={s.sectionTitle}>{d.sensitive ? "Will you attend?" : "Can you come?"}</h2>
-          <div className={s.rsvpRow}>
-            <span className={s.btn}>{d.sensitive ? "I’ll be there" : "Yes, we’ll come"}</span>
-            <span className={`${s.btn} ${s.btnGhost}`}>Maybe</span>
-            <span className={`${s.btn} ${s.btnGhost}`}>{d.sensitive ? "I can’t attend" : "Sorry, can’t come"}</span>
-          </div>
+          {reply ?? (
+            <div className={s.rsvpRow}>
+              <span className={s.btn}>{d.sensitive ? "I’ll be there" : "Yes, we’ll come"}</span>
+              <span className={`${s.btn} ${s.btnGhost}`}>Maybe</span>
+              <span className={`${s.btn} ${s.btnGhost}`}>{d.sensitive ? "I can’t attend" : "Sorry, can’t come"}</span>
+            </div>
+          )}
         </section>
       )}
 

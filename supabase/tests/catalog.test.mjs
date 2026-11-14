@@ -32,10 +32,10 @@ ok("no extra plans in the builder", cat.PLANS.length === dbPlans.length);
 
 // Event types
 const typeRe = /\('([a-z-]+)',\s*'([^']+)',\s*'(personal|celebration|community)',\s*'([a-z]+)',\s*'(\{[^']*\})',\s*(true|false),\s*(true|false),\s*(\d+)\)/g;
-const dbTypes = [...sql.matchAll(typeRe)].map((m) => ({
+const dbTypes = [...(sql + later).matchAll(typeRe)].map((m) => ({
   key: m[1], label: m[2], scale: m[3], theme: m[4], toggles: JSON.parse(m[5]), repeatsYearly: m[6] === "true", sensitive: m[7] === "true", sort: +m[8],
 }));
-ok("found the 15 event types in the database file", dbTypes.length === 15, String(dbTypes.length));
+ok("found the 18 event types in the database files", dbTypes.length === 18, String(dbTypes.length));
 for (const d of dbTypes) {
   const t = cat.EVENT_TYPES.find((x) => x.key === d.key);
   const same = t && t.label === d.label && t.scale === d.scale && t.theme === d.theme && t.repeatsYearly === d.repeatsYearly
@@ -58,7 +58,9 @@ ok("every switch in a type's defaults exists", cat.EVENT_TYPES.every((t) => Obje
 const shape = /^[a-z][a-z_]{2,29}$/;
 ok("the database accepts any well-formed text style and border", /text_style\s+text not null default 'classic' check \(text_style ~ '\^\[a-z\]\[a-z_\]\{2,29\}\$'\)/.test(sql) && /border\s+text not null default 'none' check \(border ~/.test(sql));
 ok("every text style name fits the database check", cat.TEXT_STYLES.every((t) => shape.test(t.key)) && cat.TEXT_STYLES.length === 10);
-ok("every border name fits the database check", cat.BORDERS.every((b) => shape.test(b.key)) && cat.BORDERS.length === 18);
+ok("every border name fits the database check", cat.BORDERS.every((b) => shape.test(b.key)) && cat.BORDERS.length === 21);
+const dbEffects = later.match(/effect in \(([^)]+)\)/)?.[1].replace(/'|\s/g, "").split(",");
+ok("moving effects match (0004)", JSON.stringify(dbEffects) === JSON.stringify(cat.EFFECTS.map((f) => f.key)), JSON.stringify(dbEffects));
 ok("every palette name fits the database check", cat.PALETTES.every((p) => shape.test(p.key)));
 ok("no two palettes, text styles or borders share a name", new Set(cat.PALETTES.map((p) => p.key)).size === cat.PALETTES.length
   && new Set(cat.TEXT_STYLES.map((t) => t.key)).size === cat.TEXT_STYLES.length && new Set(cat.BORDERS.map((b) => b.key)).size === cat.BORDERS.length);

@@ -5,7 +5,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Ask, CONTACT, Fill, LegalPage, legalMetadata } from "@/components/legal/legal-page";
+import { ADDRESS, Ask, CONTACT, LegalPage, OWNER, legalMetadata } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = legalMetadata("Terms", "The rules for using In2Min2: accounts, event pages, payments, refunds and public events.");
 
@@ -29,8 +29,8 @@ export default function Terms() {
     >
       <h2 id="us">1. Who we are</h2>
       <p>
-        In2Min2 (in2min2.com) is a service of GoChuchuro, run by <Fill>owner&apos;s full name</Fill>, a sole trader in England.
-        Address: <Fill>business address</Fill>. Email: {mail}.
+        In2Min2 (in2min2.com) is a service of GoChuchuro, run by {OWNER}, a sole trader in England.
+        Address: {ADDRESS}. Email: {mail}.
       </p>
       <p>
         By making an account or publishing a page you agree to these terms. Our <Link href="/privacy">privacy notice</Link> explains how we
@@ -95,12 +95,13 @@ export default function Terms() {
         <li>post anything hateful, threatening, harassing or sexual, or anything that puts a child at risk;</li>
         <li>run a scam, a fake event or a fake fundraiser, or sell tickets for an event that won&apos;t go ahead as described;</li>
         <li>pretend to be someone else;</li>
+        <li>claim a free or reduced fee you aren&apos;t entitled to, for example by calling an event a memorial when it isn&apos;t;</li>
         <li>post other people&apos;s photos, music or writing without permission;</li>
         <li>send spam, or try to break, overload or get round the security of In2Min2.</li>
       </ul>
       <p>
-        If you see a page that breaks these rules, tell us at {mail}. We can remove anything that breaks them, and we report crimes where the law
-        requires it.
+        If you see a page that breaks these rules, tell us at {mail}. We can remove anything that breaks them, charge the normal price where
+        a fee was avoided, and report crimes where the law requires it.
       </p>
 
       <h2 id="prices">7. Prices and paying</h2>

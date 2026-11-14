@@ -9,16 +9,32 @@ import { Wordmark } from "@/components/brand/wordmark";
 import { notFound } from "next/navigation";
 import EventView from "@/components/event/event-view";
 import { eventFontVariables } from "@/components/event/fonts";
+import { formatDate, formatTime } from "@/lib/event-view";
 import { getPublicEvent } from "@/lib/public-event";
+import { Rsvp } from "./rsvp";
 import { ShareButton } from "./share-button";
 
 const token = (sp: Record<string, string | string[] | undefined>) => (typeof sp.g === "string" && /^[A-Za-z0-9]{16,64}$/.test(sp.g) ? sp.g : undefined);
 
+// What WhatsApp, Messenger, iMessage and others show when the link is pasted:
+// the title, the date and place, and the preview picture made on the host's
+// phone when they published (or their main photo).
 export async function generateMetadata({ params, searchParams }: PageProps<"/[type]/[slug]">): Promise<Metadata> {
   const { type, slug } = await params;
   const page = await getPublicEvent(type, slug, token(await searchParams));
-  const title = page.kind === "event" ? page.title : page.kind === "ended" ? page.title : "In2Min2";
-  return { title: `${title} · In2Min2`, robots: { index: false, follow: false } };
+  const robots = { index: false, follow: false };
+  if (page.kind !== "event") return { title: `${page.kind === "ended" ? page.title : "In2Min2"} · In2Min2`, robots };
+  const d = page.data;
+  const when = [d.date && formatDate(d.date), formatTime(d.startTime)].filter(Boolean).join(", ");
+  const description = [when, d.venueName].filter(Boolean).join(" · ") || "An invitation made with In2Min2";
+  const images = page.shareImage ? [{ url: page.shareImage, width: 1200, height: 630, alt: page.title }] : undefined;
+  return {
+    title: `${page.title} · In2Min2`,
+    description,
+    robots,
+    openGraph: { type: "website", siteName: "In2Min2", title: page.title, description, images },
+    twitter: { card: images ? "summary_large_image" : "summary", title: page.title, description, images: images?.map((i) => i.url) },
+  };
 }
 
 function serverNow(): number {
@@ -27,7 +43,8 @@ function serverNow(): number {
 
 export default async function EventPage({ params, searchParams }: PageProps<"/[type]/[slug]">) {
   const { type, slug } = await params;
-  const page = await getPublicEvent(type, slug, token(await searchParams));
+  const g = token(await searchParams);
+  const page = await getPublicEvent(type, slug, g);
   if (page.kind === "missing") notFound();
 
   if (page.kind !== "event") {
@@ -53,10 +70,16 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
   }
 
   const p = page.data.palette;
+  const d = page.data;
+  const reply = page.view === "page" && d.toggles.rsvp ? (
+    <Rsvp type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} guestName={page.guestName} guestReply={page.guestReply}
+      sensitive={d.sensitive} hostName={d.stars?.names.trim() || (d.sensitive ? "the family" : d.scale === "community" ? "the organisers" : "the hosts")}
+      cal={{ title: page.title, date: d.date, startTime: d.startTime, endTime: d.endTime, timezone: d.timezone, venue: [d.venueName, d.venueAddress].filter(Boolean).join(", ") }} />
+  ) : undefined;
   return (
     <main className={`${eventFontVariables} min-h-dvh sm:py-8`} style={{ background: p.gradient ? `linear-gradient(${p.soft}e6, ${p.soft}e6), ${p.gradient}` : p.soft }}>
       <div className="mx-auto w-full max-w-2xl overflow-hidden sm:rounded-3xl sm:shadow-[0_24px_60px_-28px_rgba(0,0,0,0.45)]">
-        <EventView data={page.data} view={page.view} now={serverNow()} anchors />
+        <EventView data={page.data} view={page.view} now={serverNow()} anchors reply={reply} />
       </div>
       <ShareButton title={page.title} colour={p.main} textColour={p.onMain} />
     </main>

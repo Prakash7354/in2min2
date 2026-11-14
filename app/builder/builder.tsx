@@ -9,11 +9,13 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Wordmark } from "@/components/brand/wordmark";
 import EventView from "@/components/event/event-view";
-import { clearDraft, loadDraft, newDraft, saveDraft, toViewData, type Draft } from "@/lib/draft";
+import { eventType } from "@/lib/catalog";
+import { applyType, clearDraft, loadDraft, newDraft, saveDraft, toViewData, type Draft } from "@/lib/draft";
 import type { EventStageView } from "@/lib/event-view";
 import { SignInDialog, useSession } from "./account";
+import { RepliesDialog, useReplies } from "./replies";
 import { StepLook, StepPublish, StepSwitches, StepType, StepWhen, StepWho, StepWords } from "./steps";
-import { TopBar } from "./topbar";
+import { eventLink, TopBar } from "./topbar";
 import { Button } from "./ui";
 
 const STEPS = [
@@ -34,7 +36,13 @@ const VIEWS: { key: EventStageView; label: string }[] = [
 ];
 
 export default function Builder() {
-  const [draft, setDraft] = useState<Draft>(() => loadDraft());
+  // A link like /builder?type=christmas (the home page's festive designs)
+  // starts a new event of that kind; an event already being built is kept.
+  const [draft, setDraft] = useState<Draft>(() => {
+    const d = loadDraft();
+    const asked = new URLSearchParams(window.location.search).get("type");
+    return !d.eventType && asked && eventType(asked) ? { ...applyType(d, asked), step: 1 } : d;
+  });
   const [now] = useState(() => Date.now());
   const [saveOk, setSaveOk] = useState(true);
   const [view, setView] = useState<EventStageView>(STEPS[draft.step]?.view ?? "card");
@@ -54,6 +62,10 @@ export default function Builder() {
   }, []);
 
   const update = useCallback((fn: (d: Draft) => Draft) => setDraft((d) => fn(d)), []);
+  // Guests' replies (0004): loaded once published and signed in, then every minute.
+  const replies = useReplies(draft.eventId, session);
+  const [showReplies, setShowReplies] = useState(false);
+  const openReplies = useCallback(() => setShowReplies(true), []);
 
   // Save shortly after each change, and at once if the page is closed,
   // reloaded or put in the background, so the last letters typed are kept.
@@ -107,7 +119,7 @@ export default function Builder() {
     <StepWords key="words" {...props} />,
     <StepLook key="look" {...props} />,
     <StepSwitches key="switches" {...props} />,
-    <StepPublish key="publish" {...props} goTo={goTo}
+    <StepPublish key="publish" {...props} goTo={goTo} replies={replies} openReplies={openReplies}
       onPreview={(v) => { setView(v); setFull(true); }}
       onStartAgain={startAgain} />,
   ][step];
@@ -123,7 +135,7 @@ export default function Builder() {
             <span className={`text-sm ${saveOk ? "text-muted max-[379px]:sr-only" : "font-semibold text-ink"}`} aria-live="polite">
               {saveOk ? "Saved" : "Not saved"}
             </span>
-            <TopBar d={draft} session={session} goTo={goTo} askSignIn={askSignIn} say={say} onStartAgain={startAgain} />
+            <TopBar d={draft} session={session} goTo={goTo} askSignIn={askSignIn} say={say} onStartAgain={startAgain} replies={replies} openReplies={openReplies} />
           </span>
         </div>
         <nav aria-label="Steps" className="mx-auto w-full max-w-6xl px-4 pb-3">
@@ -204,6 +216,10 @@ export default function Builder() {
         <p role="status" className="fixed inset-x-4 bottom-24 z-[70] mx-auto max-w-sm rounded-2xl bg-ink px-4 py-3 text-center font-semibold text-white shadow-lg">
           {toast}
         </p>
+      )}
+
+      {showReplies && (
+        <RepliesDialog d={draft} state={replies} link={eventLink(draft)} onClose={() => setShowReplies(false)} say={say} />
       )}
 
       {signIn && (

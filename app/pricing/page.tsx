@@ -5,7 +5,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Ask, CONTACT, LegalPage, legalMetadata } from "@/components/legal/legal-page";
+import { ADDRESS, CONTACT, LegalPage, legalMetadata } from "@/components/legal/legal-page";
 import { PLANS, SAME_AGAIN_PERCENT, WELCOME_BACK_PERCENT, formatPence, plan } from "@/lib/catalog";
 
 export const metadata: Metadata = legalMetadata("Prices and fair fees", "In2Min2's prices, launch offers, and the rules for reduced fees.");
@@ -25,7 +25,7 @@ export default function Fees() {
       short={[
         <>Everyone pays the same published prices, and the same rules apply to everyone.</>,
         <><strong>Festive launch: In2Min2 is free until 31 January 2027.</strong></>,
-        <>Memorials and funerals are free. Registered charities and armed forces welfare events can ask for half price.</>,
+        <>Memorials and funerals are free, with no need to ask. Charities and armed forces welfare events can ask for half price.</>,
         <>Public events are free to set up. There&apos;s a small fee only on online sales, and nothing on cash or free tickets.</>,
         <>Ask about a reduced fee at {mail}.</>,
       ]}
@@ -55,6 +55,7 @@ export default function Fees() {
         <li>{bookingFee} per online order, not per ticket. It&apos;s shown before paying, and added to the buyer&apos;s total unless the organiser chooses to pay it.</li>
         <li>Nothing on cash or card sales on the day, and nothing at all on free events.</li>
         <li>Stripe&apos;s own card cost is included in the fee.</li>
+        <li>Online payments go through Stripe: about 1.5% + 20p on standard UK cards, more on premium and overseas cards. Card details go straight to Stripe; In2Min2 never sees them.</li>
       </ul>
 
       <h2 id="offers">2. Launch offers: for everyone, no need to ask</h2>
@@ -73,10 +74,12 @@ export default function Fees() {
       <h2 id="reduced">3. Reduced fees: our rules</h2>
       <p>The system never decides who pays less. These written rules do, and they&apos;re the same for everyone.</p>
       <div className="my-4 grid gap-3">
-        <Rule level="Free" who="Memorials and funerals" how="Automatic. A grieving family never has to ask." />
-        <Rule level="Half" who="Fundraising events run by a registered charity" how="Give your charity number. We check it on the Charity Commission, OSCR (Scotland) or Northern Ireland register." />
+        <Rule level="Free" who="Memorials and funerals"
+          how="Automatic: choose “Memorial or funeral” and the page is free. A grieving family never has to ask. Using it for any other event breaks our terms: we move the event to the normal price, or take the page down." />
+        <Rule level="Half" who="Fundraising events run by a registered charity"
+          how="Ask by email or letter with your charity number. We check it on the Charity Commission, OSCR (Scotland) or Northern Ireland register." />
         <Rule level="Half" who="Small charities that don't have to register (income under £5,000), and armed forces welfare or benevolent events"
-          how="Show who you are: for example, a bank statement in the group's name, or a letter from the association." />
+          how="Ask by email or letter, with evidence of who you are: for example, a bank statement in the group's name, or a letter from the association." />
         <Rule level="Free" who="Showcase events"
           how="A few events each season that show a kind of event we don't have an example of yet, chosen only with the organiser's permission to show them. We list every showcase event on our website." />
         <Rule level="Full" who="Everyone else" how="The normal prices and launch offers." />
@@ -85,10 +88,6 @@ export default function Fees() {
         <li><strong>Half</strong> means half of In2Min2&apos;s price or fee: for example, Season {formatPence(plan("season").pricePence / 2)}, or {community.bookingFeeBps / 200}% + {community.bookingFeePence / 2}p per online order.</li>
         <li>On Half and Free, Stripe&apos;s card cost (about 1.5% + 20p) still applies to online sales. It&apos;s Stripe&apos;s charge, not ours, and we can&apos;t waive it.</li>
       </ul>
-      <Ask>
-        Memorials free automatically: the plan said you decide each case, but a written rule applied by the system means no family ever has to ask.
-        Recommended yes. The other levels stay your decision, case by case, using these rules.
-      </Ask>
 
       <h2 id="fair">4. How we keep it fair</h2>
       <ul>
@@ -99,11 +98,11 @@ export default function Fees() {
       </ul>
 
       <h2 id="ask">5. How to ask</h2>
-      <p>Email {mail} with:</p>
+      <p>Email {mail}, or write to us at {ADDRESS}, with:</p>
       <ol>
         <li>the organiser&apos;s or family&apos;s name;</li>
         <li>the event, and its date;</li>
-        <li>which rule above applies, and a charity number if you have one.</li>
+        <li>which rule above applies, and your evidence: a charity number, or a letter or statement showing who you are.</li>
       </ol>
       <p>We reply within 5 working days. From February 2027 there&apos;ll also be an &ldquo;Ask about a reduced fee&rdquo; form.</p>
 

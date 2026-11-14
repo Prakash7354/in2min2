@@ -3,7 +3,7 @@
 // components/event/event-view.tsx, so the preview is exactly what guests see.
 
 import type { EventCopy } from "@/lib/ai/copy";
-import type { CoverFit, Palette, Parking, PhotoStyle, Scale, Template, TextStyle, ToggleKey } from "@/lib/catalog";
+import type { CoverFit, EffectKey, Palette, Parking, PhotoStyle, Scale, Template, TextStyle, ToggleKey } from "@/lib/catalog";
 
 export type ViewPerson = { relation: string; names: string };
 export type MenuItem = { course: string; dish: string };
@@ -40,6 +40,7 @@ export type EventViewData = {
   border: string;     // BORDERS key in lib/catalog.ts
   photoStyle: PhotoStyle;
   motion: boolean;
+  effect: EffectKey;    // a moving effect over the top of the page (0004)
   cover: string | null; // image URL (a data: URL while it's a draft)
   coverFit: CoverFit;   // fill the space, or show the whole picture (logos, posters)
   toggles: Record<ToggleKey, boolean>;

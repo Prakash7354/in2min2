@@ -14,6 +14,10 @@ import { Wordmark } from "@/components/brand/wordmark";
 export const DRAFT = true;
 export const UPDATED = "14 November 2026";
 export const CONTACT = "hello@in2min2.com";
+// The owner's details, until GoChuchuro is incorporated (owner, 14 Nov 2026).
+// The address is his home for now; swap in the virtual business address when he has one.
+export const OWNER = "Prakash Gurung";
+export const ADDRESS = "1 Rake Way, Andover SP11 6FX";
 
 const PAGES = [
   { href: "/privacy", label: "Privacy" },
@@ -43,8 +47,7 @@ export function LegalPage({ current, title, intro, short, children }: {
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-6 sm:pt-10">
         {DRAFT && (
           <p className="mb-6 rounded-2xl border-l-4 border-marigold-deep bg-amber-wash px-4 py-3 text-[15px] leading-snug">
-            <strong>Draft for approval, {UPDATED}.</strong> Not in force yet. Gaps to fill are <Fill>marked like this</Fill>; questions for the
-            owner are in yellow boxes.
+            <strong>Draft for approval, {UPDATED}.</strong> Not in force yet. Questions for the owner are in yellow boxes.
           </p>
         )}
         <h1 className="font-display text-4xl font-extrabold leading-tight tracking-tight text-brand sm:text-5xl">{title}</h1>

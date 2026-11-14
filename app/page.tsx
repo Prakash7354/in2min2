@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/wordmark";
+import { FestiveLaunch } from "./festive";
 
 // Holding page for the preview address. The full website (top menu, How it
 // works, pricing, communities, contact) comes in phase 2 (docs/CONCEPT.md 18b).
@@ -40,6 +41,8 @@ export default function Home() {
             </a>
           </div>
         </section>
+
+        <FestiveLaunch />
 
         <section id="how" aria-labelledby="how-title" className="grid gap-6">
           <h2 id="how-title" className="font-display text-3xl font-extrabold tracking-tight">How it works</h2>

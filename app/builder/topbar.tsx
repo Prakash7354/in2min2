@@ -7,6 +7,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { missingForPublish, unpublishedChanges, type Draft } from "@/lib/draft";
 import { shareLink } from "@/lib/share";
+import { totals, type RepliesState } from "./replies";
 import { ShareLinks } from "./share-links";
 import { supabase } from "@/lib/supabase/client";
 
@@ -16,6 +17,8 @@ type Common = {
   goTo: (step: number) => void;
   askSignIn: (why: string) => void;
   say: (message: string) => void;
+  replies?: RepliesState;
+  openReplies?: () => void;
 };
 
 export function eventLink(d: Draft): string | null {
@@ -108,7 +111,7 @@ function Popover({ label, icon, badge, children }: { label: string; icon: ReactN
 
 type Update = { tone: "todo" | "ok" | "info"; title: string; line?: string; action?: { label: string; run: () => void } };
 
-function Bell({ d, session, goTo, askSignIn, say }: Common) {
+function Bell({ d, session, goTo, askSignIn, say, replies, openReplies }: Common) {
   const items: Update[] = [];
   const missing = missingForPublish(d);
   if (!session) items.push({ tone: "todo", title: "Sign in to keep your event safe", line: "Until then it's kept only on this phone.", action: { label: "Sign in", run: () => askSignIn("Sign in to keep your event safe in your account.") } });
@@ -116,8 +119,20 @@ function Bell({ d, session, goTo, askSignIn, say }: Common) {
   if (!d.eventId && missing.length) items.push({ tone: "todo", title: `${missing.length} thing${missing.length > 1 ? "s" : ""} still needed to publish`, line: missing.map((m) => m.text).join(", "), action: { label: "Show me", run: () => goTo(missing[0].step) } });
   if (!d.eventId && !missing.length) items.push({ tone: "todo", title: "Ready to publish", line: "Everything needed is filled in.", action: { label: "Publish", run: () => goTo(6) } });
   if (d.eventId && !unpublishedChanges(d)) items.push({ tone: "ok", title: "Your page is live", line: "Share the link with your guests.", action: { label: "Share", run: () => void shareEvent(d, say) } });
-  items.push({ tone: "info", title: "Guests' replies", line: "When replies open, each new reply will appear here." });
-  const count = items.filter((i) => i.tone === "todo").length;
+  const todos = items.filter((i) => i.tone === "todo").length;
+  const fresh = replies?.fresh ?? 0;
+  if (d.eventId && replies?.rows) {
+    const t = totals(replies.rows);
+    items.push({
+      tone: fresh ? "todo" : "info",
+      title: fresh ? `${fresh} new ${fresh === 1 ? "reply" : "replies"}` : "Guests' replies",
+      line: t.replies ? `${t.coming} coming · ${t.maybe} maybe · ${t.cant} can't come${t.waiting ? ` · ${t.waiting} waiting` : ""}` : "No replies yet.",
+      action: openReplies ? { label: "See replies", run: openReplies } : undefined,
+    });
+  } else {
+    items.push({ tone: "info", title: "Guests' replies", line: d.eventId ? "Sign in to see who's replied." : "Once your page is published, each reply appears here." });
+  }
+  const count = todos + fresh;
 
   return (
     <Popover label="Updates" badge={count} icon={

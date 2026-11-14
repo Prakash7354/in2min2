@@ -7,9 +7,9 @@ import { useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { COPY_FIELDS, COPY_KEYS, charCount, type CopyKey, type CopyResponse } from "@/lib/ai/copy";
 import {
-  BORDERS, COVER_FITS, EVENT_TYPES, LANGUAGES, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
+  BORDERS, COVER_FITS, EFFECTS, EVENT_TYPES, LANGUAGES, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
   TEMPLATES, TEXT_STYLES, TOGGLES, TONES, eventType, formatPence, language, paletteFor, plan, plansFor, quote,
-  type CoverFit, type Palette, type PhotoStyle, type Scale, type Tag,
+  type CoverFit, type EffectKey, type Palette, type PhotoStyle, type Scale, type Tag,
 } from "@/lib/catalog";
 import {
   applyScale, applyType, fingerprint, missingForPublish, people, slugify, toViewData, unpublishedChanges, type Draft,
@@ -17,8 +17,10 @@ import {
 import { formatDate, formatTime, type MenuItem } from "@/lib/event-view";
 import { resizePhoto } from "@/lib/image";
 import EventView from "@/components/event/event-view";
+import { saveMedia } from "@/lib/media-upload";
 import { publishDraft } from "@/lib/publish";
 import { supabase } from "@/lib/supabase/client";
+import { totals, type RepliesState } from "./replies";
 import { ShareLinks } from "./share-links";
 import { eventLink } from "./topbar";
 import { Badge, Button, Choices, Field, Group, Notice, Soon, Switch, Tick, inputClass } from "./ui";
@@ -86,8 +88,9 @@ export function StepType({ d, update }: StepProps) {
 const TITLE_EXAMPLES: Record<string, string> = {
   birthday: "Asha is 10!", pasni: "Aarav's Pasni", wedding: "Meenu & Jose", engagement: "Priya & Sam's engagement",
   anniversary: "Ram & Sita: 25 years", bratabandha: "Kiran's Bratabandha", reunion: "2nd Battalion reunion 2027",
-  mela: "Andover Mela 2027", sport: "Wessex Cup 2027", charity: "Walk for Nepal 2027", community: "Dashain gathering 2027",
+  mela: "Riverside Mela 2027", sport: "Riverside Cup 2027", charity: "Walk for Nepal 2027", community: "Dashain gathering 2027",
   memorial: "Remembering Bhim Bahadur", corporate: "Annual dinner 2027",
+  christmas: "The Gurung family Christmas", "new-year": "New Year's Eve 2026", lhosar: "Tamu Lhosar 2026",
 };
 
 export function StepWho({ d, update }: StepProps) {
@@ -206,6 +209,9 @@ const RUN_SUGGESTIONS: Record<string, string[]> = {
   charity: ["Registration", "Start", "Lunch", "Prize-giving"],
   community: ["Welcome", "Programme", "Food", "Close"],
   corporate: ["Arrival drinks", "Welcome", "Dinner", "Awards", "Close"],
+  christmas: ["Guests arrive", "Christmas dinner", "Secret Santa", "Games", "Carols"],
+  "new-year": ["Guests arrive", "Dinner", "Dancing", "Countdown to midnight", "Fireworks"],
+  lhosar: ["Welcome", "Prayers and blessings", "Cultural programme", "Cultural dances", "Lunch", "Tika and close"],
 };
 const DEFAULT_RUN = ["Guests arrive", "Welcome", "Lunch", "Dinner"];
 const MEAL_WORDS = /\b(lunch|dinner|breakfast|brunch|meal|food|tea|buffet|bhoj|canap|supper|feast)/i;
@@ -759,6 +765,18 @@ export function StepLook({ d, update, now }: StepProps) {
 
       <Switch id="motion" checked={d.motion} onChange={(v) => update(set("motion", v))} label="Gentle movement"
         line="A slow zoom on the photo and a few small moments. People who switch movement off on their phone never see it." />
+
+      {d.motion && !eventType(d.eventType)?.sensitive && (
+        <Group title="Moving effect" line="Falls gently over the top of the page for about half a minute, then stops. Open the full-screen preview to see it.">
+          <Choices<EffectKey>
+            label="Moving effect"
+            value={d.effect}
+            columns="grid-cols-2 sm:grid-cols-3"
+            onChange={(k) => update(set("effect", k))}
+            options={EFFECTS.map((f) => ({ key: f.key, label: f.name, line: f.line }))}
+          />
+        </Group>
+      )}
     </div>
   );
 }
@@ -831,8 +849,9 @@ export function StepSwitches({ d, update }: StepProps) {
 
 // ───────────────────────────── 7. Check and publish ─────────────────────────────
 
-export function StepPublish({ d, update, session, askSignIn, say, onPreview, onStartAgain, goTo }: StepProps & {
+export function StepPublish({ d, update, session, askSignIn, say, onPreview, onStartAgain, goTo, replies, openReplies }: StepProps & {
   onPreview: (view: "card" | "page" | "live" | "after") => void; onStartAgain: () => void; goTo: (step: number) => void;
+  replies: RepliesState; openReplies: () => void;
 }) {
   const [confirmReset, setConfirmReset] = useState(false);
   const [pub, setPub] = useState<{ busy: boolean; error: string | null; offer: string | null; done: boolean }>({ busy: false, error: null, offer: null, done: false });
@@ -851,11 +870,19 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
       setPub({ busy: false, error: r.message, offer: null, done: false });
       return;
     }
+    // The main photo and the picture WhatsApp shows (0005). If this fails the
+    // page is still published; it just shows initials and no picture.
+    const m = await saveMedia(supabase(), { ...d, eventId: r.eventId }, r.eventId).catch((e: unknown) => ({ ok: false as const, message: String(e) }));
     update((x) => {
-      const next = { ...x, eventId: r.eventId, publishedPath: r.path, shortPath: r.shortPath, offerClaimed: x.offerClaimed || !!r.offer?.ok };
+      const next = {
+        ...x, eventId: r.eventId, publishedPath: r.path, shortPath: r.shortPath, offerClaimed: x.offerClaimed || !!r.offer?.ok,
+        ...(m.ok ? { coverKey: m.coverKey, shareKey: m.shareKey, mediaHash: m.mediaHash } : {}),
+      };
       return { ...next, publishedHash: fingerprint(next) };
     });
-    setPub({ busy: false, error: null, offer: r.offer?.message ?? null, done: true });
+    const photoNote = m.ok ? null
+      : `Your page is published, but the photo and the WhatsApp preview picture couldn't be saved yet. Press "Update my page" to try again. (Details for Claude Code: ${m.message})`;
+    setPub({ busy: false, error: null, offer: [r.offer?.message, photoNote].filter(Boolean).join(" ") || null, done: true });
   }
 
   const ready = missing.length === 0 && d.checked;
@@ -871,6 +898,19 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
             ? <Notice tone="warn">You&apos;ve changed things since publishing. Press &ldquo;Update my page&rdquo; below to put them live; the link stays the same.</Notice>
             : <p className="text-[15px] text-muted">Change anything, then press &ldquo;Update my page&rdquo; below; the link stays the same.</p>}
           <ShareLinks d={d} say={say} link={link} />
+        </Group>
+      )}
+
+      {d.eventId && d.toggles.rsvp && (
+        <Group title="Guests' replies" line="Every reply, with its message. New ones also show on the bell at the top.">
+          {replies.rows ? (() => {
+            const t = totals(replies.rows);
+            return (
+              <p className="text-lg"><strong className="text-brand">{t.coming}</strong> coming · <strong>{t.maybe}</strong> maybe · <strong>{t.cant}</strong> can&apos;t come
+                {t.waiting ? <> · <strong>{t.waiting}</strong> waiting</> : null}</p>
+            );
+          })() : <p className="text-[15px] text-muted">{session ? "Loading…" : "Sign in to see who has replied."}</p>}
+          <Button kind="main" onClick={session ? openReplies : () => askSignIn("Sign in to see your guests' replies.")}>See replies</Button>
         </Group>
       )}
 

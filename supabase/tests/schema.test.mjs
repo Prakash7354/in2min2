@@ -35,6 +35,18 @@ await db.exec(`
   -- default here, stricter than plain Postgres, so each grant is deliberate.
   alter default privileges in schema public revoke execute on functions from public;
   insert into auth.users values ('aaaaaaaa-0000-0000-0000-000000000001'), ('bbbbbbbb-0000-0000-0000-000000000002'), ('cccccccc-0000-0000-0000-000000000003');
+  -- Supabase Storage's two tables, as far as our policies need them (0005).
+  -- On Supabase, RLS is already on for storage.objects and the API roles have
+  -- table rights; the policies decide.
+  create schema storage;
+  create table storage.buckets (id text primary key, name text not null, public boolean not null default false,
+    file_size_limit bigint, allowed_mime_types text[]);
+  create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets(id),
+    name text not null, owner_id text default auth.uid()::text, created_at timestamptz not null default now(), unique (bucket_id, name));
+  alter table storage.objects enable row level security;
+  grant usage on schema storage to anon, authenticated, service_role;
+  grant select, insert, update, delete on storage.objects to anon, authenticated;
+  grant select on storage.buckets to anon, authenticated;
 `);
 
 console.log("Migration:");
@@ -341,7 +353,7 @@ ok("a family event needs no organiser to publish (wedding above)", true);
 
 console.log("Rights on a strict Supabase (0002) and the AI writes cap:");
 await as(null);
-ok("the public can read plans and event types (pricing page)", (await q(`select key from plans`)).length === 5 && (await q(`select key from event_types`)).length === 15);
+ok("the public can read plans and event types (pricing page)", (await q(`select key from plans`)).length === 5 && (await q(`select key from event_types`)).length === 18);
 await expectError("the public cannot read the AI usage table", `select * from ai_usage`, /permission denied/);
 ok("the public gets no AI writes", (await q(`select take_ai_write() as ok`).catch(() => [{ ok: "refused" }]))[0].ok !== true);
 await as(B);
@@ -395,6 +407,120 @@ const hro = await db.query(`update feature_toggles set schedule = true where eve
 ok("a helper of another event cannot switch it back", hro.affectedRows === 0);
 await as(A);
 await q(`delete from events where id = $1`, [ro.id]);
+
+console.log("Replies (0004):");
+await as(A);
+const [rv] = await q(`insert into events (event_type, slug, title, starts_at, status, venue_capacity)
+  values ('birthday','asha-rsvp','Asha is 10', '2027-06-01 14:00+00', 'published', 10) returning id`);
+const reply = async (body, token = null, slug = "asha-rsvp", type = "birthday") =>
+  (await q(`select submit_rsvp($1, $2, $3, $4) as r`, [type, slug, token, JSON.stringify(body)]))[0].r;
+await as(null);
+let r1 = await reply({ name: "Sita Rai", status: "attending", party_size: 4, note: "Can't wait!" });
+ok("a guest replies yes for 4 from the public page", r1.ok === true && r1.status === "attending" && r1.party_size === 4, JSON.stringify(r1));
+ok("…and gets a private token to change it later", /^[0-9a-f]{32}$/.test(r1.token));
+await expectError("the public still can't add to the guest list directly", `insert into guest_crm (event_id, full_name) values ('${rv.id}', 'Spam')`, /permission denied/);
+await expectError("the public can't read the guest list", `select full_name from guest_crm`, /permission denied/);
+let r1b = await reply({ name: "Sita Rai", status: "maybe", party_size: 2 }, r1.token);
+ok("the same token changes the reply instead of adding another", r1b.ok && r1b.status === "maybe" && r1b.party_size === 2);
+await as(A);
+ok("…so the host still sees one reply", (await q(`select count(*)::int n from guest_crm where event_id = $1`, [rv.id]))[0].n === 1);
+await as(null);
+ok("a blank name is refused", (await reply({ name: "  ", status: "attending" })).reason === "name");
+ok("more than 20 people in one reply is refused", (await reply({ name: "Big family", status: "attending", party_size: 21 })).reason === "party_size");
+ok("a note over 280 characters is refused", (await reply({ name: "Long", status: "attending", note: "x".repeat(281) })).reason === "note");
+ok("an unknown answer is refused", (await reply({ name: "Odd", status: "invited" })).reason === "bad_reply");
+await reply({ name: "Sita Rai", status: "attending", party_size: 4 }, r1.token);
+const r2 = await reply({ name: "Hari Gurung", status: "attending", party_size: 6 });
+ok("replies fill the venue's safe capacity (10)", r2.status === "attending");
+const r3 = await reply({ name: "Gita Thapa", status: "attending", party_size: 2 });
+ok("past the venue's capacity a reply joins the waiting list", r3.ok && r3.status === "waitlist", JSON.stringify(r3));
+const r1c = await reply({ name: "Sita Rai", status: "declined", party_size: 4 }, r1.token);
+ok("a guest who can no longer come can say so", r1c.status === "declined");
+await as(A);
+const who = async (name) => (await q(`select rsvp_status from guest_crm where event_id = $1 and full_name = $2`, [rv.id, name]))[0]?.rsvp_status;
+ok("…and the waiting list moves up by itself", (await who("Gita Thapa")) === "attending");
+await as(null);
+ok("someone already coming can't take more places than are left", (await reply({ name: "Hari Gurung", status: "attending", party_size: 9 }, r2.token)).reason === "no_more_room");
+const r2b = await reply({ name: "Hari Gurung", status: "attending", party_size: 6, note: "Bringing sel roti" }, r2.token);
+ok("…but keeps the places they had", r2b.ok && r2b.status === "attending");
+const twin = await reply({ name: "Hari Gurung", status: "declined" });
+ok("a different guest with the same name gets their own reply", twin.ok && twin.token !== r2.token);
+await as(A);
+let seen = await q(`select full_name, party_size, rsvp_status, rsvp_note from guest_crm where event_id = $1 order by created_at`, [rv.id]);
+ok("the host sees every reply with its note", seen.length === 4 && seen[1].rsvp_note === "Bringing sel roti", JSON.stringify(seen));
+await as(B);
+ok("another host sees none of them", (await q(`select id from guest_crm where event_id = $1`, [rv.id])).length === 0);
+await as(A);
+await q(`delete from guest_crm where event_id = $1 and full_name = 'Hari Gurung' and rsvp_status = 'declined'`, [rv.id]);
+ok("the host can remove a reply", (await q(`select count(*)::int n from guest_crm where event_id = $1`, [rv.id]))[0].n === 3);
+
+await q(`update events set is_private = true where id = $1`, [rv.id]);
+await as(null);
+ok("a private event takes no reply without a guest's own link", (await reply({ name: "Stranger", status: "attending" })).reason === "private");
+ok("…but takes one with it", (await reply({ name: "Hari Gurung", status: "attending", party_size: 6 }, r2.token)).ok === true);
+await as(A);
+await q(`update events set is_private = false where id = $1`, [rv.id]);
+await q(`update feature_toggles set rsvp = false where event_id = $1`, [rv.id]);
+await as(null);
+ok("replies switched off: none taken", (await reply({ name: "Late", status: "attending" })).reason === "closed");
+await as(A);
+await q(`update feature_toggles set rsvp = true where event_id = $1`, [rv.id]);
+await q(`insert into events (event_type, slug, title, starts_at, status) values ('birthday','was-2020','Long ago', '2020-01-01 14:00+00', 'published')`);
+await q(`insert into events (event_type, slug, title, starts_at) values ('birthday','not-yet','Draft', '2027-06-01 14:00+00')`);
+await as(null);
+ok("after the day, replies are closed", (await reply({ name: "Late", status: "attending" }, null, "was-2020")).reason === "closed");
+ok("a draft can't be replied to", (await reply({ name: "Early", status: "attending" }, null, "not-yet")).reason === "no_event");
+
+await as(A);
+await q(`update events set venue_capacity = null where id = $1`, [rv.id]);
+await q(`insert into guest_crm (event_id, full_name, party_size, rsvp_status) values ($1, 'Whole class', 200, 'invited')`, [rv.id]);
+await as(null);
+// 200 invited + Hari 6 + Gita 2 = 208 of 200 so far; 10% grace allows 220.
+ok("the plan's limit has 10% grace", (await reply({ name: "Grace", status: "maybe", party_size: 12 })).ok === true);
+ok("…then replies pause kindly", (await reply({ name: "One more", status: "attending", party_size: 1 })).reason === "full");
+ok("…though anyone can still say they can't come", (await reply({ name: "Sorry", status: "declined" })).ok === true);
+await db.exec(`reset role; insert into guest_crm (event_id, full_name, source) select '${rv.id}', 'Bot ' || i, 'rsvp_form' from generate_series(1, 60) i`);
+await as(null);
+ok("more than 60 new replies in 10 minutes: the next waits", (await reply({ name: "Flood", status: "declined" })).reason === "busy");
+await db.exec(`reset role; delete from guest_crm where full_name like 'Bot %'`);
+
+console.log("Festive designs, effects and the preview picture (0004):");
+await as(null);
+const fest = await q(`select key, scale from event_types where key in ('christmas', 'new-year', 'lhosar') order by sort_order`);
+ok("Christmas party, New Year's Eve and Lhosar are event types", fest.map((t) => `${t.key}:${t.scale}`).join() === "christmas:personal,new-year:personal,lhosar:community", JSON.stringify(fest));
+[pe] = await q(`select public_event('birthday','asha-rsvp') as p`);
+ok("a page starts with no moving effect", pe.p.event.effect === "none" && pe.p.event.share_image_key === null);
+await as(A);
+await q(`update events set effect = 'snow', share_image_key = $2, cover_image_key = $3 where id = $1`,
+  [rv.id, `${rv.id}/share-abc123.png`, `${rv.id}/cover-def456.jpg`]);
+await expectError("an unknown effect is rejected", `update events set effect = 'lasers' where id = '${rv.id}'`, /check constraint/);
+await expectError("a preview picture from another event's folder is rejected", `update events set share_image_key = '${ev.id}/share-abc123.png' where id = '${rv.id}'`, /check constraint/);
+await expectError("a photo name that isn't a picture is rejected", `update events set cover_image_key = '${rv.id}/cover-abc123.html' where id = '${rv.id}'`, /check constraint/);
+await as(null);
+[pe] = await q(`select public_event('birthday','asha-rsvp') as p`);
+ok("the public page gets the effect, photo and preview picture", pe.p.event.effect === "snow" && pe.p.event.share_image_key.endsWith("/share-abc123.png") && pe.p.event.cover_image_key.endsWith("/cover-def456.jpg"));
+
+console.log("Event photos (0005):");
+await as(null);
+const [bk] = await q(`select public, file_size_limit, allowed_mime_types from storage.buckets where id = 'event-media'`);
+ok("a public bucket for event pictures, up to 3 MB, pictures only", bk?.public === true && Number(bk.file_size_limit) === 3145728 && bk.allowed_mime_types.join() === "image/jpeg,image/png,image/webp");
+await expectError("the public can't add a file", `insert into storage.objects (bucket_id, name) values ('event-media', '${rv.id}/cover-abc123.jpg')`, /row-level security/);
+await as(A);
+await q(`insert into storage.objects (bucket_id, name) values ('event-media', $1)`, [`${rv.id}/cover-abc123.jpg`]);
+ok("the owner adds a photo in their event's folder", (await q(`select count(*)::int n from storage.objects where name = $1`, [`${rv.id}/cover-abc123.jpg`]))[0].n === 1);
+await expectError("…but not a web page", `insert into storage.objects (bucket_id, name) values ('event-media', '${rv.id}/cover-abc123.html')`, /row-level security/);
+await expectError("…or a file outside an event folder", `insert into storage.objects (bucket_id, name) values ('event-media', 'cover-abc123.jpg')`, /row-level security/);
+await as(B);
+await expectError("another host can't add to A's event", `insert into storage.objects (bucket_id, name) values ('event-media', '${rv.id}/share-abc123.png')`, /row-level security/);
+ok("…or list its files", (await q(`select name from storage.objects where bucket_id = 'event-media'`)).length === 0);
+const bdel = await db.query(`delete from storage.objects where name = $1`, [`${rv.id}/cover-abc123.jpg`]);
+ok("…or delete them", bdel.affectedRows === 0);
+await as(C);  // a helper on A's wedding
+await expectError("a helper can't change an event's pictures", `insert into storage.objects (bucket_id, name) values ('event-media', '${ev.id}/cover-abc123.jpg')`, /row-level security/);
+await as(A);
+const adel = await db.query(`delete from storage.objects where name = $1`, [`${rv.id}/cover-abc123.jpg`]);
+ok("the owner can remove their photo", adel.affectedRows === 1);
+await q(`delete from events where slug in ('asha-rsvp', 'was-2020', 'not-yet')`);
 
 console.log("Delete everything:");
 await as(C);  // C is a helper on A's wedding

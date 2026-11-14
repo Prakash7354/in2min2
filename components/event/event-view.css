@@ -947,3 +947,182 @@
 .ev-root:not([data-thumb]) .ev-tNote { font-size: max(0.9em, 14px); }
 .ev-root:not([data-thumb]) .ev-made { font-size: max(0.85em, 12.5px); }
 .ev-root:not([data-thumb]) .ev-tTag { font-size: max(0.75em, 11.5px); }
+
+/* ── Moving effects (components/event/effects.tsx, events.effect) ──
+   Over the top of the page only, about half a minute, then still. */
+.ev-fx {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: min(100%, 1100px);
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 6;
+}
+.ev-fxLane {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 0;
+  animation-name: ev-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: 3;
+  animation-fill-mode: both;
+}
+@keyframes ev-fall {
+  0% { transform: translateY(-6%); opacity: 0; }
+  6% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+.ev-fxBit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  animation-name: ev-sway;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 9;
+  animation-direction: alternate;
+}
+@keyframes ev-sway {
+  from { transform: translateX(calc(var(--sway) * -1)) rotate(0deg); }
+  to { transform: translateX(var(--sway)) rotate(var(--spin)); }
+}
+.ev-fx[data-fx="snow"] .ev-fxBit {
+  width: calc(6px * var(--s));
+  height: calc(6px * var(--s));
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(110, 135, 170, 0.28), 0 0 6px rgba(110, 150, 200, 0.55);
+}
+.ev-fx[data-fx="petals"] .ev-fxBit {
+  width: calc(10px * var(--s));
+  height: calc(14px * var(--s));
+  border-radius: 80% 0 80% 0;
+  background: #F4A522;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.08);
+}
+.ev-fx[data-fx="petals"] .ev-fxLane:nth-child(3n) .ev-fxBit { background: #F28C28; }
+.ev-fx[data-fx="petals"] .ev-fxLane:nth-child(3n + 1) .ev-fxBit { background: #FFC93C; }
+.ev-fx[data-fx="confetti"] .ev-fxBit {
+  width: calc(6px * var(--s));
+  height: calc(11px * var(--s));
+  border-radius: 1px;
+  background: var(--c);
+}
+.ev-fxBurst {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.ev-fxSpark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+.ev-fxSpark::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -2.5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 6px var(--c);
+  animation: ev-spark 2.8s cubic-bezier(0.2, 0.7, 0.3, 1) 6 both;
+  animation-delay: inherit;
+}
+@keyframes ev-spark {
+  0% { transform: translateX(0) scale(0.6); opacity: 0; }
+  8% { opacity: 1; }
+  65% { opacity: 0.9; }
+  100% { transform: translateX(min(15cqi, 72px)) scale(0.3); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-fx { display: none; }
+}
+
+/* ── The reply form (app/[type]/[slug]/rsvp.tsx) ── */
+button.ev-btn { cursor: pointer; }
+.ev-btn:disabled { opacity: 0.6; cursor: default; }
+.ev-btnSmall { padding: 0.6em 1.15em; font-size: 0.9em; }
+.ev-replyForm,
+.ev-replyDone {
+  display: grid;
+  gap: 1em;
+}
+.ev-field {
+  display: grid;
+  gap: 0.4em;
+}
+.ev-label { font-weight: 700; }
+.ev-optional { font-weight: 400; color: var(--ev-muted); }
+.ev-input {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 2px solid color-mix(in srgb, var(--ev-ink) 22%, transparent);
+  background: var(--ev-bg);
+  color: var(--ev-ink);
+  padding: 0.7em 0.85em;
+  font: inherit;
+  font-size: max(1em, 16px); /* 16px or more: phones don't zoom in on typing */
+  resize: vertical;
+}
+.ev-input:focus {
+  outline: none;
+  border-color: var(--ev-main);
+}
+.ev-stepper {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+.ev-stepBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--ev-main);
+  color: var(--ev-on-main);
+  font-size: 1.5em;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.ev-stepBtn:disabled { opacity: 0.35; cursor: default; }
+.ev-stepNum {
+  min-width: 2ch;
+  text-align: center;
+  font-size: 1.6em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.ev-btnRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6em;
+  align-items: center;
+}
+.ev-replyBig {
+  margin: 0;
+  font-family: var(--ev-display);
+  font-size: 1.5em;
+  font-weight: 700;
+  color: var(--ev-main);
+}
+.ev-replyDone p { margin: 0; }
+.ev-replyError {
+  margin: 0;
+  padding: 0.7em 0.9em;
+  border-radius: 10px;
+  border-left: 4px solid #C2410C;
+  background: color-mix(in srgb, #C2410C 12%, var(--ev-bg));
+  color: var(--ev-ink);
+}
+.ev-root:not([data-thumb]) .ev-label { font-size: max(1em, 15px); }

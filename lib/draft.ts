@@ -6,7 +6,7 @@
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
 import {
   eventType, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
-  type CoverFit, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
+  type CoverFit, type EffectKey, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
 import type { EventViewData, ViewFunction, ViewPerson } from "@/lib/event-view";
 
@@ -45,6 +45,7 @@ export type Draft = {
   border: string;
   photoStyle: PhotoStyle;
   motion: boolean;
+  effect: EffectKey;
   cover: string | null;
   coverFit: CoverFit;
   toggles: Record<ToggleKey, boolean>;
@@ -59,6 +60,10 @@ export type Draft = {
   shortPath?: string; // "/e/x9k2b": the short link, easy to read aloud or put on a poster
   offerClaimed?: boolean;
   publishedHash?: string; // fingerprint() when last published, to spot changes not yet live
+  // The main photo and preview picture as stored (0005), and what they were made from.
+  coverKey?: string | null;
+  shareKey?: string | null;
+  mediaHash?: string;
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;
@@ -99,6 +104,7 @@ export function newDraft(): Draft {
     border: "none",
     photoStyle: "arch",
     motion: true,
+    effect: "none",
     cover: null,
     coverFit: "fill",
     toggles: togglesFor(null),
@@ -127,6 +133,7 @@ export function applyType(d: Draft, key: string): Draft {
     border: t.borders[0] ?? "none",
     photoStyle: t.photoStyle,
     motion: !t.sensitive,
+    effect: t.sensitive ? "none" : t.effect ?? "none",
     tone: t.tone,
     toggles: togglesFor(key),
     plan: scale === "community" ? "community" : d.plan === "community" ? "popup" : d.plan,
@@ -192,7 +199,8 @@ export function slugOk(slug: string): boolean {
 // A short fingerprint of everything that publishing sends, so the builder can
 // say "you have changes that aren't live yet". The photo isn't sent yet
 // (photo storage comes later), so it's left out.
-const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "shortPath", "offerClaimed", "publishedHash", "cover", "offerCode"] as const;
+const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "shortPath", "offerClaimed", "publishedHash", "cover", "offerCode",
+  "coverKey", "shareKey", "mediaHash"] as const;
 export function fingerprint(d: Draft): string {
   const rest: Record<string, unknown> = { ...d };
   for (const k of LOCAL_ONLY) delete rest[k];
@@ -260,6 +268,7 @@ export function toViewData(d: Draft): EventViewData {
     border: d.border,
     photoStyle: d.photoStyle,
     motion: d.motion,
+    effect: d.effect,
     cover: d.cover,
     coverFit: d.coverFit,
     toggles: d.toggles,
