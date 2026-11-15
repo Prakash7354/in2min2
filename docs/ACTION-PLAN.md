@@ -43,7 +43,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 8. Under **Can you come?**, tap **Yes**. Type her name, choose **2** people, write a short message, and tap **Send my reply**.
 9. Tap **Add to Google Calendar** (Android) or **Add to iPhone or Outlook** (iPhone). Check the date and time.
 10. Further down, under **Photos**, tap **Add your photos**. Choose 3 photos from her phone, and take one new photo with the camera.
-11. Close the page and open the link again. It should say **Thank you, …!**, and her photos should show under Photos. Tap one: it opens large.
+11. Close the page and open the link again. It should say **Thank you, …!**, and her photos should show under Photos. With 3 or more photos they turn on a **wheel**: swipe it, and tap a photo to open it large. Add one more photo and watch it arrive with confetti.
 
 **Back on your phone:**
 12. Within a minute, the **bell** shows her reply. Tap **See replies**: her name, the number and her message.
@@ -62,12 +62,12 @@ Everything you decided is now in them, and the yellow boxes are gone. The ICO nu
 
 When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Draft" label and links them from the bottom of every page and from sign-in.
 
-### [ ] 4. Answer the charging questions, and choose what Claude Code builds next
+### [ ] 4. Three short charging answers, then choose the next build
 
-The full reasoning is in `docs/CONCEPT.md`, section 5i. Reply yes or no to each:
-1. Keep a free plan that can publish, and ask for payment when replies or photos near the limit, or to keep the page after the event?
-2. Sell "+100 photos" packs for £2?
-3. Offer a flat "Event day" pack for big community events (gate screen, cash count, TV slideshow, live scores), with small community events free?
+Your answers of 15 Nov are in `docs/CONCEPT.md`, section 5i. Reply yes or no to each:
+1. **Festive launch:** everything free with the Season limits (300 people, 300 photos), and pages made before 31 January stay up 90 days after their event?
+2. **Memorials:** free for up to 12 months, never asked to pay?
+3. **Community events:** time prices of about £19 (90 days), £29 (6 months) and £49 (12 months)?
 
 Then reply "go" to the next build, or change the order.
 

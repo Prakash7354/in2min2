@@ -13,6 +13,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { preparePhoto } from "@/lib/photo-prep";
 import { queueDelete, queueList, queuePut, sendPhoto, type Queued } from "@/lib/photo-queue";
+import { PhotoWheel } from "./photo-wheel";
 import {
   PHOTO_MESSAGES, RETRY_REASONS, deviceId, loadWall, photoUrl, publicRpc,
   type PublicWall, type WallPhoto,
@@ -20,7 +21,9 @@ import {
 
 const s = (k: string) => `ev-${k}`;
 
-type Props = { type: string; slug: string; token: string | null; sensitive: boolean; live: boolean };
+// motion: the host's "Gentle movement" (the wheel turns by itself, and new
+// photos arrive with confetti). Off, the wheel stays still but can be swiped.
+type Props = { type: string; slug: string; token: string | null; sensitive: boolean; live: boolean; motion?: boolean };
 type Sending = { total: number; done: number; waitingForSignal: number; message: string | null; tone: "info" | "error" };
 
 function ago(iso: string): string {
@@ -41,7 +44,7 @@ function savedName(type: string, slug: string): string {
   } catch { return ""; }
 }
 
-export function PhotoWall({ type, slug, token, sensitive, live }: Props) {
+export function PhotoWall({ type, slug, token, sensitive, live, motion = true }: Props) {
   const wallId = `${type}/${slug}`;
   const [wall, setWall] = useState<PublicWall | null | "error">(null);
   const [photos, setPhotos] = useState<WallPhoto[]>([]);
@@ -54,11 +57,21 @@ export function PhotoWall({ type, slug, token, sensitive, live }: Props) {
   const running = useRef(false);
   const retryTimer = useRef<number | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  // Photos seen already, so the wheel can celebrate each new one.
+  const known = useRef<Set<string> | null>(null);
+  const [arrivals, setArrivals] = useState<{ ids: string[]; n: number }>({ ids: [], n: 0 });
 
   const refresh = useCallback(async () => {
     const w = await loadWall(type, slug, token, device.current).catch(() => null);
     if (!w) { setWall((old) => (old && old !== "error" ? old : "error")); return; }
     setWall(w);
+    const ids = (w.photos ?? []).map((p) => p.id);
+    if (!known.current) known.current = new Set(ids);
+    else {
+      const added = ids.filter((id) => !known.current!.has(id));
+      added.forEach((id) => known.current!.add(id));
+      if (added.length) setArrivals((a) => ({ ids: added, n: a.n + 1 }));
+    }
     setPhotos((old) => {
       const fresh = w.photos ?? [];
       const ids = new Set(fresh.map((p) => p.id));
@@ -185,6 +198,10 @@ export function PhotoWall({ type, slug, token, sensitive, live }: Props) {
 
   return (
     <div className={s("photoWall")}>
+      {visible.length >= 3 && (
+        <PhotoWheel eventId={ev.id} photos={visible} arrivals={arrivals} motion={motion} celebrate={motion && !sensitive}
+          onOpen={(id) => { const i = visible.findIndex((p) => p.id === id); if (i >= 0) setOpen(i); }} />
+      )}
       {r.open ? (
         <div className={s("photoAdd")}>
           <label className={s("field")}>

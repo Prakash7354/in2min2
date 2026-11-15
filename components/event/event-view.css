@@ -1269,3 +1269,131 @@ button.ev-btn { cursor: pointer; }
   height: 0.68em;
   stroke-width: 2.2;
 }
+
+/* ── The photo wheel at the top of the gallery (components/photos/photo-wheel.tsx) ── */
+.ev-wheelWrap {
+  display: grid;
+  gap: 0.4em;
+  margin-inline: calc(min(calc(var(--u) * 6), 36px) * -1); /* uses the section's full width */
+  overflow: hidden;
+}
+.ev-wheel {
+  position: relative;
+  height: min(calc(var(--u) * 78), 400px);
+  perspective: 1100px;
+  perspective-origin: 50% 45%;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.ev-wheelCard {
+  --cw: min(calc(var(--u) * 42), 230px);
+  position: absolute;
+  left: 50%;
+  top: 7%;
+  width: var(--cw);
+  aspect-ratio: 3 / 4;
+  margin-left: calc(var(--cw) / -2);
+  border-radius: min(calc(var(--u) * 3.6), 18px);
+  overflow: hidden;
+  background: var(--ev-soft);
+  border: min(calc(var(--u) * 1), 5px) solid #fff;
+  box-shadow: 0 18px 36px -18px rgba(0, 0, 0, 0.55);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+  opacity: 0;
+}
+.ev-wheelCard img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+.ev-wheelCard[data-wide] .ev-wheelImg { object-fit: contain; }
+.ev-wheelBlur {
+  filter: blur(14px) saturate(1.2);
+  transform: scale(1.25);
+  opacity: 0.75;
+}
+.ev-wheelShade {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+.ev-wheelNew {
+  position: absolute;
+  top: 6%;
+  left: 6%;
+  z-index: 1;
+  padding: 0.15em 0.6em;
+  border-radius: 999px;
+  background: var(--ev-accent);
+  color: var(--ev-on-accent);
+  font-size: 0.75em;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ev-wheelCaption {
+  margin: 0;
+  text-align: center;
+  font-weight: 700;
+  color: var(--ev-main);
+}
+.ev-burst {
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  z-index: 300;
+  pointer-events: none;
+}
+.ev-burst i {
+  position: absolute;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: ev-burst 1.5s cubic-bezier(0.15, 0.7, 0.3, 1) both;
+}
+@keyframes ev-burst {
+  0% { transform: translate(0, 0) rotate(0) scale(0.4); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translate(var(--dx), calc(var(--dy) + 18cqi)) rotate(var(--rot)) scale(1); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-burst { display: none; }
+}
+
+/* The builder's preview of the wheel: a still fan (EventView is pure). */
+.ev-fan {
+  position: relative;
+  height: min(calc(var(--u) * 72), 380px);
+  perspective: calc(var(--u) * 280);
+  overflow: hidden;
+  margin-inline: calc(min(calc(var(--u) * 6), 36px) * -1);
+}
+.ev-fan > span {
+  --cw: min(calc(var(--u) * 42), 230px);
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  width: var(--cw);
+  aspect-ratio: 3 / 4;
+  margin-left: calc(var(--cw) / -2);
+  border-radius: min(calc(var(--u) * 3), 16px);
+  overflow: hidden;
+  border: min(calc(var(--u) * 0.9), 5px) solid #fff;
+  box-shadow: 0 14px 28px -16px rgba(0, 0, 0, 0.5);
+  background: var(--ev-soft);
+}
+.ev-fan > span img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

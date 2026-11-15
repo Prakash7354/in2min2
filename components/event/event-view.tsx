@@ -133,6 +133,34 @@ function Blessing({ d }: { d: EventViewData }) {
   );
 }
 
+// The builder's still preview of the photo wheel (components/photos/
+// photo-wheel.tsx): five cards on a ring, the middle one a little larger,
+// using the host's own photos when there are some.
+const FAN = [-2, -1, 0, 1, 2];
+function Fan({ d }: { d: EventViewData }) {
+  const pics = d.cover ? [d.cover, ...d.moreCovers] : [];
+  const R = 60; // in --u (1% of the page width), as the real wheel; thumbnails stay exact small copies
+  return (
+    <div className={s.fan} aria-hidden="true">
+      {FAN.map((k, i) => {
+        const th = (k * Math.PI) / 5;
+        const c = Math.cos(th);
+        const style = {
+          transform: `translate3d(calc(var(--u) * ${(Math.sin(th) * R).toFixed(2)}), 0, calc(var(--u) * ${((c - 1) * R).toFixed(2)})) rotateY(${k * 36}deg) scale(${k === 0 ? 1.14 : 1})`,
+          zIndex: 10 - Math.abs(k),
+          background: pics.length ? undefined : `var(--ev-c${i + 1})`,
+          filter: k === 0 ? undefined : `brightness(${(0.65 + 0.35 * c).toFixed(2)})`,
+        } as CSSProperties;
+        const src = pics.length ? pics[[3, 1, 0, 2, 4][i] % pics.length] : null; // the main photo in the middle
+        return (
+          // eslint-disable-next-line @next/next/no-img-element -- the host's own photo
+          <span key={k} style={style}>{src && <img src={src} alt="" />}</span>
+        );
+      })}
+    </div>
+  );
+}
+
 // A section heading with its little picture (components/icons.tsx).
 function Title({ icon, children }: { icon: IconName; children: ReactNode }) {
   return (
@@ -515,9 +543,11 @@ function Live({ d, now, a, photos }: { d: EventViewData; now: number; a: boolean
       )}
       {d.toggles.photo_wall && !photos && (
         <section className={s.section}>
+          <Title icon="camera">{d.sensitive ? "Photos and memories" : "Photos from today"}</Title>
+          <Fan d={d} />
           <span className={`${s.btn} ${s.btnAccent} ${s.btnBig}`}>{d.sensitive ? "Share a photo or memory" : "Add your photos"}</span>
           <div className={s.wall} aria-hidden="true">{Array.from({ length: 6 }, (_, i) => <span key={i} />)}</div>
-          <p className={s.muted}>Preview only. On your live page this button works on the day: guests add photos here, and you can add your own from Photos in step 7.</p>
+          <p className={s.muted}>Preview only. On your live page, guests&apos; photos turn here slowly like a wheel, and the button works on the day. You can add your own from Photos in step 7.</p>
         </section>
       )}
       <WhenWhere d={d} a={a} />
@@ -545,6 +575,7 @@ function After({ d, a, photos }: { d: EventViewData; a: boolean; photos?: ReactN
       {d.toggles.photo_wall && !photos && (
         <section className={s.section}>
           <Title icon="images">{d.sensitive ? "Photos and memories" : "The gallery"}</Title>
+          <Fan d={d} />
           <div className={s.wall} aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} />)}</div>
           <p className={s.muted}>Every guest’s photos, in one place.</p>
         </section>

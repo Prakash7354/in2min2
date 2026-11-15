@@ -7,6 +7,10 @@ This is the source of truth for what In2Min2 is and how it gets built. Claude Co
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
 
+**What changed in version 3.11 (15 Nov 2026, later):**
+- **The photo wheel** (owner's idea, from a phone-gallery advert): guests' photos stand on a ring at the top of the gallery and turn slowly clockwise. The front photo swells a little. A new photo jumps in next with "New" and a confetti burst in the event's colours (not for memorials). Swipe to spin; tap to open. Portrait and landscape both work, so nobody is told which way to hold the phone. It shows on the day and afterwards while the page is up (`components/photos/photo-wheel.tsx`; 12a).
+- The owner's answers on charging, with advice on what's still open (5i).
+
 **What changed in version 3.10 (15 Nov 2026; owner's notes on photos, icons and charging):**
 - **Up to five photos at the top of the page**, taking turns with a gentle fade, a slow zoom or a slide. With the Polaroids style they show as a still stack. Phones set to reduce motion, and hosts who switch off movement, see the main photo only (0007; 12a).
 - **Hosts add their own photos to the wall** from the builder's Photos window, before the day or on it. They show at once, count towards the plan's photos, and don't use up any guest's share (0007).
@@ -446,6 +450,20 @@ The owner asked how to charge fairly when most community money is cash, people r
   - to keep the page after the event (the memory book).
 - To stop the free plan being stretched, one free Pop-Up runs at a time per account, and a second page with the same date, place and title is flagged (phase 4, with payments).
 
+**The owner's answers (15 Nov 2026) and the advice that follows:**
+- **Decided: a free plan that can publish, charged only when it reaches its fair-use limits** (people who reply, photos, time online).
+- **Decided: photo space.** Each plan includes some photo space (Pop-Up 50, Season 300, Half-Year 600, Keepsake 1,000, Community 2,000). Beyond it, "+100 photos" costs £2, described as more size and space.
+- **Decided: community events buy time like everyone else.** The page is free for 7 days after the event, then 90 days, 6 months or 12 months, plus the booking fee on online sales. Many big community events (tournaments, melas) charge for everything and make money, so saying "not for profit" doesn't lower the price. Only a registered charity number (with evidence) earns Half (5h). The plans table changes with payments (phase 4). Until then everything is free under the festive launch.
+- **The three free situations (Recommended):**
+  - *Pop-Up:* free; the page stays 7 days after the event, then closes unless a longer plan is chosen.
+  - *Memorials and funerals:* free on any length, so up to 12 months. Never prompted to pay.
+  - *Festive launch, until 31 Jan 2027:* this is promotion and testing time, so everything is free with the Season limits (300 people, 300 photos), and pages made before 31 January stay up 90 days after their event. That gives more pages carrying "Made with In2Min2", and more testing. One event at a time per account stops the offer being stretched.
+- **Charging when motivation is high (Recommended; the owner's worry that nobody pays after the event is right).** Ask at the two moments people care most:
+  1. At publishing, step 3 already asks "How long should the page stay online?", with the price.
+  2. In the 48 hours after the event, when guests' photos are pouring in: "Your page has 86 photos from 23 guests. Keep them for a year for £15."
+  - Then one reminder two days before the page closes, and a free "Download all photos" so nobody ever loses their memories. Payment is then a choice to keep the page, never a ransom.
+- **Community time prices (Recommended for decision):** about £19 (90 days), £29 (6 months) and £49 (12 months). They hold 2,000 photos and big crowds, and usually take money.
+
 **Cash and off-platform selling at community events.** Don't fight cash; make online the better choice for everyone:
 1. **Online cheaper than the gate.** The organiser sets, say, £5 online and £7 on the day. Buyers choose online themselves, and the booking fee fits inside the difference.
 2. **"Pay here" QR at the gate**: card on the buyer's own phone, as quick as cash, with no card reader (14c).
@@ -764,6 +782,19 @@ The owner's aim is to replace paper lists, guesswork, extra volunteers and endle
 ### 12a. Photos (Recommended)
 
 **The main photo and the preview picture (built 14 Nov 2026, 0005).** When the host publishes, their phone uploads the main photo and draws the preview picture (1200 × 630, in the event's colours and fonts) that WhatsApp, Messenger and iMessage show. Both go to the public `event-media` bucket in Supabase Storage, London, in the event's own folder (`events.cover_image_key`, `events.share_image_key`). Only the owner and co-hosts can write there, and nobody can list the files. They are redone only when something they show changes (`lib/media-upload.ts`). The guests' photo wall below still uses Cloudflare R2.
+
+**The photo wheel (built 15 Nov 2026, no database change).** At the top of the gallery, once there are 3 or more photos, on the day and afterwards.
+- **The ring:** 10 cards on a ring, turning clockwise seen from above (the front moves right to left), one photo every 3.6 seconds. The front card swells by up to 16%. Cards at the back hide.
+- **More photos than places:** each card takes the next photo as it passes round the back, so every photo comes round in turn.
+- **New photos:** a new photo goes into the hidden card that comes round next, with a "New" badge and a confetti burst in the event's colours (never for memorials).
+- **Movement settings:** with "Gentle movement" off, or the phone set to reduce motion, the wheel stays still but can be swiped.
+- **Card shape:** every card is a 3:4 portrait. A landscape photo sits whole on a soft blurred copy of itself, so no photo is cut badly and guests need no instructions.
+- **How it's drawn:** styles are written straight to the cards each frame, with no React re-render.
+- **In the builder:** the preview shows a still fan of the host's own photos.
+- **Ideas for later:**
+  - the same wheel as a TV slideshow mode;
+  - "Love" reactions, with the most-loved photo pinned to the front;
+  - the host picking favourites for the front.
 
 **Photos at the top (built 15 Nov 2026, 0007).**
 - The main photo plus up to four more (`events.hero_keys`), each in the event's own folder of `event-media`.
@@ -1417,9 +1448,11 @@ The same deletion runs automatically 30 days after a page closes.
 1. (Answered: memorials free automatically.)
 2. (Answered: the refund rule, the booking fee on cancellation and 2-year account deletion, all as recommended.)
 3. Approve the three drafts so they lose the "Draft" label and are linked from every page? (Yes, once he has reread them)
-4. Charging (5i): keep a free Pop-Up that can publish, with payment where value is felt, rather than paying before every invitation? (Yes)
-5. "+100 photos" packs for £2? (Yes)
-6. A flat "Event day" pack for big community events (Gate screen, cash-up, TV slideshow, live scores), with small community events free? (Yes, price to set in February)
+4. (Answered: a free plan that publishes; charge at the fair-use limits.)
+5. (Answered: photo space included, then +100 photos for £2.)
+6. (Answered: community events buy time like everyone else, from 7 days free.) Still open: community time prices of £19, £29 and £49? (Yes) A flat "Event day" pack for big community events? (Yes, price in February)
+7. Festive launch: everything free with Season limits, and pages made before 31 January stay up 90 days after their event? (Yes)
+8. Memorials: free for up to 12 months? (Yes)
 5. What to build next (4b). (Working replies and the guest list; the photo on the guest page and the WhatsApp preview picture; then festive designs and the festive offer on the home page, all by about 1 December.)
 
 ## 24. More ideas (backlog)
