@@ -5,11 +5,14 @@
 // two settings, and the links for the TV slideshow, the table cards and the
 // photos page. Row Level Security decides who sees and changes them: the
 // event's own hosts; only the owner and co-hosts can remove one for good.
+// Hosts add their own photos here too (0007): straight on the wall, any time.
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
+import { eventType } from "@/lib/catalog";
 import type { Draft } from "@/lib/draft";
-import { photoUrl, wallPath } from "@/lib/photos";
+import { preparePhoto } from "@/lib/photo-prep";
+import { PHOTO_MESSAGES, photoUrl, wallPath } from "@/lib/photos";
 import { copyLink, whatsappUrl } from "@/lib/share";
 import { supabase } from "@/lib/supabase/client";
 
@@ -33,6 +36,7 @@ export type PhotosState = {
   setStatus: (ids: string[], status: HostPhoto["status"]) => Promise<boolean>;
   removeForGood: (ids: string[]) => Promise<boolean>;
   saveRules: (patch: { approve_first?: boolean; early?: boolean }) => Promise<boolean>;
+  addOwn: (files: File[], name: string, progress: (done: number) => void) => Promise<{ added: number; problem: string | null }>;
 };
 
 const asked = (p: HostPhoto) => !!p.removal_asked_at && p.status === "hidden" && !p.kept_at && (!p.reviewed_at || p.reviewed_at <= p.removal_asked_at);
@@ -110,11 +114,44 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
     return !r.error;
   }, [eventId, wall, load]);
 
+  // The host's own photos: made ready on this phone like a guest's, then sent
+  // one at a time with the host's sign-in (add_host_photo(), 0007).
+  const addOwn = useCallback(async (files: File[], name: string, progress: (done: number) => void) => {
+    if (!eventId || !session) return { added: 0, problem: PHOTO_MESSAGES.sign_in };
+    let added = 0, problem: string | null = null;
+    for (const f of files) {
+      let reason: string | null = null;
+      try {
+        const p = await preparePhoto(f);
+        const q = new URLSearchParams({ host: "1", event: eventId, w: String(p.w), h: String(p.h), tl: String(p.thumb.size) });
+        if (name.trim()) q.set("name", name.trim().slice(0, 60));
+        const res = await fetch(`/api/photos?${q}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/octet-stream", Authorization: `Bearer ${session.access_token}` },
+          body: new Blob([p.thumb, p.photo], { type: "application/octet-stream" }),
+        });
+        const body = (await res.json().catch(() => null)) as { ok?: boolean; reason?: string } | null;
+        if (body?.ok) added++; else reason = body?.reason ?? "server";
+      } catch (e) {
+        reason = e instanceof TypeError ? "network" : "unreadable";
+      }
+      if (reason) {
+        problem = reason === "unreadable" ? "A photo couldn't be opened on this phone. Try a JPEG or a screenshot."
+          : reason === "network" ? "No signal just now. Try again when you're connected."
+          : PHOTO_MESSAGES[reason] ?? "A photo couldn't be added.";
+        if (reason === "full" || reason === "off" || reason === "closed" || reason === "sign_in" || reason === "storage_off" || reason === "not_ready") break;
+      }
+      progress(added);
+    }
+    await load();
+    return { added, problem };
+  }, [eventId, session, load]);
+
   const list = rows ?? [];
   const needsYou = list.filter((p) => p.status === "waiting" || asked(p)).length;
   return {
     rows: live ? rows : null, wall: live ? wall : null, error, notReady, needsYou: live ? needsYou : 0,
-    refresh: () => void load(), setStatus, removeForGood, saveRules,
+    refresh: () => void load(), setStatus, removeForGood, saveRules, addOwn,
   };
 }
 
@@ -124,6 +161,8 @@ export function PhotosDialog({ d, eventId, state, onClose, say }: { d: Draft; ev
   const closeRef = useRef(onClose);
   useEffect(() => { closeRef.current = onClose; }, [onClose]);
   const [picked, setPicked] = useState<HostPhoto | null>(null);
+  const [own, setOwn] = useState<{ total: number; done: number } | null>(null);
+  const ownInput = useRef<HTMLInputElement>(null);
   const { refresh } = state;
   useEffect(() => {
     refresh();
@@ -155,6 +194,19 @@ export function PhotosDialog({ d, eventId, state, onClose, say }: { d: Draft; ev
     setPicked(null);
     say((await state.setStatus(ids, status)) ? done : "That didn't work. Please try again.");
   }
+  // Shown with the host's photos instead of a guest's name.
+  const ownName = d.scale === "community" ? (d.organiserName.trim() || "The organisers")
+    : eventType(d.eventType)?.sensitive ? "The family" : "The hosts";
+  async function addOwn(files: FileList | null) {
+    const list = Array.from(files ?? []).slice(0, 50);
+    if (!list.length) return;
+    setOwn({ total: list.length, done: 0 });
+    const r = await state.addOwn(list, ownName, (done) => setOwn({ total: list.length, done }));
+    setOwn(null);
+    if (ownInput.current) ownInput.current.value = "";
+    say([r.added ? `${r.added === 1 ? "Your photo is" : `${r.added} photos are`} on the wall.` : null, r.problem].filter(Boolean).join(" ") || "Nothing was added.");
+  }
+
   async function removeIt(ids: string[]) {
     setPicked(null);
     say((await state.removeForGood(ids)) ? (ids.length === 1 ? "Photo removed for good." : `${ids.length} photos removed for good.`)
@@ -183,6 +235,19 @@ export function PhotosDialog({ d, eventId, state, onClose, say }: { d: Draft; ev
           {wallOff && (
             <p className="rounded-2xl bg-amber-wash px-4 py-3 text-[15px]">The photo wall is switched off. Turn on <strong>Photo wall</strong> in step 6 (Switches), then press <strong>Update my page</strong>.</p>
           )}
+
+          <div className="grid gap-2 rounded-2xl border border-line p-4">
+            <p className="font-semibold">Your own photos</p>
+            <p className="text-[15px] leading-snug text-muted">
+              Add photos from this phone, before the day or on it. They go straight on the wall, shown as from &ldquo;{ownName}&rdquo;,
+              and don&apos;t use up any guest&apos;s share.
+            </p>
+            <input ref={ownInput} type="file" accept="image/*" multiple hidden onChange={(e) => void addOwn(e.target.files)} />
+            <button type="button" disabled={!!own || wallOff || state.notReady} onClick={() => ownInput.current?.click()}
+              className="inline-flex min-h-11 items-center justify-self-start rounded-full bg-brand px-5 font-bold text-white hover:bg-brand-deep disabled:opacity-60">
+              {own ? `Adding ${Math.min(own.done + 1, own.total)} of ${own.total}…` : "Add your photos"}
+            </button>
+          </div>
 
           <div className="grid grid-cols-3 gap-2">
             {([["On the wall", shown.length], ["Waiting", waiting.length], ["Hidden", hidden.length + askedRows.length]] as const).map(([k, n]) => (

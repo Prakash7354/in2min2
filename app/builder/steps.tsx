@@ -7,9 +7,9 @@ import { useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { COPY_FIELDS, COPY_KEYS, charCount, type CopyKey, type CopyResponse } from "@/lib/ai/copy";
 import {
-  BORDERS, COVER_FITS, EFFECTS, EVENT_TYPES, LANGUAGES, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
+  BORDERS, COVER_FITS, EFFECTS, EVENT_TYPES, HERO_MOTIONS, LANGUAGES, MAX_SHOWCASE, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
   TEMPLATES, TEXT_STYLES, TOGGLES, TONES, eventType, formatPence, language, paletteFor, plan, plansFor, quote,
-  type CoverFit, type EffectKey, type Palette, type PhotoStyle, type Scale, type Tag,
+  type CoverFit, type EffectKey, type HeroMotion, type Palette, type PhotoStyle, type Scale, type Tag,
 } from "@/lib/catalog";
 import {
   applyScale, applyType, fingerprint, missingForPublish, people, slugify, toViewData, unpublishedChanges, type Draft,
@@ -70,7 +70,7 @@ export function StepType({ d, update }: StepProps) {
       </div>
       {t?.soonNote && <Notice>{t.soonNote}</Notice>}
       {t && (
-        <Group title={`This looks like ${SCALES[d.scale].label.toLowerCase()}`} line="This decides which switches you see. Change it if it doesn't fit.">
+        <Group icon="sparkle" title={`This looks like ${SCALES[d.scale].label.toLowerCase()}`} line="This decides which switches you see. Change it if it doesn't fit.">
           <Choices<Scale>
             label="How big is your event?"
             value={d.scale}
@@ -105,7 +105,7 @@ export function StepWho({ d, update }: StepProps) {
           onChange={(e) => update(set("title", e.target.value))} />
       </Field>
 
-      <Group title={t?.starLabel ?? "Who it's for"} line={community ? "What or who the event is for." : "The stars of the day. They come first on the card and the page."}>
+      <Group icon="star" title={t?.starLabel ?? "Who it's for"} line={community ? "What or who the event is for." : "The stars of the day. They come first on the card and the page."}>
         <Field id="star-names" label="Names" aside={`${charCount(d.stars.names)}/120`}>
           <input id="star-names" className={inputClass} value={d.stars.names} maxLength={120}
             placeholder={d.eventType === "wedding" || d.eventType === "anniversary" ? "Meenu & Jose" : d.eventType === "memorial" ? "Bhim Bahadur Gurung" : "Aarav"}
@@ -128,7 +128,7 @@ function Family({ d, update }: Pick<StepProps, "d" | "update">) {
   const edit = (i: number, key: "relation" | "names", value: string) =>
     update((x) => ({ ...x, family: x.family.map((f, j) => (j === i ? { ...f, [key]: value } : f)) }));
   return (
-    <Group title="Family to honour" line={sensitive ? "Shown as “With love from”. Optional." : "Parents, grandparents and close family, shown with pride as “With blessings from”. Optional."}>
+    <Group icon="heart" title="Family to honour" line={sensitive ? "Shown as “With love from”. Optional." : "Parents, grandparents and close family, shown with pride as “With blessings from”. Optional."}>
       <datalist id="relations">
         {["Parents", "Grandparents", "Mother", "Father", "Brothers and sisters", "Uncles and aunts", "The family"].map((r) => <option key={r} value={r} />)}
       </datalist>
@@ -156,7 +156,7 @@ function Family({ d, update }: Pick<StepProps, "d" | "update">) {
 
 function Organiser({ d, update }: Pick<StepProps, "d" | "update">) {
   return (
-    <Group title="Who's organising?" line="Shown on the page so people know who they're dealing with. Needed before a public event can be published.">
+    <Group icon="flag" title="Who's organising?" line="Shown on the page so people know who they're dealing with. Needed before a public event can be published.">
       <Field id="org-name" label="Organiser's name" aside={`${charCount(d.organiserName)}/120`}>
         <input id="org-name" className={inputClass} value={d.organiserName} maxLength={120} placeholder="Riverside Community Association"
           onChange={(e) => update(set("organiserName", e.target.value))} />
@@ -242,7 +242,7 @@ function RunningOrderEditor({ d, update }: Pick<StepProps, "d" | "update">) {
   });
   const full = d.functions.length >= 15;
   return (
-    <Group title={community ? "Programme" : "Running order"}
+    <Group icon="list" title={community ? "Programme" : "Running order"}
       line="What happens when, with a menu for each meal. Guests see it on the event page, and on the day it shows what's on now. Optional.">
       {!d.toggles.schedule && <Notice tone="warn">The running order is switched off in step 6, so guests won&apos;t see it.</Notice>}
       {!full && (
@@ -355,7 +355,7 @@ export function StepWhen({ d, update }: StepProps) {
   const overCapacity = d.venueCapacity !== null && n > d.venueCapacity;
   return (
     <div className="grid gap-6">
-      <Group title="When">
+      <Group icon="calendar" title="When">
         <div className="grid gap-4 sm:grid-cols-3">
           <Field id="date" label="Date">
             <input id="date" type="date" className={inputClass} value={d.date} onChange={(e) => update(set("date", e.target.value))} />
@@ -370,7 +370,7 @@ export function StepWhen({ d, update }: StepProps) {
         {d.date && <p className="text-[15px] text-muted">Guests will see: {formatDate(d.date)}{d.startTime ? `, ${formatTime(d.startTime)}` : ""}</p>}
       </Group>
 
-      <Group title="Where">
+      <Group icon="pin" title="Where">
         <Field id="venue" label="Venue name" aside={`${charCount(d.venueName)}/120`}>
           <input id="venue" className={inputClass} value={d.venueName} maxLength={120} placeholder="Princes Hall"
             onChange={(e) => update(set("venueName", e.target.value))} />
@@ -399,7 +399,7 @@ export function StepWhen({ d, update }: StepProps) {
 
       <RunningOrderEditor d={d} update={update} />
 
-      <Group title="How many people?" line="Count everyone, children too. It sets your price and tells the venue and caterer what to expect.">
+      <Group icon="people" title="How many people?" line="Count everyone, children too. It sets your price and tells the venue and caterer what to expect.">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field id="people" label="About how many people?">
             <input id="people" type="number" inputMode="numeric" min={1} max={100000} className={inputClass} value={d.expectedGuests ?? ""} placeholder="150"
@@ -421,7 +421,7 @@ export function StepWhen({ d, update }: StepProps) {
 function PlanPicker({ d, update }: Pick<StepProps, "d" | "update">) {
   const n = people(d);
   return (
-    <Group title="How long should the page stay online?" line="After the event, guests can still see the thank-you and everyone's photos. Every plan has every feature.">
+    <Group icon="hourglass" title="How long should the page stay online?" line="After the event, guests can still see the thank-you and everyone's photos. Every plan has every feature.">
       <Choices
         label="How long should the page stay online after the event?"
         value={d.plan}
@@ -454,7 +454,7 @@ function PlanPicker({ d, update }: Pick<StepProps, "d" | "update">) {
 
 function CommunityPrice() {
   return (
-    <Group title="What it costs" line="No upfront cost. No guesswork. No cash flow needed.">
+    <Group icon="coins" title="What it costs" line="No upfront cost. No guesswork. No cash flow needed.">
       <ul className="grid gap-2 text-[16px]">
         <li><strong>Free to set up</strong>, with every organiser tool.</li>
         <li><strong>4% + 30p</strong> on each online order, only when money comes in. Card costs included.</li>
@@ -664,20 +664,85 @@ export function StepLook({ d, update, now }: StepProps) {
     }
   }
 
+  // Up to four more photos for the top of the page (0007). Kept a little
+  // smaller than the main one, so the draft fits in the phone's storage.
+  const more = d.moreCovers ?? [];
+  const room = MAX_SHOWCASE - 1 - more.length;
+  async function addMore(files: FileList | null) {
+    const list = Array.from(files ?? []).slice(0, room);
+    if (!list.length) return;
+    setPhotoBusy(true);
+    setPhotoError(null);
+    const urls: string[] = [];
+    for (const f of list) {
+      try { urls.push((await resizePhoto(f, 1080, 0.75)).url); }
+      catch { setPhotoError("One photo couldn't be used. Try another."); }
+    }
+    update((x) => ({ ...x, moreCovers: [...(x.moreCovers ?? []), ...urls].slice(0, MAX_SHOWCASE - 1) }));
+    setPhotoBusy(false);
+  }
+  const makeMain = (i: number) => update((x) => {
+    if (!x.cover) return x;
+    const rest = [...(x.moreCovers ?? [])];
+    const [picked] = rest.splice(i, 1, x.cover);
+    return { ...x, cover: picked, moreCovers: rest };
+  });
+
   return (
     <div className="grid gap-6">
-      <Group title="Main photo" line="A photo of the stars, the venue or the team. It's made smaller on your phone, and its hidden location data is removed.">
+      <Group icon="camera" title="Photos at the top" line="Your main photo, and up to four more that take turns. Each is made smaller on your phone, and its hidden location data is removed.">
         <div className="flex flex-wrap items-center gap-3">
           <label className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-full bg-brand px-6 py-3 font-bold text-white hover:bg-brand-deep">
             {photoBusy ? "Preparing…" : d.cover ? "Change photo" : "Choose a photo"}
             <input type="file" accept="image/*" className="sr-only" onChange={(e) => { void pickPhoto(e.target.files?.[0]); e.target.value = ""; }} />
           </label>
-          {d.cover && <Button kind="quiet" onClick={() => update(set("cover", null))}>Remove photo</Button>}
+          {d.cover && <Button kind="quiet" onClick={() => update((x) => {
+            const [next, ...rest] = x.moreCovers ?? [];
+            return { ...x, cover: next ?? null, moreCovers: rest };
+          })}>Remove photo</Button>}
         </div>
         {photoError && <Notice tone="warn">{photoError}</Notice>}
         {d.cover && (
           <div className="grid gap-2">
-            <p className="font-semibold">How should it fit?</p>
+            <p className="font-semibold">More photos <span className="font-normal text-muted">({more.length} of {MAX_SHOWCASE - 1})</span></p>
+            <div className="flex flex-wrap gap-2">
+              {more.map((src, i) => (
+                <div key={i} className="grid w-24 gap-1">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a local data: URL */}
+                  <img src={src} alt={`Photo ${i + 2}`} className="aspect-square w-24 rounded-xl border border-line object-cover" />
+                  <div className="flex gap-1">
+                    <button type="button" className="min-h-9 flex-1 rounded-full bg-wash text-xs font-bold hover:bg-line" onClick={() => makeMain(i)}>Make main</button>
+                    <button type="button" aria-label={`Remove photo ${i + 2}`} className="grid size-9 place-items-center rounded-full bg-wash hover:bg-line"
+                      onClick={() => update((x) => ({ ...x, moreCovers: (x.moreCovers ?? []).filter((_, j) => j !== i) }))}>
+                      <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {room > 0 && (
+                <label className="grid aspect-square w-24 cursor-pointer place-items-center rounded-xl border-2 border-dashed border-line text-center text-sm font-bold text-brand hover:bg-wash">
+                  <span>+ Add<br />photos</span>
+                  <input type="file" accept="image/*" multiple className="sr-only" onChange={(e) => { void addMore(e.target.files); e.target.value = ""; }} />
+                </label>
+              )}
+            </div>
+            {more.length > 0 && d.photoStyle === "polaroid" && (
+              <p className="text-[15px] text-muted">With the Polaroids photo style, your first three photos show as a still stack.</p>
+            )}
+            {more.length > 0 && d.photoStyle !== "polaroid" && (
+              <>
+                <p className="font-semibold">How they change</p>
+                <Choices<HeroMotion> label="How the photos change" value={d.heroMotion ?? "fade"} columns="grid-cols-1 sm:grid-cols-3"
+                  onChange={(k) => update(set("heroMotion", k))}
+                  options={HERO_MOTIONS.map((m) => ({ key: m.key, label: m.name, line: m.line }))} />
+                {!d.motion && <Notice tone="warn">Turn on <strong>Gentle movement</strong> below to show them all. Until then, only the main photo shows.</Notice>}
+              </>
+            )}
+          </div>
+        )}
+        {d.cover && (
+          <div className="grid gap-2">
+            <p className="font-semibold">How should they fit?</p>
             <Choices<CoverFit> label="How the photo fits" value={d.coverFit} columns="grid-cols-1 sm:grid-cols-2"
               onChange={(k) => update(set("coverFit", k))}
               options={COVER_FITS.map((f) => ({ key: f.key, label: f.name, line: f.line }))} />
@@ -685,7 +750,7 @@ export function StepLook({ d, update, now }: StepProps) {
         )}
       </Group>
 
-      <Group title="Border" line={allBorders ? "All borders. Each one takes your colours." : `Suggested for ${t ? t.label.toLowerCase() : "your event"}. Each one takes your colours.`}>
+      <Group icon="frame" title="Border" line={allBorders ? "All borders. Each one takes your colours." : `Suggested for ${t ? t.label.toLowerCase() : "your event"}. Each one takes your colours.`}>
         <div role="radiogroup" aria-label="Border" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {shownBorders.map((b) => (
             <Tile key={b.key} tag={b.tag} on={d.border === b.key} onClick={() => update(set("border", b.key))} label={b.name} line={b.line}>
@@ -700,7 +765,7 @@ export function StepLook({ d, update, now }: StepProps) {
         </Button>
       </Group>
 
-      <Group title="Colours" line="Every set is checked so the words stay easy to read.">
+      <Group icon="palette" title="Colours" line="Every set is checked so the words stay easy to read.">
         {PALETTE_FAMILIES.map((family) => (
           <div key={family} className="grid gap-2">
             <h3 className="text-sm font-bold uppercase tracking-wider text-muted">{family === "In2Min2" ? "In2Min2 colours" : family}</h3>
@@ -727,7 +792,7 @@ export function StepLook({ d, update, now }: StepProps) {
         </div>
       </Group>
 
-      <Group title="Text style" line="Each style has matching letters for Nepali, Hindi, Punjabi, Gujarati, Bengali and Tamil.">
+      <Group icon="type" title="Text style" line="Each style has matching letters for Nepali, Hindi, Punjabi, Gujarati, Bengali and Tamil.">
         <div role="radiogroup" aria-label="Text style" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {TEXT_STYLES.map((ts) => (
             <Tile key={ts.key} on={d.textStyle === ts.key} onClick={() => update(set("textStyle", ts.key))} label={ts.name} line={ts.feel}>
@@ -742,7 +807,7 @@ export function StepLook({ d, update, now }: StepProps) {
         </div>
       </Group>
 
-      <Group title="Layout">
+      <Group icon="layout" title="Layout">
         <div role="radiogroup" aria-label="Layout" className="grid grid-cols-2 gap-3">
           {TEMPLATES.map((tp) => (
             <Tile key={tp.key} on={d.template === tp.key} onClick={() => update(set("template", tp.key))} label={tp.name} line={tp.line}>
@@ -754,7 +819,7 @@ export function StepLook({ d, update, now }: StepProps) {
         </div>
       </Group>
 
-      <Group title="Photo style">
+      <Group icon="image" title="Photo style">
         <Choices<PhotoStyle>
           label="Photo style"
           value={d.photoStyle}
@@ -768,7 +833,7 @@ export function StepLook({ d, update, now }: StepProps) {
         line="A slow zoom on the photo and a few small moments. People who switch movement off on their phone never see it." />
 
       {d.motion && !eventType(d.eventType)?.sensitive && (
-        <Group title="Moving effect" line="Falls gently over the top of the page for about half a minute, then stops. Open the full-screen preview to see it.">
+        <Group icon="sparkle" title="Moving effect" line="Falls gently over the top of the page for about half a minute, then stops. Open the full-screen preview to see it.">
           <Choices<EffectKey>
             label="Moving effect"
             value={d.effect}
@@ -877,12 +942,13 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
     update((x) => {
       const next = {
         ...x, eventId: r.eventId, publishedPath: r.path, shortPath: r.shortPath, offerClaimed: x.offerClaimed || !!r.offer?.ok,
-        ...(m.ok ? { coverKey: m.coverKey, shareKey: m.shareKey, mediaHash: m.mediaHash } : {}),
+        ...(m.ok ? { coverKey: m.coverKey, shareKey: m.shareKey, mediaHash: m.mediaHash, heroKeys: m.heroKeys, heroHash: m.heroHash } : {}),
       };
       return { ...next, publishedHash: fingerprint(next) };
     });
-    const photoNote = m.ok ? null
-      : `Your page is published, but the photo and the WhatsApp preview picture couldn't be saved yet. Press "Update my page" to try again. (Details for Claude Code: ${m.message})`;
+    const photoNote = !m.ok
+      ? `Your page is published, but the photo and the WhatsApp preview picture couldn't be saved yet. Press "Update my page" to try again. (Details for Claude Code: ${m.message})`
+      : m.heroNote ? `Your page is published, but the extra photos at the top couldn't be saved yet. Press "Update my page" to try again. (Details for Claude Code: ${m.heroNote})` : null;
     setPub({ busy: false, error: null, offer: [r.offer?.message, photoNote].filter(Boolean).join(" ") || null, done: true });
   }
 
@@ -893,7 +959,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
   return (
     <div className="grid gap-6">
       {link && (
-        <Group title={pub.done ? "Published!" : "Your event is live"} line="Your links, and a ready-made message for each moment.">
+        <Group icon="check" title={pub.done ? "Published!" : "Your event is live"} line="Your links, and a ready-made message for each moment.">
           {pub.offer && <Notice>{pub.offer}</Notice>}
           {changed
             ? <Notice tone="warn">You&apos;ve changed things since publishing. Press &ldquo;Update my page&rdquo; below to put them live; the link stays the same.</Notice>
@@ -903,7 +969,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
       )}
 
       {d.eventId && d.toggles.rsvp && (
-        <Group title="Guests' replies" line="Every reply, with its message. New ones also show on the bell at the top.">
+        <Group icon="envelope" title="Guests' replies" line="Every reply, with its message. New ones also show on the bell at the top.">
           {replies.rows ? (() => {
             const t = totals(replies.rows);
             return (
@@ -916,7 +982,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
       )}
 
       {d.eventId && d.toggles.photo_wall && (
-        <Group title="Guests' photos" line="Guests add photos from their phones, with no app. Show them on a TV, and print table cards with a QR code.">
+        <Group icon="images" title="Guests' photos" line="Guests add photos from their phones, with no app. Show them on a TV, and print table cards with a QR code.">
           {photos.rows ? (
             <p className="text-lg"><strong className="text-brand">{photos.rows.filter((p) => p.status === "shown").length}</strong> on the wall
               {photos.needsYou ? <> · <strong>{photos.needsYou}</strong> {photos.needsYou === 1 ? "needs" : "need"} you</> : null}</p>
@@ -925,7 +991,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
         </Group>
       )}
 
-      <Group title="See it as guests will" line="Tap to open full-screen.">
+      <Group icon="eye" title="See it as guests will" line="Tap to open full-screen.">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {([["card", "Invitation card"], ["page", "Event page"], ["live", "On the day"], ["after", "After the event"]] as const).map(([v, label]) => (
             <Button key={v} kind="quiet" onClick={() => onPreview(v)}>{label}</Button>
@@ -933,7 +999,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
         </div>
       </Group>
 
-      <Group title="Web address">
+      <Group icon="link" title="Web address">
         <Field id="slug" label={<span>in2min2.com/{t?.key ?? "event"}/<strong className="text-brand">{slug || "…"}</strong></span>}
           hint="Small letters, numbers and hyphens. You can't change it once it's shared, so check it now.">
           <input id="slug" className={inputClass} value={d.slug} placeholder={slugify(d.title || d.stars.names) || "our-event"} maxLength={60}
@@ -941,7 +1007,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
         </Field>
       </Group>
 
-      <Group title="Price">
+      <Group icon="tag" title="Price">
         {community ? (
           <p>Free to set up. 4% + 30p on each online order; nothing on cash or free events. Online sales open in February.</p>
         ) : (
@@ -976,7 +1042,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
         )}
       </Group>
 
-      <Group title="Before you publish">
+      <Group icon="shield" title="Before you publish">
         {missing.length > 0 ? (
           <div className="grid gap-2">
             <p className="font-semibold">Still needed:</p>

@@ -406,6 +406,16 @@ export const COVER_FITS: { key: CoverFit; name: string; line: string }[] = [
   { key: "whole", name: "Show the whole picture", line: "Best for logos, posters and photos with words on them." },
 ];
 
+// Up to five photos at the top of the page (0007): how they change from one
+// to the next. Gentle, never flashing; still for anyone who turns movement off.
+export type HeroMotion = "fade" | "zoom" | "slide";
+export const HERO_MOTIONS: { key: HeroMotion; name: string; line: string }[] = [
+  { key: "fade", name: "Gentle fade", line: "Each photo fades softly into the next" },
+  { key: "zoom", name: "Slow zoom", line: "Each photo drifts in slowly, like a film" },
+  { key: "slide", name: "Slide", line: "Photos slide across, like a phone's gallery" },
+];
+export const MAX_SHOWCASE = 5; // the main photo plus four more
+
 export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [
   { key: "hero", name: "Hero", line: "The photo fills the top" },
   { key: "arch", name: "Arch", line: "The photo in an arch, for a child or a couple" },

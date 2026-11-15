@@ -140,15 +140,20 @@ export async function drawShareImage(v: EventViewData): Promise<Blob | null> {
   return new Promise((ok) => canvas.toBlob((b) => ok(b), "image/jpeg", 0.86));
 }
 
-export type MediaResult = { ok: true; coverKey: string | null; shareKey: string | null; mediaHash: string } | { ok: false; message: string };
+export type MediaResult =
+  | { ok: true; coverKey: string | null; shareKey: string | null; mediaHash: string; heroKeys: string[]; heroHash: string; heroNote: string | null }
+  | { ok: false; message: string };
 
 export async function saveMedia(sb: SupabaseClient, d: Draft, eventId: string): Promise<MediaResult> {
   const v = toViewData(d);
   const coverHash = d.cover ? djb2(d.cover) : "none";
   const shows = djb2(JSON.stringify([coverHash, v.coverFit, v.title, v.copy.card_headline, v.date, v.startTime, v.venueName, d.palette, d.customColor, d.textStyle, v.typeLabel, v.scale]));
-  if (d.mediaHash === shows && d.shareKey && d.shareKey.startsWith(eventId)) return { ok: true, coverKey: d.coverKey ?? null, shareKey: d.shareKey, mediaHash: shows };
-
   const store = sb.storage.from(MEDIA_BUCKET);
+  if (d.mediaHash === shows && d.shareKey && d.shareKey.startsWith(eventId)) {
+    const hero = await saveShowcase(sb, d, eventId, d.coverKey ?? null);
+    return { ok: true, coverKey: d.coverKey ?? null, shareKey: d.shareKey, mediaHash: shows, ...hero };
+  }
+
   const old = [d.coverKey, d.shareKey].filter((k): k is string => !!k && k.startsWith(eventId));
   let coverKey: string | null = d.coverKey && d.coverKey.startsWith(eventId) ? d.coverKey : null;
 
@@ -173,7 +178,40 @@ export async function saveMedia(sb: SupabaseClient, d: Draft, eventId: string): 
   // 3. Point the event at them, then tidy away the old files.
   const r = await sb.from("events").update({ cover_image_key: coverKey, share_image_key: shareKey }).eq("id", eventId);
   if (r.error) return { ok: false, message: `${r.error.code ?? ""} ${r.error.message}` };
-  const gone = old.filter((k) => k !== coverKey && k !== shareKey);
+  const gone = old.filter((k) => k !== coverKey && k !== shareKey && !(d.heroKeys ?? []).includes(k));
   if (gone.length) await store.remove(gone);
-  return { ok: true, coverKey, shareKey, mediaHash: shows };
+  const hero = await saveShowcase(sb, d, eventId, coverKey);
+  return { ok: true, coverKey, shareKey, mediaHash: shows, ...hero };
+}
+
+// The up-to-four more photos at the top of the page, and how they change
+// (0007). A photo already stored is kept (its name starts with its content's
+// fingerprint); new ones are uploaded; ones taken out are deleted. Saved
+// separately from the main photo, so a problem here never stops publishing.
+async function saveShowcase(sb: SupabaseClient, d: Draft, eventId: string, coverKey: string | null): Promise<{ heroKeys: string[]; heroHash: string; heroNote: string | null }> {
+  const more = d.cover ? (d.moreCovers ?? []).slice(0, 4) : [];
+  const hashes = more.map((u) => djb2(u));
+  const heroHash = djb2(JSON.stringify([hashes, d.heroMotion ?? "fade"]));
+  const had = (d.heroKeys ?? []).filter((k) => k.startsWith(eventId));
+  if (d.heroHash === heroHash) return { heroKeys: had, heroHash, heroNote: null };
+
+  const store = sb.storage.from(MEDIA_BUCKET);
+  const keys: string[] = [];
+  for (let i = 0; i < more.length; i++) {
+    const same = had.find((k) => k.includes(`/cover-${hashes[i].slice(0, 6)}`) && !keys.includes(k));
+    if (same) { keys.push(same); continue; }
+    const blob = await (await fetch(more[i])).blob();
+    const key = `${eventId}/cover-${hashes[i].slice(0, 6)}${rand()}.jpg`;
+    const up = await store.upload(key, blob, { contentType: "image/jpeg", cacheControl: "31536000", upsert: false });
+    if (up.error) return { heroKeys: had, heroHash: d.heroHash ?? "", heroNote: up.error.message };
+    keys.push(key);
+  }
+  const r = await sb.from("events").update({ hero_keys: keys, hero_motion: d.heroMotion ?? "fade" }).eq("id", eventId);
+  if (r.error) {
+    if (keys.length) await store.remove(keys.filter((k) => !had.includes(k)));
+    return { heroKeys: had, heroHash: d.heroHash ?? "", heroNote: `${r.error.code ?? ""} ${r.error.message}` };
+  }
+  const gone = had.filter((k) => !keys.includes(k) && k !== coverKey);
+  if (gone.length) await store.remove(gone);
+  return { heroKeys: keys, heroHash, heroNote: null };
 }

@@ -5,6 +5,7 @@
 
 import type { ReactNode } from "react";
 import { TAG_LABELS, type Tag } from "@/lib/catalog";
+import { Icon, type IconName } from "@/components/icons";
 
 export const inputClass =
   "w-full rounded-xl border-2 border-line bg-card px-4 py-3 text-[17px] text-ink placeholder:text-muted/70 outline-none transition focus:border-brand";
@@ -24,11 +25,14 @@ export function Field({ id, label, hint, aside, children }: {
   );
 }
 
-export function Group({ title, line, children }: { title: string; line?: string; children: ReactNode }) {
+export function Group({ title, line, icon, children }: { title: string; line?: string; icon?: IconName; children: ReactNode }) {
   return (
     <section className="grid gap-4 rounded-3xl border border-line bg-card/70 p-4 sm:p-6">
       <div className="grid gap-1">
-        <h2 className="font-display text-xl font-bold text-brand">{title}</h2>
+        <h2 className="flex items-center gap-2.5 font-display text-xl font-bold text-brand">
+          {icon && <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-wash text-brand"><Icon name={icon} /></span>}
+          {title}
+        </h2>
         {line && <p className="text-[15px] text-muted">{line}</p>}
       </div>
       {children}

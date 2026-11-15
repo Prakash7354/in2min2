@@ -1,11 +1,17 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.9, 14 November 2026 (late night). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.10, 15 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.10 (15 Nov 2026; owner's notes on photos, icons and charging):**
+- **Up to five photos at the top of the page**, taking turns with a gentle fade, a slow zoom or a slide. With the Polaroids style they show as a still stack. Phones set to reduce motion, and hosts who switch off movement, see the main photo only (0007; 12a).
+- **Hosts add their own photos to the wall** from the builder's Photos window, before the day or on it. They show at once, count towards the plan's photos, and don't use up any guest's share (0007).
+- **Icons beside headings** in the builder and on event pages (`components/icons.tsx`, drawn in-house).
+- **How to charge honestly** (5i, Recommended): charge only for what In2Min2 can count (time online, replies, photos and day tools), never for cash or head counts.
 
 **What changed in version 3.9 (14 Nov 2026, late night; owner: "go ahead"):**
 - 0004 and 0005 have run on the live database.
@@ -419,6 +425,33 @@ The system can't know whether an event is sensitive or deserving, so it never de
 - Anyone who takes money online also passes Stripe's identity check (name, address, date of birth, bank). So nobody sells tickets anonymously.
 - Prices are the same for profit and not-for-profit events by default. The answer helps the owner judge fee requests. A false answer breaks the terms: the owner can move the event to Full or take it down.
 
+### 5i. Charging honestly, without asking anyone to declare anything (Recommended, owner's question of 15 Nov 2026)
+
+The owner asked how to charge fairly when most community money is cash, people rarely self-declare honestly, and the number invited says nothing about who turns up. The rule that answers all of it: **charge only for what In2Min2 itself provides and can count.**
+
+| What | Can we count it? | How it's charged |
+| --- | --- | --- |
+| Time the page stays up | Yes | The plan (Pop-Up free 7 days, Season, Half-Year, Keepsake) |
+| Replies handled through the page | Yes, every reply | "+100 people" packs, £3. Replies pause kindly at the limit plus 10% grace (built) |
+| Photos stored | Yes, every photo | Recommended: "+100 photos" packs, £2. Storage costs about 1p per 100 photos a month on R2, and the per-phone share stops fatigue and spam |
+| Online orders (tickets, parking, stalls) | Yes, Stripe sees them | 4% + 30p per order (5d) |
+| Page views, word-of-mouth guests, cash at the gate | No | **Never charged.** We don't serve them anything costly, and asking for declarations only rewards dishonesty |
+
+**"Build free, pay before sending"** (the owner's idea). Recommended shape:
+- Building stays free, always.
+- Publish shows a clear summary of what was built and its price.
+- The free Pop-Up stays available, so any family can send an invitation. Free invitations carry "Made with In2Min2", which is the advertising.
+- Payment is asked for where value is felt:
+  - when replies or photos near the limit (we can see both);
+  - to keep the page after the event (the memory book).
+- To stop the free plan being stretched, one free Pop-Up runs at a time per account, and a second page with the same date, place and title is flagged (phase 4, with payments).
+
+**Cash and off-platform selling at community events.** Don't fight cash; make online the better choice for everyone:
+1. **Online cheaper than the gate.** The organiser sets, say, £5 online and £7 on the day. Buyers choose online themselves, and the booking fee fits inside the difference.
+2. **"Pay here" QR at the gate**: card on the buyer's own phone, as quick as cash, with no card reader (14c).
+3. **Accountability sells it to committees.** Every online sale is recorded and paid straight to the organiser's own bank. Cash is counted in the Gate screen with numbered receipts. Treasurers can show members exactly what came in, and nobody can be accused.
+4. **A flat "Event day" pack for big community events** (Recommended for decision, e.g. £15–£49 by venue size): the Gate screen with cash-up, the TV slideshow, live scores and more photo places. A flat fee is honest and predictable, with no declarations. Small community events stay free.
+
 ## 6. The life of an event (Decided)
 
 The page changes by the clock alone, in the event's own time zone (`public.stage()`):
@@ -731,6 +764,18 @@ The owner's aim is to replace paper lists, guesswork, extra volunteers and endle
 ### 12a. Photos (Recommended)
 
 **The main photo and the preview picture (built 14 Nov 2026, 0005).** When the host publishes, their phone uploads the main photo and draws the preview picture (1200 × 630, in the event's colours and fonts) that WhatsApp, Messenger and iMessage show. Both go to the public `event-media` bucket in Supabase Storage, London, in the event's own folder (`events.cover_image_key`, `events.share_image_key`). Only the owner and co-hosts can write there, and nobody can list the files. They are redone only when something they show changes (`lib/media-upload.ts`). The guests' photo wall below still uses Cloudflare R2.
+
+**Photos at the top (built 15 Nov 2026, 0007).**
+- The main photo plus up to four more (`events.hero_keys`), each in the event's own folder of `event-media`.
+- `events.hero_motion` sets how they take turns: `fade`, `zoom` or `slide`.
+- Drawn with CSS only: the main photo sits still underneath, and each further photo arrives as a layer on top. The last layer is the main photo again, so the loop restarts without a jump.
+- The builder's thumbnails, movement switched off, and phones set to reduce motion show the main photo only. The Polaroids style shows the first three as a still stack.
+- The extra photos are kept a little smaller (1080 px) so the draft fits in the phone's storage. They're uploaded after publishing, separately from the main photo, so a problem never stops publishing (`lib/media-upload.ts` `saveShowcase()`).
+- Five photos are about 0.6 MB per event, so Supabase's free 1 GB holds about 1,500 events. Move them to R2 when that nears.
+
+**The hosts' own photos (built 15 Nov 2026, 0007).** The owner, co-hosts and helpers add photos from the builder's Photos window with `add_host_photo()`.
+- They can be added before the day or on it, and show at once, shown as from "The hosts" (or the organiser's name).
+- They count towards the plan's photos, but not towards any phone's share.
 
 **The guests' photo wall (built 14 Nov 2026, 0006).** How it works:
 - **Where guests add photos:** the event page's "Photos from today" section (on the day), "The gallery" (afterwards), or `/{type}/{slug}/photos`, where the table cards' QR code lands.
@@ -1135,6 +1180,7 @@ All three are also offered to hosts as event colours (7).
 - **`0002_grants_and_ai_limit.sql` (14 Nov 2026):** explicit rights for anon, authenticated and service_role, because Supabase stopped granting them automatically on 30 Oct 2026. Plus `ai_usage` and `take_ai_write()`: 20 AI writes a day per signed-in person. The test harness is now as strict as Supabase (no automatic rights), so a missing grant fails the checks.
 - **`0004_replies_festive_effects.sql` (14 Nov 2026):** `submit_rsvp()`; the Christmas party, New Year's Eve and Lhosar event types; `events.effect`; `events.share_image_key`, and both picture keys tied to the event's own folder; `public_event()` with these.
 - **`0005_event_photos.sql` (14 Nov 2026):** the `event-media` bucket and its four storage policies (`media_path_ok()`), kept separate so a storage problem can't block 0004.
+- **`0007_showcase_and_host_photos.sql` (15 Nov 2026):** `events.hero_keys` (up to four, own folder, `media_keys_own()`) and `events.hero_motion`; `public_event()` with both; `event_photos.by_host`; `add_host_photo()`; `photo_stored()` showing hosts' photos at once. 14 checks.
 - **`0006_photo_wall.sql` (14 Nov 2026):** `event_photos` (Row Level Security: hosts read, helpers and up hide or show, nobody inserts or deletes from the browser), `events.wall_key`, `photo_access()`, `photo_rules()`, `public_photos()`, `add_photo()`, `photo_stored()`, `ask_photo_removal()` and `remove_photos()`. 49 checks.
 - `price_quote()`: plan plus packs, then the single best of fee level, same-again or welcome-back (phase 4, when payments need it; the builder already shows prices from `lib/catalog.ts` `quote()`, checked against the same numbers);
 - `repeat_event()`: "Run it again" into the same series (phase 6);
@@ -1160,6 +1206,7 @@ Small events run all year, so the personal and celebration side comes first and 
 | 1c (built 14 Nov, evening) | After the owner's first phone test: the running order with menus and two switches (0003); the photo above the border and "show the whole picture"; a smarter event page (countdown, date-and-place card, timeline, big reply buttons, minimum text sizes); Share, the bell and Settings at the top right; the AI writer panel; sign-in in its own window; Share on the public page | Live once the owner runs 0003 | The owner adds a running order with a menu on his phone and sees it on the guest link |
 | 1d (built 14 Nov, night) | The Share panel with every link and a ready-made message per moment; links to parts of the page; drafts of the privacy notice, terms and prices and fair fees | | Tested in Chrome at phone width |
 | 1e (built 14 Nov, late night) | Working replies with calendar links, the Replies window and bell; the main photo and WhatsApp preview picture; festive types, seasonal colours, three borders and moving effects; the festive banner on the home page | Live (0004 and 0005 run 14 Nov) | A guest replies from a WhatsApp link on a second phone and the host sees it |
+| 1g (built 15 Nov) | Up to five photos at the top with fade, zoom or slide; hosts' own photos on the wall; icons beside headings; the pricing principle (5i) | Live once the owner runs 0007 | The owner adds four photos on his phone and watches them take turns on the guest link |
 | 1f (built 14 Nov, late night) | The guests' photo wall from phase 3: adding photos with no app, shrinking and removing the location on the phone, sending after bad signal, approve-first, removal requests, the host's Photos window and bell, the TV slideshow, table cards and a poster with QR codes made in-house | Live (0006 run and the bucket created, 14 Nov) | 20 photos from two phones reach the TV; the host hides one |
 | **2** | The public page through its four stages; sharing everywhere (section 11); RSVP with limits and capacity; **the guest dashboard (9)**; reminders; privacy notice and terms; **the In2Min2 website (18b) and the demo account (18c)**; nightly backups (21) | Early January 2027 | A guest replies from a WhatsApp link on a real phone |
 | **Pilot 1** | 3–5 family events from the owner's network (Pop-Up and `LAUNCH50`) | From January 2027 | Real families use it; feedback collected |
@@ -1174,7 +1221,7 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
 ## 21. Security and resilience (owner: "crucial")
 
 **Against data leaks:**
-- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 259 checks today, plus 67 on the builder's catalogue and prices, and they run before every commit.
+- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 273 checks today, plus 67 on the builder's catalogue and prices, and they run before every commit.
 - **The public reads no table**, only functions that return what a guest may see. Server-only columns (plan, money, domain) can't be written from a browser.
 - **Hold as little as possible:**
   - no dates of birth, ID documents or player ages;
@@ -1370,6 +1417,9 @@ The same deletion runs automatically 30 days after a page closes.
 1. (Answered: memorials free automatically.)
 2. (Answered: the refund rule, the booking fee on cancellation and 2-year account deletion, all as recommended.)
 3. Approve the three drafts so they lose the "Draft" label and are linked from every page? (Yes, once he has reread them)
+4. Charging (5i): keep a free Pop-Up that can publish, with payment where value is felt, rather than paying before every invitation? (Yes)
+5. "+100 photos" packs for £2? (Yes)
+6. A flat "Event day" pack for big community events (Gate screen, cash-up, TV slideshow, live scores), with small community events free? (Yes, price to set in February)
 5. What to build next (4b). (Working replies and the guest list; the photo on the guest page and the WhatsApp preview picture; then festive designs and the festive offer on the home page, all by about 1 December.)
 
 ## 24. More ideas (backlog)

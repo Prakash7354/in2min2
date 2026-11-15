@@ -645,6 +645,46 @@ await q(`delete from events where id in ($1, $2)`, [pw.id, lw.id]);
 await db.exec(`reset role`);
 ok("deleting an event deletes its photos' rows too", (await q(`select count(*)::int n from event_photos where event_id in ($1, $2)`, [pw.id, lw.id]))[0].n === 0);
 
+console.log("Showcase photos and the hosts' own photos (0007):");
+await as(A);
+const [sh] = await q(`insert into events (event_type, slug, title, starts_at, status, organiser_name, organiser_type, for_profit)
+  values ('lhosar','show-lhosar','Lhosar showcase', '2027-02-18 11:00+00', 'published', 'Riverside Community Association', 'community_group', false) returning id`);
+await q(`update events set hero_keys = $2, hero_motion = 'zoom' where id = $1`, [sh.id, `{${sh.id}/cover-abc123def.jpg,${sh.id}/cover-xyz789abc.jpg}`]);
+let [hk] = await q(`select hero_keys, hero_motion from events where id = $1`, [sh.id]);
+ok("a host adds two more showcase photos and chooses how they move", hk.hero_keys.length === 2 && hk.hero_motion === "zoom");
+await expectError("more than four extra photos is refused", `update events set hero_keys = '{${[1, 2, 3, 4, 5].map((i) => `${sh.id}/cover-abcdef${i}`).map((k) => k + ".jpg").join(",")}}' where id = '${sh.id}'`, /check constraint/);
+await expectError("a showcase photo from another event's folder is refused", `update events set hero_keys = '{${ev.id}/cover-abc123def.jpg}' where id = '${sh.id}'`, /check constraint/);
+await expectError("a file that isn't a picture is refused", `update events set hero_keys = '{${sh.id}/cover-abc123def.html}' where id = '${sh.id}'`, /check constraint/);
+await expectError("an unknown movement is refused", `update events set hero_motion = 'spin' where id = '${sh.id}'`, /check constraint/);
+await as(null);
+[pe] = await q(`select public_event('lhosar','show-lhosar') as p`);
+ok("the public page gets the showcase photos and their movement", pe.p.event.hero_keys.length === 2 && pe.p.event.hero_motion === "zoom");
+await expectError("the public can't add a host photo", `select add_host_photo('${sh.id}', 'X', 1600, 1200, 300000)`, /permission denied/);
+
+await as(A);
+const hp = (await q(`select add_host_photo($1, 'Riverside Committee', 1600, 1200, 300000) as r`, [sh.id]))[0].r;
+ok("the owner adds their own photo before the day", hp.ok === true && /^[0-9a-f]{32}$/.test(hp.secret), JSON.stringify(hp));
+await as(null);
+const hs = (await q(`select photo_stored($1, $2) as r`, [hp.id, hp.secret]))[0].r;
+ok("…it goes straight on the wall, though guests' photos here wait for an OK", hs.status === "shown");
+await as(B);
+ok("another host can't add photos to A's event", (await q(`select add_host_photo($1, null, 1600, 1200, 300000) as r`, [sh.id]))[0].r.reason === "no_event");
+await as(A);
+await q(`insert into event_hosts (event_id, user_id, role) values ($1, $2, 'helper')`, [sh.id, C]);
+await as(C);
+ok("a helper can add photos (they're often the photographer)", (await q(`select add_host_photo($1, null, 1600, 1200, 300000) as r`, [sh.id]))[0].r.ok === true);
+ok("a host photo that's too big is refused", (await q(`select add_host_photo($1, null, 9000, 1200, 300000) as r`, [sh.id]))[0].r.reason === "bad_photo");
+await db.exec(`reset role; insert into event_photos (event_id, status, width, height, bytes, device, ready_at)
+  select '${sh.id}', 'shown', 100, 100, 100, 'fill' || lpad(i::text, 20, '0'), now() from generate_series(1, 1998) i;
+  update event_photos set created_at = now() - interval '1 day' where device like 'fill%'`);
+await as(A);
+ok("host photos count towards the plan's photos (2,000 here), then it's full", (await q(`select add_host_photo($1, null, 1600, 1200, 300000) as r`, [sh.id]))[0].r.reason === "full");
+await db.exec(`reset role; delete from event_photos where device like 'fill%'`);
+await as(A);
+await q(`update feature_toggles set photo_wall = false where event_id = $1`, [sh.id]);
+ok("with the photo wall switched off, the host is told", (await q(`select add_host_photo($1, null, 1600, 1200, 300000) as r`, [sh.id]))[0].r.reason === "off");
+await q(`delete from events where id = $1`, [sh.id]);
+
 console.log("Delete everything:");
 await as(C);  // C is a helper on A's wedding
 const hd = await db.query(`delete from events where id = $1`, [ev.id]);

@@ -1176,3 +1176,96 @@ button.ev-btn { cursor: pointer; }
   background: color-mix(in srgb, var(--ev-main) 10%, var(--ev-bg));
   color: var(--ev-ink);
 }
+
+/* ── Showcase: up to five photos at the top (0007) ──
+   The main photo sits still underneath. Each further photo is a layer that
+   arrives in turn and stays; the last layer is the main photo again, so the
+   loop restarts without a jump. Keyframes are written out for 2 to 5 photos
+   (generated; see the comment in components/event/event-view.tsx PhotoBox).
+   Thumbnails, "Gentle movement" off, and phones set to reduce motion show
+   the main photo only. */
+.ev-slide {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.ev-root[data-motion="on"]:not([data-thumb]) .ev-slide {
+  display: block;
+  animation: var(--slide) var(--cycle) ease-in-out infinite;
+}
+.ev-root[data-motion="on"]:not([data-thumb]) .ev-photo[data-show="fade"] .ev-slide,
+.ev-root[data-motion="on"]:not([data-thumb]) .ev-photo[data-show="zoom"] .ev-slide { opacity: 0; }
+.ev-root[data-motion="on"]:not([data-thumb]) .ev-photo[data-show="slide"] .ev-slide { transform: translateX(100%); }
+.ev-root .ev-photo[data-show] .ev-photoImg { animation: none; }
+.ev-root[data-motion="on"]:not([data-thumb]) .ev-photo[data-show="zoom"] > .ev-photoImg {
+  animation: var(--base) var(--cycle) ease-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-slide { display: none !important; }
+  .ev-photo[data-show] > .ev-photoImg { animation: none !important; }
+}
+@keyframes ev-fade-2-1 { 0%, 38% { opacity: 0; } 50%, 100% { opacity: 1; } }
+@keyframes ev-fade-2-2 { 0%, 88% { opacity: 0; } 100%, 100% { opacity: 1; } }
+@keyframes ev-fade-3-1 { 0%, 25.333% { opacity: 0; } 33.333%, 100% { opacity: 1; } }
+@keyframes ev-fade-3-2 { 0%, 58.667% { opacity: 0; } 66.667%, 100% { opacity: 1; } }
+@keyframes ev-fade-3-3 { 0%, 92% { opacity: 0; } 100%, 100% { opacity: 1; } }
+@keyframes ev-fade-4-1 { 0%, 19% { opacity: 0; } 25%, 100% { opacity: 1; } }
+@keyframes ev-fade-4-2 { 0%, 44% { opacity: 0; } 50%, 100% { opacity: 1; } }
+@keyframes ev-fade-4-3 { 0%, 69% { opacity: 0; } 75%, 100% { opacity: 1; } }
+@keyframes ev-fade-4-4 { 0%, 94% { opacity: 0; } 100%, 100% { opacity: 1; } }
+@keyframes ev-fade-5-1 { 0%, 15.2% { opacity: 0; } 20%, 100% { opacity: 1; } }
+@keyframes ev-fade-5-2 { 0%, 35.2% { opacity: 0; } 40%, 100% { opacity: 1; } }
+@keyframes ev-fade-5-3 { 0%, 55.2% { opacity: 0; } 60%, 100% { opacity: 1; } }
+@keyframes ev-fade-5-4 { 0%, 75.2% { opacity: 0; } 80%, 100% { opacity: 1; } }
+@keyframes ev-fade-5-5 { 0%, 95.2% { opacity: 0; } 100%, 100% { opacity: 1; } }
+@keyframes ev-slide-2-1 { 0%, 41% { transform: translateX(100%); } 50%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-2-2 { 0%, 91% { transform: translateX(100%); } 100%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-3-1 { 0%, 27.333% { transform: translateX(100%); } 33.333%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-3-2 { 0%, 60.667% { transform: translateX(100%); } 66.667%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-3-3 { 0%, 94% { transform: translateX(100%); } 100%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-4-1 { 0%, 20.5% { transform: translateX(100%); } 25%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-4-2 { 0%, 45.5% { transform: translateX(100%); } 50%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-4-3 { 0%, 70.5% { transform: translateX(100%); } 75%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-4-4 { 0%, 95.5% { transform: translateX(100%); } 100%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-5-1 { 0%, 16.4% { transform: translateX(100%); } 20%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-5-2 { 0%, 36.4% { transform: translateX(100%); } 40%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-5-3 { 0%, 56.4% { transform: translateX(100%); } 60%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-5-4 { 0%, 76.4% { transform: translateX(100%); } 80%, 100% { transform: translateX(0); } }
+@keyframes ev-slide-5-5 { 0%, 96.4% { transform: translateX(100%); } 100%, 100% { transform: translateX(0); } }
+@keyframes ev-zoombase-2 { 0% { transform: scale(1.1); } 50%, 100% { transform: scale(1); } }
+@keyframes ev-zoom-2-1 { 0%, 37.5% { opacity: 0; transform: scale(1.1); } 50% { opacity: 1; transform: scale(1.1); } 100%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-2-2 { 0%, 87.5% { opacity: 0; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1.1); } }
+@keyframes ev-zoombase-3 { 0% { transform: scale(1.1); } 33.333%, 100% { transform: scale(1); } }
+@keyframes ev-zoom-3-1 { 0%, 25% { opacity: 0; transform: scale(1.1); } 33.333% { opacity: 1; transform: scale(1.1); } 66.667%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-3-2 { 0%, 58.333% { opacity: 0; transform: scale(1.1); } 66.667% { opacity: 1; transform: scale(1.1); } 100%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-3-3 { 0%, 91.667% { opacity: 0; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1.1); } }
+@keyframes ev-zoombase-4 { 0% { transform: scale(1.1); } 25%, 100% { transform: scale(1); } }
+@keyframes ev-zoom-4-1 { 0%, 18.75% { opacity: 0; transform: scale(1.1); } 25% { opacity: 1; transform: scale(1.1); } 50%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-4-2 { 0%, 43.75% { opacity: 0; transform: scale(1.1); } 50% { opacity: 1; transform: scale(1.1); } 75%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-4-3 { 0%, 68.75% { opacity: 0; transform: scale(1.1); } 75% { opacity: 1; transform: scale(1.1); } 100%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-4-4 { 0%, 93.75% { opacity: 0; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1.1); } }
+@keyframes ev-zoombase-5 { 0% { transform: scale(1.1); } 20%, 100% { transform: scale(1); } }
+@keyframes ev-zoom-5-1 { 0%, 15% { opacity: 0; transform: scale(1.1); } 20% { opacity: 1; transform: scale(1.1); } 40%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-5-2 { 0%, 35% { opacity: 0; transform: scale(1.1); } 40% { opacity: 1; transform: scale(1.1); } 60%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-5-3 { 0%, 55% { opacity: 0; transform: scale(1.1); } 60% { opacity: 1; transform: scale(1.1); } 80%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-5-4 { 0%, 75% { opacity: 0; transform: scale(1.1); } 80% { opacity: 1; transform: scale(1.1); } 100%, 100% { opacity: 1; transform: scale(1); } }
+@keyframes ev-zoom-5-5 { 0%, 95% { opacity: 0; transform: scale(1.1); } 100% { opacity: 1; transform: scale(1.1); } }
+
+/* ── Section headings with a little picture (components/icons.tsx) ── */
+.ev-titleIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 0.38em;
+  border-radius: 999px;
+  vertical-align: -0.16em;
+  background: color-mix(in srgb, var(--ev-accent) 24%, var(--ev-bg));
+  color: var(--ev-main);
+}
+.ev-titleIcon svg {
+  width: 0.68em;
+  height: 0.68em;
+  stroke-width: 2.2;
+}

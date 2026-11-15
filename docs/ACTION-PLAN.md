@@ -1,6 +1,6 @@
 # Your action plan
 
-*For Prakash. Updated 14 November 2026 (late night, photo wall live). The full plan is `docs/CONCEPT.md`.*
+*For Prakash. Updated 15 November 2026. The full plan is `docs/CONCEPT.md`.*
 
 Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks different from the steps, describe what you see. **Never paste a secret key into the chat or any file.**
 
@@ -20,11 +20,19 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
-### [ ] 1. Test with a second phone, such as your wife's (20 minutes)
+### [ ] 1. Run one database file (3 minutes)
+
+[`0007_showcase_and_host_photos.sql`](../supabase/migrations/0007_showcase_and_host_photos.sql) switches on the extra photos at the top of the page and your own photos on the wall.
+1. In VS Code, open the file above. Press **Cmd+A**, then **Cmd+C**.
+2. In Supabase, click **SQL Editor** (left menu), then **New query**.
+3. Click in the empty box, press **Cmd+V**, then click **Run** (bottom right).
+4. It should say **Success. No rows returned.** Then tell Claude Code.
+
+### [ ] 2. Test with a second phone, such as your wife's (20 minutes)
 
 **On your phone:**
 1. Open **in2min2.com**. Under *Festive launch*, tap **Christmas party**. If your own event opens instead, either carry on with it, or tap **Settings** (top right) › **Start a new event** and tap Christmas party again.
-2. Fill in the steps. On **The look**, add a photo, then try a **Moving effect** (Snow, Fireworks, Petals).
+2. Fill in the steps. On **The look**, add a main photo, then tap **+ Add photos** for up to four more, and pick **How they change** (Gentle fade, Slow zoom or Slide). Try a **Moving effect** too (Snow, Fireworks, Petals).
 3. On **Check and publish**, press **Publish** (or **Update my page**) and wait for **Published!**
 4. Still on that step, tap **Photos, TV slideshow and table cards**. Turn on **Let guests add photos before the day** (your party is weeks away, so photos would otherwise open on the day). Close the window.
 5. Tap **Share** (top right) › **The invitation** › **WhatsApp**, and send it to your wife.
@@ -40,11 +48,12 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 **Back on your phone:**
 12. Within a minute, the **bell** shows her reply. Tap **See replies**: her name, the number and her message.
 13. Tap the bell again › **See photos**. Her photos are **On the wall**. Tap one › **Hide it**, and check it has gone from her page.
+    In the same window, tap **Add your photos** and add two of your own. They show on her page straight away.
 14. In the same window, tap **Print table cards with a QR code**. Point her phone's camera at a card on your screen: it should open the photos page.
 15. Optional, on a laptop: open the **TV slideshow** from the same window, press **Full screen**, then add a photo from her phone. Within 15 seconds it shows with **New**.
 16. Tell Claude Code what worked and what didn't. If a screen shows **"Details for Claude Code:"**, copy that line.
 
-### [ ] 2. Approve the three drafts (10 minutes)
+### [ ] 3. Approve the three drafts (10 minutes)
 
 Everything you decided is now in them, and the yellow boxes are gone. The ICO number says "to be provided at launch".
 - [Privacy notice](https://in2min2.com/privacy)
@@ -53,9 +62,14 @@ Everything you decided is now in them, and the yellow boxes are gone. The ICO nu
 
 When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Draft" label and links them from the bottom of every page and from sign-in.
 
-### [ ] 3. Choose what Claude Code builds next
+### [ ] 4. Answer the charging questions, and choose what Claude Code builds next
 
-See the recommendation in the chat, then reply "go" or change the order.
+The full reasoning is in `docs/CONCEPT.md`, section 5i. Reply yes or no to each:
+1. Keep a free plan that can publish, and ask for payment when replies or photos near the limit, or to keep the page after the event?
+2. Sell "+100 photos" packs for £2?
+3. Offer a flat "Event day" pack for big community events (gate screen, cash count, TV slideshow, live scores), with small community events free?
+
+Then reply "go" to the next build, or change the order.
 
 ## Before the January pilot, or before sharing links widely
 

@@ -44,6 +44,7 @@ export const PHOTO_MESSAGES: Record<string, string> = {
   storage_off: "Photos aren't switched on yet. Please try again later.",
   not_ready: "Photos aren't switched on yet. Please try again later.",
   too_big: "This photo is too big to send.",
+  sign_in: "Please sign in again, then try once more.",
 };
 
 // Reasons worth trying again later by themselves (bad signal, a busy moment).

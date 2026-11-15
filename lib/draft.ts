@@ -6,7 +6,7 @@
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
 import {
   eventType, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
-  type CoverFit, type EffectKey, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
+  type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
 import type { EventViewData, ViewFunction, ViewPerson } from "@/lib/event-view";
 
@@ -48,6 +48,8 @@ export type Draft = {
   effect: EffectKey;
   cover: string | null;
   coverFit: CoverFit;
+  moreCovers: string[];   // up to four more photos for the top of the page (0007), data: URLs
+  heroMotion: HeroMotion; // how they change
   toggles: Record<ToggleKey, boolean>;
   slug: string;
   isPrivate: boolean;
@@ -63,6 +65,8 @@ export type Draft = {
   // The main photo and preview picture as stored (0005), and what they were made from.
   coverKey?: string | null;
   shareKey?: string | null;
+  heroKeys?: string[];    // the four more, as stored (0007)
+  heroHash?: string;      // what they were made from, so unchanged photos aren't sent again
   mediaHash?: string;
 };
 
@@ -107,6 +111,8 @@ export function newDraft(): Draft {
     effect: "none",
     cover: null,
     coverFit: "fill",
+    moreCovers: [],
+    heroMotion: "fade",
     toggles: togglesFor(null),
     slug: "",
     isPrivate: false,
@@ -200,10 +206,13 @@ export function slugOk(slug: string): boolean {
 // say "you have changes that aren't live yet". The photo isn't sent yet
 // (photo storage comes later), so it's left out.
 const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "shortPath", "offerClaimed", "publishedHash", "cover", "offerCode",
-  "coverKey", "shareKey", "mediaHash"] as const;
+  "coverKey", "shareKey", "mediaHash", "moreCovers", "heroKeys", "heroHash"] as const;
 export function fingerprint(d: Draft): string {
   const rest: Record<string, unknown> = { ...d };
   for (const k of LOCAL_ONLY) delete rest[k];
+  // The showcase photos (0007) count as a change, by a cheap signature rather
+  // than the whole pictures.
+  if (d.moreCovers?.length) rest.photoSig = [d.cover, ...d.moreCovers].map((u) => (u ? `${u.length}${u.slice(-40)}` : "")).join("|");
   const s = JSON.stringify(rest);
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = (Math.imul(h, 33) ^ s.charCodeAt(i)) >>> 0;
@@ -271,6 +280,8 @@ export function toViewData(d: Draft): EventViewData {
     effect: d.effect,
     cover: d.cover,
     coverFit: d.coverFit,
+    moreCovers: d.cover ? d.moreCovers ?? [] : [],
+    heroMotion: d.heroMotion ?? "fade",
     toggles: d.toggles,
     hideBranding: plan(d.plan).hideBranding,
   };

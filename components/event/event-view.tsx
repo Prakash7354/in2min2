@@ -7,11 +7,12 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
-import { partyColours, textStyle, type Palette } from "@/lib/catalog";
+import { partyColours, textStyle, type HeroMotion, type Palette } from "@/lib/catalog";
 import {
   daysUntil, directionsUrl, formatDate, formatTime, monogram, runningOrder,
   type EventStageView, type EventViewData, type MenuItem,
 } from "@/lib/event-view";
+import { Icon, type IconName } from "@/components/icons";
 import BorderArt from "./borders";
 import Effect from "./effects";
 // Styles: components/event/event-view.css, loaded once in app/layout.tsx.
@@ -132,24 +133,66 @@ function Blessing({ d }: { d: EventViewData }) {
   );
 }
 
+// A section heading with its little picture (components/icons.tsx).
+function Title({ icon, children }: { icon: IconName; children: ReactNode }) {
+  return (
+    <h2 className={s.sectionTitle}>
+      <span className={s.titleIcon} aria-hidden="true"><Icon name={icon} className="" /></span>
+      {children}
+    </h2>
+  );
+}
+
 // ─────────────── photos ───────────────
 
 // "whole": the whole picture, never cropped, on a soft blurred copy of itself
 // (for logos, posters, and photos with words on them). "fill": cropped to fill.
+//
+// Showcase (0007): with more photos, the main one sits still underneath and
+// each further photo arrives in turn as a layer on top; the last layer is the
+// main photo again, so the loop restarts without a jump. All CSS (the
+// ev-fade-, ev-slide- and ev-zoom- keyframes in event-view.css, one set per
+// number of photos), so this stays pure and the builder's thumbnails stay still.
+const SHOW_SECONDS: Record<HeroMotion, number> = { fade: 5, slide: 5, zoom: 6 };
+
 function PhotoBox({ d, className }: { d: EventViewData; className: string }) {
   const whole = d.coverFit === "whole";
+  const all = d.cover ? [d.cover, ...d.moreCovers].slice(0, 5) : [];
+  const n = all.length;
+  const layer = (src: string) => (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element -- a local data: URL while drafting; stored photos when published */}
+      {whole && <img src={src} alt="" aria-hidden="true" className={s.photoBlur} />}
+      {/* eslint-disable-next-line @next/next/no-img-element -- as above */}
+      <img src={src} alt="" className={s.photoImg} />
+    </>
+  );
+  const vars = { "--cycle": `${n * SHOW_SECONDS[d.heroMotion]}s`, "--base": `ev-zoombase-${n}` } as CSSProperties;
   return (
-    <div className={`${s.photo} ${className}`} data-fit={d.cover ? d.coverFit : undefined}>
+    <div className={`${s.photo} ${className}`} data-fit={d.cover ? d.coverFit : undefined}
+      data-show={n > 1 ? d.heroMotion : undefined} style={n > 1 ? vars : undefined}>
       {d.cover ? (
         <>
-          {/* eslint-disable-next-line @next/next/no-img-element -- a local data: URL while drafting; R2 images later */}
-          {whole && <img src={d.cover} alt="" aria-hidden="true" className={s.photoBlur} />}
-          {/* eslint-disable-next-line @next/next/no-img-element -- as above */}
-          <img src={d.cover} alt="" className={s.photoImg} />
+          {layer(all[0])}
+          {n > 1 && [...all.slice(1), all[0]].map((src, i) => (
+            <div key={i} className={s.slide} aria-hidden="true" style={{ "--slide": `ev-${d.heroMotion}-${n}-${i + 1}` } as CSSProperties}>
+              {layer(src)}
+            </div>
+          ))}
         </>
       ) : (
         <span className={s.mono} aria-hidden="true">{monogram((d.scale === "community" ? d.title : d.stars?.names) || d.title || d.typeLabel)}</span>
       )}
+    </div>
+  );
+}
+
+// A still photo in one of the back polaroids.
+function Still({ src }: { src?: string }) {
+  return (
+    <div className={s.photo}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- as above */}
+      {src && <img src={src} alt="" className={s.photoImg} />}
     </div>
   );
 }
@@ -159,11 +202,12 @@ function Photo({ d }: { d: EventViewData }) {
     case "arch":
       return <PhotoBox d={d} className={s.photoArch} />;
     case "polaroid":
+      // A still stack: the main photo on top, the next two behind it.
       return (
         <div className={s.polaroids}>
-          <div className={s.polaroid}><div className={s.photo} /></div>
-          <div className={s.polaroid}><div className={s.photo} /></div>
-          <div className={s.polaroid}><PhotoBox d={d} className="" /></div>
+          <div className={s.polaroid}><Still src={d.moreCovers[1]} /></div>
+          <div className={s.polaroid}><Still src={d.moreCovers[0]} /></div>
+          <div className={s.polaroid}><PhotoBox d={{ ...d, moreCovers: [] }} className="" /></div>
         </div>
       );
     case "split":
@@ -172,8 +216,6 @@ function Photo({ d }: { d: EventViewData }) {
       return <PhotoBox d={d} className={s.photoHero} />;
   }
 }
-
-// ─────────────── views ───────────────
 
 function Card({ d }: { d: EventViewData }) {
   const { main, second, secondLang } = words(d);
@@ -285,7 +327,7 @@ function Page({ d, now, a, reply, photos }: { d: EventViewData; now: number; a: 
 
       {d.toggles.rsvp && (
         <section className={`${s.section} ${s.rsvp}`} id={a ? "reply" : undefined}>
-          <h2 className={s.sectionTitle}>{d.sensitive ? "Will you attend?" : "Can you come?"}</h2>
+          <Title icon="envelope">{d.sensitive ? "Will you attend?" : "Can you come?"}</Title>
           {reply ?? (
             <div className={s.rsvpRow}>
               <span className={s.btn}>{d.sensitive ? "I’ll be there" : "Yes, we’ll come"}</span>
@@ -298,7 +340,7 @@ function Page({ d, now, a, reply, photos }: { d: EventViewData; now: number; a: 
 
       {d.toggles.photo_wall && photos && (
         <section className={s.section} id={a ? "photos" : undefined}>
-          <h2 className={s.sectionTitle}>{d.sensitive ? "Photos and memories" : "Photos"}</h2>
+          <Title icon="camera">{d.sensitive ? "Photos and memories" : "Photos"}</Title>
           {photos}
         </section>
       )}
@@ -359,7 +401,7 @@ function WhenWhere({ d, a = false }: { d: EventViewData; a?: boolean }) {
   const url = d.toggles.map_directions ? directionsUrl(d) : null;
   return (
     <section className={s.section} id={a ? "where" : undefined}>
-      <h2 className={s.sectionTitle}>When and where</h2>
+      <Title icon="pin">When and where</Title>
       <div className={`${s.facts} ${s.panel}`}>
         <div className={s.fact}>
           <span className={s.icon}><CalendarIcon /></span>
@@ -402,7 +444,7 @@ function RunningOrder({ d, now, live = false, a = false }: { d: EventViewData; n
   const ro = runningOrder(d.functions, d.date, now, d.timezone);
   return (
     <section className={s.section} id={a ? "running-order" : undefined}>
-      <h2 className={s.sectionTitle}>{d.scale === "community" ? "Programme" : "Running order"}</h2>
+      <Title icon="clock">{d.scale === "community" ? "Programme" : "Running order"}</Title>
       <ol className={s.timeline}>
         {ro.items.map((f, i) => {
           const state = live ? (i === ro.current ? "now" : i === ro.next ? "next" : i < ro.current ? "done" : undefined) : undefined;
@@ -467,7 +509,7 @@ function Live({ d, now, a, photos }: { d: EventViewData; now: number; a: boolean
       {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} live a={a} />}
       {d.toggles.photo_wall && photos && (
         <section className={s.section} id={a ? "photos" : undefined}>
-          <h2 className={s.sectionTitle}>{d.sensitive ? "Photos and memories" : "Photos from today"}</h2>
+          <Title icon="camera">{d.sensitive ? "Photos and memories" : "Photos from today"}</Title>
           {photos}
         </section>
       )}
@@ -475,7 +517,7 @@ function Live({ d, now, a, photos }: { d: EventViewData; now: number; a: boolean
         <section className={s.section}>
           <span className={`${s.btn} ${s.btnAccent} ${s.btnBig}`}>{d.sensitive ? "Share a photo or memory" : "Add your photos"}</span>
           <div className={s.wall} aria-hidden="true">{Array.from({ length: 6 }, (_, i) => <span key={i} />)}</div>
-          <p className={s.muted}>Guests’ photos appear here as they are added.</p>
+          <p className={s.muted}>Preview only. On your live page this button works on the day: guests add photos here, and you can add your own from Photos in step 7.</p>
         </section>
       )}
       <WhenWhere d={d} a={a} />
@@ -496,13 +538,13 @@ function After({ d, a, photos }: { d: EventViewData; a: boolean; photos?: ReactN
       </Hero>
       {d.toggles.photo_wall && photos && (
         <section className={s.section} id={a ? "photos" : undefined}>
-          <h2 className={s.sectionTitle}>{d.sensitive ? "Photos and memories" : "The gallery"}</h2>
+          <Title icon="images">{d.sensitive ? "Photos and memories" : "The gallery"}</Title>
           {photos}
         </section>
       )}
       {d.toggles.photo_wall && !photos && (
         <section className={s.section}>
-          <h2 className={s.sectionTitle}>{d.sensitive ? "Photos and memories" : "The gallery"}</h2>
+          <Title icon="images">{d.sensitive ? "Photos and memories" : "The gallery"}</Title>
           <div className={s.wall} aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} />)}</div>
           <p className={s.muted}>Every guest’s photos, in one place.</p>
         </section>
