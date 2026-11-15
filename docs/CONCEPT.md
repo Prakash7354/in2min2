@@ -644,6 +644,68 @@ Everything else stays still. People who have reduced motion switched on see no a
 - **Small moments of delight**, only at the six moments in 7b.
 - **Quiet for sad occasions.** A memorial or funeral gets calm colours, no petals or confetti, gentle wording that never says "celebrate", and no offers (5g).
 
+### 7e. Design 2.0: bold, mobile-first, one thing per screen (Decided by the owner, 15 Nov 2026: dark by default with a light option, the Motion library, and "go")
+
+**Built 15 Nov 2026 (prototype, no database):**
+- `/new/style`: the style page. Colours, letters, buttons, tiles, inputs, the bottom sheet, icons, and the frameless photo wheel in every sky.
+- `/new`: the 6-screen Quick start. What → whose → when → where → pick a look (swipe complete designs) → photo, then "Your invitation is ready" with a share sheet.
+- `/new/home`: the event Home. Big tiles with live numbers (pretend), each opening one bottom sheet.
+- The real photo wheel is now frameless, with clear space between photos (smaller cards on a wider ring).
+
+Next: the owner's 5-person test (ACTION-PLAN step 1), then rebuilding the real builder in this style.
+
+**What users told the owner.** They said "show me on the phone". The current look, pale and subtle, was missed and felt hard. Another app that was bold, colourful and visually striking won. Users want it simple, with nothing to hunt for, and mobile first. The owner pictures slick cards a shade lighter than the background, depth and space, and photos with no frames and clear space between them.
+
+**The evidence agrees, with one caution:**
+- **Bold:** Google's research for its bold "Material 3 Expressive" design found key buttons up to 4 times faster, and the gap for people over 45 closed. This is Google's own research, from a leaked blog post.
+- **One thing per screen:** it is the GOV.UK standard because it helps people focus.
+- **Two competitors show both sides:** Partiful (Google Play's best app of 2024) wins on bold, playful, animated invitations, and Apple Invites on simplicity.
+- **Thumbs:** about half of phone use is one-handed, so the main button goes at the bottom.
+- **The caution about dark:** dark text on a light background is on average easier to read, including for older people and in bright rooms, and preferences split about a third each way. Apple's see-through Liquid Glass drew complaints about readability. So the look should be dark, but with very high contrast, no see-through text, and a light option.
+
+**Principles:**
+1. **Two looks.**
+   - The host's app (making and running the event): dark by default, bold and app-like, with a light option.
+   - The guests' page: the event's own colours, with immersive moments (the wheel in the sky, chapters, the memory book).
+2. **Depth without lines.**
+   - A deep indigo-black background, not pure black.
+   - Panels a shade lighter instead of borders, with 20–28 px rounded corners, soft shadow or glow, and generous space.
+   - Photos without white frames.
+3. **One bright action per screen** (marigold), at the bottom within thumb reach.
+4. **Large, bold words:** headings around 32–40 px and body text at least 17 px. Icons on everything, and few words per screen.
+5. **Movement with meaning:**
+   - Springy changes between screens, and cards that lift when touched.
+   - 3D in CSS only.
+   - Everything respects reduce motion.
+6. **App feel without an app store:** installable to the home screen (PWA), with its own icon and full screen. Notifications on iPhone once installed (iOS 16.4+).
+
+**Builder 2.0 (Recommended).** Today's 7 steps hold 24 groups. "The look" alone has 8 decisions and about 60–70 choices to scroll.
+- **Quick start, about 6 screens:**
+  1. What are you celebrating?
+  2. Whose?
+  3. When?
+  4. Where?
+  5. Choose a look, by swiping through complete, ready-made designs.
+  6. A photo (optional).
+
+  Then Publish and share. The AI writes the words in the background.
+- **Then an event Home of big tiles with live numbers:** Invitation · Replies · Photos · Share · Day plan · Look · Settings. Each opens one simple screen.
+- **Fine-tuning** (borders, fonts, effects, menus, switches) sits inside the tiles with good defaults.
+- **On every screen:** "Step 3 of 6", a big Next at the bottom, and "Skip for now".
+
+**Technology:**
+- **Keep:** Next.js, Tailwind, CSS 3D, and the browser's own screen-to-screen and scroll animations (Chrome; Safari 18.2 and 26; Firefox catching up).
+- **Add, if the owner approves:** Motion (motion.dev, MIT), for springs, swipes, drag and cards that open into full screens. From about 5 KB.
+- **Not in the app:** Three.js or WebGL. About 140–150 KB before our own code, and heavy for phones; at most for the TV wheel.
+- **Skip:** web vibration, which iPhone doesn't support.
+- **No database change:** 0001–0009 carry over unchanged.
+
+**Process:**
+1. A style page on a hidden link, to judge on phones.
+2. A clickable prototype of Quick start and the event Home with pretend data, tested with 5 people. The goal: a newcomer sends an invitation in under 2 minutes without help.
+3. Rebuild the builder alongside the old one, and switch over once proven.
+4. Then the guests' page: chapters and the memory book in the same style.
+
 ## 8. The AI writer and languages
 
 ### 7d. Design artwork: what we can do, and who owns it (owner's question, 13 Nov 2026)

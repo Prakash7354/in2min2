@@ -34,9 +34,31 @@ const PATHS = {
   shield: <><path d="M12 3.5l7 2.8v5.2c0 4.6-3 7.9-7 9-4-1.1-7-4.4-7-9V6.3z" /><path d="M8.8 12l2.2 2.2 4.2-4.4" /></>,
   switches: <><rect x="3" y="5" width="18" height="6" rx="3" /><circle cx="15" cy="8" r="1.8" /><rect x="3" y="13" width="18" height="6" rx="3" /><circle cx="9" cy="16" r="1.8" /></>,
   book: <><path d="M4 5.5A2 2 0 0 1 6 3.5h13.5v15H6a2 2 0 0 0-2 2z" /><path d="M4 20.5a2 2 0 0 1 2-2h13.5v2H6" /></>,
+  // Event kinds and navigation (Design 2.0, 15 Nov 2026)
+  cake: <><path d="M4 20.5h16M5 20.5v-6.5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6.5" /><path d="M5 15.5c1.2 1 2.3 1 3.5 0s2.3-1 3.5 0 2.3 1 3.5 0 2.3-1 3.5 0" /><path d="M12 12V8.5M8 12V9M16 12V9" /><path d="M12 6.2c-.8-.7-.8-1.8 0-2.7.8.9.8 2 0 2.7z" /></>,
+  bowl: <><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z" /><path d="M9 20h6" /><path d="M8 8.5c.6-1.4 2-2 3.4-1.5M12.5 8c.9-1.2 2.5-1.5 3.8-.6" /></>,
+  balloon: <><path d="M12 15c-3.6 0-6-3.1-6-6.4A6 6 0 0 1 18 8.6C18 11.9 15.6 15 12 15z" /><path d="M11 15l-.6 1.6h3.2L13 15M12 16.6c0 1.6-1.6 2.2-1.6 3.9" /></>,
+  rings: <><circle cx="9" cy="14" r="5" /><circle cx="15" cy="14" r="5" /><path d="M10 5.5l2-2 2 2-2 2.5z" /></>,
+  briefcase: <><rect x="3.5" y="7.5" width="17" height="12" rx="2" /><path d="M9 7.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v1.5M3.5 12.5h17" /></>,
+  trophy: <><path d="M8 4.5h8v5a4 4 0 0 1-8 0z" /><path d="M8 6.5H5a3 3 0 0 0 3 4M16 6.5h3a3 3 0 0 1-3 4M12 13.5v3M8.5 20h7M9.5 20l.5-3.5h4l.5 3.5" /></>,
+  tree: <><path d="M12 3l5 6h-2.5l3.5 5h-3l3 4H6l3-4H6l3.5-5H7z" /><path d="M12 18v3" /></>,
+  flower: <><circle cx="12" cy="9" r="2.2" /><path d="M12 6.8c0-2.6 2.6-3.6 3.6-2 .8 1.4-.6 3.2-2.4 3.6M14.2 9.6c2.4.8 2.6 3.6.8 4-1.6.3-2.6-1.7-2.2-3.4M9.8 9.6c-2.4.8-2.6 3.6-.8 4 1.6.3 2.6-1.7 2.2-3.4M12 6.8c0-2.6-2.6-3.6-3.6-2-.8 1.4.6 3.2 2.4 3.6" /><path d="M12 11.2V21M12 17c-1.6-1.8-3.6-2-5-1.6 1 1.8 3 2.4 5 1.6zM12 18.5c1.4-1.4 3.2-1.6 4.6-1.2-.9 1.6-2.8 2.1-4.6 1.2z" /></>,
+  sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6" /></>,
+  moon: <path d="M19.5 14.6A8 8 0 0 1 9.4 4.5a8 8 0 1 0 10.1 10.1z" />,
+  back: <path d="M15 5l-7 7 7 7" />,
+  next: <path d="M9 5l7 7-7 7" />,
+  close: <path d="M6 6l12 12M18 6L6 18" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  share: <><path d="M12 3v12M7.5 7.5L12 3l4.5 4.5" /><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H16" /></>,
+  qr: <><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><path d="M14 14h2v2h-2zM18 14h2M14 18v2M17 17v3h3v-2" /></>,
+  copy: <><rect x="8.5" y="8.5" width="11" height="11" rx="2" /><path d="M15.5 8.5V6a1.5 1.5 0 0 0-1.5-1.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5" /></>,
+  message: <path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-6.5L7 20v-3.5h-.5a2 2 0 0 1-2-2z" />,
+  printer: <><path d="M7 9V3.5h10V9M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M7 14h10v6.5H7z" /></>,
+  tv: <><rect x="3" y="5" width="18" height="12" rx="2" /><path d="M8 20.5h8M12 17v3.5" /></>,
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;
+export const ICON_NAMES = Object.keys(PATHS) as IconName[];
 
 export function Icon({ name, className = "size-5" }: { name: IconName; className?: string }) {
   return (

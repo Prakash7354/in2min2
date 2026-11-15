@@ -139,7 +139,7 @@ function Blessing({ d }: { d: EventViewData }) {
 const FAN = [-2, -1, 0, 1, 2];
 function Fan({ d }: { d: EventViewData }) {
   const pics = d.cover ? [d.cover, ...d.moreCovers] : [];
-  const R = 42; // in --u (1% of the page width), as the real wheel; thumbnails stay exact small copies
+  const R = 50; // in --u (1% of the page width), as the real wheel; thumbnails stay exact small copies
   return (
     <div className={`${s.fan} ${s.sky}`} data-sky={skyFor(d.palette)} aria-hidden="true">
       {FAN.map((k, i) => {

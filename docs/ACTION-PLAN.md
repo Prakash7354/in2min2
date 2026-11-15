@@ -10,7 +10,8 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 - [x] Design agreed, logo C chosen, six questions answered (13–14 Nov).
 - [x] Supabase set up. All six database files run, 0001 to [0006](../supabase/migrations/0006_photo_wall.sql) (14 Nov): replies, festive designs, the WhatsApp preview picture and the guests' photo wall.
-- [x] Photo store created on Cloudflare, in Europe (14 Nov).
+- [x] Photo store created on Cloudflare, in Europe (14 Nov). Database files 0007, 0008 and 0009 run (15 Nov).
+- [x] New look decided: dark by default with a light option, the Motion library, one thing per screen (15 Nov).
 - [x] hello@in2min2.com forwards to hello@gochuchuro.com (14 Nov).
 - [x] Gemini key working. Check any time: https://in2min2.com/api/health should say `"ai":"ready"`.
 - [x] in2min2.com bought and connected (14 Nov).
@@ -20,13 +21,22 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
-### [ ] 1. Run one database file (3 minutes)
+### [ ] 1. Try the new look, then test it with 5 people (about 30 minutes in all)
 
-[`0009_photographers_and_sky.sql`](../supabase/migrations/0009_photographers_and_sky.sql) switches on photographers and the sky behind the photo wheel. (0007 and 0008 ran on 15 Nov.)
-1. In VS Code, open the file above. Press **Cmd+A**, then **Cmd+C**.
-2. In Supabase, click **SQL Editor** (left menu), then **New query**.
-3. Click in the empty box, press **Cmd+V**, then click **Run** (bottom right).
-4. It should say **Success. No rows returned.** Then tell Claude Code.
+Three hidden pages (not linked anywhere, nothing is saved or sent):
+- **in2min2.com/new/style**: the new look on one page. Tap the sun or moon to switch dark and light. Try the skies under "The photo wheel".
+- **in2min2.com/new**: the 6-screen Quick start.
+- **in2min2.com/new/home**: the event Home. Tap each tile.
+
+**The 5-person test.** Use colleagues, a grandparent, a teenager, and someone who isn't confident with phones.
+1. Open **in2min2.com/new** on *their* phone (or yours). Say only: *"Make an invitation for a birthday and get it ready to share."*
+2. Don't help or point. Time them from the first tap to **Your invitation is ready**.
+3. Note where they stop or hesitate, and anything they say out loud.
+4. Afterwards, ask three questions:
+   - What was easy?
+   - What was confusing?
+   - Would you use this for your own event?
+5. Send Claude Code the times and notes. The goal: a newcomer finishes in under 2 minutes without help.
 
 ### [ ] 2. Test with a second phone, such as your wife's (20 minutes)
 
@@ -63,13 +73,6 @@ Everything you decided is now in them, and the yellow boxes are gone. The ICO nu
 - [Prices and fair fees](https://in2min2.com/pricing)
 
 When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Draft" label and links them from the bottom of every page and from sign-in.
-
-### [ ] 4. Choose the next build
-
-Your answers of 15 Nov are written into `docs/CONCEPT.md` (5i and 12c). Reply "go", or change the order:
-1. **Posters and printed invitations** with QR codes, ready for home printers and print shops (the QR maker is built).
-2. **Help for families who find forms hard:** AI fills the builder from a photo of a printed card or a voice note; a Listen button; Nepali buttons.
-3. **Before the January pilot (must do):** photo clean-up after pages close, nightly backups, and Turnstile against bots.
 
 ## Before the January pilot, or before sharing links widely
 

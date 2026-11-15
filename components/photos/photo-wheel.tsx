@@ -42,11 +42,12 @@ type Props = {
   celebrate: boolean;
   size?: "page" | "tv";
   sky?: Sky;                                  // the sky behind it (0009)
+  srcOf?: (p: WallPhoto) => string;           // where each picture comes from (the style page uses samples)
 };
 
 const fill = (list: WallPhoto[]) => Array.from({ length: SLOTS }, (_, i) => list[i % list.length]?.id ?? "");
 
-export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, motion, celebrate, size = "page", sky = "night" }: Props) {
+export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, motion, celebrate, size = "page", sky = "night", srcOf }: Props) {
   const stage = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLDivElement | null)[]>([]);
   const shades = useRef<(HTMLSpanElement | null)[]>([]);
@@ -116,7 +117,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
         else if (!still && document.visibilityState === "visible") g.angle -= speed * dt;   // clockwise, seen from above
       }
       const W = stage.current?.clientWidth ?? 360;
-      const R = tv ? Math.min(W * 0.38, 1100) : Math.min(W * 0.42, 380);
+      const R = tv ? Math.min(W * 0.4, 1100) : Math.min(W * 0.5, 460);
       let bestCos = -2, bestI = g.front;
       for (let i = 0; i < SLOTS; i++) {
         const el = cards.current[i];
@@ -151,7 +152,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
     const g = st.current;
     if (!g.drag) return;
     const W = stage.current?.clientWidth ?? 360;
-    const R = tv ? Math.min(W * 0.38, 1100) : Math.min(W * 0.42, 380);
+    const R = tv ? Math.min(W * 0.4, 1100) : Math.min(W * 0.5, 460);
     const dx = e.clientX - g.drag.x;
     g.drag.moved = Math.max(g.drag.moved, Math.abs(dx));
     if (g.drag.moved > 6) stage.current?.setPointerCapture?.(e.pointerId);
@@ -183,7 +184,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
         {slots.map((id, i) => {
           const p = byId.get(id);
           const wide = !!p && p.w > p.h * 1.1;
-          const src = p ? photoUrl(eventId, p.id, "t") : "";
+          const src = p ? (srcOf ? srcOf(p) : photoUrl(eventId, p.id, "t")) : "";
           const badge = !p ? null : fresh.includes(p.id) ? "New" : p.fav ? "Host’s pick" : top && top.id === p.id ? "Most loved" : null;
           return (
             <div key={i} data-slot={i} ref={(el) => { cards.current[i] = el; }} className={s("wheelCard")} data-wide={wide ? "" : undefined}>
