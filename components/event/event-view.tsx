@@ -139,14 +139,14 @@ function Blessing({ d }: { d: EventViewData }) {
 const FAN = [-2, -1, 0, 1, 2];
 function Fan({ d }: { d: EventViewData }) {
   const pics = d.cover ? [d.cover, ...d.moreCovers] : [];
-  const R = 60; // in --u (1% of the page width), as the real wheel; thumbnails stay exact small copies
+  const R = 42; // in --u (1% of the page width), as the real wheel; thumbnails stay exact small copies
   return (
     <div className={s.fan} aria-hidden="true">
       {FAN.map((k, i) => {
         const th = (k * Math.PI) / 5;
         const c = Math.cos(th);
         const style = {
-          transform: `translate3d(calc(var(--u) * ${(Math.sin(th) * R).toFixed(2)}), 0, calc(var(--u) * ${((c - 1) * R).toFixed(2)})) rotateY(${k * 36}deg) scale(${k === 0 ? 1.14 : 1})`,
+          transform: `translate3d(calc(var(--u) * ${(Math.sin(th) * R).toFixed(2)}), calc(var(--u) * ${(-(1 - c) * R * 0.14).toFixed(2)}), calc(var(--u) * ${((c - 1) * R).toFixed(2)})) rotateY(${k * 36}deg) scale(${k === 0 ? 1.14 : 1})`,
           zIndex: 10 - Math.abs(k),
           background: pics.length ? undefined : `var(--ev-c${i + 1})`,
           filter: k === 0 ? undefined : `brightness(${(0.65 + 0.35 * c).toFixed(2)})`,
@@ -179,9 +179,11 @@ function Title({ icon, children }: { icon: IconName; children: ReactNode }) {
 // Showcase (0007): with more photos, the main one sits still underneath and
 // each further photo arrives in turn as a layer on top; the last layer is the
 // main photo again, so the loop restarts without a jump. All CSS (the
-// ev-fade-, ev-slide- and ev-zoom- keyframes in event-view.css, one set per
+// ev-zoomin-, ev-zoomout- and ev-slide- keyframes in event-view.css, one set per
 // number of photos), so this stays pure and the builder's thumbnails stay still.
-const SHOW_SECONDS: Record<HeroMotion, number> = { fade: 5, slide: 5, zoom: 6 };
+// zoomin and zoomout: each photo glides in from the right as it fades up, then
+// slowly zooms closer (or draws back) while it's on top. slide: as before.
+const SHOW_SECONDS: Record<HeroMotion, number> = { zoomin: 6, zoomout: 6, slide: 5 };
 
 function PhotoBox({ d, className }: { d: EventViewData; className: string }) {
   const whole = d.coverFit === "whole";
@@ -195,7 +197,7 @@ function PhotoBox({ d, className }: { d: EventViewData; className: string }) {
       <img src={src} alt="" className={s.photoImg} />
     </>
   );
-  const vars = { "--cycle": `${n * SHOW_SECONDS[d.heroMotion]}s`, "--base": `ev-zoombase-${n}` } as CSSProperties;
+  const vars = { "--cycle": `${n * SHOW_SECONDS[d.heroMotion]}s`, "--base": `ev-${d.heroMotion}base-${n}` } as CSSProperties;
   return (
     <div className={`${s.photo} ${className}`} data-fit={d.cover ? d.coverFit : undefined}
       data-show={n > 1 ? d.heroMotion : undefined} style={n > 1 ? vars : undefined}>

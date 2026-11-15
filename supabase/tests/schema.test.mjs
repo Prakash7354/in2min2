@@ -649,16 +649,16 @@ console.log("Showcase photos and the hosts' own photos (0007):");
 await as(A);
 const [sh] = await q(`insert into events (event_type, slug, title, starts_at, status, organiser_name, organiser_type, for_profit)
   values ('lhosar','show-lhosar','Lhosar showcase', '2027-02-18 11:00+00', 'published', 'Riverside Community Association', 'community_group', false) returning id`);
-await q(`update events set hero_keys = $2, hero_motion = 'zoom' where id = $1`, [sh.id, `{${sh.id}/cover-abc123def.jpg,${sh.id}/cover-xyz789abc.jpg}`]);
+await q(`update events set hero_keys = $2, hero_motion = 'zoomout' where id = $1`, [sh.id, `{${sh.id}/cover-abc123def.jpg,${sh.id}/cover-xyz789abc.jpg}`]);
 let [hk] = await q(`select hero_keys, hero_motion from events where id = $1`, [sh.id]);
-ok("a host adds two more showcase photos and chooses how they move", hk.hero_keys.length === 2 && hk.hero_motion === "zoom");
+ok("a host adds two more showcase photos and chooses how they move", hk.hero_keys.length === 2 && hk.hero_motion === "zoomout");
 await expectError("more than four extra photos is refused", `update events set hero_keys = '{${[1, 2, 3, 4, 5].map((i) => `${sh.id}/cover-abcdef${i}`).map((k) => k + ".jpg").join(",")}}' where id = '${sh.id}'`, /check constraint/);
 await expectError("a showcase photo from another event's folder is refused", `update events set hero_keys = '{${ev.id}/cover-abc123def.jpg}' where id = '${sh.id}'`, /check constraint/);
 await expectError("a file that isn't a picture is refused", `update events set hero_keys = '{${sh.id}/cover-abc123def.html}' where id = '${sh.id}'`, /check constraint/);
 await expectError("an unknown movement is refused", `update events set hero_motion = 'spin' where id = '${sh.id}'`, /check constraint/);
 await as(null);
 [pe] = await q(`select public_event('lhosar','show-lhosar') as p`);
-ok("the public page gets the showcase photos and their movement", pe.p.event.hero_keys.length === 2 && pe.p.event.hero_motion === "zoom");
+ok("the public page gets the showcase photos and their movement", pe.p.event.hero_keys.length === 2 && pe.p.event.hero_motion === "zoomout");
 await expectError("the public can't add a host photo", `select add_host_photo('${sh.id}', 'X', 1600, 1200, 300000)`, /permission denied/);
 
 await as(A);
@@ -684,6 +684,64 @@ await as(A);
 await q(`update feature_toggles set photo_wall = false where event_id = $1`, [sh.id]);
 ok("with the photo wall switched off, the host is told", (await q(`select add_host_photo($1, null, 1600, 1200, 300000) as r`, [sh.id]))[0].r.reason === "off");
 await q(`delete from events where id = $1`, [sh.id]);
+
+console.log("Love taps, favourites and the new movements (0008):");
+await as(A);
+const [lv] = await q(`insert into events (event_type, slug, title, starts_at, ends_at, status)
+  values ('birthday','love-party','Love party', now() - interval '1 hour', now() + interval '4 hours', 'published') returning id, wall_key`);
+ok("a new event's photos at the top start with zoom in", (await q(`select hero_motion from events where id = $1`, [lv.id]))[0].hero_motion === "zoomin");
+await q(`update events set hero_motion = 'zoomout' where id = $1`, [lv.id]);
+await expectError("the old movement names are gone", `update events set hero_motion = 'fade' where id = '${lv.id}'`, /check constraint/);
+await as(null);
+const LD1 = "loverphone00000000000001", LD2 = "loverphone00000000000002";
+const lp = await addPhoto(DEV1, "love-party");
+await stored(lp.id, lp.secret);
+const lp2 = await addPhoto(DEV1, "love-party");
+await stored(lp2.id, lp2.secret);
+const love = async (photo, dev, on = true, slug = "love-party", token = null) =>
+  (await q(`select love_photo('birthday', $1, $2, $3, $4, $5) as r`, [slug, token, photo, dev, on]))[0].r;
+let l1 = await love(lp.id, LD1);
+ok("a guest loves a photo", l1.ok === true && l1.loves === 1 && l1.mine === true, JSON.stringify(l1));
+ok("…the same phone can't love it twice", (await love(lp.id, LD1)).loves === 1);
+ok("…another phone adds to the count", (await love(lp.id, LD2)).loves === 2);
+ok("…and a love can be taken back", (await love(lp.id, LD1, false)).loves === 1);
+ok("a bad phone id is refused", (await love(lp.id, "NOT ok!")).reason === "bad");
+let lwall = (await q(`select public_photos('birthday','love-party',null,$1) as r`, [LD2]))[0].r;
+const lpRow = lwall.photos.find((x) => x.id === lp.id);
+ok("the wall shows each photo's loves, and which this phone loved", lpRow.loves === 1 && lpRow.mine === true && lwall.photos.find((x) => x.id === lp2.id).mine === false);
+ok("the most-loved photos are featured", lwall.featured.length === 1 && lwall.featured[0].id === lp.id);
+await expectError("the public can't read who loved what", `select * from photo_loves`, /permission denied/);
+await expectError("…or write a love directly", `insert into photo_loves (photo_id, event_id, device) values ('${lp.id}', '${lv.id}', '${LD1}')`, /permission denied/);
+
+await as(A);
+ok("the owner sees the loves on their event", (await q(`select device from photo_loves where event_id = $1`, [lv.id])).length === 1);
+await q(`update event_photos set favourite = true where id = $1`, [lp2.id]);
+await expectError("a host can't change a love count", `update event_photos set love_count = 99 where id = '${lp.id}'`, /permission denied/);
+await as(null);
+lwall = (await q(`select public_photos('birthday','love-party',null,null) as r`))[0].r;
+ok("the host's favourite comes first among the featured", lwall.featured[0].id === lp2.id && lwall.featured[0].fav === true && lwall.featured.length === 2);
+await as(B);
+ok("another host sees no loves on A's event", (await q(`select device from photo_loves where event_id = $1`, [lv.id])).length === 0);
+const bf = await db.query(`update event_photos set favourite = false where id = $1`, [lp2.id]);
+ok("…and can't change A's favourites", bf.affectedRows === 0);
+await as(A);
+await q(`insert into event_hosts (event_id, user_id, role) values ($1, $2, 'helper')`, [lv.id, C]);
+await as(C);
+ok("a helper sees the loves", (await q(`select device from photo_loves where event_id = $1`, [lv.id])).length === 1);
+ok("…and can pick favourites", (await db.query(`update event_photos set favourite = true where id = $1`, [lp.id])).affectedRows === 1);
+await as(A);
+await q(`update event_photos set status = 'hidden' where id = $1`, [lp.id]);
+await as(null);
+ok("a hidden photo can't be loved", (await love(lp.id, LD2)).reason === "gone");
+await as(A);
+await q(`update events set is_private = true where id = $1`, [lv.id]);
+await as(null);
+ok("a private event's photos can't be loved without a link", (await love(lp2.id, LD1)).reason === "private");
+ok("…but can with the photo key", (await love(lp2.id, LD1, true, "love-party", lv.wall_key)).ok === true);
+await as(A);
+await q(`delete from events where id = $1`, [lv.id]);
+await db.exec(`reset role`);
+ok("deleting an event deletes its loves", (await q(`select count(*)::int n from photo_loves where event_id = $1`, [lv.id]))[0].n === 0);
 
 console.log("Delete everything:");
 await as(C);  // C is a helper on A's wedding

@@ -1,19 +1,24 @@
 "use client";
 
 // The photo wheel at the top of the gallery (owner's idea, 15 Nov 2026):
-// guests' photos stand on a ring that turns slowly clockwise, like the cards
-// in a phone-gallery advert. The photo at the front swells a little; the ones
-// at the sides lean away. Every card is the same tall shape: a landscape
-// photo sits whole inside its card on a soft blurred copy of itself, so
-// guests never need to be told which way to hold the phone.
+// guests' photos float on a ring in a night sky, turning slowly clockwise,
+// like the cards in a phone-gallery advert but out in space. The front photo
+// swells a little; the ones at the sides lean away and rise along the arc.
+// Every card is the same tall shape: a landscape photo sits whole on a soft
+// blurred copy of itself, so guests never need to be told which way to hold
+// the phone.
 //
 // - With more photos than places on the ring, each card takes the next photo
-//   as it passes round the back, so every photo comes round in turn.
-// - A new photo jumps in next, with a "New" badge and a small burst of
-//   confetti in the event's colours (not for memorials).
+//   as it passes round the back, so every photo comes round in turn; every
+//   third time it brings back one of the "stars" (the hosts' favourites and
+//   the most-loved photos, 0008).
+// - A new photo jumps in next, with "New" and a small burst of confetti in
+//   the event's colours (not for memorials).
+// - Love counts on the cards; the heart under the wheel loves the front photo.
 // - Swipe to spin it; tap a photo to see it large.
 // - Phones set to reduce motion, and hosts who switch movement off, get a
 //   still wheel that can still be swiped.
+// - size "tv": the same wheel filling a TV (the TV wheel, /tv?style=wheel).
 // Moves by writing styles straight to the cards each frame (no React
 // re-render), so it stays smooth on older phones.
 
@@ -27,16 +32,19 @@ const s = (k: string) => `ev-${k}`;
 
 type Props = {
   eventId: string;
-  photos: WallPhoto[];
-  arrivals: { ids: string[]; n: number };   // new photos since the last look
-  onOpen: (id: string) => void;
+  photos: WallPhoto[];                        // favourites and most-loved first
+  stars: string[];                            // brought round more often
+  arrivals: { ids: string[]; n: number };     // new photos since the last look
+  onOpen?: (id: string) => void;
+  onLove?: (id: string) => void;
   motion: boolean;
   celebrate: boolean;
+  size?: "page" | "tv";
 };
 
 const fill = (list: WallPhoto[]) => Array.from({ length: SLOTS }, (_, i) => list[i % list.length]?.id ?? "");
 
-export function PhotoWheel({ eventId, photos, arrivals, onOpen, motion, celebrate }: Props) {
+export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, motion, celebrate, size = "page" }: Props) {
   const stage = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLDivElement | null)[]>([]);
   const shades = useRef<(HTMLSpanElement | null)[]>([]);
@@ -45,18 +53,26 @@ export function PhotoWheel({ eventId, photos, arrivals, onOpen, motion, celebrat
   const [fresh, setFresh] = useState<string[]>([]);
   const [bursts, setBursts] = useState<number[]>([]);
   const list = useRef(photos);
+  const starList = useRef(stars);
   const st = useRef({
-    angle: 0, vel: 0, last: 0, front: 0, pointer: SLOTS, queue: [] as string[], swapped: new Array<boolean>(SLOTS).fill(false),
+    angle: 0, vel: 0, last: 0, front: 0, pointer: SLOTS, swaps: 0, starPointer: 0,
+    queue: [] as string[], swapped: new Array<boolean>(SLOTS).fill(false),
     drag: null as null | { x: number; angle: number; lastX: number; lastT: number; moved: number },
   });
+  const tv = size === "tv";
 
-  useEffect(() => { list.current = photos; }, [photos]);
+  useEffect(() => { list.current = photos; starList.current = stars; }, [photos, stars]);
 
-  // A card at the back takes the next photo: new ones first, then round the list.
+  // A card at the back takes the next photo: new ones first, then every third
+  // time a star, otherwise round the whole list.
   const swapAt = (i: number) => {
     const g = st.current;
     const all = list.current;
-    const next = g.queue.shift() ?? (all.length > SLOTS ? all[g.pointer++ % all.length]?.id : undefined);
+    const starIds = starList.current;
+    g.swaps++;
+    let next = g.queue.shift();
+    if (!next && starIds.length && g.swaps % 3 === 0) next = starIds[g.starPointer++ % starIds.length];
+    if (!next && all.length > SLOTS) next = all[g.pointer++ % all.length]?.id;
     if (next) setSlots((prev) => prev.map((id, j) => (j === i ? next : id)));
   };
 
@@ -98,7 +114,7 @@ export function PhotoWheel({ eventId, photos, arrivals, onOpen, motion, celebrat
         else if (!still && document.visibilityState === "visible") g.angle -= speed * dt;   // clockwise, seen from above
       }
       const W = stage.current?.clientWidth ?? 360;
-      const R = Math.min(W * 0.6, 420);
+      const R = tv ? Math.min(W * 0.38, 1100) : Math.min(W * 0.42, 380);
       let bestCos = -2, bestI = g.front;
       for (let i = 0; i < SLOTS; i++) {
         const el = cards.current[i];
@@ -106,11 +122,12 @@ export function PhotoWheel({ eventId, photos, arrivals, onOpen, motion, celebrat
         const th = g.angle + i * STEP;
         const c = Math.cos(th);
         const pop = Math.pow(Math.max(0, c), 12) * 0.16;   // swells as it reaches the middle
-        el.style.transform = `translate3d(${(Math.sin(th) * R).toFixed(1)}px,0,${((c - 1) * R).toFixed(1)}px) rotateY(${((th * 180) / Math.PI).toFixed(2)}deg) scale(${(1 + pop).toFixed(3)})`;
+        const rise = (1 - c) * R * 0.14;                    // the ring is seen from a little above, like an orbit
+        el.style.transform = `translate3d(${(Math.sin(th) * R).toFixed(1)}px,${(-rise).toFixed(1)}px,${((c - 1) * R).toFixed(1)}px) rotateY(${((th * 180) / Math.PI).toFixed(2)}deg) scale(${(1 + pop).toFixed(3)})`;
         el.style.zIndex = String(Math.round((c + 1) * 100));
         el.style.opacity = c < -0.3 ? "0" : Math.min(1, (c + 0.3) * 2.2).toFixed(2);
         const shade = shades.current[i];
-        if (shade) shade.style.opacity = (0.5 * (1 - Math.max(0, c))).toFixed(2);
+        if (shade) shade.style.opacity = (0.55 * (1 - Math.max(0, c))).toFixed(2);
         if (c > bestCos) { bestCos = c; bestI = i; }
         if (c < -0.92 && !g.swapped[i]) { g.swapped[i] = true; swapAt(i); }
         if (c > 0) g.swapped[i] = false;
@@ -120,7 +137,7 @@ export function PhotoWheel({ eventId, photos, arrivals, onOpen, motion, celebrat
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [motion]);
+  }, [motion, tv]);
 
   // Swipe to spin; a tap opens the photo.
   const down = (e: PointerEvent) => {
@@ -132,7 +149,7 @@ export function PhotoWheel({ eventId, photos, arrivals, onOpen, motion, celebrat
     const g = st.current;
     if (!g.drag) return;
     const W = stage.current?.clientWidth ?? 360;
-    const R = Math.min(W * 0.6, 420);
+    const R = tv ? Math.min(W * 0.38, 1100) : Math.min(W * 0.42, 380);
     const dx = e.clientX - g.drag.x;
     g.drag.moved = Math.max(g.drag.moved, Math.abs(dx));
     if (g.drag.moved > 6) stage.current?.setPointerCapture?.(e.pointerId);
@@ -149,20 +166,23 @@ export function PhotoWheel({ eventId, photos, arrivals, onOpen, motion, celebrat
     if (d && d.moved <= 6) {
       const card = (e.target as HTMLElement).closest<HTMLElement>("[data-slot]");
       const id = card ? slots[Number(card.dataset.slot)] : slots[g.front];
-      if (id) onOpen(id);
+      if (id) onOpen?.(id);
       g.vel = 0;
     }
   };
 
   const byId = new Map(photos.map((p) => [p.id, p]));
+  const top = photos.reduce<WallPhoto | null>((b, p) => ((p.loves ?? 0) > (b?.loves ?? 0) ? p : b), null);
   const frontPhoto = byId.get(slots[front]);
   return (
-    <div className={s("wheelWrap")} aria-hidden="true">
-      <div ref={stage} className={s("wheel")} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={() => { st.current.drag = null; }}>
+    <div className={s("wheelWrap")} data-size={size}>
+      <div ref={stage} className={s("wheel")} aria-hidden="true" onPointerDown={down} onPointerMove={move} onPointerUp={up}
+        onPointerCancel={() => { st.current.drag = null; }}>
         {slots.map((id, i) => {
           const p = byId.get(id);
           const wide = !!p && p.w > p.h * 1.1;
           const src = p ? photoUrl(eventId, p.id, "t") : "";
+          const badge = !p ? null : fresh.includes(p.id) ? "New" : p.fav ? "Host’s pick" : top && top.id === p.id ? "Most loved" : null;
           return (
             <div key={i} data-slot={i} ref={(el) => { cards.current[i] = el; }} className={s("wheelCard")} data-wide={wide ? "" : undefined}>
               {src && (
@@ -173,14 +193,25 @@ export function PhotoWheel({ eventId, photos, arrivals, onOpen, motion, celebrat
                   <img src={src} alt="" className={s("wheelImg")} draggable={false} loading="lazy" decoding="async" />
                 </>
               )}
-              {p && fresh.includes(p.id) && <span className={s("wheelNew")}>New</span>}
+              {badge && <span className={s("wheelBadge")} data-kind={badge === "New" ? "new" : "star"}>{badge}</span>}
+              {!!p?.loves && <span className={s("wheelLoves")}>♥ {p.loves}</span>}
               <span ref={(el) => { shades.current[i] = el; }} className={s("wheelShade")} />
             </div>
           );
         })}
         {bursts.map((k) => <Burst key={k} />)}
       </div>
-      <p className={s("wheelCaption")}>{frontPhoto?.by ? `From ${frontPhoto.by}` : " "}</p>
+      <div className={s("wheelCaption")}>
+        <span>{frontPhoto?.by ? `From ${frontPhoto.by}` : " "}</span>
+        {frontPhoto && onLove && (
+          <button type="button" className={s("loveBtn")} data-on={frontPhoto.mine ? "" : undefined} aria-pressed={!!frontPhoto.mine}
+            aria-label={`${frontPhoto.mine ? "Take back your love for" : "Love"} this photo${frontPhoto.loves ? `, ${frontPhoto.loves} loves` : ""}`}
+            onClick={() => onLove(frontPhoto.id)}>
+            <span aria-hidden="true">{frontPhoto.mine ? "♥" : "♡"}</span> {frontPhoto.loves ? frontPhoto.loves : "Love"}
+          </button>
+        )}
+        {frontPhoto && !onLove && !!frontPhoto.loves && <span>♥ {frontPhoto.loves}</span>}
+      </div>
     </div>
   );
 }

@@ -408,12 +408,18 @@ export const COVER_FITS: { key: CoverFit; name: string; line: string }[] = [
 
 // Up to five photos at the top of the page (0007): how they change from one
 // to the next. Gentle, never flashing; still for anyone who turns movement off.
-export type HeroMotion = "fade" | "zoom" | "slide";
+// Owner, 15 Nov 2026: "one zoom in, fade and slide; another zoom out, fade
+// and slide; and the slide one as is" (0008 renamed fade → zoomin, zoom → zoomout).
+export type HeroMotion = "zoomin" | "zoomout" | "slide";
 export const HERO_MOTIONS: { key: HeroMotion; name: string; line: string }[] = [
-  { key: "fade", name: "Gentle fade", line: "Each photo fades softly into the next" },
-  { key: "zoom", name: "Slow zoom", line: "Each photo drifts in slowly, like a film" },
+  { key: "zoomin", name: "Zoom in", line: "Each photo glides in and fades up, then slowly draws closer" },
+  { key: "zoomout", name: "Zoom out", line: "Each photo glides in and fades up, then slowly draws back" },
   { key: "slide", name: "Slide", line: "Photos slide across, like a phone's gallery" },
 ];
+// Drafts and pages saved before 0008 used the old names.
+export function heroMotionOf(m: string | null | undefined): HeroMotion {
+  return m === "zoomout" || m === "zoom" ? "zoomout" : m === "slide" ? "slide" : "zoomin";
+}
 export const MAX_SHOWCASE = 5; // the main photo plus four more
 
 export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [

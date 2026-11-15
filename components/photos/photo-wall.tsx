@@ -15,7 +15,7 @@ import { preparePhoto } from "@/lib/photo-prep";
 import { queueDelete, queueList, queuePut, sendPhoto, type Queued } from "@/lib/photo-queue";
 import { PhotoWheel } from "./photo-wheel";
 import {
-  PHOTO_MESSAGES, RETRY_REASONS, deviceId, loadWall, photoUrl, publicRpc,
+  PHOTO_MESSAGES, RETRY_REASONS, deviceId, loadWall, lovePhoto, photoUrl, publicRpc,
   type PublicWall, type WallPhoto,
 } from "@/lib/photos";
 
@@ -48,10 +48,11 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
   const wallId = `${type}/${slug}`;
   const [wall, setWall] = useState<PublicWall | null | "error">(null);
   const [photos, setPhotos] = useState<WallPhoto[]>([]);
+  const [featured, setFeatured] = useState<WallPhoto[]>([]);   // favourites and most-loved (0008)
   const [broken, setBroken] = useState<Set<string>>(new Set());
   const [name, setName] = useState("");
   const [sending, setSending] = useState<Sending | null>(null);
-  const [open, setOpen] = useState<number | null>(null);
+  const [open, setOpen] = useState<{ from: "grid" | "wheel"; i: number } | null>(null);
   const [more, setMore] = useState(false);
   const device = useRef<string>("");
   const running = useRef(false);
@@ -65,6 +66,7 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
     const w = await loadWall(type, slug, token, device.current).catch(() => null);
     if (!w) { setWall((old) => (old && old !== "error" ? old : "error")); return; }
     setWall(w);
+    setFeatured(w.featured ?? []);
     const ids = (w.photos ?? []).map((p) => p.id);
     if (!known.current) known.current = new Set(ids);
     else {
@@ -185,6 +187,22 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
     if (w?.photos?.length) setPhotos((old) => [...old, ...w.photos!.filter((p) => !old.some((o) => o.id === p.id))]);
   }
 
+  // Love a photo, or take it back: shown at once, then corrected by the
+  // database's count (0008). One love per phone per photo.
+  async function love(id: string) {
+    const target = [...photos, ...featured].find((p) => p.id === id);
+    if (!target) return;
+    const on = !target.mine;
+    const apply = (f: (p: WallPhoto) => WallPhoto) => {
+      setPhotos((x) => x.map((p) => (p.id === id ? f(p) : p)));
+      setFeatured((x) => x.map((p) => (p.id === id ? f(p) : p)));
+    };
+    apply((p) => ({ ...p, mine: on, loves: Math.max(0, (p.loves ?? 0) + (on ? 1 : -1)) }));
+    const r = await lovePhoto(type, slug, token, id, device.current, on);
+    if (r?.ok) apply((p) => ({ ...p, mine: on, loves: r.loves ?? p.loves }));
+    else apply((p) => ({ ...p, mine: !on, loves: Math.max(0, (p.loves ?? 0) + (on ? -1 : 1)) }));
+  }
+
   if (wall === null) return <p className={s("muted")}>Loading photos…</p>;
   if (wall === "error" || !wall.event || !wall.rules) return <p className={s("muted")}>Guests’ photos will appear here.</p>;
   if (!wall.rules.on) return <p className={s("muted")}>The host has switched off photos for this event.</p>;
@@ -192,15 +210,21 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
   const ev = wall.event;
   const r = wall.rules;
   const visible = photos.filter((p) => !broken.has(p.id));
+  // The wheel: the hosts' favourites and the most-loved first, then the rest, newest first.
+  const featuredIds = new Set(featured.map((p) => p.id));
+  const latest = new Map(visible.map((p) => [p.id, p]));
+  const wheelPhotos = [...featured.filter((p) => !broken.has(p.id)).map((p) => latest.get(p.id) ?? p), ...visible.filter((p) => !featuredIds.has(p.id))];
+  const viewList = open?.from === "wheel" ? wheelPhotos : visible;
   const mine = wall.mine;
   const shareLeft = wall.per_guest != null && mine ? Math.max(0, wall.per_guest - mine.added) : null;
   const busy = sending !== null && sending.message === null;
 
   return (
     <div className={s("photoWall")}>
-      {visible.length >= 3 && (
-        <PhotoWheel eventId={ev.id} photos={visible} arrivals={arrivals} motion={motion} celebrate={motion && !sensitive}
-          onOpen={(id) => { const i = visible.findIndex((p) => p.id === id); if (i >= 0) setOpen(i); }} />
+      {wheelPhotos.length >= 3 && (
+        <PhotoWheel eventId={ev.id} photos={wheelPhotos} stars={featured.map((p) => p.id)} arrivals={arrivals} motion={motion}
+          celebrate={motion && !sensitive} onLove={(id) => void love(id)}
+          onOpen={(id) => { const i = wheelPhotos.findIndex((p) => p.id === id); if (i >= 0) setOpen({ from: "wheel", i }); }} />
       )}
       {r.open ? (
         <div className={s("photoAdd")}>
@@ -235,10 +259,12 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
       {visible.length > 0 ? (
         <div className={s("photoGrid")}>
           {visible.map((p, i) => (
-            <button key={p.id} type="button" className={s("photoTile")} onClick={() => setOpen(i)} aria-label={`Open photo ${i + 1}${p.by ? ` by ${p.by}` : ""}`}>
+            <button key={p.id} type="button" className={s("photoTile")} onClick={() => setOpen({ from: "grid", i })}
+              aria-label={`Open photo ${i + 1}${p.by ? ` by ${p.by}` : ""}${p.loves ? `, ${p.loves} loves` : ""}`}>
               {/* eslint-disable-next-line @next/next/no-img-element -- R2 photos, already sized on the guest's phone */}
               <img src={photoUrl(ev.id, p.id, "t")} alt="" loading="lazy" decoding="async"
                 onError={() => setBroken((b) => new Set(b).add(p.id))} />
+              {(!!p.loves || p.fav) && <span className={s("tileLoves")} aria-hidden="true">{p.fav ? "★ " : ""}{p.loves ? `♥ ${p.loves}` : ""}</span>}
             </button>
           ))}
         </div>
@@ -251,10 +277,12 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
         </button></div>
       )}
 
-      {open !== null && visible[open] && (
-        <Viewer photos={visible} index={open} eventId={ev.id} onIndex={setOpen} onClose={() => setOpen(null)}
+      {open !== null && viewList[open.i] && (
+        <Viewer photos={viewList} index={open.i} eventId={ev.id} onIndex={(i) => setOpen({ from: open.from, i })} onClose={() => setOpen(null)}
+          onLove={(id) => void love(id)}
           onRemoved={(id) => {
             setPhotos((x) => x.filter((p) => p.id !== id));
+            setFeatured((x) => x.filter((p) => p.id !== id));
             setWall((w) => (w && w !== "error" ? { ...w, shown: Math.max(0, (w.shown ?? 1) - 1) } : w));
             setOpen(null);
           }}
@@ -266,8 +294,8 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
 
 // ─────────────── the large view ───────────────
 
-function Viewer({ photos, index, eventId, onIndex, onClose, onRemoved, ask }: {
-  photos: WallPhoto[]; index: number; eventId: string; onIndex: (i: number) => void; onClose: () => void;
+function Viewer({ photos, index, eventId, onIndex, onClose, onRemoved, onLove, ask }: {
+  photos: WallPhoto[]; index: number; eventId: string; onIndex: (i: number) => void; onClose: () => void; onLove: (id: string) => void;
   onRemoved: (id: string) => void; ask: (id: string, note: string) => Promise<{ ok: boolean; reason?: string } | null>;
 }) {
   const p = photos[index];
@@ -321,7 +349,14 @@ function Viewer({ photos, index, eventId, onIndex, onClose, onRemoved, ask }: {
         )}
       </div>
       <div className="grid gap-2 px-4 pb-4 pt-2 text-[15px]" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
-        <p className="m-0 text-white/80">{p.by ? `Added by ${p.by}` : "Added by a guest"} · {ago(p.at)}</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="m-0 text-white/80">{p.fav ? "★ Host’s pick · " : ""}{p.by ? `Added by ${p.by}` : "Added by a guest"} · {ago(p.at)}</p>
+          <button type="button" onClick={() => onLove(p.id)} aria-pressed={!!p.mine}
+            aria-label={`${p.mine ? "Take back your love for" : "Love"} this photo${p.loves ? `, ${p.loves} loves` : ""}`}
+            className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 font-extrabold ${p.mine ? "bg-[#e0245e] text-white" : "bg-white/10 text-white ring-1 ring-white/50"}`}>
+            <span aria-hidden="true" className="text-xl leading-none">{p.mine ? "♥" : "♡"}</span>{p.loves ? p.loves : "Love"}
+          </button>
+        </div>
         {asking ? (
           <div className="grid gap-2 rounded-2xl bg-white/10 p-3">
             <p className="m-0 font-semibold">Ask the host to remove this photo? It comes down straight away while they look.</p>

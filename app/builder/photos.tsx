@@ -20,6 +20,7 @@ export type HostPhoto = {
   id: string; status: "waiting" | "shown" | "hidden"; width: number; height: number; added_by: string | null;
   removal_asked_at: string | null; removal_note: string | null; kept_at: string | null; reviewed_at: string | null;
   ready_at: string | null; created_at: string;
+  favourite?: boolean; love_count?: number;   // 0008
 };
 type Wall = {
   wallKey: string; isPrivate: boolean; photoLimit: number | null; perGuest: number | null;
@@ -37,6 +38,7 @@ export type PhotosState = {
   removeForGood: (ids: string[]) => Promise<boolean>;
   saveRules: (patch: { approve_first?: boolean; early?: boolean }) => Promise<boolean>;
   addOwn: (files: File[], name: string, progress: (done: number) => void) => Promise<{ added: number; problem: string | null }>;
+  setFavourite: (id: string, on: boolean) => Promise<boolean>;
 };
 
 const asked = (p: HostPhoto) => !!p.removal_asked_at && p.status === "hidden" && !p.kept_at && (!p.reviewed_at || p.reviewed_at <= p.removal_asked_at);
@@ -51,12 +53,16 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
   const load = useCallback(async () => {
     if (!eventId || !session) return;
     const sb = supabase();
-    const [p, e, f] = await Promise.all([
-      sb.from("event_photos").select("id, status, width, height, added_by, removal_asked_at, removal_note, kept_at, reviewed_at, ready_at, created_at")
-        .eq("event_id", eventId).neq("status", "uploading").order("ready_at", { ascending: false }).limit(1000),
+    const cols = "id, status, width, height, added_by, removal_asked_at, removal_note, kept_at, reviewed_at, ready_at, created_at";
+    const photosQuery = (extra: string) => sb.from("event_photos").select(cols + extra)
+      .eq("event_id", eventId).neq("status", "uploading").order("ready_at", { ascending: false }).limit(1000);
+    const [first, e, f] = await Promise.all([
+      photosQuery(", favourite, love_count"),
       sb.from("events").select("wall_key, is_private, plans(photo_limit, photos_per_guest)").eq("id", eventId).maybeSingle(),
       sb.from("feature_toggles").select("settings").eq("event_id", eventId).maybeSingle(),
     ]);
+    // Before 0008 has run there are no favourites or love counts yet.
+    const p = first.error?.code === "42703" ? await photosQuery("") : first;
     if (p.error) {
       const missing = p.error.code === "42P01" || p.error.code === "PGRST205" || /event_photos/.test(p.error.message);
       setNotReady(missing);
@@ -65,7 +71,7 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
     }
     setNotReady(false);
     setError(null);
-    setRows(p.data as HostPhoto[]);
+    setRows(p.data as unknown as HostPhoto[]);
     const ev = e.data as { wall_key: string; is_private: boolean; plans: { photo_limit: number | null; photos_per_guest: number | null } | null } | null;
     const settings = ((f.data as { settings?: Record<string, unknown> } | null)?.settings ?? {}) as Record<string, unknown>;
     const pw = (settings.photo_wall ?? {}) as { approve_first?: unknown; early?: unknown };
@@ -147,11 +153,17 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
     return { added, problem };
   }, [eventId, session, load]);
 
+  const setFavourite = useCallback(async (id: string, on: boolean) => {
+    const r = await supabase().from("event_photos").update({ favourite: on }).eq("id", id);
+    await load();
+    return !r.error;
+  }, [load]);
+
   const list = rows ?? [];
   const needsYou = list.filter((p) => p.status === "waiting" || asked(p)).length;
   return {
     rows: live ? rows : null, wall: live ? wall : null, error, notReady, needsYou: live ? needsYou : 0,
-    refresh: () => void load(), setStatus, removeForGood, saveRules, addOwn,
+    refresh: () => void load(), setStatus, removeForGood, saveRules, addOwn, setFavourite,
   };
 }
 
@@ -186,6 +198,7 @@ export function PhotosDialog({ d, eventId, state, onClose, say }: { d: Draft; ev
   const key = w?.isPrivate ? w.wallKey : null;
   const photosLink = type && slug ? `${origin}${wallPath(type, slug, key)}` : null;
   const tvLink = type && slug ? `${origin}${wallPath(type, slug, key, "tv")}` : null;
+  const tvWheelLink = type && slug ? `${origin}${wallPath(type, slug, key, "tv", "wheel")}` : null;
   const printLink = type && slug ? `${origin}${wallPath(type, slug, key, "print")}` : null;
   const title = d.title.trim() || "Our event";
   const wallOff = !d.toggles.photo_wall;
@@ -280,6 +293,7 @@ export function PhotosDialog({ d, eventId, state, onClose, say }: { d: Draft; ev
               <p className="font-semibold">On the day</p>
               <div className="flex flex-wrap gap-2">
                 <a href={tvLink ?? "#"} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center rounded-full bg-brand px-4 text-sm font-bold text-white">Open the TV slideshow</a>
+                <a href={tvWheelLink ?? "#"} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center rounded-full bg-brand px-4 text-sm font-bold text-white">Open the TV wheel</a>
                 <a href={printLink ?? "#"} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center rounded-full bg-wash px-4 text-sm font-bold hover:bg-line">Print table cards with a QR code</a>
                 <a href={whatsappUrl(photosLink, `Add your photos from ${title} here. No app needed:`)} target="_blank" rel="noreferrer"
                   className="inline-flex min-h-10 items-center rounded-full bg-[#25D366] px-4 text-sm font-bold text-[#073B1C]">Send the photo link on WhatsApp</a>
@@ -313,7 +327,7 @@ export function PhotosDialog({ d, eventId, state, onClose, say }: { d: Draft; ev
             </Group>
           )}
 
-          <Group title="On the wall" line={shown.length ? "Tap a photo to hide it or remove it." : "No photos yet. Share the photo link or put the table cards out."}>
+          <Group title="On the wall" line={shown.length ? "Tap a photo to make it a favourite (it comes round the wheel more often), hide it or remove it. ♥ shows guests' loves." : "No photos yet. Share the photo link or put the table cards out."}>
             <Grid photos={shown} eventId={eventId} onPick={setPicked} />
           </Group>
 
@@ -332,8 +346,16 @@ export function PhotosDialog({ d, eventId, state, onClose, say }: { d: Draft; ev
             <img src={photoUrl(eventId, picked.id, "p")} alt="" className="max-h-full max-w-full object-contain" />
           </div>
           <div className="grid gap-2 p-4" onClick={(e) => e.stopPropagation()} style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
-            <p className="text-white/80">{picked.added_by ? `Added by ${picked.added_by}` : "Added by a guest"}</p>
+            <p className="text-white/80">{picked.added_by ? `Added by ${picked.added_by}` : "Added by a guest"}{picked.love_count ? ` · ♥ ${picked.love_count} ${picked.love_count === 1 ? "love" : "loves"}` : ""}</p>
             <div className="flex flex-wrap gap-2">
+              {picked.status === "shown" && picked.favourite !== undefined && (
+                <button type="button" className={`min-h-11 rounded-full px-4 font-bold ${picked.favourite ? "bg-marigold text-ink" : "bg-white text-black"}`}
+                  onClick={async () => {
+                    const on = !picked.favourite;
+                    setPicked(null);
+                    say((await state.setFavourite(picked.id, on)) ? (on ? "A favourite: it comes round the wheel more often." : "No longer a favourite.") : "That didn't work. Please try again.");
+                  }}>{picked.favourite ? "★ Favourite (tap to undo)" : "☆ Make it a favourite"}</button>
+              )}
               {picked.status !== "shown" && <button type="button" className="min-h-11 rounded-full bg-white px-4 font-bold text-black" onClick={() => void act([picked.id], "shown", "On the wall.")}>Show it</button>}
               {picked.status !== "hidden" && <button type="button" className="min-h-11 rounded-full bg-white px-4 font-bold text-black" onClick={() => void act([picked.id], "hidden", "Hidden.")}>Hide it</button>}
               <button type="button" className="min-h-11 rounded-full px-4 font-bold ring-1 ring-white/50" onClick={() => void removeIt([picked.id])}>Remove for good</button>
@@ -379,9 +401,14 @@ function Grid({ photos, eventId, onPick }: { photos: HostPhoto[]; eventId: strin
   return (
     <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
       {photos.map((p) => (
-        <button key={p.id} type="button" onClick={() => onPick(p)} className="aspect-square overflow-hidden rounded-lg bg-wash" aria-label={`Photo${p.added_by ? ` by ${p.added_by}` : ""}`}>
+        <button key={p.id} type="button" onClick={() => onPick(p)} className="relative aspect-square overflow-hidden rounded-lg bg-wash" aria-label={`Photo${p.added_by ? ` by ${p.added_by}` : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element -- R2 thumbnail */}
           <img src={photoUrl(eventId, p.id, "t")} alt="" className="size-full object-cover" loading="lazy" />
+          {(p.favourite || !!p.love_count) && (
+            <span className="absolute bottom-1 left-1 rounded-full bg-ink/75 px-1.5 text-xs font-extrabold text-white">
+              {p.favourite ? "★ " : ""}{p.love_count ? `♥ ${p.love_count}` : ""}
+            </span>
+          )}
         </button>
       ))}
     </div>

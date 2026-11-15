@@ -1,11 +1,15 @@
 // in2min2.com/{type}/{slug}/tv: the guests' photos as a slideshow for a TV
 // or projector (components/photos/slideshow.tsx). The QR code in the corner
 // opens the photos page, with a private event's photo key when it has one.
+// ?style=wheel shows the photo wheel in a night sky instead (components/
+// photos/tv-wheel.tsx).
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { eventFontVariables } from "@/components/event/fonts";
+import { eventVars } from "@/components/event/event-view";
 import { Slideshow } from "@/components/photos/slideshow";
+import { TvWheel } from "@/components/photos/tv-wheel";
 import { WallMessage } from "@/components/photos/wall-frame";
 import { paletteFor, textStyle } from "@/lib/catalog";
 import { wallPath } from "@/lib/photos";
@@ -19,7 +23,8 @@ export async function generateMetadata({ params, searchParams }: PageProps<"/[ty
 
 export default async function TvPage({ params, searchParams }: PageProps<"/[type]/[slug]/tv">) {
   const { type, slug } = await params;
-  const key = keyParam(await searchParams);
+  const sp = await searchParams;
+  const key = keyParam(sp);
   const w = await getWall(type, slug, key);
   if (w === null) notFound();
   if (w === undefined) return <WallMessage title="Photos aren't open yet" line="Please try again a little later." />;
@@ -31,6 +36,14 @@ export default async function TvPage({ params, searchParams }: PageProps<"/[type
   const origin = await siteOrigin();
   const join = `${origin}${wallPath(type, slug, ev.private ? key : null)}`;
   const joinText = ev.private ? "Point your phone’s camera at the code" : `or go to ${origin.replace(/^https?:\/\//, "")}/e/${ev.short_code}`;
+  if (sp.style === "wheel") {
+    return (
+      <main className={eventFontVariables}>
+        <TvWheel type={type} slug={slug} token={key ?? null} eventId={ev.id} title={ev.headline || ev.title} joinUrl={join} joinText={joinText}
+          vars={eventVars(p, ev.text_style)} display={textStyle(ev.text_style).display} motion celebrate={!ev.sensitive} />
+      </main>
+    );
+  }
   return (
     <main className={eventFontVariables}>
       <Slideshow type={type} slug={slug} token={key ?? null} eventId={ev.id} title={ev.headline || ev.title} joinUrl={join} joinText={joinText}

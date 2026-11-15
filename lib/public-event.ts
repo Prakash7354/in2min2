@@ -4,7 +4,7 @@
 
 import { cache } from "react";
 import type { EventCopy } from "@/lib/ai/copy";
-import { eventType, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
+import { eventType, heroMotionOf, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type CoverFit, type EffectKey, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
 import type { EventStageView, EventViewData } from "@/lib/event-view";
 import { mediaUrl } from "@/lib/media";
 import { rpc } from "@/lib/supabase/rest";
@@ -29,7 +29,7 @@ type PublicEvent = {
     scale: Scale; theme: Template; palette: string; primary_color: string; text_style: TextStyle; border: string;
     photo_style: PhotoStyle; motion: boolean; cover_image_key: string | null; cover_fit?: CoverFit; hide_branding: boolean;
     effect?: EffectKey; share_image_key?: string | null;
-    hero_keys?: string[]; hero_motion?: HeroMotion;
+    hero_keys?: string[]; hero_motion?: string;
   };
   people?: { role: "star" | "honour"; relation: string | null; names: string; names_local: string | null }[];
   features?: Partial<Record<ToggleKey, boolean>> & { settings?: { photo_wall?: { early?: boolean } } };
@@ -109,7 +109,7 @@ export const getPublicEvent = cache(async (type: string, slug: string, token?: s
     effect: e.effect ?? "none",
     cover: mediaUrl(e.cover_image_key),
     moreCovers: e.cover_image_key ? (e.hero_keys ?? []).map((k) => mediaUrl(k)).filter((u): u is string => !!u) : [],
-    heroMotion: e.hero_motion ?? "fade",
+    heroMotion: heroMotionOf(e.hero_motion),
     coverFit: e.cover_fit ?? "fill",
     toggles,
     hideBranding: e.hide_branding,

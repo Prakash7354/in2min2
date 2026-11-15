@@ -732,7 +732,7 @@ export function StepLook({ d, update, now }: StepProps) {
             {more.length > 0 && d.photoStyle !== "polaroid" && (
               <>
                 <p className="font-semibold">How they change</p>
-                <Choices<HeroMotion> label="How the photos change" value={d.heroMotion ?? "fade"} columns="grid-cols-1 sm:grid-cols-3"
+                <Choices<HeroMotion> label="How the photos change" value={d.heroMotion ?? "zoomin"} columns="grid-cols-1 sm:grid-cols-3"
                   onChange={(k) => update(set("heroMotion", k))}
                   options={HERO_MOTIONS.map((m) => ({ key: m.key, label: m.name, line: m.line }))} />
                 {!d.motion && <Notice tone="warn">Turn on <strong>Gentle movement</strong> below to show them all. Until then, only the main photo shows.</Notice>}

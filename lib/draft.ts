@@ -5,7 +5,7 @@
 
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
 import {
-  eventType, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
+  eventType, heroMotionOf, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
   type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
 import type { EventViewData, ViewFunction, ViewPerson } from "@/lib/event-view";
@@ -112,7 +112,7 @@ export function newDraft(): Draft {
     cover: null,
     coverFit: "fill",
     moreCovers: [],
-    heroMotion: "fade",
+    heroMotion: "zoomin",
     toggles: togglesFor(null),
     slug: "",
     isPrivate: false,
@@ -160,7 +160,7 @@ export function loadDraft(): Draft {
     if (parsed?.v !== 1) return newDraft();
     const base = newDraft();
     return { ...base, ...parsed, copy: { ...base.copy, ...parsed.copy }, translation: { ...base.translation, ...parsed.translation },
-      toggles: { ...base.toggles, ...parsed.toggles } };
+      toggles: { ...base.toggles, ...parsed.toggles }, heroMotion: heroMotionOf(parsed.heroMotion) };
   } catch {
     return newDraft();
   }
@@ -281,7 +281,7 @@ export function toViewData(d: Draft): EventViewData {
     cover: d.cover,
     coverFit: d.coverFit,
     moreCovers: d.cover ? d.moreCovers ?? [] : [],
-    heroMotion: d.heroMotion ?? "fade",
+    heroMotion: heroMotionOf(d.heroMotion),
     toggles: d.toggles,
     hideBranding: plan(d.plan).hideBranding,
   };

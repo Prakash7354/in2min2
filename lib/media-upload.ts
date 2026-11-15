@@ -191,7 +191,7 @@ export async function saveMedia(sb: SupabaseClient, d: Draft, eventId: string): 
 async function saveShowcase(sb: SupabaseClient, d: Draft, eventId: string, coverKey: string | null): Promise<{ heroKeys: string[]; heroHash: string; heroNote: string | null }> {
   const more = d.cover ? (d.moreCovers ?? []).slice(0, 4) : [];
   const hashes = more.map((u) => djb2(u));
-  const heroHash = djb2(JSON.stringify([hashes, d.heroMotion ?? "fade"]));
+  const heroHash = djb2(JSON.stringify([hashes, d.heroMotion ?? "zoomin"]));
   const had = (d.heroKeys ?? []).filter((k) => k.startsWith(eventId));
   if (d.heroHash === heroHash) return { heroKeys: had, heroHash, heroNote: null };
 
@@ -206,7 +206,11 @@ async function saveShowcase(sb: SupabaseClient, d: Draft, eventId: string, cover
     if (up.error) return { heroKeys: had, heroHash: d.heroHash ?? "", heroNote: up.error.message };
     keys.push(key);
   }
-  const r = await sb.from("events").update({ hero_keys: keys, hero_motion: d.heroMotion ?? "fade" }).eq("id", eventId);
+  let r = await sb.from("events").update({ hero_keys: keys, hero_motion: d.heroMotion ?? "zoomin" }).eq("id", eventId);
+  // Before 0008 has run, the database knows only the old names.
+  if (r.error?.code === "23514") {
+    r = await sb.from("events").update({ hero_keys: keys, hero_motion: d.heroMotion === "zoomout" ? "zoom" : d.heroMotion === "slide" ? "slide" : "fade" }).eq("id", eventId);
+  }
   if (r.error) {
     if (keys.length) await store.remove(keys.filter((k) => !had.includes(k)));
     return { heroKeys: had, heroHash: d.heroHash ?? "", heroNote: `${r.error.code ?? ""} ${r.error.message}` };

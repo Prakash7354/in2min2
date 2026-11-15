@@ -4,7 +4,8 @@
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 export type WallRules = { on: boolean; approve_first: boolean; early: boolean; open: boolean };
-export type WallPhoto = { id: string; w: number; h: number; by: string | null; at: string };
+// loves: love taps (0008); mine: this phone loved it; fav: one of the hosts' favourites.
+export type WallPhoto = { id: string; w: number; h: number; by: string | null; at: string; loves?: number; mine?: boolean; fav?: boolean };
 export type WallEvent = {
   id: string; type: string; slug: string; short_code: string; title: string; headline: string | null;
   scale: "personal" | "celebration" | "community"; palette: string; primary_color: string; text_style: string;
@@ -20,6 +21,7 @@ export type PublicWall = {
   per_guest?: number | null;
   shown?: number;
   photos?: WallPhoto[];
+  featured?: WallPhoto[];   // favourites and the most-loved, wherever they are (0008)
   mine?: { added: number; waiting: number } | null;
 };
 
@@ -27,8 +29,9 @@ export const photoUrl = (eventId: string, id: string, size: "p" | "t") => `/m/${
 
 // The photos page, and the TV slideshow. A private event's links carry its
 // photo key (k), which opens the photos only.
-export function wallPath(type: string, slug: string, key?: string | null, page: "photos" | "tv" | "print" = "photos") {
-  return `/${type}/${slug}/${page}${key ? `?k=${encodeURIComponent(key)}` : ""}`;
+export function wallPath(type: string, slug: string, key?: string | null, page: "photos" | "tv" | "print" = "photos", style?: "wheel") {
+  const q = new URLSearchParams({ ...(key ? { k: key } : {}), ...(style ? { style } : {}) }).toString();
+  return `/${type}/${slug}/${page}${q ? `?${q}` : ""}`;
 }
 
 // What the phone shows when a photo can't be added.
@@ -66,6 +69,13 @@ export function loadWall(type: string, slug: string, token: string | null, devic
   return publicRpc<PublicWall | null>("public_photos", {
     p_type: type, p_slug: slug, p_token: token, p_device: device, p_before: before ?? null, p_limit: 60,
   });
+}
+
+// Love a photo, or take the love back (0008). One per phone per photo.
+export function lovePhoto(type: string, slug: string, token: string | null, id: string, device: string, love: boolean) {
+  return publicRpc<{ ok: boolean; loves?: number; mine?: boolean; reason?: string }>("love_photo", {
+    p_type: type, p_slug: slug, p_token: token, p_photo: id, p_device: device, p_love: love,
+  }).catch(() => null);
 }
 
 // A random id for this phone, kept in its storage: it counts the phone's share.

@@ -22,7 +22,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ### [ ] 1. Run one database file (3 minutes)
 
-[`0007_showcase_and_host_photos.sql`](../supabase/migrations/0007_showcase_and_host_photos.sql) switches on the extra photos at the top of the page and your own photos on the wall.
+[`0008_loves_and_favourites.sql`](../supabase/migrations/0008_loves_and_favourites.sql) switches on love taps, your favourites, and the new Zoom in and Zoom out movements. (0007 ran on 15 Nov.)
 1. In VS Code, open the file above. Press **Cmd+A**, then **Cmd+C**.
 2. In Supabase, click **SQL Editor** (left menu), then **New query**.
 3. Click in the empty box, press **Cmd+V**, then click **Run** (bottom right).
@@ -32,7 +32,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 **On your phone:**
 1. Open **in2min2.com**. Under *Festive launch*, tap **Christmas party**. If your own event opens instead, either carry on with it, or tap **Settings** (top right) › **Start a new event** and tap Christmas party again.
-2. Fill in the steps. On **The look**, add a main photo, then tap **+ Add photos** for up to four more, and pick **How they change** (Gentle fade, Slow zoom or Slide). Try a **Moving effect** too (Snow, Fireworks, Petals).
+2. Fill in the steps. On **The look**, add a main photo, then tap **+ Add photos** for up to four more, and pick **How they change** (Zoom in, Zoom out or Slide). Try a **Moving effect** too (Snow, Fireworks, Petals).
 3. On **Check and publish**, press **Publish** (or **Update my page**) and wait for **Published!**
 4. Still on that step, tap **Photos, TV slideshow and table cards**. Turn on **Let guests add photos before the day** (your party is weeks away, so photos would otherwise open on the day). Close the window.
 5. Tap **Share** (top right) › **The invitation** › **WhatsApp**, and send it to your wife.
@@ -43,14 +43,14 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 8. Under **Can you come?**, tap **Yes**. Type her name, choose **2** people, write a short message, and tap **Send my reply**.
 9. Tap **Add to Google Calendar** (Android) or **Add to iPhone or Outlook** (iPhone). Check the date and time.
 10. Further down, under **Photos**, tap **Add your photos**. Choose 3 photos from her phone, and take one new photo with the camera.
-11. Close the page and open the link again. It should say **Thank you, …!**, and her photos should show under Photos. With 3 or more photos they turn on a **wheel**: swipe it, and tap a photo to open it large. Add one more photo and watch it arrive with confetti.
+11. Close the page and open the link again. It should say **Thank you, …!**, and her photos should show under Photos. With 3 or more photos they turn on a **wheel**: swipe it, and tap a photo to open it large. Add one more photo and watch it arrive with confetti. Tap the **heart** under the wheel: the count goes up on your phone too.
 
 **Back on your phone:**
 12. Within a minute, the **bell** shows her reply. Tap **See replies**: her name, the number and her message.
 13. Tap the bell again › **See photos**. Her photos are **On the wall**. Tap one › **Hide it**, and check it has gone from her page.
     In the same window, tap **Add your photos** and add two of your own. They show on her page straight away.
 14. In the same window, tap **Print table cards with a QR code**. Point her phone's camera at a card on your screen: it should open the photos page.
-15. Optional, on a laptop: open the **TV slideshow** from the same window, press **Full screen**, then add a photo from her phone. Within 15 seconds it shows with **New**.
+15. Optional, on a laptop: open the **TV wheel** (or the **TV slideshow**) from the same window, press **Full screen**, then add a photo from her phone. Within 15 seconds it arrives with **New**. In the Photos window, tap a photo › **Make it a favourite**: it comes round more often, marked **Host's pick**.
 16. Tell Claude Code what worked and what didn't. If a screen shows **"Details for Claude Code:"**, copy that line.
 
 ### [ ] 3. Approve the three drafts (10 minutes)
@@ -62,14 +62,19 @@ Everything you decided is now in them, and the yellow boxes are gone. The ICO nu
 
 When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Draft" label and links them from the bottom of every page and from sign-in.
 
-### [ ] 4. Three short charging answers, then choose the next build
+### [ ] 4. Four short answers, then the next build
 
-Your answers of 15 Nov are in `docs/CONCEPT.md`, section 5i. Reply yes or no to each:
+Reply yes or no to each (details in `docs/CONCEPT.md`, sections 5i and 12c):
 1. **Festive launch:** everything free with the Season limits (300 people, 300 photos), and pages made before 31 January stay up 90 days after their event?
 2. **Memorials:** free for up to 12 months, never asked to pay?
 3. **Community events:** time prices of about £19 (90 days), £29 (6 months) and £49 (12 months)?
+4. **Photographers:**
+   - a private photographer link, with their credit on every photo and a "Book them" card;
+   - free on family events;
+   - a paid "Official photographer" spot on community events;
+   - a partner scheme.
 
-Then reply "go" to the next build, or change the order.
+   Build it next?
 
 ## Before the January pilot, or before sharing links widely
 
