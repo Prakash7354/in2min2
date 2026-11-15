@@ -22,7 +22,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ### [ ] 1. Run one database file (3 minutes)
 
-[`0008_loves_and_favourites.sql`](../supabase/migrations/0008_loves_and_favourites.sql) switches on love taps, your favourites, and the new Zoom in and Zoom out movements. (0007 ran on 15 Nov.)
+[`0009_photographers_and_sky.sql`](../supabase/migrations/0009_photographers_and_sky.sql) switches on photographers and the sky behind the photo wheel. (0007 and 0008 ran on 15 Nov.)
 1. In VS Code, open the file above. Press **Cmd+A**, then **Cmd+C**.
 2. In Supabase, click **SQL Editor** (left menu), then **New query**.
 3. Click in the empty box, press **Cmd+V**, then click **Run** (bottom right).
@@ -49,6 +49,8 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 12. Within a minute, the **bell** shows her reply. Tap **See replies**: her name, the number and her message.
 13. Tap the bell again › **See photos**. Her photos are **On the wall**. Tap one › **Hide it**, and check it has gone from her page.
     In the same window, tap **Add your photos** and add two of your own. They show on her page straight away.
+    Still in the Photos window, try a **Sky behind the photo wheel** (Day, Evening, Night, Galaxy or Northern lights), then look at her page again.
+    Under **Your photographer**, add a pretend photographer (your own name and @instagram), tap **Copy their link**, open it in your phone's browser and add three photos. On her page they show **Photo: …** and a **Book them** card.
 14. In the same window, tap **Print table cards with a QR code**. Point her phone's camera at a card on your screen: it should open the photos page.
 15. Optional, on a laptop: open the **TV wheel** (or the **TV slideshow**) from the same window, press **Full screen**, then add a photo from her phone. Within 15 seconds it arrives with **New**. In the Photos window, tap a photo › **Make it a favourite**: it comes round more often, marked **Host's pick**.
 16. Tell Claude Code what worked and what didn't. If a screen shows **"Details for Claude Code:"**, copy that line.
@@ -62,19 +64,12 @@ Everything you decided is now in them, and the yellow boxes are gone. The ICO nu
 
 When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Draft" label and links them from the bottom of every page and from sign-in.
 
-### [ ] 4. Four short answers, then the next build
+### [ ] 4. Choose the next build
 
-Reply yes or no to each (details in `docs/CONCEPT.md`, sections 5i and 12c):
-1. **Festive launch:** everything free with the Season limits (300 people, 300 photos), and pages made before 31 January stay up 90 days after their event?
-2. **Memorials:** free for up to 12 months, never asked to pay?
-3. **Community events:** time prices of about £19 (90 days), £29 (6 months) and £49 (12 months)?
-4. **Photographers:**
-   - a private photographer link, with their credit on every photo and a "Book them" card;
-   - free on family events;
-   - a paid "Official photographer" spot on community events;
-   - a partner scheme.
-
-   Build it next?
+Your answers of 15 Nov are written into `docs/CONCEPT.md` (5i and 12c). Reply "go", or change the order:
+1. **Posters and printed invitations** with QR codes, ready for home printers and print shops (the QR maker is built).
+2. **Help for families who find forms hard:** AI fills the builder from a photo of a printed card or a voice note; a Listen button; Nepali buttons.
+3. **Before the January pilot (must do):** photo clean-up after pages close, nightly backups, and Turnstile against bots.
 
 ## Before the January pilot, or before sharing links widely
 

@@ -7,7 +7,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
-import { partyColours, textStyle, type HeroMotion, type Palette } from "@/lib/catalog";
+import { partyColours, skyFor, textStyle, type HeroMotion, type Palette } from "@/lib/catalog";
 import {
   daysUntil, directionsUrl, formatDate, formatTime, monogram, runningOrder,
   type EventStageView, type EventViewData, type MenuItem,
@@ -141,7 +141,7 @@ function Fan({ d }: { d: EventViewData }) {
   const pics = d.cover ? [d.cover, ...d.moreCovers] : [];
   const R = 42; // in --u (1% of the page width), as the real wheel; thumbnails stay exact small copies
   return (
-    <div className={s.fan} aria-hidden="true">
+    <div className={`${s.fan} ${s.sky}`} data-sky={skyFor(d.palette)} aria-hidden="true">
       {FAN.map((k, i) => {
         const th = (k * Math.PI) / 5;
         const c = Math.cos(th);

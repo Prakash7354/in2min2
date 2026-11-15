@@ -1,11 +1,24 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.12, 15 November 2026 (evening). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.13, 15 November 2026 (night). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.13 (15 Nov 2026, night):**
+- 0008 has run.
+- **Five skies behind the photo wheel:** day, evening, night, galaxy and northern lights. "Match my colours" picks one from the event's colours, and the host can choose in the Photos window. Pure CSS.
+- **Photographers (built; 12c):**
+  - A private upload link with no account.
+  - Their name on every photo, and a "Book them" card for guests.
+  - Up to three per event, and the host can switch a link off.
+  - Needs 0009.
+- **The owner's answers on charging** (5i):
+  - Festive launch with Season limits and 90 days after the event.
+  - Memorials free for 12 months.
+  - Community time plans at £19, £29 and £49, with Half only for registered charities with strong evidence by email.
 
 **What changed in version 3.12 (15 Nov 2026, evening; owner's notes after seeing the wheel):**
 - 0007 has run.
@@ -477,6 +490,13 @@ The owner asked how to charge fairly when most community money is cash, people r
   - Then one reminder two days before the page closes, and a free "Download all photos" so nobody ever loses their memories. Payment is then a choice to keep the page, never a ransom.
 - **Community time prices (Recommended for decision):** about £19 (90 days), £29 (6 months) and £49 (12 months). They hold 2,000 photos and big crowds, and usually take money.
 
+**The owner's answers, 15 Nov 2026 (night):**
+- **Festive launch:** yes. Everything is free with the Season limits (300 people, 300 photos), and pages made before 31 January stay up 90 days after their event.
+- **Memorials:** yes. Free for up to 12 months, never asked to pay.
+- **Community time plans:** yes, about £19 (90 days), £29 (6 months) and £49 (12 months).
+  - Half price applies as for every plan: only for a registered charity, or a small charity or armed forces welfare event. It needs a request by email with strong evidence.
+  - Saying "not for profit" is not enough, because many big community events take money for everything (5h).
+
 **Cash and off-platform selling at community events.** Don't fight cash; make online the better choice for everyone:
 1. **Online cheaper than the gate.** The organiser sets, say, £5 online and £7 on the day. Buyers choose online themselves, and the booking fee fits inside the difference.
 2. **"Pay here" QR at the gate**: card on the buyer's own phone, as quick as cash, with no card reader (14c).
@@ -882,7 +902,18 @@ Most events need tens to a few hundred photos. A big mela or tournament may get 
 
 **The TV wheel.** `/{type}/{slug}/tv?style=wheel` is the same wheel filling a TV in the night sky, with the title and a QR code. It checks for new photos every 15 seconds, and new ones arrive with confetti. The builder's Photos window has **Open the TV wheel** next to **Open the TV slideshow**.
 
-### 12c. Photographers (Recommended, owner's question of 15 Nov 2026)
+### 12c. Photographers (Decided by the owner, 15 Nov 2026: "build the plan ... allow them to get associated but still fee charges"; built the same night, 0009)
+
+**Built.**
+- **For the host:** in the Photos window, "Your photographer" takes a name, business and link (website, @instagram or phone).
+  - It makes a private link, `/photographer/{key}`, that the host sends on WhatsApp or copies.
+  - The host can switch the link off or remove the photographer (their photos stay, without the credit). Up to three per event.
+- **For the photographer:** their page takes many photos at once, prepared like guests' photos and kept on the device until sent.
+  - Their photos go straight on the wall, credited "Photo: Ram Studio", and use the event's photo space.
+- **For guests:** a "Photos by Ram Studio · Book them" card in the gallery, linking to the website, Instagram or phone.
+- **Still to do:** the paid "Official photographer" placement on community events and the partner scheme, with payments in February.
+
+The plan as recommended:
 
 Most events have a photographer, paid or volunteer. Done well, they help everyone:
 
@@ -1258,6 +1289,7 @@ All three are also offered to hosts as event colours (7).
 - **`0002_grants_and_ai_limit.sql` (14 Nov 2026):** explicit rights for anon, authenticated and service_role, because Supabase stopped granting them automatically on 30 Oct 2026. Plus `ai_usage` and `take_ai_write()`: 20 AI writes a day per signed-in person. The test harness is now as strict as Supabase (no automatic rights), so a missing grant fails the checks.
 - **`0004_replies_festive_effects.sql` (14 Nov 2026):** `submit_rsvp()`; the Christmas party, New Year's Eve and Lhosar event types; `events.effect`; `events.share_image_key`, and both picture keys tied to the event's own folder; `public_event()` with these.
 - **`0005_event_photos.sql` (14 Nov 2026):** the `event-media` bucket and its four storage policies (`media_path_ok()`), kept separate so a storage problem can't block 0004.
+- **`0009_photographers_and_sky.sql` (15 Nov 2026):** `photo_rules()` with the sky; `event_photographers` (Row Level Security: hosts read, the owner and co-hosts add, change and remove, up to three); `event_photos.photographer_id`; `photographer_wall()` and `add_photographer_photo()` through the private key; `public_photos()` with each photo's credit and the photographers for "Book them". 22 checks.
 - **`0008_loves_and_favourites.sql` (15 Nov 2026):** `hero_motion` renamed to zoomin, zoomout and slide (old values mapped); `event_photos.favourite` and `love_count`; `photo_loves` (Row Level Security: the event's hosts read; the public only through `love_photo()`); `public_photos()` with loves, mine, fav and featured. 22 checks.
 - **`0007_showcase_and_host_photos.sql` (15 Nov 2026):** `events.hero_keys` (up to four, own folder, `media_keys_own()`) and `events.hero_motion`; `public_event()` with both; `event_photos.by_host`; `add_host_photo()`; `photo_stored()` showing hosts' photos at once. 14 checks.
 - **`0006_photo_wall.sql` (14 Nov 2026):** `event_photos` (Row Level Security: hosts read, helpers and up hide or show, nobody inserts or deletes from the browser), `events.wall_key`, `photo_access()`, `photo_rules()`, `public_photos()`, `add_photo()`, `photo_stored()`, `ask_photo_removal()` and `remove_photos()`. 49 checks.
@@ -1285,6 +1317,7 @@ Small events run all year, so the personal and celebration side comes first and 
 | 1c (built 14 Nov, evening) | After the owner's first phone test: the running order with menus and two switches (0003); the photo above the border and "show the whole picture"; a smarter event page (countdown, date-and-place card, timeline, big reply buttons, minimum text sizes); Share, the bell and Settings at the top right; the AI writer panel; sign-in in its own window; Share on the public page | Live once the owner runs 0003 | The owner adds a running order with a menu on his phone and sees it on the guest link |
 | 1d (built 14 Nov, night) | The Share panel with every link and a ready-made message per moment; links to parts of the page; drafts of the privacy notice, terms and prices and fair fees | | Tested in Chrome at phone width |
 | 1e (built 14 Nov, late night) | Working replies with calendar links, the Replies window and bell; the main photo and WhatsApp preview picture; festive types, seasonal colours, three borders and moving effects; the festive banner on the home page | Live (0004 and 0005 run 14 Nov) | A guest replies from a WhatsApp link on a second phone and the host sees it |
+| 1i (built 15 Nov, night) | Five skies behind the wheel; photographers with a private link, credits and "Book them" | Live once the owner runs 0009 | A photographer adds 20 photos from a laptop; guests see the credit and the card |
 | 1h (built 15 Nov, evening) | Zoom in and zoom out movements; the wheel in a night sky; love taps with counts; hosts' favourites; the TV wheel | Live once the owner runs 0008 | Guests love photos on two phones; the counts match on the TV wheel |
 | 1g (built 15 Nov) | Up to five photos at the top with fade, zoom or slide; hosts' own photos on the wall; icons beside headings; the pricing principle (5i) | Live once the owner runs 0007 | The owner adds four photos on his phone and watches them take turns on the guest link |
 | 1f (built 14 Nov, late night) | The guests' photo wall from phase 3: adding photos with no app, shrinking and removing the location on the phone, sending after bad signal, approve-first, removal requests, the host's Photos window and bell, the TV slideshow, table cards and a poster with QR codes made in-house | Live (0006 run and the bucket created, 14 Nov) | 20 photos from two phones reach the TV; the host hides one |
@@ -1301,7 +1334,7 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
 ## 21. Security and resilience (owner: "crucial")
 
 **Against data leaks:**
-- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 295 checks today, plus 67 on the builder's catalogue and prices, and they run before every commit.
+- **Row Level Security on every table**, with a check for each role (owner, co-host, helper, another host, the public). There are 317 checks today, plus 67 on the builder's catalogue and prices, and they run before every commit.
 - **The public reads no table**, only functions that return what a guest may see. Server-only columns (plan, money, domain) can't be written from a browser.
 - **Hold as little as possible:**
   - no dates of birth, ID documents or player ages;
@@ -1504,7 +1537,8 @@ The same deletion runs automatically 30 days after a page closes.
 6. (Answered: community events buy time like everyone else, from 7 days free.) Still open: community time prices of £19, £29 and £49? (Yes) A flat "Event day" pack for big community events? (Yes, price in February)
 7. Festive launch: everything free with Season limits, and pages made before 31 January stay up 90 days after their event? (Yes)
 8. Memorials: free for up to 12 months? (Yes)
-9. Photographers (12c): a photographer link with credit and a "Book them" card; free on family events, a paid "Official photographer" placement on community events; a photographer partner scheme? (Yes, build next)
+9. (Answered: photographers built; the paid placement and partner scheme come with payments.)
+2b. (Answered 15 Nov night: festive launch, memorials and community prices all as recommended; Half by email with strong evidence.)
 5. What to build next (4b). (Working replies and the guest list; the photo on the guest page and the WhatsApp preview picture; then festive designs and the festive offer on the home page, all by about 1 December.)
 
 ## 24. More ideas (backlog)

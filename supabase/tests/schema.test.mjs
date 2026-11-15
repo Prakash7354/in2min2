@@ -743,6 +743,72 @@ await q(`delete from events where id = $1`, [lv.id]);
 await db.exec(`reset role`);
 ok("deleting an event deletes its loves", (await q(`select count(*)::int n from photo_loves where event_id = $1`, [lv.id]))[0].n === 0);
 
+console.log("Photographers and the sky behind the wheel (0009):");
+await as(A);
+const [pgev] = await q(`insert into events (event_type, slug, title, starts_at, ends_at, status, organiser_name, organiser_type, for_profit)
+  values ('lhosar','pg-lhosar','Lhosar with a photographer', now() - interval '1 hour', now() + interval '6 hours', 'published', 'Riverside Community Association', 'community_group', false) returning id`);
+await as(null);
+let pgw = (await q(`select public_photos('lhosar','pg-lhosar') as r`))[0].r;
+ok("the sky behind the wheel starts on auto", pgw.rules.sky === "auto");
+await as(A);
+await q(`update feature_toggles set settings = jsonb_set(settings, '{photo_wall}', '{"sky": "aurora"}') where event_id = $1`, [pgev.id]);
+await as(null);
+ok("the host can choose northern lights", (await q(`select public_photos('lhosar','pg-lhosar') as r`))[0].r.rules.sky === "aurora");
+await as(A);
+await q(`update feature_toggles set settings = jsonb_set(settings, '{photo_wall}', '{"sky": "mars"}') where event_id = $1`, [pgev.id]);
+await as(null);
+ok("an unknown sky falls back to auto", (await q(`select public_photos('lhosar','pg-lhosar') as r`))[0].r.rules.sky === "auto");
+
+await as(A);
+const [pg1] = await q(`insert into event_photographers (event_id, name, business, link) values ($1, 'Ram Thapa', 'Ram Studio', 'https://ramstudio.example') returning id, upload_key`, [pgev.id]);
+ok("the owner adds a photographer, who gets a private upload key", /^[0-9a-f]{32}$/.test(pg1.upload_key));
+await expectError("a host can't choose the upload key", `insert into event_photographers (event_id, name, upload_key) values ('${pgev.id}', 'X', '${"a".repeat(32)}')`, /permission denied/);
+await q(`insert into event_photographers (event_id, name) values ($1, 'Two'), ($1, 'Three')`, [pgev.id]);
+await expectError("at most three photographers per event", `insert into event_photographers (event_id, name) values ('${pgev.id}', 'Four')`, /row-level security/);
+await q(`delete from event_photographers where event_id = $1 and name in ('Two', 'Three')`, [pgev.id]);
+await as(null);
+await expectError("the public can't read photographers or their keys", `select * from event_photographers`, /permission denied/);
+await as(B);
+ok("another host sees none of A's photographers", (await q(`select id from event_photographers where event_id = $1`, [pgev.id])).length === 0);
+await as(A);
+await q(`insert into event_hosts (event_id, user_id, role) values ($1, $2, 'helper')`, [pgev.id, C]);
+await as(C);
+ok("a helper can see the photographer", (await q(`select id from event_photographers where event_id = $1`, [pgev.id])).length === 1);
+await expectError("…but can't add one", `insert into event_photographers (event_id, name) values ('${pgev.id}', 'Helper pick')`, /row-level security/);
+
+await as(null);
+const pgWall = (await q(`select photographer_wall($1) as r`, [pg1.upload_key]))[0].r;
+ok("the photographer's link opens their upload page", pgWall.photographer.business === "Ram Studio" && pgWall.event.title === "Lhosar with a photographer" && pgWall.active === true);
+ok("a wrong key opens nothing", (await q(`select photographer_wall($1) as r`, ["0".repeat(32)]))[0].r === null);
+const pa = (await q(`select add_photographer_photo($1, 1600, 1067, 400000) as r`, [pg1.upload_key]))[0].r;
+ok("the photographer adds a photo with no account", pa.ok === true, JSON.stringify(pa));
+const ps = (await q(`select photo_stored($1, $2) as r`, [pa.id, pa.secret]))[0].r;
+ok("…it goes straight on the wall, though guests' photos here wait for an OK", ps.status === "shown");
+pgw = (await q(`select public_photos('lhosar','pg-lhosar') as r`))[0].r;
+ok("…credited to the studio", pgw.photos[0].pg === "Ram Studio" && pgw.photos[0].by === "Ram Studio");
+ok("the gallery lists the photographer for the Book them card", pgw.photographers.length === 1 && pgw.photographers[0].link === "https://ramstudio.example" && pgw.photographers[0].photos === 1);
+ok("a bad size is refused", (await q(`select add_photographer_photo($1, 9000, 1067, 400000) as r`, [pg1.upload_key]))[0].r.reason === "bad_photo");
+await as(A);
+await q(`update event_photographers set active = false where id = $1`, [pg1.id]);
+await as(null);
+ok("a switched-off link takes no more photos", (await q(`select add_photographer_photo($1, 1600, 1067, 400000) as r`, [pg1.upload_key]))[0].r.reason === "no_link");
+ok("…and drops off the Book them card", (await q(`select public_photos('lhosar','pg-lhosar') as r`))[0].r.photographers.length === 0);
+await as(A);
+await q(`update event_photographers set active = true where id = $1`, [pg1.id]);
+await db.exec(`reset role; insert into event_photos (event_id, status, width, height, bytes, device, ready_at, created_at)
+  select '${pgev.id}', 'shown', 100, 100, 100, 'pgfill' || lpad(i::text, 18, '0'), now(), now() - interval '1 day' from generate_series(1, 1999) i`);
+await as(null);
+ok("photographers' photos count towards the event's photo space", (await q(`select add_photographer_photo($1, 1600, 1067, 400000) as r`, [pg1.upload_key]))[0].r.reason === "full");
+await db.exec(`reset role; delete from event_photos where device like 'pgfill%'`);
+await as(A);
+await q(`delete from event_photographers where id = $1`, [pg1.id]);
+await as(null);
+pgw = (await q(`select public_photos('lhosar','pg-lhosar') as r`))[0].r;
+ok("removing a photographer keeps their photos, without the credit", pgw.photos.length === 1 && pgw.photos[0].pg === null);
+ok("…and their link stops working", (await q(`select photographer_wall($1) as r`, [pg1.upload_key]))[0].r === null);
+await as(A);
+await q(`delete from events where id = $1`, [pgev.id]);
+
 console.log("Delete everything:");
 await as(C);  // C is a helper on A's wedding
 const hd = await db.query(`delete from events where id = $1`, [ev.id]);

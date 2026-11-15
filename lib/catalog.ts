@@ -422,6 +422,36 @@ export function heroMotionOf(m: string | null | undefined): HeroMotion {
 }
 export const MAX_SHOWCASE = 5; // the main photo plus four more
 
+// The sky behind the photo wheel (owner, 15 Nov 2026; 0009 stores the host's
+// choice in settings.photo_wall.sky). "auto" picks one from the colours.
+export type Sky = "day" | "evening" | "night" | "galaxy" | "aurora";
+export const SKIES: { key: Sky | "auto"; name: string; line: string }[] = [
+  { key: "auto", name: "Match my colours", line: "Picked for you from your event's colours" },
+  { key: "day", name: "Day sky", line: "Soft blue sky with a warm sun and drifting clouds" },
+  { key: "evening", name: "Evening", line: "A sunset glow, from gold to purple" },
+  { key: "night", name: "Night", line: "Deep blue night with twinkling stars" },
+  { key: "galaxy", name: "Galaxy", line: "The Milky Way in pinks, purples and blues" },
+  { key: "aurora", name: "Northern lights", line: "Green and violet lights swaying over the stars" },
+];
+function hueOf(hex: string): number {
+  const n = parseInt(hex.replace("#", ""), 16);
+  const r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  if (!d) return 0;
+  const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return (h * 60 + 360) % 360;
+}
+// Auto: northern lights for a winter night, a galaxy for colour blends,
+// night for dark pages, an evening glow for warm colours, otherwise day.
+export function skyFor(p: Palette, chosen?: string | null): Sky {
+  if (chosen && chosen !== "auto" && SKIES.some((s) => s.key === chosen)) return chosen as Sky;
+  if (p.key === "winter_night") return "aurora";
+  if (p.gradient) return "galaxy";
+  if (p.dark) return "night";
+  const h = hueOf(p.main);
+  return h >= 330 || h < 60 ? "evening" : "day";
+}
+
 export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [
   { key: "hero", name: "Hero", line: "The photo fills the top" },
   { key: "arch", name: "Arch", line: "The photo in an arch, for a child or a couple" },

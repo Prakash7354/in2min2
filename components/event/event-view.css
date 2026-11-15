@@ -1619,3 +1619,117 @@ button.ev-btn { cursor: pointer; }
   object-fit: cover;
   display: block;
 }
+
+/* ── Skies behind the photo wheel (0009; catalog SKIES, skyFor) ──
+   .ev-sky sits on the wheel (.ev-wheelWrap) and on the builder's preview
+   (.ev-fan). Night is the base look above; the others replace it. */
+.ev-sky[data-sky="day"] {
+  color: #1c1a3a;
+  background:
+    radial-gradient(circle at 84% 14%, #fffce8 0 3.5%, rgba(255, 236, 170, 0.6) 7%, rgba(255, 236, 170, 0) 22%),
+    radial-gradient(ellipse 60% 40% at 50% 62%, color-mix(in srgb, var(--ev-accent) 18%, transparent), transparent 70%),
+    linear-gradient(180deg, #5aa8ec 0%, #8cc8f6 45%, #cfe9fc 80%, #eef8ff 100%);
+}
+.ev-sky[data-sky="day"]::before {
+  inset: 0 -12%;
+  background-image:
+    radial-gradient(ellipse 16% 6% at 18% 24%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 11% 5% at 25% 20%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 18% 6% at 70% 36%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 12% 5% at 64% 32%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 22% 7% at 38% 88%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 15% 5% at 86% 80%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 70%);
+  animation: ev-clouds 50s ease-in-out infinite alternate;
+}
+.ev-sky[data-sky="day"]::after { display: none; }
+@keyframes ev-clouds {
+  from { transform: translateX(-5%); }
+  to { transform: translateX(5%); }
+}
+.ev-sky[data-sky="day"] .ev-wheelShade { background: #e4f1fd; }
+.ev-sky[data-sky="day"] .ev-loveBtn { color: #1c1a3a; border-color: rgba(28, 26, 58, 0.35); background: rgba(255, 255, 255, 0.6); }
+.ev-sky[data-sky="day"] .ev-loveBtn[data-on] { color: #fff; background: #e0245e; border-color: #e0245e; }
+
+.ev-sky[data-sky="evening"] {
+  background:
+    radial-gradient(ellipse 45% 22% at 50% 102%, rgba(255, 220, 150, 0.95), rgba(255, 170, 90, 0.5) 45%, transparent 75%),
+    radial-gradient(ellipse 60% 40% at 50% 62%, color-mix(in srgb, var(--ev-accent) 22%, transparent), transparent 70%),
+    linear-gradient(180deg, #22144a 0%, #57286e 26%, #a23d6b 50%, #df6956 70%, #f5a25a 87%, #ffd38c 100%);
+}
+.ev-sky[data-sky="evening"]::before,
+.ev-sky[data-sky="evening"]::after {
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 42%);
+  mask-image: linear-gradient(180deg, #000 0%, transparent 42%);
+}
+.ev-sky[data-sky="evening"] .ev-wheelShade { background: #3a1a40; }
+
+.ev-sky[data-sky="galaxy"] {
+  background:
+    linear-gradient(158deg, transparent 26%, rgba(110, 80, 220, 0.35) 38%, rgba(255, 150, 215, 0.4) 47%, rgba(255, 232, 205, 0.34) 50%,
+      rgba(110, 170, 255, 0.34) 56%, rgba(90, 60, 200, 0.25) 62%, transparent 72%),
+    radial-gradient(ellipse 30% 22% at 22% 30%, rgba(255, 110, 200, 0.28), transparent 70%),
+    radial-gradient(ellipse 34% 24% at 80% 72%, rgba(90, 150, 255, 0.28), transparent 70%),
+    radial-gradient(ellipse 55% 40% at 50% 62%, color-mix(in srgb, var(--ev-accent) 22%, transparent), transparent 70%),
+    linear-gradient(180deg, #04030f 0%, #0a0620 60%, #120a2a 100%);
+}
+
+.ev-sky[data-sky="aurora"] {
+  background:
+    radial-gradient(ellipse 80% 35% at 50% 112%, rgba(30, 90, 90, 0.85), transparent 70%),
+    linear-gradient(180deg, #020b15 0%, #051c28 55%, #0a2a31 100%);
+}
+.ev-sky[data-sky="aurora"] .ev-wheel,
+.ev-fan[data-sky="aurora"]::after {
+  background-image:
+    radial-gradient(ellipse 60% 22% at 28% 16%, rgba(70, 255, 170, 0.6), transparent 70%),
+    radial-gradient(ellipse 48% 16% at 64% 9%, rgba(90, 220, 255, 0.45), transparent 70%),
+    radial-gradient(ellipse 44% 18% at 58% 30%, rgba(180, 100, 255, 0.42), transparent 70%),
+    radial-gradient(ellipse 40% 14% at 88% 20%, rgba(70, 255, 170, 0.42), transparent 70%),
+    radial-gradient(ellipse 70% 16% at 30% 84%, rgba(70, 255, 170, 0.3), transparent 70%),
+    radial-gradient(ellipse 50% 12% at 78% 92%, rgba(180, 100, 255, 0.28), transparent 70%);
+  background-size: 160% 100%;
+  animation: ev-aurora 16s ease-in-out infinite alternate;
+}
+.ev-fan[data-sky="aurora"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+@keyframes ev-aurora {
+  from { background-position: 0% 0; }
+  to { background-position: 100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ev-sky[data-sky="day"]::before,
+  .ev-sky[data-sky="aurora"] .ev-wheel,
+  .ev-fan[data-sky="aurora"]::after { animation: none; }
+}
+
+/* The photographer's "Book them" card in the gallery (0009). */
+.ev-pgCard {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  padding: 0.8em 0.9em;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--ev-ink) 14%, transparent);
+  background: var(--ev-soft);
+}
+.ev-pgIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.4em;
+  height: 2.4em;
+  border-radius: 999px;
+  background: var(--ev-main);
+  color: var(--ev-on-main);
+}
+.ev-pgText {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.3;
+}
+.ev-pgText span { color: var(--ev-muted); font-size: 0.9em; }

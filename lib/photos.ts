@@ -3,9 +3,11 @@
 
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
-export type WallRules = { on: boolean; approve_first: boolean; early: boolean; open: boolean };
+export type WallRules = { on: boolean; approve_first: boolean; early: boolean; open: boolean; sky?: string };
 // loves: love taps (0008); mine: this phone loved it; fav: one of the hosts' favourites.
-export type WallPhoto = { id: string; w: number; h: number; by: string | null; at: string; loves?: number; mine?: boolean; fav?: boolean };
+// pg: the photographer's credit (0009).
+export type WallPhoto = { id: string; w: number; h: number; by: string | null; at: string; loves?: number; mine?: boolean; fav?: boolean; pg?: string | null };
+export type WallPhotographer = { name: string; business: string | null; link: string | null; photos: number };
 export type WallEvent = {
   id: string; type: string; slug: string; short_code: string; title: string; headline: string | null;
   scale: "personal" | "celebration" | "community"; palette: string; primary_color: string; text_style: string;
@@ -22,6 +24,7 @@ export type PublicWall = {
   shown?: number;
   photos?: WallPhoto[];
   featured?: WallPhoto[];   // favourites and the most-loved, wherever they are (0008)
+  photographers?: WallPhotographer[];   // for the "Book them" card (0009)
   mine?: { added: number; waiting: number } | null;
 };
 
@@ -48,6 +51,7 @@ export const PHOTO_MESSAGES: Record<string, string> = {
   not_ready: "Photos aren't switched on yet. Please try again later.",
   too_big: "This photo is too big to send.",
   sign_in: "Please sign in again, then try once more.",
+  no_link: "This photographer link has been switched off. Please ask the host for a new one.",
 };
 
 // Reasons worth trying again later by themselves (bad signal, a busy moment).
@@ -76,6 +80,17 @@ export function lovePhoto(type: string, slug: string, token: string | null, id: 
   return publicRpc<{ ok: boolean; loves?: number; mine?: boolean; reason?: string }>("love_photo", {
     p_type: type, p_slug: slug, p_token: token, p_photo: id, p_device: device, p_love: love,
   }).catch(() => null);
+}
+
+// A photographer's "Book them" link: a website, an Instagram name or a phone.
+export function bookingHref(link: string | null | undefined): string | null {
+  const l = (link ?? "").trim();
+  if (!l) return null;
+  if (/^https?:\/\//i.test(l)) return l;
+  if (/^@[\w.]{2,30}$/.test(l)) return `https://instagram.com/${l.slice(1)}`;
+  if (/^[+\d][\d\s()-]{6,}$/.test(l)) return `tel:${l.replace(/[^\d+]/g, "")}`;
+  if (/^[\w-]+(\.[\w-]+)+(\/.*)?$/.test(l)) return `https://${l}`;
+  return null;
 }
 
 // A random id for this phone, kept in its storage: it counts the phone's share.

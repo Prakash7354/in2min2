@@ -9,15 +9,16 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { QrCode } from "@/components/qr-code";
+import type { Sky } from "@/lib/catalog";
 import { publicRpc, type PublicWall, type WallPhoto } from "@/lib/photos";
 import { PhotoWheel } from "./photo-wheel";
 
 type Props = {
   type: string; slug: string; token: string | null; eventId: string; title: string;
-  joinUrl: string; joinText: string; vars: CSSProperties; display: string; motion: boolean; celebrate: boolean;
+  joinUrl: string; joinText: string; vars: CSSProperties; display: string; motion: boolean; celebrate: boolean; sky: Sky;
 };
 
-export function TvWheel({ type, slug, token, eventId, title, joinUrl, joinText, vars, display, motion, celebrate }: Props) {
+export function TvWheel({ type, slug, token, eventId, title, joinUrl, joinText, vars, display, motion, celebrate, sky }: Props) {
   const [photos, setPhotos] = useState<WallPhoto[]>([]);
   const [featured, setFeatured] = useState<WallPhoto[]>([]);
   const [arrivals, setArrivals] = useState<{ ids: string[]; n: number }>({ ids: [], n: 0 });
@@ -75,9 +76,9 @@ export function TvWheel({ type, slug, token, eventId, title, joinUrl, joinText, 
       <div className="ev-root h-full" style={vars} data-motion={motion ? "on" : "off"}>
         {wheelPhotos.length >= 3 ? (
           <PhotoWheel size="tv" eventId={eventId} photos={wheelPhotos} stars={featured.map((p) => p.id)} arrivals={arrivals}
-            motion={motion} celebrate={celebrate} />
+            motion={motion} celebrate={celebrate} sky={sky} />
         ) : (
-          <div className="ev-wheelWrap grid h-dvh place-items-center text-center" data-size="tv">
+          <div className="ev-wheelWrap ev-sky grid h-dvh place-items-center text-center" data-size="tv" data-sky={sky}>
             <div className="grid max-w-[60vw] gap-[2vh]">
               <p className="m-0 text-[clamp(28px,4.5vw,80px)] font-bold leading-tight" style={{ fontFamily: display }}>
                 {photos.length ? "More photos, please!" : "Be the first to add a photo"}

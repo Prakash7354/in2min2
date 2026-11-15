@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { eventType } from "@/lib/catalog";
+import { SKIES, eventType, paletteFor, skyFor, type Sky } from "@/lib/catalog";
 import type { Draft } from "@/lib/draft";
 import { preparePhoto } from "@/lib/photo-prep";
 import { PHOTO_MESSAGES, photoUrl, wallPath } from "@/lib/photos";
@@ -21,10 +21,13 @@ export type HostPhoto = {
   removal_asked_at: string | null; removal_note: string | null; kept_at: string | null; reviewed_at: string | null;
   ready_at: string | null; created_at: string;
   favourite?: boolean; love_count?: number;   // 0008
+  photographer_id?: string | null;             // 0009
 };
+export type Photographer = { id: string; name: string; business: string | null; link: string | null; upload_key: string; active: boolean };
 type Wall = {
   wallKey: string; isPrivate: boolean; photoLimit: number | null; perGuest: number | null;
   settings: Record<string, unknown>; approveFirst: boolean; early: boolean;
+  sky: string;   // "auto" or a sky key (0009)
 };
 
 export type PhotosState = {
@@ -36,9 +39,14 @@ export type PhotosState = {
   refresh: () => void;
   setStatus: (ids: string[], status: HostPhoto["status"]) => Promise<boolean>;
   removeForGood: (ids: string[]) => Promise<boolean>;
-  saveRules: (patch: { approve_first?: boolean; early?: boolean }) => Promise<boolean>;
+  saveRules: (patch: { approve_first?: boolean; early?: boolean; sky?: string }) => Promise<boolean>;
   addOwn: (files: File[], name: string, progress: (done: number) => void) => Promise<{ added: number; problem: string | null }>;
   setFavourite: (id: string, on: boolean) => Promise<boolean>;
+  // The event's photographers (0009); null until 0009 has run.
+  photographers: Photographer[] | null;
+  addPhotographer: (g: { name: string; business: string; link: string }) => Promise<string | null>;
+  changePhotographer: (id: string, patch: { active?: boolean }) => Promise<boolean>;
+  removePhotographer: (id: string) => Promise<boolean>;
 };
 
 const asked = (p: HostPhoto) => !!p.removal_asked_at && p.status === "hidden" && !p.kept_at && (!p.reviewed_at || p.reviewed_at <= p.removal_asked_at);
@@ -48,6 +56,7 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
   const [wall, setWall] = useState<Wall | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notReady, setNotReady] = useState(false);
+  const [photographers, setPhotographers] = useState<Photographer[] | null>(null);
   const live = !!eventId && !!session;
 
   const load = useCallback(async () => {
@@ -56,13 +65,17 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
     const cols = "id, status, width, height, added_by, removal_asked_at, removal_note, kept_at, reviewed_at, ready_at, created_at";
     const photosQuery = (extra: string) => sb.from("event_photos").select(cols + extra)
       .eq("event_id", eventId).neq("status", "uploading").order("ready_at", { ascending: false }).limit(1000);
-    const [first, e, f] = await Promise.all([
-      photosQuery(", favourite, love_count"),
+    const [first, e, f, g] = await Promise.all([
+      photosQuery(", favourite, love_count, photographer_id"),
       sb.from("events").select("wall_key, is_private, plans(photo_limit, photos_per_guest)").eq("id", eventId).maybeSingle(),
       sb.from("feature_toggles").select("settings").eq("event_id", eventId).maybeSingle(),
+      sb.from("event_photographers").select("id, name, business, link, upload_key, active").eq("event_id", eventId).order("created_at"),
     ]);
-    // Before 0008 has run there are no favourites or love counts yet.
-    const p = first.error?.code === "42703" ? await photosQuery("") : first;
+    // Before 0008 and 0009 have run, some columns aren't there yet.
+    let p = first;
+    if (p.error?.code === "42703") p = await photosQuery(", favourite, love_count");
+    if (p.error?.code === "42703") p = await photosQuery("");
+    setPhotographers(g.error ? null : (g.data as Photographer[]));
     if (p.error) {
       const missing = p.error.code === "42P01" || p.error.code === "PGRST205" || /event_photos/.test(p.error.message);
       setNotReady(missing);
@@ -74,7 +87,7 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
     setRows(p.data as unknown as HostPhoto[]);
     const ev = e.data as { wall_key: string; is_private: boolean; plans: { photo_limit: number | null; photos_per_guest: number | null } | null } | null;
     const settings = ((f.data as { settings?: Record<string, unknown> } | null)?.settings ?? {}) as Record<string, unknown>;
-    const pw = (settings.photo_wall ?? {}) as { approve_first?: unknown; early?: unknown };
+    const pw = (settings.photo_wall ?? {}) as { approve_first?: unknown; early?: unknown; sky?: unknown };
     if (ev) {
       setWall({
         wallKey: ev.wall_key, isPrivate: ev.is_private, photoLimit: ev.plans?.photo_limit ?? null, perGuest: ev.plans?.photos_per_guest ?? null,
@@ -82,6 +95,7 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
         // Same default as photo_rules() in 0006: checked first for community events and memorials.
         approveFirst: typeof pw.approve_first === "boolean" ? pw.approve_first : scale === "community" || sensitive,
         early: pw.early === true,
+        sky: typeof pw.sky === "string" ? pw.sky : "auto",
       });
     }
   }, [eventId, session, scale, sensitive]);
@@ -112,7 +126,7 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
     return !!body?.ok && (body.removed ?? 0) > 0;
   }, [session, load]);
 
-  const saveRules = useCallback(async (patch: { approve_first?: boolean; early?: boolean }) => {
+  const saveRules = useCallback(async (patch: { approve_first?: boolean; early?: boolean; sky?: string }) => {
     if (!eventId || !wall) return false;
     const pw = { ...((wall.settings.photo_wall as Record<string, unknown> | undefined) ?? {}), ...patch };
     const r = await supabase().from("feature_toggles").update({ settings: { ...wall.settings, photo_wall: pw } }).eq("event_id", eventId);
@@ -159,11 +173,32 @@ export function usePhotos(eventId: string | undefined, session: Session | null, 
     return !r.error;
   }, [load]);
 
+  // Photographers: added by the owner or a co-host; each gets a private upload link.
+  const addPhotographer = useCallback(async (g: { name: string; business: string; link: string }) => {
+    if (!eventId) return null;
+    const r = await supabase().from("event_photographers")
+      .insert({ event_id: eventId, name: g.name.trim().slice(0, 60), business: g.business.trim().slice(0, 80) || null, link: g.link.trim().slice(0, 200) || null })
+      .select("upload_key").single();
+    await load();
+    return r.error ? null : (r.data as { upload_key: string }).upload_key;
+  }, [eventId, load]);
+  const changePhotographer = useCallback(async (id: string, patch: { active?: boolean }) => {
+    const r = await supabase().from("event_photographers").update(patch).eq("id", id);
+    await load();
+    return !r.error;
+  }, [load]);
+  const removePhotographer = useCallback(async (id: string) => {
+    const r = await supabase().from("event_photographers").delete().eq("id", id);
+    await load();
+    return !r.error;
+  }, [load]);
+
   const list = rows ?? [];
   const needsYou = list.filter((p) => p.status === "waiting" || asked(p)).length;
   return {
     rows: live ? rows : null, wall: live ? wall : null, error, notReady, needsYou: live ? needsYou : 0,
     refresh: () => void load(), setStatus, removeForGood, saveRules, addOwn, setFavourite,
+    photographers: live ? photographers : null, addPhotographer, changePhotographer, removePhotographer,
   };
 }
 
@@ -202,6 +237,7 @@ export function PhotosDialog({ d, eventId, state, onClose, say }: { d: Draft; ev
   const printLink = type && slug ? `${origin}${wallPath(type, slug, key, "print")}` : null;
   const title = d.title.trim() || "Our event";
   const wallOff = !d.toggles.photo_wall;
+  const autoSky = skyFor(paletteFor(d.palette, d.customColor));
 
   async function act(ids: string[], status: HostPhoto["status"], done: string) {
     setPicked(null);
@@ -302,6 +338,31 @@ export function PhotosDialog({ d, eventId, state, onClose, say }: { d: Draft; ev
               </div>
               <p className="text-sm text-muted">The slideshow runs on a laptop plugged into the venue&apos;s TV, or a smart TV&apos;s web browser. Press <strong>Full screen</strong>.{w?.isPrivate ? " These links carry your event's photo key, so they work for everyone at the venue: share them only there." : ""}</p>
             </div>
+          )}
+
+          {w && (
+            <div className="grid gap-2 rounded-2xl border border-line p-4">
+              <p className="font-semibold">Sky behind the photo wheel</p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Sky behind the photo wheel">
+                {SKIES.map((k) => {
+                  const on = (w.sky || "auto") === k.key;
+                  const shown = k.key === "auto" ? autoSky : k.key;
+                  return (
+                    <button key={k.key} type="button" role="radio" aria-checked={on}
+                      onClick={async () => say((await state.saveRules({ sky: k.key })) ? `Sky: ${k.name}.` : "Couldn't save. Please try again.")}
+                      className={`grid gap-1 rounded-xl border-2 p-1.5 text-left ${on ? "border-brand" : "border-line"}`}>
+                      <span className="block h-12 rounded-lg" style={{ background: SKY_SWATCH[shown] }} aria-hidden="true" />
+                      <span className="px-1 text-sm font-bold leading-tight">{k.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-sm text-muted">{SKIES.find((k) => k.key === (w.sky || "auto"))?.line}{(w.sky || "auto") === "auto" ? ` (now: ${SKIES.find((k) => k.key === autoSky)?.name})` : ""}</p>
+            </div>
+          )}
+
+          {state.photographers && (
+            <Photographers list={state.photographers} rows={rows} state={state} say={say} title={title} origin={origin} />
           )}
 
           {askedRows.length > 0 && (
@@ -436,5 +497,89 @@ function Toggle({ checked, label, line, onChange }: { checked: boolean; label: s
         <span className="text-[15px] leading-snug text-muted">{line}</span>
       </span>
     </label>
+  );
+}
+
+// Small previews of each sky for the chooser.
+const SKY_SWATCH: Record<Sky, string> = {
+  day: "linear-gradient(180deg, #5aa8ec, #cfe9fc)",
+  evening: "linear-gradient(180deg, #57286e, #df6956 60%, #ffd38c)",
+  night: "radial-gradient(circle at 30% 30%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 2px), linear-gradient(180deg, #06061a, #120d2c)",
+  galaxy: "linear-gradient(158deg, #04030f 25%, #6e50dc 40%, #ff96d7 48%, #6eaaff 56%, #04030f 72%)",
+  aurora: "radial-gradient(ellipse 70% 30% at 40% 30%, rgba(70,255,170,.8), transparent 70%), radial-gradient(ellipse 50% 25% at 70% 40%, rgba(180,100,255,.6), transparent 70%), linear-gradient(180deg, #020b15, #0a2a31)",
+};
+
+// The event's photographers (0009): add one, send them their private link,
+// switch it off, or remove them. Up to three.
+function Photographers({ list, rows, state, say, title, origin }: {
+  list: Photographer[]; rows: HostPhoto[]; state: PhotosState; say: (m: string) => void; title: string; origin: string;
+}) {
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState({ name: "", business: "", link: "" });
+  const [busy, setBusy] = useState(false);
+  const field = "w-full rounded-xl border-2 border-line bg-card px-3 py-2.5 text-[16px] focus:border-brand focus:outline-none";
+  async function add() {
+    if (!form.name.trim()) { say("Please type the photographer's name."); return; }
+    setBusy(true);
+    const key = await state.addPhotographer(form);
+    setBusy(false);
+    if (!key) { say("Couldn't add them. Only the owner and co-hosts can, up to three."); return; }
+    setForm({ name: "", business: "", link: "" });
+    setAdding(false);
+    say("Added. Now send them their link.");
+  }
+  return (
+    <div className="grid gap-3 rounded-2xl border border-line p-4">
+      <div className="grid gap-0.5">
+        <p className="font-semibold">Your photographer</p>
+        <p className="text-sm text-muted">
+          Send them a private link: they add their photos with no account, and each one shows their name. Guests see a
+          &ldquo;Book them&rdquo; card with their link. Their photos use your event&apos;s photo space.
+        </p>
+      </div>
+      {list.map((g) => {
+        const link = `${origin}/photographer/${g.upload_key}`;
+        const count = rows.filter((p) => p.photographer_id === g.id && p.status !== "hidden").length;
+        return (
+          <div key={g.id} className="grid gap-2 rounded-xl bg-wash p-3">
+            <p className="font-semibold">{g.business || g.name}{g.business ? <span className="font-normal text-muted"> · {g.name}</span> : null}</p>
+            <p className="text-sm text-muted">{count} {count === 1 ? "photo" : "photos"} on the wall{g.active ? "" : " · link switched off"}</p>
+            <div className="flex flex-wrap gap-2">
+              {g.active && (
+                <>
+                  <a href={whatsappUrl(link, `Here's your link to add your photos of ${title}. No account needed:`)} target="_blank" rel="noreferrer"
+                    className="inline-flex min-h-10 items-center rounded-full bg-[#25D366] px-4 text-sm font-bold text-[#073B1C]">Send their link on WhatsApp</a>
+                  <button type="button" className="inline-flex min-h-10 items-center rounded-full bg-card px-4 text-sm font-bold ring-1 ring-line"
+                    onClick={async () => say((await copyLink(link)) === "copied" ? "Photographer link copied." : "Couldn't copy here.")}>Copy their link</button>
+                </>
+              )}
+              <button type="button" className="inline-flex min-h-10 items-center rounded-full bg-card px-4 text-sm font-bold ring-1 ring-line"
+                onClick={async () => say((await state.changePhotographer(g.id, { active: !g.active })) ? (g.active ? "Link switched off." : "Link switched on.") : "That didn't work.")}>
+                {g.active ? "Switch link off" : "Switch link on"}
+              </button>
+              <button type="button" className="inline-flex min-h-10 items-center rounded-full px-4 text-sm font-bold underline"
+                onClick={async () => say((await state.removePhotographer(g.id)) ? "Removed. Their photos stay, without their name." : "That didn't work.")}>Remove</button>
+            </div>
+          </div>
+        );
+      })}
+      {adding ? (
+        <div className="grid gap-2">
+          <input className={field} placeholder="Their name, e.g. Ram Thapa" value={form.name} maxLength={60} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <input className={field} placeholder="Business name (if any), e.g. Ram Studio" value={form.business} maxLength={80} onChange={(e) => setForm({ ...form, business: e.target.value })} />
+          <input className={field} placeholder="Website, @instagram or phone, for Book them" value={form.link} maxLength={200} onChange={(e) => setForm({ ...form, link: e.target.value })} />
+          <div className="flex flex-wrap gap-2">
+            <button type="button" disabled={busy} onClick={() => void add()} className="inline-flex min-h-10 items-center rounded-full bg-brand px-4 text-sm font-bold text-white disabled:opacity-60">
+              {busy ? "Adding…" : "Add photographer"}
+            </button>
+            <button type="button" onClick={() => setAdding(false)} className="inline-flex min-h-10 items-center rounded-full bg-wash px-4 text-sm font-bold">Cancel</button>
+          </div>
+        </div>
+      ) : list.length < 3 && (
+        <button type="button" onClick={() => setAdding(true)} className="inline-flex min-h-10 items-center justify-self-start rounded-full bg-brand px-4 text-sm font-bold text-white">
+          {list.length ? "Add another photographer" : "Add your photographer"}
+        </button>
+      )}
+    </div>
   );
 }

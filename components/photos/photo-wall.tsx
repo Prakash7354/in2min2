@@ -11,11 +11,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { paletteFor, skyFor } from "@/lib/catalog";
 import { preparePhoto } from "@/lib/photo-prep";
 import { queueDelete, queueList, queuePut, sendPhoto, type Queued } from "@/lib/photo-queue";
 import { PhotoWheel } from "./photo-wheel";
 import {
-  PHOTO_MESSAGES, RETRY_REASONS, deviceId, loadWall, lovePhoto, photoUrl, publicRpc,
+  PHOTO_MESSAGES, RETRY_REASONS, bookingHref, deviceId, loadWall, lovePhoto, photoUrl, publicRpc,
   type PublicWall, type WallPhoto,
 } from "@/lib/photos";
 
@@ -215,6 +216,7 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
   const latest = new Map(visible.map((p) => [p.id, p]));
   const wheelPhotos = [...featured.filter((p) => !broken.has(p.id)).map((p) => latest.get(p.id) ?? p), ...visible.filter((p) => !featuredIds.has(p.id))];
   const viewList = open?.from === "wheel" ? wheelPhotos : visible;
+  const sky = skyFor(paletteFor(ev.palette, ev.primary_color), r.sky);
   const mine = wall.mine;
   const shareLeft = wall.per_guest != null && mine ? Math.max(0, wall.per_guest - mine.added) : null;
   const busy = sending !== null && sending.message === null;
@@ -223,9 +225,22 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
     <div className={s("photoWall")}>
       {wheelPhotos.length >= 3 && (
         <PhotoWheel eventId={ev.id} photos={wheelPhotos} stars={featured.map((p) => p.id)} arrivals={arrivals} motion={motion}
-          celebrate={motion && !sensitive} onLove={(id) => void love(id)}
+          celebrate={motion && !sensitive} onLove={(id) => void love(id)} sky={sky}
           onOpen={(id) => { const i = wheelPhotos.findIndex((p) => p.id === id); if (i >= 0) setOpen({ from: "wheel", i }); }} />
       )}
+      {(wall.photographers ?? []).map((g) => {
+        const href = bookingHref(g.link);
+        return (
+          <div key={g.name + (g.business ?? "")} className={s("pgCard")}>
+            <span className={s("pgIcon")} aria-hidden="true"><CameraIcon /></span>
+            <span className={s("pgText")}>
+              <strong>Photos by {g.business || g.name}</strong>
+              <span>The event photographer{g.photos ? ` · ${g.photos} ${g.photos === 1 ? "photo" : "photos"} here` : ""}</span>
+            </span>
+            {href && <a className={`${s("btn")} ${s("btnSmall")}`} href={href} target="_blank" rel="noreferrer">Book them</a>}
+          </div>
+        );
+      })}
       {r.open ? (
         <div className={s("photoAdd")}>
           <label className={s("field")}>
@@ -350,7 +365,7 @@ function Viewer({ photos, index, eventId, onIndex, onClose, onRemoved, onLove, a
       </div>
       <div className="grid gap-2 px-4 pb-4 pt-2 text-[15px]" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="m-0 text-white/80">{p.fav ? "★ Host’s pick · " : ""}{p.by ? `Added by ${p.by}` : "Added by a guest"} · {ago(p.at)}</p>
+          <p className="m-0 text-white/80">{p.fav ? "★ Host’s pick · " : ""}{p.pg ? `Photo: ${p.pg}` : p.by ? `Added by ${p.by}` : "Added by a guest"} · {ago(p.at)}</p>
           <button type="button" onClick={() => onLove(p.id)} aria-pressed={!!p.mine}
             aria-label={`${p.mine ? "Take back your love for" : "Love"} this photo${p.loves ? `, ${p.loves} loves` : ""}`}
             className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 font-extrabold ${p.mine ? "bg-[#e0245e] text-white" : "bg-white/10 text-white ring-1 ring-white/50"}`}>

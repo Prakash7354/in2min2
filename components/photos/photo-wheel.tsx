@@ -23,6 +23,7 @@
 // re-render), so it stays smooth on older phones.
 
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import type { Sky } from "@/lib/catalog";
 import { photoUrl, type WallPhoto } from "@/lib/photos";
 
 const SLOTS = 10;
@@ -40,11 +41,12 @@ type Props = {
   motion: boolean;
   celebrate: boolean;
   size?: "page" | "tv";
+  sky?: Sky;                                  // the sky behind it (0009)
 };
 
 const fill = (list: WallPhoto[]) => Array.from({ length: SLOTS }, (_, i) => list[i % list.length]?.id ?? "");
 
-export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, motion, celebrate, size = "page" }: Props) {
+export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, motion, celebrate, size = "page", sky = "night" }: Props) {
   const stage = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLDivElement | null)[]>([]);
   const shades = useRef<(HTMLSpanElement | null)[]>([]);
@@ -175,7 +177,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
   const top = photos.reduce<WallPhoto | null>((b, p) => ((p.loves ?? 0) > (b?.loves ?? 0) ? p : b), null);
   const frontPhoto = byId.get(slots[front]);
   return (
-    <div className={s("wheelWrap")} data-size={size}>
+    <div className={`${s("wheelWrap")} ${s("sky")}`} data-size={size} data-sky={sky}>
       <div ref={stage} className={s("wheel")} aria-hidden="true" onPointerDown={down} onPointerMove={move} onPointerUp={up}
         onPointerCancel={() => { st.current.drag = null; }}>
         {slots.map((id, i) => {
@@ -202,7 +204,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
         {bursts.map((k) => <Burst key={k} />)}
       </div>
       <div className={s("wheelCaption")}>
-        <span>{frontPhoto?.by ? `From ${frontPhoto.by}` : " "}</span>
+        <span>{frontPhoto?.pg ? `Photo: ${frontPhoto.pg}` : frontPhoto?.by ? `From ${frontPhoto.by}` : "\u00a0"}</span>
         {frontPhoto && onLove && (
           <button type="button" className={s("loveBtn")} data-on={frontPhoto.mine ? "" : undefined} aria-pressed={!!frontPhoto.mine}
             aria-label={`${frontPhoto.mine ? "Take back your love for" : "Love"} this photo${frontPhoto.loves ? `, ${frontPhoto.loves} loves` : ""}`}

@@ -9,6 +9,7 @@ export type Queued = {
   qid: string;
   wall: string;                   // "{type}/{slug}"
   type: string; slug: string; token: string | null; device: string; name: string;
+  pg?: string;                    // a photographer's upload key (0009): sent with that instead
   photo: Blob; thumb: Blob; w: number; h: number;
   added: number; tries: number;
 };
@@ -63,11 +64,11 @@ export async function queueList(wall: string): Promise<Queued[]> {
 }
 
 export async function sendPhoto(item: Queued): Promise<SendResult> {
-  const q = new URLSearchParams({
-    type: item.type, slug: item.slug, device: item.device, w: String(item.w), h: String(item.h), tl: String(item.thumb.size),
-  });
-  if (item.token) q.set("g", item.token);
-  if (item.name.trim()) q.set("name", item.name.trim().slice(0, 60));
+  const q = item.pg
+    ? new URLSearchParams({ pg: item.pg, w: String(item.w), h: String(item.h), tl: String(item.thumb.size) })
+    : new URLSearchParams({ type: item.type, slug: item.slug, device: item.device, w: String(item.w), h: String(item.h), tl: String(item.thumb.size) });
+  if (!item.pg && item.token) q.set("g", item.token);
+  if (!item.pg && item.name.trim()) q.set("name", item.name.trim().slice(0, 60));
   try {
     const res = await fetch(`/api/photos?${q}`, {
       method: "POST",

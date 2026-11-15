@@ -11,7 +11,7 @@ import { eventVars } from "@/components/event/event-view";
 import { Slideshow } from "@/components/photos/slideshow";
 import { TvWheel } from "@/components/photos/tv-wheel";
 import { WallMessage } from "@/components/photos/wall-frame";
-import { paletteFor, textStyle } from "@/lib/catalog";
+import { paletteFor, skyFor, textStyle } from "@/lib/catalog";
 import { wallPath } from "@/lib/photos";
 import { getWall, keyParam, siteOrigin } from "@/lib/public-wall";
 
@@ -40,7 +40,8 @@ export default async function TvPage({ params, searchParams }: PageProps<"/[type
     return (
       <main className={eventFontVariables}>
         <TvWheel type={type} slug={slug} token={key ?? null} eventId={ev.id} title={ev.headline || ev.title} joinUrl={join} joinText={joinText}
-          vars={eventVars(p, ev.text_style)} display={textStyle(ev.text_style).display} motion celebrate={!ev.sensitive} />
+          vars={eventVars(p, ev.text_style)} display={textStyle(ev.text_style).display} motion celebrate={!ev.sensitive}
+          sky={skyFor(p, w.rules?.sky)} />
       </main>
     );
   }

@@ -13,6 +13,8 @@
 // The hosts' own photos (0007) come the same way from the builder, with
 // ?host=1&event={id} and the host's sign-in token: add_host_photo() checks
 // they run the event, and their photos go straight on the wall.
+// A photographer's photos (0009) come with ?pg={upload key}, no account:
+// add_photographer_photo() checks the key, and credits them.
 
 import { rpc } from "@/lib/supabase/rest";
 import { photoKeys, photoStore } from "@/lib/photo-store";
@@ -28,10 +30,11 @@ export async function POST(req: Request) {
   const q = new URL(req.url).searchParams;
   const type = q.get("type") ?? "", slug = q.get("slug") ?? "";
   const host = q.get("host") === "1";
+  const pg = q.get("pg") ?? "";
   const eventId = q.get("event") ?? "";
   const token = (req.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
-  if (host ? !token || !/^[0-9a-f-]{36}$/.test(eventId)
-    : !/^[a-z]+(-[a-z]+)*$/.test(type) || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return say({ ok: false, reason: host ? "sign_in" : "no_event" }, 400);
+  if (pg ? !/^[0-9a-f]{32}$/.test(pg) : host ? !token || !/^[0-9a-f-]{36}$/.test(eventId)
+    : !/^[a-z]+(-[a-z]+)*$/.test(type) || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) return say({ ok: false, reason: pg ? "no_link" : host ? "sign_in" : "no_event" }, 400);
   const tl = Number(q.get("tl")), w = Number(q.get("w")), h = Number(q.get("h"));
   if (Number(req.headers.get("content-length") ?? 0) > MAX_PHOTO + MAX_THUMB) return say({ ok: false, reason: "too_big" }, 413);
 
@@ -46,7 +49,9 @@ export async function POST(req: Request) {
 
   const size = { p_width: Number.isInteger(w) ? w : 0, p_height: Number.isInteger(h) ? h : 0, p_bytes: photo.length };
   const name = (q.get("name") ?? "").slice(0, 60) || null;
-  const add = host
+  const add = pg
+    ? await rpc<Added>("add_photographer_photo", { p_key: pg, ...size })
+    : host
     ? await rpc<Added>("add_host_photo", { p_event: eventId, p_name: name, ...size }, token)
     : await rpc<Added>("add_photo", { p_type: type, p_slug: slug, p_token: q.get("g") || null, p_device: q.get("device") ?? "", p_name: name, ...size });
   if (!add.ok) return say({ ok: false, reason: "not_ready" }, 503);
