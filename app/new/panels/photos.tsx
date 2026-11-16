@@ -14,6 +14,7 @@ import { SKY_SWATCH, asked, type HostPhoto, type Photographer, type PhotosState 
 import { useB2 } from "../context";
 import { PanelShell } from "../panels";
 import { Field, Note, Row, Section, Toggle } from "../ui";
+import { WheelTry } from "./wheel";
 
 export function PhotosPanel() {
   const b = useB2();
@@ -26,8 +27,9 @@ export function PhotosPanel() {
 
   if (!d.eventId) {
     return (
-      <PanelShell icon="images" title="Photos" line="Guests add photos from their phones, with no app. Show them on a TV, and print table cards with a QR code.">
-        <Note>Once your page is published, guests’ photos appear here. You can add your own too.</Note>
+      <PanelShell icon="images" title="Photos" line="Guests add photos from their phones, with no app, and they turn on this wheel: on your page, and on a TV at the venue.">
+        <WheelTry tryOwn />
+        <Note>Once your page is published, guests can add theirs. They open at midnight on the day, or before, if you like.</Note>
         <button type="button" className="b2-btn b2-secondary b2-block" onClick={() => b.open("publish")}>Check and publish</button>
       </PanelShell>
     );
@@ -85,6 +87,9 @@ export function PhotosPanel() {
           <span>The photo wall is switched off. Turn on <strong>Photo wall</strong> in Settings, then update your page.</span><Icon name="next" className="size-5" />
         </button>
       )}
+
+      <WheelTry real={shown} sky={w?.sky} tryOwn={false} />
+      {w && !w.early && shown.length < 4 && <p className="b2-small" style={{ marginTop: -8 }}>Want guests to try it before the day too? Turn on <strong>Let guests add photos before the day</strong> under Rules.</p>}
 
       <div className="b2-stats" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
         {([["On the wall", shown.length], ["Waiting", waiting.length], ["Hidden", hidden.length + askedRows.length]] as const).map(([k, n]) => (

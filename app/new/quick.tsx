@@ -9,14 +9,16 @@
 import { useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { motion } from "motion/react";
 import EventView from "@/components/event/event-view";
-import { Icon } from "@/components/icons";
+import { Icon, type IconName } from "@/components/icons";
 import { eventType, ORGANISER_TYPES, PARKING_OPTIONS } from "@/lib/catalog";
 import { applyType, toViewData, type Draft } from "@/lib/draft";
 import { formatDate, formatTime } from "@/lib/event-view";
 import { resizePhoto } from "@/lib/image";
 import { useB2 } from "./context";
-import { applyLook, currentLook, dateChips, FIRST_TYPES, kindOf, looksFor, MEMORIAL_KINDS, MORE_TYPES, TYPE_ART } from "./kinds";
+import { applyLook, currentLook, dateChips, dateLine, FIRST_TYPES, kindOf, looksFor, MEMORIAL_KINDS, MORE_TYPES, TYPE_ART } from "./kinds";
 import type { Screen } from "./nav";
+import { Peek } from "./peek";
+import { MilestonePicker, TitleLine } from "./pickers";
 import { AccountButton } from "./sheets";
 import { BottomBar, Chips, Pop, TopBar, spring } from "./ui";
 
@@ -28,10 +30,13 @@ export function quickSteps(d: Draft): Screen[] {
 
 export const time12 = (t: string) => formatTime(t).replace(":00", "");
 
-// Short names for the organiser chips.
+// Short names and icons for the organiser chips.
 const ORGANISER_SHORT: Record<string, string> = {
   community_group: "Community group", club: "Club or society", charity: "Charity", armed_forces: "Armed forces or veterans",
   faith: "Faith group", business: "Business", individual: "An individual", family: "A family",
+};
+export const ORGANISER_ICON: Record<string, IconName> = {
+  community_group: "flag", club: "star", charity: "heart", armed_forces: "shield", faith: "flower", business: "briefcase", individual: "user", family: "people",
 };
 
 function useQuick() {
@@ -166,13 +171,7 @@ function WhoScreen() {
         </label>
       )}
 
-      {k.milestone && (
-        <div className="b2-field">
-          <span className="b2-label">{k.milestone.label}</span>
-          <Chips label={k.milestone.label} clear value={d.milestone ?? null} options={k.milestone.chips.map((c) => ({ key: c, label: c }))}
-            onChange={(c) => update((x) => ({ ...x, milestone: c ?? undefined }))} />
-        </div>
-      )}
+      {k.milestone && <MilestonePicker m={k.milestone} />}
       {k.memorialKinds && (
         <div className="b2-field">
           <span className="b2-label">What is it?</span>
@@ -181,10 +180,8 @@ function WhoScreen() {
         </div>
       )}
 
-      {!k.titleFirst && filled && (
-        <p className="b2-small" aria-live="polite">On the invitation: <strong style={{ color: "var(--b2-text)" }}>{d.title}</strong></p>
-      )}
-      <BottomBar>
+      {!k.titleFirst && filled && <TitleLine />}
+      <BottomBar aside={<Peek />}>
         <button type="submit" form={form} className="b2-btn b2-primary b2-block" disabled={!filled}>Next</button>
         <button type="button" className="b2-btn b2-quiet" onClick={() => next("who")}>Skip for now</button>
       </BottomBar>
@@ -209,11 +206,11 @@ function OrganiserScreen() {
       <div className="b2-field">
         <span className="b2-label">What kind of organiser?</span>
         <Chips label="What kind of organiser?" value={d.organiserType || null}
-          options={ORGANISER_TYPES.map((o) => ({ key: o.key, label: ORGANISER_SHORT[o.key] ?? o.label }))}
+          options={ORGANISER_TYPES.map((o) => ({ key: o.key, label: ORGANISER_SHORT[o.key] ?? o.label, icon: ORGANISER_ICON[o.key] }))}
           onChange={(c) => update((x) => ({ ...x, organiserType: c ?? "" }))} />
       </div>
       <p className="b2-small">Shown on the page, so people know who they’re dealing with. Needed before a public event goes live.</p>
-      <BottomBar>
+      <BottomBar aside={<Peek />}>
         <button type="submit" form={form} className="b2-btn b2-primary b2-block" disabled={!d.organiserName.trim() || !d.organiserType}>Next</button>
         <button type="button" className="b2-btn b2-quiet" onClick={() => next("organiser")}>Skip for now</button>
       </BottomBar>
@@ -239,7 +236,7 @@ function ProfitScreen() {
           </button>
         ))}
       </div>
-      <BottomBar><button type="button" className="b2-btn b2-quiet" onClick={() => next("profit")}>Skip for now</button></BottomBar>
+      <BottomBar aside={<Peek />}><button type="button" className="b2-btn b2-quiet" onClick={() => next("profit")}>Skip for now</button></BottomBar>
     </section>
   );
 }
@@ -256,7 +253,7 @@ function WhenScreen() {
       <div className="b2-field">
         <span className="b2-label">The day</span>
         <Chips label="Quick dates" value={dates.find((x) => x.date === d.date)?.date ?? null}
-          options={dates.map((x) => ({ key: x.date, label: x.label, icon: "calendar" as const }))}
+          options={dates.map((x) => ({ key: x.date, label: x.label, line: dateLine(x.label, x.date), icon: "calendar" as const }))}
           onChange={(v) => v && update((x) => ({ ...x, date: v }))} />
         <input className="b2-input b2-input-sm" type="date" aria-label="Or pick the date" value={d.date} onChange={(e) => update((x) => ({ ...x, date: e.target.value }))} />
       </div>
@@ -268,7 +265,7 @@ function WhenScreen() {
         <input className="b2-input b2-input-sm" type="time" aria-label="Or the exact time" value={d.startTime} onChange={(e) => update((x) => ({ ...x, startTime: e.target.value }))} />
       </div>
       {d.date && <p className="b2-h3" aria-live="polite">{formatDate(d.date)}{d.startTime ? `, ${formatTime(d.startTime)}` : ""}</p>}
-      <BottomBar>
+      <BottomBar aside={<Peek />}>
         <button type="button" className="b2-btn b2-primary b2-block" disabled={!d.date} onClick={() => next("when")}>Next</button>
         <button type="button" className="b2-btn b2-quiet" onClick={() => next("when")}>Not sure yet</button>
       </BottomBar>
@@ -300,7 +297,7 @@ function WhereScreen() {
           placeholder="Street and postcode" onChange={(e) => update((x) => ({ ...x, venueAddress: e.target.value }))} />
       </label>
       <p className="b2-small">Guests get a Directions button that opens their own maps app.</p>
-      <BottomBar>
+      <BottomBar aside={<Peek />}>
         <button type="submit" form={form} className="b2-btn b2-primary b2-block" disabled={!d.venueName.trim()}>Next</button>
         <button type="button" className="b2-btn b2-quiet" onClick={() => next("where")}>Not decided yet</button>
       </BottomBar>
@@ -327,7 +324,7 @@ function ParkingScreen() {
           </button>
         ))}
       </div>
-      <BottomBar><button type="button" className="b2-btn b2-quiet" onClick={() => next("parking")}>Skip for now</button></BottomBar>
+      <BottomBar aside={<Peek />}><button type="button" className="b2-btn b2-quiet" onClick={() => next("parking")}>Skip for now</button></BottomBar>
     </section>
   );
 }
@@ -402,7 +399,7 @@ function PhotoScreen() {
           <input type="file" accept="image/*" hidden onChange={(e) => { void pick(e.target.files?.[0]); e.target.value = ""; }} />
         </label>
       )}
-      <BottomBar>
+      <BottomBar aside={d.cover ? undefined : <Peek />}>
         {d.cover ? (
           <>
             <button type="button" className="b2-btn b2-primary b2-block" onClick={() => next("photo")}>Looks good</button>

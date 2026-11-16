@@ -10,6 +10,8 @@ import { eventType, ORGANISER_TYPES } from "@/lib/catalog";
 import { useB2 } from "../context";
 import { kindOf, MEMORIAL_KINDS, titleFor } from "../kinds";
 import { PanelShell } from "../panels";
+import { MilestonePicker } from "../pickers";
+import { ORGANISER_ICON } from "../quick";
 import { AddChips, Chips, Field, Section } from "../ui";
 
 const FAMILY = ["Parents", "Grandparents", "Mother", "Father", "Brothers and sisters", "Uncles and aunts", "The family"];
@@ -27,7 +29,7 @@ export function PeoplePanel() {
     update((x) => ({ ...x, family: x.family.map((f, j) => (j === i ? { ...f, [key]: value } : f)) }));
 
   return (
-    <PanelShell icon="people" title={community ? "Who's organising" : "Who it's for"}
+    <PanelShell peek icon="people" title={community ? "Who's organising" : "Who it's for"}
       line={community ? "Shown on the page so people know who they're dealing with." : "The stars of the day come first on the card and the page."}>
       <Section icon="star" title="The event's name" line="The big line on the page.">
         <Field label="Name" aside={`${charCount(d.title)}/120`}>
@@ -53,13 +55,7 @@ export function PeoplePanel() {
             <input className="b2-input b2-input-sm" value={d.stars.relation} maxLength={40} aria-label="Shown above the names" placeholder="Or type your own"
               onChange={(e) => update((x) => ({ ...x, stars: { ...x.stars, relation: e.target.value } }))} />
           </div>
-          {k.milestone && (
-            <div className="b2-field">
-              <span className="b2-label">{k.milestone.label}</span>
-              <Chips label={k.milestone.label} small clear value={d.milestone ?? null} options={k.milestone.chips.map((c) => ({ key: c, label: c }))}
-                onChange={(c) => update((x) => ({ ...x, milestone: c ?? undefined }))} />
-            </div>
-          )}
+          {k.milestone && <MilestonePicker m={k.milestone} small />}
           {k.memorialKinds && (
             <div className="b2-field">
               <span className="b2-label">What is it?</span>
@@ -101,7 +97,7 @@ export function PeoplePanel() {
           </Field>
           <div className="b2-field">
             <span className="b2-label">What kind of organiser?</span>
-            <Chips label="What kind of organiser?" small value={d.organiserType || null} options={ORGANISER_TYPES.map((o) => ({ key: o.key, label: o.label }))}
+            <Chips label="What kind of organiser?" small value={d.organiserType || null} options={ORGANISER_TYPES.map((o) => ({ key: o.key, label: o.label, icon: ORGANISER_ICON[o.key] }))}
               onChange={(v) => update((x) => ({ ...x, organiserType: v ?? "" }))} />
           </div>
           <div className="b2-field">

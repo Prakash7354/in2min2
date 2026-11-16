@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export type Screen = "what" | "who" | "organiser" | "profit" | "when" | "where" | "parking" | "look" | "photo" | "ready" | "home";
 export type Panel = "words" | "details" | "people" | "plan" | "look" | "settings" | "publish" | "preview" | "replies" | "photos";
-export type SheetKey = "share" | "bell" | "account" | "signin";
+export type SheetKey = "share" | "bell" | "account" | "signin" | "preview";
 export type Nav = { n: number; screen: Screen; panel: Panel | null; sheet: SheetKey | null };
 type Place = Omit<Nav, "n">;
 

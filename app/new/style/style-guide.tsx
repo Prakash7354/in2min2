@@ -3,7 +3,7 @@
 // The style page (in2min2.com/new/style): Design 2.0 in one place, to judge
 // on a phone: colours, letters, buttons, tiles, inputs, the bottom sheet,
 // icons, and the frameless photo wheel in each sky. The sample "photos" are
-// drawn here (no outside pictures).
+// drawn scenes (components/photos/samples.ts; no outside pictures).
 
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
@@ -11,30 +11,10 @@ import { MotionConfig } from "motion/react";
 import { eventVars } from "@/components/event/event-view";
 import { ICON_NAMES, Icon } from "@/components/icons";
 import { PhotoWheel } from "@/components/photos/photo-wheel";
+import { SAMPLE_PHOTOS, sampleSrc } from "@/components/photos/samples";
 import { SKIES, paletteFor, type Sky } from "@/lib/catalog";
-import type { WallPhoto } from "@/lib/photos";
 import { TYPE_ART } from "../kinds";
 import { Sheet, ThemeButton, useToast } from "../ui";
-
-// Sample photos for the wheel: small drawn scenes, landscape and portrait.
-function svg(w: number, h: number, body: string) {
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">${body}</svg>`)}`;
-}
-const grad = (id: string, stops: string[], vertical = true) =>
-  `<linearGradient id="${id}" x1="0" y1="0" x2="${vertical ? 0 : 1}" y2="${vertical ? 1 : 0}">${stops.map((c, i) => `<stop offset="${i / (stops.length - 1)}" stop-color="${c}"/>`).join("")}</linearGradient>`;
-const SCENES: { w: number; h: number; src: string }[] = [
-  { w: 1600, h: 900, src: svg(160, 90, `<defs>${grad("a", ["#2b1055", "#d4418e", "#ff9966"])}</defs><rect width="160" height="90" fill="url(#a)"/><circle cx="110" cy="52" r="14" fill="#ffd56b"/><path d="M0 90 L0 62 L30 40 L52 58 L80 30 L110 60 L135 44 L160 58 L160 90Z" fill="#1d0f3a"/>`) },
-  { w: 900, h: 1600, src: svg(90, 160, `<rect width="90" height="160" fill="#140c2c"/>${Array.from({ length: 22 }, (_, i) => `<circle cx="${(i * 37) % 90}" cy="${(i * 61) % 160}" r="${6 + (i % 5) * 3}" fill="${["#ffb627", "#ff4f8b", "#8b7cff", "#4fe3a6", "#6fb6ff"][i % 5]}" opacity="${0.25 + (i % 4) * 0.15}"/>`).join("")}`) },
-  { w: 1600, h: 900, src: svg(160, 90, `<defs>${grad("b", ["#6fb6ff", "#cfe9fc"])}${grad("c", ["#2e9d5b", "#145c36"])}</defs><rect width="160" height="90" fill="url(#b)"/><path d="M0 60 Q40 35 80 55 T160 50 L160 90 L0 90Z" fill="url(#c)"/><rect y="70" width="160" height="20" fill="#3c8dd9" opacity=".6"/>`) },
-  { w: 900, h: 1600, src: svg(90, 160, `<defs>${grad("d", ["#ffe0ec", "#ff8fb1"])}</defs><rect width="90" height="160" fill="url(#d)"/>${[0, 60, 120, 180, 240, 300].map((r) => `<ellipse cx="45" cy="62" rx="10" ry="24" fill="#e8336a" opacity=".8" transform="rotate(${r} 45 80)"/>`).join("")}<circle cx="45" cy="80" r="9" fill="#ffd56b"/><rect x="43" y="88" width="4" height="60" fill="#2e9d5b"/>`) },
-  { w: 1600, h: 900, src: svg(160, 90, `<defs>${grad("e", ["#05051a", "#1d1450"])}</defs><rect width="160" height="90" fill="url(#e)"/>${Array.from({ length: 30 }, (_, i) => `<rect x="${(i * 11) % 150}" y="${45 + ((i * 7) % 35)}" width="6" height="${10 + (i % 4) * 6}" fill="${["#ffb627", "#ffd56b", "#6fb6ff"][i % 3]}" opacity=".7"/>`).join("")}`) },
-  { w: 900, h: 1600, src: svg(90, 160, `<defs>${grad("f", ["#5e35b1", "#22b8cf"])}</defs><rect width="90" height="160" fill="url(#f)"/>${[40, 70, 100, 130].map((y, i) => `<path d="M0 ${y} Q22 ${y - 14} 45 ${y} T90 ${y} L90 160 L0 160Z" fill="#ffffff" opacity="${0.08 + i * 0.05}"/>`).join("")}`) },
-  { w: 1600, h: 900, src: svg(160, 90, `<defs>${grad("g", ["#9fd3ff", "#e8f4ff"])}</defs><rect width="160" height="90" fill="url(#g)"/><path d="M0 90 L20 50 L40 70 L70 20 L100 65 L125 35 L160 75 L160 90Z" fill="#5c6f8a"/><path d="M62 32 L70 20 L78 32 L72 30 L70 34 L67 30Z" fill="#fff"/>`) },
-  { w: 900, h: 1600, src: svg(90, 160, `<rect width="90" height="160" fill="#0d1b3e"/>${Array.from({ length: 9 }, (_, i) => `<ellipse cx="${15 + (i * 29) % 70}" cy="${20 + i * 15}" rx="8" ry="11" fill="#ff9f43" opacity=".85"/><ellipse cx="${15 + (i * 29) % 70}" cy="${20 + i * 15}" rx="16" ry="20" fill="#ffb627" opacity=".15"/>`).join("")}`) },
-];
-const PHOTOS: WallPhoto[] = SCENES.map((s, i) => ({
-  id: `sample-${i}`, w: s.w, h: s.h, by: ["Sita", "Hari", "Ram Studio", "Gita", "Asha", "Maya", "Bikash", "Kamala"][i], at: "", loves: [12, 3, 0, 7, 1, 0, 5, 2][i], fav: i === 3,
-}));
 
 export default function StyleGuide() {
   const [sheet, setSheet] = useState(false);
@@ -125,8 +105,8 @@ export default function StyleGuide() {
             <div className="ev-frame" style={{ borderRadius: 26, overflow: "hidden" }}>
               <div className="ev-root" style={eventVars(palette, "classic")} data-motion="on">
                 <div style={{ padding: "0 min(calc(var(--u) * 6), 36px)" }}>
-                  <PhotoWheel key={sky} eventId="sample" photos={PHOTOS} stars={["sample-3", "sample-0"]} arrivals={{ ids: [], n: 0 }}
-                    motion celebrate={false} sky={sky} srcOf={(p) => SCENES[Number(p.id.split("-")[1])].src} onLove={() => say("Loved")} onOpen={() => say("Opens the photo large")} />
+                  <PhotoWheel key={sky} eventId="sample" photos={SAMPLE_PHOTOS} stars={["sample-3", "sample-0"]} arrivals={{ ids: [], n: 0 }}
+                    motion celebrate={false} sky={sky} srcOf={(p) => sampleSrc(p.id)} onLove={() => say("Loved")} onOpen={() => say("Opens the photo large")} />
                 </div>
               </div>
             </div>

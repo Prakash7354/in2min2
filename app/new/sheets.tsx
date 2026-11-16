@@ -7,10 +7,11 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
+import EventView from "@/components/event/event-view";
 import { Icon, type IconName } from "@/components/icons";
 import { QrCode } from "@/components/qr-code";
 import { eventType } from "@/lib/catalog";
-import { missingForPublish, unpublishedChanges, type Draft } from "@/lib/draft";
+import { missingForPublish, toViewData, unpublishedChanges, type Draft } from "@/lib/draft";
 import { formatDate } from "@/lib/event-view";
 import { copyLink, shareLink, whatsappUrl } from "@/lib/share";
 import { supabase } from "@/lib/supabase/client";
@@ -18,7 +19,7 @@ import { moments } from "../builder/share-links";
 import { totals } from "../builder/replies";
 import { MISSING_PANEL, useB2, type B2 } from "./context";
 import type { Panel } from "./nav";
-import { RoundButton, Sheet, Toggle, useTheme } from "./ui";
+import { Chips, RoundButton, Sheet, Toggle, useTheme } from "./ui";
 
 export function eventLink(d: Draft): string | null {
   return d.publishedPath ? `${window.location.origin}${d.publishedPath}` : null;
@@ -34,6 +35,7 @@ export function Sheets({ signInWhy, onSignedIn }: { signInWhy: string; onSignedI
       <Sheet open={s === "bell"} title="Updates" onClose={close}><BellBody /></Sheet>
       <Sheet open={s === "account"} title="You" onClose={close}><AccountBody /></Sheet>
       <Sheet open={s === "signin"} title="Sign in" onClose={close}><SignInBody why={signInWhy} onDone={onSignedIn} /></Sheet>
+      <Sheet open={s === "preview"} title="Preview" onClose={close}><PreviewBody /></Sheet>
     </>
   );
 }
@@ -141,6 +143,49 @@ function ShareLinks({ d, link, say }: { d: Draft; link: string; say: (m: string)
           </div>
         );
       })}
+    </div>
+  );
+}
+
+// ─────────────── Preview: the card or the page, as guests will see it ───────────────
+// Opened from the live little card (peek.tsx) on any step or panel. Below it,
+// one tap to change the words, the names, when and where, or the look; Done
+// on that panel comes straight back to where the host was.
+
+const CHANGES: { panel: Panel; icon: IconName; label: string }[] = [
+  { panel: "words", icon: "pen", label: "Words" },
+  { panel: "people", icon: "people", label: "Names" },
+  { panel: "details", icon: "calendar", label: "When and where" },
+  { panel: "look", icon: "palette", label: "Look and photo" },
+];
+
+function PreviewBody() {
+  const b = useB2();
+  const fromSheet = useFromSheet();
+  const { d, now } = b;
+  // The day plan and the switches show on the page, not the card.
+  const [view, setView] = useState<"card" | "page">(() => (b.nav.panel === "plan" || b.nav.panel === "settings" ? "page" : "card"));
+  const changes = CHANGES.filter((c) => c.panel !== b.nav.panel)
+    .map((c) => (c.panel === "people" && d.scale === "community" ? { ...c, label: "Organiser" } : c));
+  return (
+    <div style={{ display: "grid", gap: 14 }}>
+      <Chips label="Which to see" small value={view} onChange={(v) => v && setView(v)}
+        options={[{ key: "card", label: "Invitation", icon: "envelope" }, { key: "page", label: "Event page", icon: "layout" }]} />
+      <div className="b2-previewframe"><EventView data={toViewData(d)} view={view} now={now} /></div>
+      <p className="b2-small">
+        {!d.eventId ? "Only you can see this until you publish." : unpublishedChanges(d) ? "Your guests still see the last version you published, until you update it." : "This is what your guests see now."}
+      </p>
+      <div className="b2-sheetfoot">
+        <div className="b2-chips b2-chips-scroll" role="group" aria-label="Change something">
+          <span className="b2-label" style={{ alignSelf: "center" }}>Change:</span>
+          {changes.map((c) => (
+            <button key={c.panel} type="button" className="b2-chip b2-chip-sm" onClick={() => void fromSheet(c.panel)}>
+              <Icon name={c.icon} className="" />{c.label}
+            </button>
+          ))}
+        </div>
+        <button type="button" className="b2-btn b2-primary b2-block" onClick={() => void b.back()}>Carry on</button>
+      </div>
     </div>
   );
 }

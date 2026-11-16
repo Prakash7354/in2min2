@@ -40,7 +40,7 @@ export function PlanPanel() {
     if (!title) setOpenId(id);
   };
   return (
-    <PanelShell icon="clock" title={community ? "Programme" : "Day plan"}
+    <PanelShell peek icon="clock" title={community ? "Programme" : "Day plan"}
       line="What happens when, with a menu for each meal. Guests see it in time order; on the day it shows what's on now.">
       {!d.toggles.schedule && (
         <button type="button" className="b2-note b2-notebtn" data-tone="warn" onClick={() => open("settings")}>

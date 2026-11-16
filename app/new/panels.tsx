@@ -18,6 +18,7 @@ import { PublishPanel } from "./panels/publish";
 import { RepliesPanel } from "./panels/replies";
 import { SettingsPanel } from "./panels/settings";
 import { WordsPanel } from "./panels/words";
+import { Peek } from "./peek";
 import { BottomBar, PanelHead, TopBar } from "./ui";
 
 export function PanelView({ panel }: { panel: Panel }) {
@@ -35,8 +36,9 @@ export function PanelView({ panel }: { panel: Panel }) {
   }
 }
 
-export function PanelShell({ icon, title, line, children, footer, wide }: {
-  icon: IconName; title: string; line?: ReactNode; children: ReactNode; footer?: ReactNode; wide?: boolean;
+// `peek`: the live little card beside Done, for panels that change what guests see.
+export function PanelShell({ icon, title, line, children, footer, wide, peek }: {
+  icon: IconName; title: string; line?: ReactNode; children: ReactNode; footer?: ReactNode; wide?: boolean; peek?: boolean;
 }) {
   const b = useB2();
   return (
@@ -46,7 +48,7 @@ export function PanelShell({ icon, title, line, children, footer, wide }: {
         <PanelHead icon={icon} title={title} line={line} />
         {children}
       </main>
-      <BottomBar>
+      <BottomBar aside={peek ? <Peek /> : undefined}>
         {footer ?? <button type="button" className="b2-btn b2-primary b2-block" onClick={() => void b.back()}>Done</button>}
       </BottomBar>
     </>

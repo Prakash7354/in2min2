@@ -95,7 +95,7 @@ export type Kind = {
   titleFirst?: boolean;        // the event's name is asked instead of a person's (parties, community)
   titleChips?: string[];       // quick names for the event
   relations?: string[];        // shown above the names on the card
-  milestone?: { label: string; chips: string[] };   // "Which birthday?" 50th…
+  milestone?: { label: string; chips: string[]; max: number; other: string };   // "Which birthday?" 50th… or any other number
   memorialKinds?: boolean;     // "What is it?" funeral, prayers…
   // When
   times: string[];             // popular start times, "HH:MM"
@@ -113,7 +113,7 @@ export const KINDS: Record<string, Kind> = {
   birthday: {
     who: "Whose birthday is it?", label: "Their name", example: "Sita",
     relations: ["The birthday girl", "The birthday boy", "The birthday star"],
-    milestone: { label: "Which birthday? (if you like)", chips: ["1st", "16th", "18th", "21st", "30th", "40th", "50th", "60th"] },
+    milestone: { label: "Which birthday? (if you like)", chips: ["1st", "16th", "18th", "21st", "30th", "40th", "50th", "60th"], max: 120, other: "Another age" },
     times: ["11:00", "14:00", "16:00", "19:00"], hours: [2, 3, 4],
     venues: ["At home", "Community hall", "Restaurant", "Soft play", "Garden"],
     plan: [["Guests arrive", 0], ["Games", 30], ["Food", 90, true], ["Cake", 120], ["Party ends", 180]], dishes: "general",
@@ -156,7 +156,7 @@ export const KINDS: Record<string, Kind> = {
   anniversary: {
     who: "Whose anniversary is it?", label: "Their names", example: "Ram", couple: true,
     relations: ["The couple", "Mum and Dad", "Grandma and Grandpa"],
-    milestone: { label: "How many years? (if you like)", chips: ["1st", "10th", "25th", "30th", "40th", "50th", "60th"] },
+    milestone: { label: "How many years? (if you like)", chips: ["1st", "10th", "25th", "30th", "40th", "50th", "60th"], max: 90, other: "Another year" },
     times: ["13:00", "18:00", "19:00"], hours: [3, 4, 5],
     venues: ["At home", "Restaurant", "Function hall", "Hotel"],
     plan: [["Guests arrive", 0], ["Welcome", 30], ["Cake", 90], ["Dinner", 120, true], ["Dancing", 180]], dishes: "general",
@@ -258,6 +258,13 @@ export const MEMORIAL_KINDS: { key: string; title: (n: string) => string }[] = [
   { key: "One year on", title: (n) => `${n}: one year on` },
 ];
 
+// 1st, 2nd, 3rd, 4th… 11th, 12th, 13th… 21st, 101st.
+export function ordinal(n: number): string {
+  const teen = n % 100 >= 11 && n % 100 <= 13;
+  const end = teen ? "th" : ({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th";
+  return `${n}${end}`;
+}
+
 // The event's name made from the names and the milestone, until the host
 // types their own.
 export function titleFor(d: Draft): string {
@@ -316,6 +323,16 @@ export function dateChips(typeKey: string | null, from = new Date()): { label: s
     { label: "In 2 weeks", date: saturday(2, from) },
     { label: "In a month", date: saturday(4, from) },
   ];
+}
+
+// The date under a quick-date chip: "21 Nov" under "This Saturday", "Thu 25 Dec" under "Christmas Day".
+const DAY3 = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MONTH3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export function dateLine(label: string, date: string): string {
+  const [y, m, d] = date.split("-").map(Number);
+  if (!y || !m || !d) return "";
+  const dm = `${d} ${MONTH3[m - 1]}`;
+  return /sat/i.test(label) ? dm : `${DAY3[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]} ${dm}`;
 }
 
 export function addMinutes(time: string, minutes: number): { time: string; days: number } {

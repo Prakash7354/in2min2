@@ -27,12 +27,15 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 **Try it yourself first (15 minutes):**
 1. Open **in2min2.com/new** on your phone. To start fresh, tap **You** (the round person button, top right) › **Start a new event** › **Yes, start new**.
-2. Tap **Birthday**, type a name and tap **50th**. On each screen, tap the quick choices (**This Saturday**, **2pm**, **Community hall**). Swipe to choose a look, and add a photo.
+2. Tap **Birthday**, type a name and tap **50th**. Then tap **Another age** and use **−** or **+** (or type a number) to make it, say, an 11th. Tap **Change** beside "On the invitation" to word it your own way.
+   - Watch the little card at the bottom left: it changes as you type. Tap it to see the **Preview**, then **Carry on**.
+   - On each screen, tap the quick choices (**This Saturday**, **2pm**, **Community hall**). Swipe to choose a look, and add a photo.
 3. On **Your invitation is ready**, tap **Sign in and write it**. Sign in with the code we email you, and watch the AI write the words.
 4. Tap **Go to your event home** and open each tile:
    - **Invitation words**: tap **Shorter** or **Warmer** under a box.
    - **Day plan**: tap **Use this plan**, then tap **Food** and add a dish.
    - **Look**: swipe the looks, then try **Colours**, **Border** and **Letters**.
+   - **Photos**: before publishing, tap **Try it with your photos** and pick a few. They jump on to the wheel. They stay on your phone and nobody else sees them.
 5. Tap **Publish** at the bottom, turn on **I've checked it**, and tap **Publish**. The Share sheet opens: send the link to yourself on WhatsApp.
 6. Try the top bar: **Share**, the **bell** (updates, and reminders of what to send when), and **You** (sign out, dark or light).
 7. Press your phone's own **Back** button, or swipe back. It should go back one screen, or close the open panel.

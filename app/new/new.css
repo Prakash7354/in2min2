@@ -207,21 +207,28 @@
 }
 .b2-art svg { width: 30px; height: 30px; stroke-width: 2; }
 
-/* Chips (quick answers) */
-.b2-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+/* Chips (quick answers). Slimmer than the buttons (owner, 16 Nov 2026:
+   "slightly slimmer would look smarter"), with a tap area bigger than they look. */
+.b2-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .b2-chip {
-  min-height: 48px;
-  padding: 0 18px;
+  position: relative;
+  min-height: 40px;
+  padding: 0 15px;
   border: 0;
   border-radius: 999px;
   background: var(--b2-s2);
   color: var(--b2-text);
   font: inherit;
-  font-weight: 700;
-  font-size: 16px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.2;
   box-shadow: var(--b2-edge);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, transform 0.12s ease;
 }
+.b2-chip::after { content: ""; position: absolute; inset: -4px -2px; }
+.b2-chip:active { transform: scale(0.96); }
 .b2-chip[aria-pressed="true"],
 .b2-chip[aria-checked="true"] { background: var(--b2-accent); color: var(--b2-on-accent); }
 
@@ -298,6 +305,32 @@
   display: grid;
   gap: 4px;
 }
+/* The live little card beside the buttons (peek.tsx) */
+.b2-bottom > div[data-aside] { grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 12px; }
+.b2-bottom-btns { display: grid; gap: 4px; min-width: 0; }
+.b2-peek {
+  position: relative;
+  display: block;
+  width: 62px;
+  height: 84px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--b2-s2);
+  cursor: pointer;
+  box-shadow: 0 0 0 2px var(--b2-s3), 0 12px 24px -12px rgba(0, 0, 0, 0.7);
+  -webkit-tap-highlight-color: transparent;
+}
+.b2-peek-card { display: block; width: 100%; pointer-events: none; }
+.b2-peek-label {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+  padding: 3px 0 4px;
+  background: rgba(14, 12, 28, 0.82); color: #fff;
+  font-size: 10.5px; font-weight: 800; letter-spacing: 0.02em;
+}
+.b2-peek-label svg { width: 12px; height: 12px; }
 
 /* ── Choosing a look: swipe through complete designs ── */
 .b2-deck {
@@ -562,10 +595,17 @@
 .b2-chips-scroll > * { flex: none; }
 
 /* Chips: icons, a smaller size, a strong one, and the AI ones */
-.b2-chip { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
-.b2-chip svg { width: 18px; height: 18px; flex: none; }
-.b2-chip[disabled] { opacity: 0.45; cursor: default; }
-.b2-chip-sm { min-height: 44px; padding: 0 15px; font-size: 15px; }
+.b2-chip { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; }
+.b2-chip svg { width: 16px; height: 16px; flex: none; opacity: 0.85; }
+.b2-chip[aria-checked="true"] svg, .b2-chip-strong svg { opacity: 1; }
+.b2-chip[disabled] { opacity: 0.45; cursor: default; transform: none; }
+.b2-chip-sm { min-height: 36px; padding: 0 13px; font-size: 14.5px; gap: 6px; }
+.b2-chip-sm svg { width: 15px; height: 15px; }
+/* A chip with a second line: "This Saturday / 21 Nov" */
+.b2-chip-two { min-height: 46px; padding: 5px 15px 5px 13px; }
+.b2-chiptext { display: grid; gap: 1px; text-align: left; }
+.b2-chiptext small { font-size: 12.5px; font-weight: 600; color: var(--b2-text-2); }
+.b2-chip[aria-checked="true"] .b2-chiptext small { color: inherit; opacity: 0.78; }
 .b2-chip-strong { background: var(--b2-accent); color: var(--b2-on-accent); }
 .b2-chip-ai { background: color-mix(in srgb, var(--b2-violet) 22%, var(--b2-s2)); }
 .b2-chip.b2-wa, .b2-btn.b2-wa { background: #25d366; color: #073b1c; }
@@ -580,6 +620,29 @@
 .b2-textarea { min-height: 0; padding: 14px 16px; border-radius: 16px; font-size: 17px; font-weight: 500; line-height: 1.45; resize: vertical; field-sizing: content; }
 select.b2-input { padding-right: 40px; background-image: linear-gradient(45deg, transparent 50%, var(--b2-text-2) 50%), linear-gradient(135deg, var(--b2-text-2) 50%, transparent 50%); background-position: calc(100% - 22px) 50%, calc(100% - 16px) 50%; background-size: 6px 6px; background-repeat: no-repeat; }
 .b2-code { text-align: center; letter-spacing: 0.4em; font-family: var(--font-display); font-size: 28px; }
+/* "Another age": a number with − and + */
+.b2-stepper { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.b2-stepper-box {
+  display: inline-flex; align-items: baseline; justify-content: center; min-width: 96px; height: 52px; padding: 0 16px;
+  border-radius: 16px; background: var(--b2-s2); box-shadow: var(--b2-edge); cursor: text;
+  font-family: var(--font-display); font-weight: 800; font-size: 26px; line-height: 52px;
+}
+.b2-stepper-box:focus-within { box-shadow: 0 0 0 3px var(--b2-accent); }
+.b2-stepper-box input {
+  border: 0; padding: 0; background: none; color: var(--b2-text); font: inherit; font-variant-numeric: tabular-nums; text-align: right; outline: none;
+}
+.b2-stepper-box input::placeholder { color: var(--b2-text-2); opacity: 0.5; }
+.b2-stepper-box span { font-size: 17px; color: var(--b2-text-2); margin-left: 1px; }
+/* What the invitation will say, with Change */
+.b2-titleline { display: grid; gap: 8px; padding: 12px 14px; border-radius: 18px; background: var(--b2-s1); box-shadow: var(--b2-edge); }
+.b2-titletext { font-size: 18px; line-height: 1.25; overflow-wrap: anywhere; }
+/* The preview sheet's footer stays in reach while the page scrolls */
+.b2-sheetfoot {
+  position: sticky; bottom: 0; z-index: 2;
+  display: grid; gap: 10px; margin: 0 -20px; padding: 12px 20px max(16px, env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--b2-s1) 18px);
+}
+.b2-sheetfoot .b2-chips-scroll { margin: 0 -20px; padding: 2px 20px 4px; }
 .b2-amp { justify-self: center; font-family: var(--font-display); font-weight: 800; font-size: 30px; color: var(--b2-accent-text); line-height: 1; margin: -4px 0; }
 
 /* Notes */
@@ -704,6 +767,7 @@ a.b2-row { color: var(--b2-text); }
 .b2-fontpick { padding: 14px; }
 .b2-fontpick span:first-child { font-size: 24px; line-height: 1.15; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .b2-previewframe { border-radius: 22px; overflow: hidden; box-shadow: var(--b2-shadow); }
+.b2-wheelframe { border-radius: 24px; overflow: hidden; box-shadow: var(--b2-shadow); }
 
 /* Replies and photos */
 .b2-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }

@@ -1,11 +1,19 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.14, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.15, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.15 (16 Nov 2026, from the owner's first try of Builder 2.0):**
+- **See it while you build.** A live little card sits beside the buttons at the bottom of every Quick start step and of the Words, People, When and where, Day plan and Settings panels (`app/new/peek.tsx`). It follows each letter typed and bounces when something on it changes. Tap it for the full **Preview** sheet: the invitation or the event page, as guests will see them, with one tap to change the words, names, when and where, or the look (Done comes straight back).
+- **Quick choices stay adjustable** (`app/new/pickers.tsx`):
+  - Birthdays and anniversaries keep their popular chips, plus **Another age** / **Another year**: a number box with − and +, so an 11th birthday or a 35th anniversary is a few taps.
+  - "On the invitation: Sita's 11th birthday" has **Change**, to type your own words; one tap puts the suggestion back. This also covers memorials that aren't in the list, such as 13th-day prayers.
+- **Slimmer chips** (40px, 36px small, with a larger tap area than they look), with room for an icon and a second line: the quick dates now show the date ("This Saturday / 21 Nov"), and the organiser chips have icons.
+- **Try the photo wheel from the start** (owner: "could that feature be accessible from the outset, not just on the day"). The Photos panel shows the wheel before publishing, in the event's own sky, with drawn sample pictures (`components/photos/samples.ts`). **Try it with your photos** puts up to 12 of the host's photos on the wheel at once, with "New" and confetti, as guests' arrive on the day. They stay on the phone: never uploaded or saved. After publishing, the panel shows the real wheel with the photos on the wall; samples fill in until there are four. Guests can try it before the day too, with **Let guests add photos before the day**.
 
 **What changed in version 3.14 (16 Nov 2026):**
 - **Builder 2.0 is built: the real builder in the new look (7e), at in2min2.com/new.** It is hidden until proven, and works on the same event, sign-in, AI writer and database as `/builder`.
@@ -708,6 +716,8 @@ Everything else stays still. People who have reduced motion switched on see no a
     - `quick.tsx`, `home.tsx`, `panels/*.tsx` and `sheets.tsx`: the screens.
     - `nav.ts`: the Back button.
     - `ui.tsx` and `new.css`: the look.
+
+- 16 Nov 2026, after the owner's first try: the live little card and Preview sheet on every step (`peek.tsx`), Another age / Another year and Change for the name (`pickers.tsx`), slimmer chips with second lines, and Try the photo wheel in the Photos panel from the start (`panels/wheel.tsx`).
 
 Next: the owner tries `/new` on his phone, then the 5-person test (ACTION-PLAN step 1). Once Builder 2.0 is proven, `/builder` switches over to it.
 

@@ -26,7 +26,7 @@ export function SettingsPanel() {
   const art = TYPE_ART[d.eventType ?? ""];
   const list = TOGGLES.filter((x) => x.scales.includes(d.scale));
   return (
-    <PanelShell icon="switches" title="Settings" line="Change any of these at any time, even after publishing.">
+    <PanelShell peek icon="switches" title="Settings" line="Change any of these at any time, even after publishing.">
       <Section icon="sparkle" title="Kind of event">
         {t && !changeKind ? (
           <button type="button" className="b2-row" onClick={() => setChangeKind(true)}>

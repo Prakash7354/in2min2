@@ -170,9 +170,14 @@ export function Pop() {
 // ── Building blocks for the screens and panels ──
 
 // Rendered straight into #b2 (not inside the sliding screen), so it stays
-// fixed to the bottom of the phone while screens slide.
-export function BottomBar({ children }: { children: ReactNode }) {
-  const bar = <div className="b2-bottom"><div>{children}</div></div>;
+// fixed to the bottom of the phone while screens slide. `aside` sits to the
+// left of the buttons (the live little card, see peek.tsx).
+export function BottomBar({ children, aside }: { children: ReactNode; aside?: ReactNode }) {
+  const bar = (
+    <div className="b2-bottom">
+      {aside ? <div data-aside="">{aside}<div className="b2-bottom-btns">{children}</div></div> : <div>{children}</div>}
+    </div>
+  );
   const root = typeof document !== "undefined" ? document.getElementById("b2") : null;
   return root ? createPortal(bar, root) : bar;
 }
@@ -208,7 +213,8 @@ export function Field({ label, hint, aside, children }: { label: ReactNode; hint
 }
 
 // Quick choices: tap one (or tap it again to clear, when `clear` is set).
-export type ChipOption<K extends string> = { key: K; label: ReactNode; icon?: IconName };
+// A chip can carry an icon, and a short second line ("21 Nov" under "This Saturday").
+export type ChipOption<K extends string> = { key: K; label: ReactNode; icon?: IconName; line?: ReactNode };
 export function Chips<K extends string>({ label, options, value, onChange, clear = false, small = false }: {
   label: string; options: ChipOption<K>[]; value: K | null | undefined; onChange: (k: K | null) => void; clear?: boolean; small?: boolean;
 }) {
@@ -217,9 +223,10 @@ export function Chips<K extends string>({ label, options, value, onChange, clear
       {options.map((o) => {
         const on = value === o.key;
         return (
-          <button key={o.key} type="button" role="radio" aria-checked={on} className={`b2-chip${small ? " b2-chip-sm" : ""}`}
+          <button key={o.key} type="button" role="radio" aria-checked={on} className={`b2-chip${small ? " b2-chip-sm" : ""}${o.line ? " b2-chip-two" : ""}`}
             onClick={() => onChange(on && clear ? null : o.key)}>
-            {o.icon && <Icon name={o.icon} className="" />}{o.label}
+            {o.icon && <Icon name={o.icon} className="" />}
+            {o.line ? <span className="b2-chiptext"><span>{o.label}</span><small>{o.line}</small></span> : o.label}
           </button>
         );
       })}

@@ -35,7 +35,7 @@ export function WordsPanel() {
   const [allSecond, setAllSecond] = useState(() => !!second && !MAIN_LANGS.includes(second.code));
   const [confirmReset, setConfirmReset] = useState(false);
   return (
-    <PanelShell icon="pen" title="The words" line="On the invitation and the page. Change any word; nothing goes live until you publish.">
+    <PanelShell peek icon="pen" title="The words" line="On the invitation and the page. Change any word; nothing goes live until you publish.">
       <section className="b2-ai" aria-label="AI writer">
         <p className="b2-h3"><Icon name="sparkle" className="b2-inline" /> AI writer</p>
         <div className="b2-field">

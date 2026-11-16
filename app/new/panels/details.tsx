@@ -9,7 +9,7 @@ import { PARKING_OPTIONS, type Parking } from "@/lib/catalog";
 import { people } from "@/lib/draft";
 import { formatDate, formatTime } from "@/lib/event-view";
 import { useB2 } from "../context";
-import { addMinutes, dateChips, kindOf } from "../kinds";
+import { addMinutes, dateChips, dateLine, kindOf } from "../kinds";
 import { PanelShell } from "../panels";
 import { time12, venueValue } from "../quick";
 import { Chips, Field, Note, Section } from "../ui";
@@ -27,12 +27,12 @@ export function DetailsPanel() {
   const community = d.scale === "community";
   const over = d.venueCapacity !== null && n > d.venueCapacity;
   return (
-    <PanelShell icon="calendar" title="When and where" line="Tap a quick choice, or type your own.">
+    <PanelShell peek icon="calendar" title="When and where" line="Tap a quick choice, or type your own.">
       <Section icon="calendar" title="When">
         <div className="b2-field">
           <span className="b2-label">The day</span>
           <Chips label="Quick dates" small value={dates.find((x) => x.date === d.date)?.date ?? null}
-            options={dates.map((x) => ({ key: x.date, label: x.label }))} onChange={(v) => v && update((x) => ({ ...x, date: v }))} />
+            options={dates.map((x) => ({ key: x.date, label: x.label, line: dateLine(x.label, x.date) }))} onChange={(v) => v && update((x) => ({ ...x, date: v }))} />
           <input className="b2-input b2-input-sm" type="date" aria-label="The date" value={d.date} onChange={(e) => update((x) => ({ ...x, date: e.target.value }))} />
         </div>
         <div className="b2-field">
