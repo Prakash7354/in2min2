@@ -1,11 +1,24 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.15, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.16, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.16 (16 Nov 2026, from the owner's second set of notes):**
+- **Letter styles work in Builder 2.0.** Handwritten, Calligraphy and Elegant (italic) fell back to the phone's plain letters at `/new`, because its layout didn't load the event fonts. The public page and `/builder` were already right.
+- **Skies behind the photo wheel:**
+  - New **Morning**: a fresh dawn with a gentle sun rising in the bottom-right corner, away from the photos. Warm colours and the bright party colours now get Morning by default, which suits birthdays.
+  - **Day** has no bright sun now, just a clear sky with soft clouds at the edges.
+  - **Evening's** bright glow is toned down, so the photos and the words under the wheel stand out.
+  - Choosing Morning for the wheel needs 0010.
+- **A heart photo shape**: a soft heart with a fine outline in the accent colour. It needs [0010](../supabase/migrations/0010_heart_and_morning.sql) before it can be published. The arch now comes last in the shape list, and the "Marigold & indigo" look uses the hero photo instead.
+- **The bottom of the page:** "Made with In2Min2" is small and quiet on the right, with no badge. On the left is who's behind the event: "Organised by …" for public events, "Hosted by …" or "With love from …" from the family names. The host can change it (Hosted by, Organised by, With love from, In memory of, Presented by) or hide it, in People. It's kept in `feature_toggles.settings.credit`, which the public page already reads, so it needed no database change.
+- **Recommended, for decision:**
+  - Announcements to guests (10x).
+  - Music nights, concerts and film nights, with ticket tiers, VIP, seating zones, licences and big-screen modes (13x).
 
 **What changed in version 3.15 (16 Nov 2026, from the owner's first try of Builder 2.0):**
 - **See it while you build.** A live little card sits beside the buttons at the bottom of every Quick start step and of the Words, People, When and where, Day plan and Settings panels (`app/new/peek.tsx`). It follows each letter typed and bounces when something on it changes. Tap it for the full **Preview** sheet: the invitation or the event page, as guests will see them, with one tap to change the words, names, when and where, or the look (Done comes straight back).
@@ -912,6 +925,19 @@ The owner's aim is to replace paper lists, guesswork, extra volunteers and endle
 - For large public events, many councils ask for an event management plan through their Safety Advisory Group. The event pack supplies its numbers and lists, but it isn't the plan itself.
 - Never use words like "safety approved" or "compliant".
 
+### 10x. Announcements from the host to guests (Recommended; owner's request, 16 Nov 2026; awaiting his go)
+
+"News updates, a change of weather plan, car park full, we're excited to see everyone." Not built yet: it needs one database file and is a new screen, so it waits for the owner's go.
+
+- **Writing one.** An **Announce** button (a megaphone) on the event Home. Quick choices for each kind of event, then a box: *Running 15 minutes late* · *Car park full: please use …* · *Weather plan: we're moving indoors to …* · *Doors are open* · *Change of place* (shown in red) · *We can't wait to see you!*. The AI can tidy the words and add the second language, as for the invitation.
+- **Where guests see it.** A banner at the top of the event page, with how long ago it was posted ("10 minutes ago"). The newest is shown in full and older ones fold away. The host can remove one. On the day it also shows on the TV wheel and slideshow, as a strip along the bottom.
+- **How it reaches them**, cheapest and most reliable first:
+  1. **WhatsApp**, from the host's own phone: one tap opens WhatsApp with the message and link, ready for their groups. Free.
+  2. **Email** to guests who gave an email when they replied, through our own sender (Resend), within its free allowance.
+  3. **Later, notifications** for guests who add the page to their home screen. On an iPhone, web notifications only work for a page added to the home screen (Safari 16.4+), so this can never reach everyone, and WhatsApp stays first. No text messages: they cost money for every one sent.
+- **Limits:** up to 10 a day per event, 280 characters each, so guests are never spammed. Free on every plan (it's a safety feature).
+- **Build:** one table, `event_announcements` (event_id, kind, words, translation, posted_at), with Row Level Security, grants and the five role checks. The owner and co-hosts post; helpers can read. Guests read through a security-definer function, never the table.
+
 ## 11. Sharing everywhere (owner's request, 13 Nov 2026)
 
 - **One Share button.**
@@ -1144,6 +1170,32 @@ On approval they get:
 - a QR pass for arrival.
 
 Sponsors choose a tier and pay online, or are added by hand. Their logos appear on the page, the big screen and the results images (golf's sponsor cards).
+
+### 13x. Shows: music nights, concerts, a band or a singer, and film nights (Recommended; owner's idea, 16 Nov 2026; for decision)
+
+Community organisers already run these in halls, restaurants, hotels and stadiums, and charge for them. They fit the community plan and the ticket plan we already have (5d, 14c, 14d), with five additions.
+
+1. **Two new kinds of event:** *Music night or concert* and *Film night*, with their own quick choices: door time and start time, the line-up or the film, an age guide, and "bring your own" rules.
+2. **Ticket tiers:** *Standard*, *VIP*, and the host's own, such as *Family of four*. Each tier has a price online, a price at the door, how many there are, and a short list of what's included, for example "front rows, meet the band, a welcome drink". The QR pass says VIP, and the Gate screen shows it in gold, so helpers can point people the right way.
+3. **Seating, simplest first:**
+   - (a) **Unreserved**, the default.
+   - (b) **Zones or tables:** VIP rows, Table 1–20. The host sets them, and the buyer's pass says "Table 7".
+   - (c) **A seat-by-seat map** only if organisers ask for it after the pilot. Maps are costly to build, and most community shows don't need them.
+4. **Paying at the door without a card reader:** the "Pay here" QR (14c) as now. Organisers who want to take a card on a helper's phone could add **Stripe Tap to Pay** later; it works on iPhone and Android in the UK with no reader. Check Stripe's UK in-person fee before deciding.
+5. **The big screen:** guests love seeing themselves on it. Two new TV modes join the wheel and the slideshow:
+   - **Spotlight:** one guest photo, large, with their name and a short message.
+   - **Mosaic:** a wall that fills up photo by photo.
+
+   A small "Add yours" QR code sits in the corner of every mode. Photos at public shows are checked by the host before they show (0006 already does this for community events).
+
+**Licences: a checklist in the builder, not legal advice.**
+- **Film nights:** charging admission for a film needs a licence for that film, such as Filmbank's Single Title Screening Licence. It covers one film at one event, and the price depends on the venue size and whether you charge. Box office figures go back to Filmbank.
+- **Music:** venues and community halls usually hold TheMusicLicence (PPL PRS). If a hall is hired, the hirer may need their own. One-off events can be licensed, and charities can ask for a discount at least 14 days before.
+- **Alcohol or late entertainment** may need a Temporary Event Notice.
+
+The builder asks "Is the venue covering the music licence?" and links each body. In2Min2 never says an event is licensed.
+
+**Pricing:** as for every community sale, the per-order booking fee (5d), paid by the buyer, with free events still free. Built with payments (phase 4, February), because tiers and zones need orders and passes.
 
 ## 14. Money, receipts and proof of payment
 

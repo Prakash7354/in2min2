@@ -242,6 +242,9 @@ function Photo({ d }: { d: EventViewData }) {
       );
     case "split":
       return <PhotoBox d={d} className={s.photoSplit} />;
+    case "heart":
+      // A soft heart with a fine outline in the event's accent colour (0010).
+      return <div className={s.heartWrap}><PhotoBox d={d} className={s.photoHeart} /></div>;
     default:
       return <PhotoBox d={d} className={s.photoHero} />;
   }
@@ -592,19 +595,19 @@ function After({ d, a, photos }: { d: EventViewData; a: boolean; photos?: ReactN
   );
 }
 
+// Who's behind the event on the left ("Organised by …", "Hosted by …"), with
+// a public event's details under it; a quiet "Made with In2Min2" on the right
+// (owner, 16 Nov 2026: the old badge was "too obvious").
 function Footer({ d }: { d: EventViewData }) {
   const o = d.organiser;
+  const details = o ? [o.typeLabel, o.charityNumber && `Charity ${o.charityNumber}`,
+    o.forProfit === null ? "" : o.forProfit ? "Run for profit" : "Not for profit", o.contact].filter(Boolean).join(" · ") : "";
   return (
     <footer className={s.footer}>
-      {o?.name && (
-        <span>
-          Organised by <strong>{o.name}</strong>
-          {o.typeLabel && ` · ${o.typeLabel}`}
-          {o.charityNumber && ` · Charity ${o.charityNumber}`}
-          {o.forProfit !== null && (o.forProfit ? " · Run for profit" : " · Not for profit")}
-          {o.contact && ` · ${o.contact}`}
-        </span>
-      )}
+      <span className={s.credit}>
+        {d.credit && <span>{d.credit.label} <strong>{d.credit.name}</strong></span>}
+        {details && <span className={s.creditMore}>{d.credit?.name === o?.name ? details : `${o?.name} · ${details}`}</span>}
+      </span>
       {!d.hideBranding && <span className={s.made}>Made with In<b>2</b>Min<b>2</b></span>}
     </footer>
   );

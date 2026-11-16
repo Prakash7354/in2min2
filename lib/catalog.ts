@@ -9,7 +9,7 @@
 export type Scale = "personal" | "celebration" | "community";
 export type Template = "classic" | "modern" | "festive" | "sport";
 export type TextStyle = "classic" | "formal" | "elegant" | "calligraphy" | "heritage" | "contemporary" | "clean" | "bold" | "playful" | "handwritten";
-export type PhotoStyle = "hero" | "arch" | "polaroid" | "split";
+export type PhotoStyle = "hero" | "arch" | "polaroid" | "split" | "heart";
 export type Parking = "unknown" | "none" | "free" | "paid" | "street";
 export type PlanKey = "popup" | "season" | "half_year" | "keepsake" | "community";
 
@@ -424,11 +424,12 @@ export const MAX_SHOWCASE = 5; // the main photo plus four more
 
 // The sky behind the photo wheel (owner, 15 Nov 2026; 0009 stores the host's
 // choice in settings.photo_wall.sky). "auto" picks one from the colours.
-export type Sky = "day" | "evening" | "night" | "galaxy" | "aurora";
+export type Sky = "morning" | "day" | "evening" | "night" | "galaxy" | "aurora";
 export const SKIES: { key: Sky | "auto"; name: string; line: string }[] = [
   { key: "auto", name: "Match my colours", line: "Picked for you from your event's colours" },
-  { key: "day", name: "Day sky", line: "Soft blue sky with a warm sun and drifting clouds" },
-  { key: "evening", name: "Evening", line: "A sunset glow, from gold to purple" },
+  { key: "morning", name: "Morning", line: "A fresh dawn sky, with a gentle sun rising in the corner" },
+  { key: "day", name: "Day sky", line: "Clear blue sky with soft drifting clouds" },
+  { key: "evening", name: "Evening", line: "A soft sunset, from rose to purple" },
   { key: "night", name: "Night", line: "Deep blue night with twinkling stars" },
   { key: "galaxy", name: "Galaxy", line: "The Milky Way in pinks, purples and blues" },
   { key: "aurora", name: "Northern lights", line: "Green and violet lights swaying over the stars" },
@@ -446,17 +447,22 @@ function hueOf(hex: string): number {
 export function skyFor(p: Palette, chosen?: string | null): Sky {
   if (chosen && chosen !== "auto" && SKIES.some((s) => s.key === chosen)) return chosen as Sky;
   if (p.key === "winter_night") return "aurora";
-  if (p.gradient) return "galaxy";
+  if (p.gradient) return "morning";   // the bright party colours: birthdays, mostly
   if (p.dark) return "night";
   const h = hueOf(p.main);
-  return h >= 330 || h < 60 ? "evening" : "day";
+  // Warm colours get the morning sky (owner, 16 Nov 2026: "a young morning
+  // sky with a tender sun rising in the corner … inspirational for birthdays").
+  return h >= 330 || h < 60 ? "morning" : "day";
 }
 
+// The heart (0010) needs the database file 0010 before it can be published.
+// The arch comes last (owner, 16 Nov 2026: arch "less of a priority").
 export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [
   { key: "hero", name: "Hero", line: "The photo fills the top" },
-  { key: "arch", name: "Arch", line: "The photo in an arch, for a child or a couple" },
   { key: "polaroid", name: "Polaroid", line: "Tilted like a snapshot, fun for birthdays" },
+  { key: "heart", name: "Heart", line: "The photo in a soft heart with a fine outline, for love and birthdays" },
   { key: "split", name: "Split", line: "Photo on one side, words on the other" },
+  { key: "arch", name: "Arch", line: "The photo in an arch, for a child or a couple" },
 ];
 
 // Borders and decorations, drawn in code (components/event/borders.tsx) so

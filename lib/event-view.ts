@@ -13,6 +13,28 @@ export type ViewFunction = {
   note?: string; meal?: boolean; menu?: MenuItem[];
 };
 
+// The line at the bottom left of the page that says who's behind the event
+// (owner, 16 Nov 2026: "give credibility to the organiser: organised by …,
+// hosted by …, in memory of …"). The host can change it or hide it; until
+// they do, it's made from what they've already filled in.
+export type Credit = { label: string; name: string };
+export const CREDIT_LABELS = ["Hosted by", "Organised by", "With love from", "In memory of", "Presented by"] as const;
+// The host's own choice: undefined = made for them, null = hidden.
+export type CreditChoice = Credit | null | undefined;
+
+export function defaultCredit(x: { scale: string; sensitive: boolean; organiserName: string; family: { relation: string; names: string }[] }): Credit | null {
+  if (x.scale === "community") return x.organiserName.trim() ? { label: "Organised by", name: x.organiserName.trim() } : null;
+  const fam = x.family.find((f) => f.names.trim());
+  if (!fam) return null;
+  return { label: x.sensitive ? "With love from" : "Hosted by", name: fam.names.trim() };
+}
+
+export function creditFor(choice: CreditChoice, made: Credit | null): Credit | null {
+  if (choice === null) return null;
+  if (choice && choice.name.trim()) return { label: choice.label.trim().slice(0, 30) || "Hosted by", name: choice.name.trim().slice(0, 80) };
+  return made;
+}
+
 export type EventViewData = {
   typeKey: string;
   typeLabel: string;
@@ -22,6 +44,8 @@ export type EventViewData = {
   stars: ViewPerson | null;
   family: ViewPerson[];
   organiser: { name: string; typeLabel: string; forProfit: boolean | null; charityNumber: string; contact: string } | null;
+  // Bottom left of the page: "Hosted by …", "Organised by …" (creditFor).
+  credit: Credit | null;
   date: string;        // YYYY-MM-DD in the event's own time zone
   startTime: string;   // HH:MM
   endTime: string;     // HH:MM or ""

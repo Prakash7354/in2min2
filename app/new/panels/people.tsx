@@ -7,6 +7,7 @@
 import { charCount } from "@/lib/ai/copy";
 import { Icon } from "@/components/icons";
 import { eventType, ORGANISER_TYPES } from "@/lib/catalog";
+import { CREDIT_LABELS, creditFor, defaultCredit } from "@/lib/event-view";
 import { useB2 } from "../context";
 import { kindOf, MEMORIAL_KINDS, titleFor } from "../kinds";
 import { PanelShell } from "../panels";
@@ -89,7 +90,15 @@ export function PeoplePanel() {
         </Section>
       )}
 
-      {community && (
+      {community && <OrganiserSection />}
+      <CreditSection />
+    </PanelShell>
+  );
+}
+
+function OrganiserSection() {
+  const { d, update } = useB2();
+  return (
         <Section icon="flag" title="The organiser" line="Needed before a public event can be published.">
           <Field label="Organiser's name" aside={`${charCount(d.organiserName)}/120`}>
             <input className="b2-input b2-input-sm" value={d.organiserName} maxLength={120} placeholder="e.g. Riverside Community Association"
@@ -117,7 +126,32 @@ export function PeoplePanel() {
               onChange={(e) => update((x) => ({ ...x, organiserContact: e.target.value }))} />
           </Field>
         </Section>
+  );
+}
+
+// The line at the bottom left of the page (owner, 16 Nov 2026: "give
+// credibility to the organiser … organised by, hosted by, in memory of …
+// default option or edit option"). Made from what's filled in until changed.
+function CreditSection() {
+  const { d, update } = useB2();
+  const t = eventType(d.eventType);
+  const made = defaultCredit({ scale: d.scale, sensitive: !!t?.sensitive, organiserName: d.organiserName, family: d.family });
+  const shown = creditFor(d.credit, made);
+  const label = d.credit?.label ?? made?.label ?? (d.scale === "community" ? "Organised by" : t?.sensitive ? "With love from" : "Hosted by");
+  const name = d.credit ? d.credit.name : made?.name ?? "";
+  return (
+    <Section icon="star" title="At the bottom of the page" line="Who's behind the event, so guests can trust it. “Made with In2Min2” sits small on the right.">
+      <Chips label="What it says" small value={d.credit === null ? "none" : label}
+        options={[...CREDIT_LABELS.map((l) => ({ key: l as string, label: l })), { key: "none", label: "Don’t show" }]}
+        onChange={(v) => update((x) => ({ ...x, credit: !v || v === "none" ? null : { label: v, name } }))} />
+      {d.credit !== null && (
+        <input className="b2-input b2-input-sm" value={name} maxLength={80} aria-label="Who" placeholder={d.scale === "community" ? "e.g. Riverside Community Association" : "e.g. The Gurung family"}
+          onChange={(e) => update((x) => ({ ...x, credit: { label, name: e.target.value } }))} />
       )}
-    </PanelShell>
+      <p className="b2-small">
+        {shown ? <>Guests see: <strong style={{ color: "var(--b2-text)" }}>{shown.label} {shown.name}</strong></> : "Nothing shows on the left."}
+        {d.credit !== undefined && made && <> · <button type="button" className="b2-link" onClick={() => update((x) => ({ ...x, credit: undefined }))}>Use “{made.label} {made.name}”</button></>}
+      </p>
+    </Section>
   );
 }

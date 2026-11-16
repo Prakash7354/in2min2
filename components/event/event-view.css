@@ -285,6 +285,33 @@
   border-radius: 999px 999px min(calc(var(--u) * 2), 10px) min(calc(var(--u) * 2), 10px);
   box-shadow: 0 0 0 min(calc(var(--u) * 1.2), 6px) var(--ev-bg), 0 0 0 min(calc(var(--u) * 1.8), 9px) var(--ev-accent);
 }
+/* A soft heart (0010), with a fine accent outline and a gap, like the arch's double ring. */
+.ev-root { --ev-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 92'%3E%3Cpath d='M50 89C47 87 4 62 2.4 31.5 1.4 13.5 13.6 2 28.8 2 39.6 2 46.4 8.4 50 15.6 53.6 8.4 60.4 2 71.2 2 86.4 2 98.6 13.5 97.6 31.5 96 62 53 87 50 89Z'/%3E%3C/svg%3E"); }
+.ev-heartWrap {
+  position: relative;
+  width: 62%;
+  aspect-ratio: 100 / 92;
+  margin-block: min(calc(var(--u) * 2.4), 12px) min(calc(var(--u) * 1.2), 6px);
+  display: grid;
+}
+.ev-heartWrap::before,
+.ev-heartWrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 46%;
+  -webkit-mask: var(--ev-heart) center / 100% 100% no-repeat;
+  mask: var(--ev-heart) center / 100% 100% no-repeat;
+}
+.ev-heartWrap::before { background: var(--ev-accent); transform: scale(1.085); }
+.ev-heartWrap::after { background: var(--ev-bg); transform: scale(1.05); }
+.ev-photoHeart {
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  -webkit-mask: var(--ev-heart) center / 100% 100% no-repeat;
+  mask: var(--ev-heart) center / 100% 100% no-repeat;
+}
 .ev-polaroids {
   position: relative;
   width: 62%;
@@ -785,40 +812,33 @@
   margin: 0;
 }
 .ev-footer {
-  padding: min(calc(var(--u) * 5), 28px) min(calc(var(--u) * 6), 36px) min(calc(var(--u) * 7), 40px);
-  display: grid;
-  gap: 0.6em;
-  justify-items: center;
-  text-align: center;
+  padding: min(calc(var(--u) * 5), 28px) min(calc(var(--u) * 6), 36px) min(calc(var(--u) * 6), 34px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1em;
   font-size: 0.85em;
   color: var(--ev-muted);
   border-top: 1px solid color-mix(in srgb, var(--ev-ink) 10%, transparent);
 }
+.ev-credit { display: grid; gap: 0.25em; min-width: 0; text-align: left; overflow-wrap: anywhere; }
+.ev-credit strong { color: var(--ev-ink); }
+.ev-creditMore { font-size: 0.88em; }
+/* Quiet, bottom right, no background */
 .ev-made {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45em;
-  border-radius: 999px;
-  padding: 0.4em 1em;
-  background: #2e2a6e;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 0.85em;
+  flex: none;
+  margin-left: auto;
+  font-size: 0.82em;
+  font-weight: 600;
   font-family: var(--f-bricolage), var(--f-mukta), system-ui, sans-serif;
   letter-spacing: -0.01em;
+  color: var(--ev-muted);
+  opacity: 0.8;
+  white-space: nowrap;
 }
 .ev-made b {
-  display: inline-grid;
-  place-items: center;
-  width: 1.05em;
-  height: 1.05em;
-  margin-inline: 0.04em;
-  border-radius: 50%;
-  background: #f4a522;
-  color: #1c1a3a;
-  font-size: 0.86em;
   font-weight: 800;
-  line-height: 1;
+  color: var(--ev-accent);
 }
 .ev-demo {
   position: absolute;
@@ -1450,6 +1470,7 @@ button.ev-btn { cursor: pointer; }
   text-transform: uppercase;
 }
 .ev-wheelBadge[data-kind="star"] { background: #fff; color: #1c1a3a; }
+.ev-wheelBadge { white-space: nowrap; font-family: var(--f-inter), system-ui, sans-serif; }
 .ev-wheelLoves {
   position: absolute;
   right: 5%;
@@ -1633,22 +1654,42 @@ button.ev-btn { cursor: pointer; }
 /* ── Skies behind the photo wheel (0009; catalog SKIES, skyFor) ──
    .ev-sky sits on the wheel (.ev-wheelWrap) and on the builder's preview
    (.ev-fan). Night is the base look above; the others replace it. */
+/* Morning (owner, 16 Nov 2026: "a young morning sky with a tender sun rising
+   in the corner, that wouldn't affect the images"): a fresh dawn, periwinkle
+   at the top to blush and cream, with a gentle sun just rising in the
+   bottom-right corner, away from the photos. The last stars fade at the top. */
+.ev-sky[data-sky="morning"] {
+  color: #2a2350;
+  background:
+    radial-gradient(circle at 94% 106%, #fff8e6 0 6%, rgba(255, 224, 172, 0.7) 9.5%, rgba(255, 200, 155, 0.3) 18%, rgba(255, 196, 155, 0) 32%),
+    radial-gradient(ellipse 120% 26% at 50% 102%, rgba(255, 216, 192, 0.5), transparent 70%),
+    radial-gradient(ellipse 55% 40% at 50% 58%, color-mix(in srgb, var(--ev-accent) 14%, transparent), transparent 70%),
+    linear-gradient(180deg, #5d7dd0 0%, #8a9ddf 28%, #c1bce8 56%, #e9cfdc 80%, #f9dfd0 100%);
+}
+.ev-sky[data-sky="morning"]::before {
+  opacity: 0.6;
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 28%);
+  mask-image: linear-gradient(180deg, #000 0%, transparent 28%);
+}
+.ev-sky[data-sky="morning"]::after { display: none; }
+.ev-sky[data-sky="morning"] .ev-wheelShade { background: #c1bce8; }
+
+/* Day: a clear blue sky with soft clouds at the edges, and no bright sun, so
+   the photos are what shines (owner, 16 Nov 2026). */
 .ev-sky[data-sky="day"] {
   color: #1c1a3a;
   background:
-    radial-gradient(circle at 84% 14%, #fffce8 0 3.5%, rgba(255, 236, 170, 0.6) 7%, rgba(255, 236, 170, 0) 22%),
-    radial-gradient(ellipse 60% 40% at 50% 62%, color-mix(in srgb, var(--ev-accent) 18%, transparent), transparent 70%),
-    linear-gradient(180deg, #5aa8ec 0%, #8cc8f6 45%, #cfe9fc 80%, #eef8ff 100%);
+    radial-gradient(ellipse 55% 40% at 50% 60%, color-mix(in srgb, var(--ev-accent) 12%, transparent), transparent 70%),
+    linear-gradient(180deg, #3d8bdc 0%, #69abec 38%, #a3cff5 72%, #d3eafb 100%);
 }
 .ev-sky[data-sky="day"]::before {
   inset: 0 -12%;
   background-image:
-    radial-gradient(ellipse 16% 6% at 18% 24%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 70%),
-    radial-gradient(ellipse 11% 5% at 25% 20%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 70%),
-    radial-gradient(ellipse 18% 6% at 70% 36%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%),
-    radial-gradient(ellipse 12% 5% at 64% 32%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 70%),
-    radial-gradient(ellipse 22% 7% at 38% 88%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 70%),
-    radial-gradient(ellipse 15% 5% at 86% 80%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0) 70%);
+    radial-gradient(ellipse 15% 5% at 12% 14%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 10% 4% at 19% 10%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 16% 5% at 84% 12%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 22% 6% at 30% 92%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 70%),
+    radial-gradient(ellipse 16% 5% at 80% 88%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0) 70%);
   animation: ev-clouds 50s ease-in-out infinite alternate;
 }
 .ev-sky[data-sky="day"]::after { display: none; }
@@ -1656,15 +1697,19 @@ button.ev-btn { cursor: pointer; }
   from { transform: translateX(-5%); }
   to { transform: translateX(5%); }
 }
-.ev-sky[data-sky="day"] .ev-wheelShade { background: #e4f1fd; }
-.ev-sky[data-sky="day"] .ev-loveBtn { color: #1c1a3a; border-color: rgba(28, 26, 58, 0.35); background: rgba(255, 255, 255, 0.6); }
-.ev-sky[data-sky="day"] .ev-loveBtn[data-on] { color: #fff; background: #e0245e; border-color: #e0245e; }
+.ev-sky[data-sky="day"] .ev-wheelShade { background: #a3cff5; }
+.ev-sky[data-sky="day"] .ev-loveBtn,
+.ev-sky[data-sky="morning"] .ev-loveBtn { color: #1c1a3a; border-color: rgba(28, 26, 58, 0.35); background: rgba(255, 255, 255, 0.6); }
+.ev-sky[data-sky="day"] .ev-loveBtn[data-on],
+.ev-sky[data-sky="morning"] .ev-loveBtn[data-on] { color: #fff; background: #e0245e; border-color: #e0245e; }
 
+/* Evening: a soft sunset, rose to purple, with only a low warm glow (the old
+   bright glow washed out the photos and the words under the wheel). */
 .ev-sky[data-sky="evening"] {
   background:
-    radial-gradient(ellipse 45% 22% at 50% 102%, rgba(255, 220, 150, 0.95), rgba(255, 170, 90, 0.5) 45%, transparent 75%),
-    radial-gradient(ellipse 60% 40% at 50% 62%, color-mix(in srgb, var(--ev-accent) 22%, transparent), transparent 70%),
-    linear-gradient(180deg, #22144a 0%, #57286e 26%, #a23d6b 50%, #df6956 70%, #f5a25a 87%, #ffd38c 100%);
+    radial-gradient(ellipse 50% 16% at 50% 104%, rgba(255, 190, 135, 0.45), transparent 75%),
+    radial-gradient(ellipse 60% 40% at 50% 62%, color-mix(in srgb, var(--ev-accent) 16%, transparent), transparent 70%),
+    linear-gradient(180deg, #1c1340 0%, #42225c 30%, #73305f 56%, #a2475e 80%, #bd5a5a 100%);
 }
 .ev-sky[data-sky="evening"]::before,
 .ev-sky[data-sky="evening"]::after {

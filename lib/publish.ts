@@ -123,7 +123,13 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
 
   // 4. Switches (ai_copy stays on; only the builder's switches are sent)
   const toggles = Object.fromEntries((Object.keys(TOGGLE_DEFAULTS) as ToggleKey[]).map((k) => [k, d.toggles[k]]));
-  const t = await sb.from("feature_toggles").update(toggles).eq("event_id", ev.id);
+  // …and the credit line at the bottom of the page, kept beside the photo
+  // wall's settings ({ label, name }, { hidden: true }, or left out).
+  const cur = await sb.from("feature_toggles").select("settings").eq("event_id", ev.id).maybeSingle();
+  const settings: Record<string, unknown> = { ...((cur.data?.settings as Record<string, unknown> | null) ?? {}) };
+  if (d.credit === undefined) delete settings.credit;
+  else settings.credit = d.credit === null ? { hidden: true } : { label: d.credit.label.trim().slice(0, 30), name: d.credit.name.trim().slice(0, 80) };
+  const t = await sb.from("feature_toggles").update({ ...toggles, settings }).eq("event_id", ev.id);
   if (t.error) return explain(t.error);
 
   // 5. A launch-offer code, once

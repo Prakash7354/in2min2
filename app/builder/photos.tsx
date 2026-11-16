@@ -502,7 +502,8 @@ function Toggle({ checked, label, line, onChange }: { checked: boolean; label: s
 
 // Small previews of each sky for the chooser.
 export const SKY_SWATCH: Record<Sky, string> = {
-  day: "linear-gradient(180deg, #5aa8ec, #cfe9fc)",
+  morning: "radial-gradient(circle at 88% 92%, #fff6df 0 10%, rgba(255, 205, 150, 0.6) 20%, transparent 46%), linear-gradient(180deg, #7d9ce0, #c9c9ee 55%, #f6d7d6 85%, #ffe6cc)",
+  day: "linear-gradient(180deg, #4f9be6, #b3dbf8)",
   evening: "linear-gradient(180deg, #57286e, #df6956 60%, #ffd38c)",
   night: "radial-gradient(circle at 30% 30%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 2px), linear-gradient(180deg, #06061a, #120d2c)",
   galaxy: "linear-gradient(158deg, #04030f 25%, #6e50dc 40%, #ff96d7 48%, #6eaaff 56%, #04030f 72%)",

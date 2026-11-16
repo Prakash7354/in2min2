@@ -3,11 +3,16 @@
 // replaces the classic builder: not linked anywhere, and search engines are
 // told to ignore it. It uses the same draft, sign-in and database as /builder.
 //
+// It draws real event pages, so it carries every event font (each is
+// downloaded only when a letter style uses it); without them, Handwritten,
+// Calligraphy and Elegant fell back to the phone's plain letters.
+//
 // Dark by default with a light option. The choice sits on #b2 as
 // data-theme, set by a tiny script before the first paint so there's no
 // flash; theme.tsx changes it.
 
 import type { Metadata, Viewport } from "next";
+import { eventFontVariables } from "@/components/event/fonts";
 import "./new.css";
 
 export const metadata: Metadata = {
@@ -21,7 +26,7 @@ const setTheme = `try{var t=localStorage.getItem("in2min2.theme");document.curre
 
 export default function NewLayout({ children }: LayoutProps<"/new">) {
   return (
-    <div id="b2" className="b2" data-theme="dark" suppressHydrationWarning>
+    <div id="b2" className={`b2 ${eventFontVariables}`} data-theme="dark" suppressHydrationWarning>
       <script dangerouslySetInnerHTML={{ __html: setTheme }} />
       {children}
     </div>

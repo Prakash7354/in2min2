@@ -5,7 +5,7 @@
 import { cache } from "react";
 import type { EventCopy } from "@/lib/ai/copy";
 import { eventType, heroMotionOf, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type CoverFit, type EffectKey, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
-import type { EventStageView, EventViewData } from "@/lib/event-view";
+import { creditFor, defaultCredit, type CreditChoice, type EventStageView, type EventViewData } from "@/lib/event-view";
 import { mediaUrl } from "@/lib/media";
 import { rpc } from "@/lib/supabase/rest";
 import { utcToZoned } from "@/lib/time";
@@ -32,7 +32,7 @@ type PublicEvent = {
     hero_keys?: string[]; hero_motion?: string;
   };
   people?: { role: "star" | "honour"; relation: string | null; names: string; names_local: string | null }[];
-  features?: Partial<Record<ToggleKey, boolean>> & { settings?: { photo_wall?: { early?: boolean } } };
+  features?: Partial<Record<ToggleKey, boolean>> & { settings?: { photo_wall?: { early?: boolean }; credit?: unknown } };
   sub_events?: {
     title: string; kind: string; starts_at: string; venue_name: string | null; description: string | null;
     menu?: { course?: string; dish?: string }[] | null;
@@ -54,6 +54,15 @@ const copy = (c: Partial<EventCopy> | undefined): EventCopy => ({
 });
 
 // One database call per request, shared by the page and its title.
+// The host's credit line as published (lib/publish.ts): { label, name }, or
+// { hidden: true }; anything else means "made from the organiser or family".
+function creditChoice(v: unknown): CreditChoice {
+  if (!v || typeof v !== "object") return undefined;
+  const c = v as { hidden?: unknown; label?: unknown; name?: unknown };
+  if (c.hidden === true) return null;
+  return typeof c.label === "string" && typeof c.name === "string" ? { label: c.label, name: c.name } : undefined;
+}
+
 export const getPublicEvent = cache(async (type: string, slug: string, token?: string): Promise<PublicPage> => {
   const r = await rpc<PublicEvent | null>("public_event", { p_type: type, p_slug: slug, p_token: token ?? null });
   if (!r.ok || !r.data) return { kind: "missing" };
@@ -114,6 +123,9 @@ export const getPublicEvent = cache(async (type: string, slug: string, token?: s
     toggles,
     hideBranding: e.hide_branding,
     demo: e.is_demo,
+    credit: creditFor(creditChoice(features.settings?.credit),
+      defaultCredit({ scale: e.scale, sensitive: t?.sensitive ?? false, organiserName: e.organiser_name ?? "",
+        family: people.filter((x) => x.role === "honour").map((x) => ({ relation: x.relation ?? "", names: x.names })) })),
   };
   const view: EventStageView = p.stage === "live" ? "live" : p.stage === "post" ? "after" : "page";
   return {

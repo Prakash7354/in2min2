@@ -64,8 +64,9 @@ ok("moving effects match (0004)", JSON.stringify(dbEffects) === JSON.stringify(c
 ok("every palette name fits the database check", cat.PALETTES.every((p) => shape.test(p.key)));
 ok("no two palettes, text styles or borders share a name", new Set(cat.PALETTES.map((p) => p.key)).size === cat.PALETTES.length
   && new Set(cat.TEXT_STYLES.map((t) => t.key)).size === cat.TEXT_STYLES.length && new Set(cat.BORDERS.map((b) => b.key)).size === cat.BORDERS.length);
-const dbPhotoStyles = sql.match(/photo_style in \(([^)]+)\)/)[1].replace(/'|\s/g, "").split(",");
-ok("photo styles match", JSON.stringify(dbPhotoStyles) === JSON.stringify(cat.PHOTO_STYLES.map((s) => s.key)));
+// The latest list wins (0010 added the heart); the builder's order is its own.
+const dbPhotoStyles = [...(sql + later).matchAll(/photo_style in \(([^)]+)\)/g)].at(-1)[1].replace(/'|\s/g, "").split(",");
+ok("photo styles match", JSON.stringify([...dbPhotoStyles].sort()) === JSON.stringify(cat.PHOTO_STYLES.map((s) => s.key).sort()), JSON.stringify(dbPhotoStyles));
 const dbFits = later.match(/cover_fit in \(([^)]+)\)/)?.[1].replace(/'|\s/g, "").split(",");
 ok("photo fits match (0003)", JSON.stringify(dbFits) === JSON.stringify(cat.COVER_FITS.map((f) => f.key)), JSON.stringify(dbFits));
 const dbOrganiser = sql.match(/organiser_type in \(([^)]+)\)/)[1].replace(/'|\s/g, "").split(",");

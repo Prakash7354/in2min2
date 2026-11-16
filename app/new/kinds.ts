@@ -44,7 +44,7 @@ export const MORE_TYPES = EVENT_TYPES.map((t) => t.key).filter((k) => !FIRST_TYP
 
 export type Look = { key: string; name: string; palette: string; border: BorderKey; textStyle: TextStyle; template: Template; photoStyle: PhotoStyle };
 const GENERAL: Look[] = [
-  { key: "indigo", name: "Marigold & indigo", palette: "marigold_indigo", border: "fine_line", textStyle: "classic", template: "classic", photoStyle: "arch" },
+  { key: "indigo", name: "Marigold & indigo", palette: "marigold_indigo", border: "fine_line", textStyle: "classic", template: "classic", photoStyle: "hero" },
   { key: "rose", name: "Rose and gold", palette: "lali_gurans", border: "floral", textStyle: "elegant", template: "classic", photoStyle: "arch" },
   { key: "midnight", name: "Midnight gold", palette: "midnight_gold", border: "stars", textStyle: "formal", template: "modern", photoStyle: "hero" },
   { key: "party", name: "Party brights", palette: "confetti_brights", border: "confetti", textStyle: "playful", template: "festive", photoStyle: "polaroid" },

@@ -826,6 +826,11 @@ function PhotoShape({ kind }: { kind: PhotoStyle }) {
     <span className="flex h-16 items-center justify-center rounded-xl bg-wash" aria-hidden="true">
       {kind === "hero" && <span className={`h-10 w-24 rounded-md ${box}`} />}
       {kind === "arch" && <span className={`h-12 w-9 rounded-t-full rounded-b-md ${box}`} />}
+      {kind === "heart" && (
+        <svg viewBox="0 0 100 92" className="h-11 w-12 fill-brand/25" aria-hidden="true">
+          <path d="M50 89C47 87 4 62 2.4 31.5 1.4 13.5 13.6 2 28.8 2 39.6 2 46.4 8.4 50 15.6 53.6 8.4 60.4 2 71.2 2 86.4 2 98.6 13.5 97.6 31.5 96 62 53 87 50 89Z" />
+        </svg>
+      )}
       {kind === "polaroid" && (
         <span className="relative h-12 w-12">
           <span className="absolute inset-0 -rotate-12 rounded-sm bg-white p-1 pb-3 shadow"><span className={`block size-full ${box}`} /></span>

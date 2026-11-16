@@ -21,6 +21,14 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
+### [ ] 0. Run database file 0010 (2 minutes)
+
+This adds the heart photo shape and the Morning sky. Until it runs, publishing a page with the heart shape shows an error.
+1. Open [0010_heart_and_morning.sql](../supabase/migrations/0010_heart_and_morning.sql) in VS Code, then press **Cmd+A**, then **Cmd+C**.
+2. Go to **supabase.com** › your project › **SQL Editor** (left side) › **New query**.
+3. Paste with **Cmd+V**, then press **Run** (bottom right). It should say **Success. No rows returned**.
+4. Tell Claude Code "0010 ran".
+
 ### [ ] 1. Try Builder 2.0 on your phone, then test it with 5 people (about 40 minutes in all)
 
 **in2min2.com/new** is now the real builder in the new look. It's hidden (not linked anywhere) and works on the same event as the classic builder, so your test event may open straight on its Home.

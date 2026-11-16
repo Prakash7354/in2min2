@@ -8,7 +8,7 @@ import {
   eventType, heroMotionOf, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
   type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
-import type { EventViewData, ViewFunction, ViewPerson } from "@/lib/event-view";
+import { creditFor, defaultCredit, type CreditChoice, type EventViewData, type ViewFunction, type ViewPerson } from "@/lib/event-view";
 
 export type Draft = {
   v: 1;
@@ -75,6 +75,10 @@ export type Draft = {
   quickDone?: boolean;
   wordsBy?: "ai" | "suggested" | "host";
   milestone?: string;
+  // The line at the bottom left of the page (lib/event-view.ts creditFor):
+  // left out = made from the organiser or family; null = hidden. Published
+  // in feature_toggles.settings.credit.
+  credit?: CreditChoice;
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;
@@ -291,5 +295,6 @@ export function toViewData(d: Draft): EventViewData {
     heroMotion: heroMotionOf(d.heroMotion),
     toggles: d.toggles,
     hideBranding: plan(d.plan).hideBranding,
+    credit: creditFor(d.credit, defaultCredit({ scale: d.scale, sensitive: t?.sensitive ?? false, organiserName: d.organiserName, family: d.family })),
   };
 }
