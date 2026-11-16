@@ -37,7 +37,11 @@
 .ev-root[data-border="fine_line"] { --bt: 0.03; --bb: 0.03; --side: 3cqi; }
 .ev-root[data-border="ornate"] { --bt: 0.08; --bb: 0.08; --side: 4cqi; }
 .ev-root[data-border="royal"] { --bt: 0.09; --bb: 0.09; --side: 5cqi; }
-.ev-root[data-border="khukuri"] { --bt: 0.15; --bb: 0.06; --side: 3cqi; }
+.ev-root[data-border="khukuri"] { --bt: 0.07; --bb: 0.06; --side: 3cqi; }
+.ev-root[data-border="red_roses"] { --bt: 0.17; --bb: 0.15; --side: 7cqi; }
+.ev-root[data-border="watercolour_roses"] { --bt: 0.1; --bb: 0.1; --side: 9cqi; }
+.ev-root[data-border="gold_crown"] { --bt: 0.08; --bb: 0.08; --side: 5cqi; }
+.ev-root[data-border="golden_leaves"] { --bt: 0.11; --bb: 0.1; --side: 6cqi; }
 .ev-root[data-border="art_deco"] { --bt: 0.08; --bb: 0.08; --side: 4cqi; }
 .ev-root[data-border="laurel"] { --bt: 0.05; --bb: 0.2; --side: 2cqi; }
 .ev-root[data-border="floral"] { --bt: 0.07; --bb: 0.07; --side: 2cqi; }
@@ -2019,15 +2023,64 @@ button.ev-btn { cursor: pointer; }
 .ev-root[data-border="khukuri"] { --divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24'%3E%3Cpath d='M8 12 H104 M196 12 H292' fill='none' stroke='black' stroke-width='1.4' stroke-linecap='round'/%3E%3Cpath d='M4 12 L8 8 L12 12 L8 16Z M296 12 L292 8 L288 12 L292 16Z'/%3E%3C/svg%3E"); }
 .ev-root[data-border="art_deco"] { --divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24'%3E%3Cpath d='M20 12 H132 M168 12 H280' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M150 5 L157 12 L150 19 L143 12Z'/%3E%3Ccircle cx='138' cy='12' r='1.8'/%3E%3Ccircle cx='162' cy='12' r='1.8'/%3E%3C/svg%3E"); }
 .ev-root[data-border="laurel"] { --divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24'%3E%3Cpath d='M20 12 H132 M168 12 H280' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M150 5 L157 12 L150 19 L143 12Z'/%3E%3Ccircle cx='138' cy='12' r='1.8'/%3E%3Ccircle cx='162' cy='12' r='1.8'/%3E%3C/svg%3E"); }
-/* Crossed khukuris: the rules, with the owner's emblem in the middle, in the main colour */
+/* Crossed khukuris: short fine rules in the main colour, with a small emblem
+   in the middle of every third divider only (owner: "smaller and cute … not
+   too often"). */
+.ev-root[data-border="khukuri"] { --divider-plain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24'%3E%3Cpath d='M30 12 H132 M168 12 H270' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M150 6 L156 12 L150 18 L144 12Z'/%3E%3C/svg%3E"); }
 .ev-root[data-border="khukuri"] .ev-section::before {
-  height: 30px; background: var(--ev-main);
-  -webkit-mask: var(--divider) center / 100% 24px no-repeat, url(/art/crossed-khukuris.png) center / auto 30px no-repeat;
-  mask: var(--divider) center / 100% 24px no-repeat, url(/art/crossed-khukuris.png) center / auto 30px no-repeat;
+  width: min(46%, 230px); background: var(--ev-main);
+  -webkit-mask: var(--divider-plain) center / contain no-repeat; mask: var(--divider-plain) center / contain no-repeat;
+}
+.ev-root[data-border="khukuri"] .ev-section:nth-of-type(3n+2)::before {
+  -webkit-mask: var(--divider) center / 100% 24px no-repeat, url(/art/crossed-khukuris.png) center / auto 17px no-repeat;
+  mask: var(--divider) center / 100% 24px no-repeat, url(/art/crossed-khukuris.png) center / auto 17px no-repeat;
 }
 /* The emblem at the top of a crossed-khukuris border */
 .ev-khukuriMark {
-  display: block; width: 24cqi; aspect-ratio: 898 / 633; top: 1.8cqi; background: var(--ev-main);
+  display: block; width: 15cqi; aspect-ratio: 898 / 633; top: 2.4cqi; background: var(--ev-main);
   -webkit-mask: url(/art/crossed-khukuris.png) center / contain no-repeat; mask: url(/art/crossed-khukuris.png) center / contain no-repeat;
 }
-.ev-khukuriRules { top: 5.3cqi; }
+.ev-khukuriRules { top: 3.9cqi; }
+
+/* ───────── Picture borders B1–B4 (the owner's frames, public/art/borders) ───────── */
+.ev-pic { position: absolute; display: block; pointer-events: none; background-repeat: no-repeat; background-size: contain; }
+.ev-pic-tl { top: 0; left: 0; }
+.ev-pic-tr { top: 0; right: 0; }
+.ev-pic-bl { bottom: 0; left: 0; }
+.ev-pic-br { bottom: 0; right: 0; }
+.ev-picFrame { position: absolute; pointer-events: none; border: 1.5px solid var(--frame, var(--ev-accent)); }
+/* B1 Red roses: full colour, with a gold line where the original's runs */
+.ev-b01-frame { --frame: #c9a24a; inset: 4.6cqi 5.6cqi; opacity: 0.85; }
+.ev-b01-tl { width: 34cqi; aspect-ratio: 460 / 415; background-image: url(/art/borders/b01-red-roses-tl.png); }
+.ev-b01-tr { width: 32cqi; aspect-ratio: 460 / 489; background-image: url(/art/borders/b01-red-roses-tr.png); }
+.ev-b01-bl { width: 30cqi; aspect-ratio: 400 / 388; background-image: url(/art/borders/b01-red-roses-bl.png); }
+.ev-b01-br { width: 34cqi; aspect-ratio: 440 / 287; background-image: url(/art/borders/b01-red-roses-br.png); }
+/* B2 Watercolour roses: full colour, no frame line */
+.ev-b02-tl { width: 25cqi; aspect-ratio: 419 / 630; top: 1cqi; left: 1cqi; background-image: url(/art/borders/b02-watercolour-roses-tl.png); }
+.ev-b02-tr { width: 36cqi; aspect-ratio: 460 / 118; top: 4cqi; right: 6cqi; background-image: url(/art/borders/b02-watercolour-roses-tr.png); }
+.ev-b02-bl { width: 36cqi; aspect-ratio: 460 / 126; bottom: 4cqi; left: 6cqi; background-image: url(/art/borders/b02-watercolour-roses-bl.png); }
+.ev-b02-br { width: 25cqi; aspect-ratio: 419 / 641; bottom: 1cqi; right: 1cqi; background-image: url(/art/borders/b02-watercolour-roses-br.png); }
+/* B3 Gold crown and B4 Golden leaves: masks in the accent colour, with a shine */
+.ev-b03, .ev-b03-crown, .ev-b04-tl, .ev-b04-br {
+  background: linear-gradient(135deg, var(--ev-accent) 0%, color-mix(in srgb, var(--ev-accent) 62%, #3a2a00) 45%, var(--ev-accent) 70%, color-mix(in srgb, var(--ev-accent) 70%, #fff) 100%);
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-size: contain; mask-size: contain;
+}
+.ev-b03 { width: 26cqi; aspect-ratio: 380 / 330; -webkit-mask-image: url(/art/borders/b03-gold-crown-corner.png); mask-image: url(/art/borders/b03-gold-crown-corner.png); }
+.ev-b03-frame { inset: 2.9cqi; border-width: 1.2px; border-color: transparent var(--ev-accent); }
+.ev-b03-crown { left: 50%; width: 42cqi; aspect-ratio: 700 / 86; transform: translateX(-50%); -webkit-mask-image: url(/art/borders/b03-gold-crown-divider.png); mask-image: url(/art/borders/b03-gold-crown-divider.png); }
+.ev-b03-crownTop { top: 3cqi; }
+.ev-b03-crownBottom { bottom: 3cqi; }
+.ev-b04-frame { inset: 5cqi; border-width: 1px; }
+.ev-b04-tl { width: 30cqi; aspect-ratio: 460 / 484; top: 0.6cqi; left: 0.6cqi; -webkit-mask-image: url(/art/borders/b04-golden-leaves-tl.png); mask-image: url(/art/borders/b04-golden-leaves-tl.png); }
+.ev-b04-br { width: 30cqi; aspect-ratio: 460 / 497; bottom: 0.6cqi; right: 0.6cqi; -webkit-mask-image: url(/art/borders/b04-golden-leaves-br.png); mask-image: url(/art/borders/b04-golden-leaves-br.png); }
+/* Section dividers: a small crown line on every third section (B3); fine diamonds for B4 */
+.ev-root:is([data-border="gold_crown"], [data-border="golden_leaves"]) .ev-section { position: relative; border-top-color: transparent; }
+.ev-root:is([data-border="gold_crown"], [data-border="golden_leaves"]) .ev-section::before {
+  content: ""; position: absolute; top: 0; left: 50%; width: min(52%, 260px); height: 14px; transform: translate(-50%, -50%);
+  background: var(--ev-accent); pointer-events: none;
+  -webkit-mask: var(--divider) center / contain no-repeat; mask: var(--divider) center / contain no-repeat;
+}
+.ev-root[data-border="gold_crown"], .ev-root[data-border="golden_leaves"] { --divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24'%3E%3Cpath d='M30 12 H132 M168 12 H270' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M150 6 L156 12 L150 18 L144 12Z'/%3E%3C/svg%3E"); }
+.ev-root[data-border="gold_crown"] .ev-section:nth-of-type(3n+2)::before {
+  width: min(58%, 290px); height: 20px; -webkit-mask: url(/art/borders/b03-gold-crown-divider.png) center / contain no-repeat; mask: url(/art/borders/b03-gold-crown-divider.png) center / contain no-repeat;
+}

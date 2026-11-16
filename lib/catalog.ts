@@ -56,7 +56,7 @@ export type EventType = {
 
 export const EVENT_TYPES: EventType[] = [
   { key: "birthday", tag: "popular", label: "Birthday", scale: "personal", theme: "modern", toggles: {}, repeatsYearly: true, sensitive: false,
-    line: "Any age, any size", starLabel: "The birthday person", palette: "confetti_brights", textStyle: "playful", borders: ["balloons", "confetti", "bunting", "stars", "floral", "royal"], photoStyle: "polaroid", tone: "Fun and playful" },
+    line: "Any age, any size", starLabel: "The birthday person", palette: "confetti_brights", textStyle: "playful", borders: ["balloons", "confetti", "bunting", "stars", "floral", "royal", "watercolour_roses", "golden_leaves"], photoStyle: "polaroid", tone: "Fun and playful" },
   { key: "pasni", tag: "popular", label: "Pasni (rice feeding)", scale: "personal", theme: "festive", toggles: { gift_registry: true }, repeatsYearly: false, sensitive: false,
     line: "Baby's first rice", starLabel: "The child", palette: "marigold_indigo", textStyle: "heritage", borders: ["marigold", "royal", "mandala", "floral", "balloons"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "party", label: "Party", scale: "personal", theme: "modern", toggles: {}, repeatsYearly: false, sensitive: false,
@@ -64,17 +64,17 @@ export const EVENT_TYPES: EventType[] = [
   { key: "ceremony", label: "Family ceremony", scale: "personal", theme: "festive", toggles: { gift_registry: true }, repeatsYearly: false, sensitive: false,
     line: "Puja, naming, blessing", starLabel: "Who it's for", palette: "saffron", textStyle: "heritage", borders: ["marigold", "mandala", "royal", "dhaka", "ornate"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "wedding", tag: "popular", label: "Wedding", scale: "celebration", theme: "classic", toggles: { gift_registry: true, guestbook: true }, repeatsYearly: true, sensitive: false,
-    line: "Mehndi, ceremony, reception", starLabel: "The couple", palette: "red_gold", textStyle: "calligraphy", borders: ["royal", "ornate", "floral", "marigold", "art_deco", "mandala", "fine_line"], photoStyle: "arch", tone: "Formal and elegant" },
+    line: "Mehndi, ceremony, reception", starLabel: "The couple", palette: "red_gold", textStyle: "calligraphy", borders: ["royal", "red_roses", "gold_crown", "ornate", "watercolour_roses", "floral", "marigold", "golden_leaves", "art_deco", "mandala", "fine_line"], photoStyle: "arch", tone: "Formal and elegant" },
   { key: "engagement", label: "Engagement", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: false, sensitive: false,
-    line: "Tika, ring ceremony", starLabel: "The couple", palette: "burgundy_gold", textStyle: "elegant", borders: ["floral", "royal", "ornate", "art_deco", "stars"], photoStyle: "arch", tone: "Warm and welcoming" },
+    line: "Tika, ring ceremony", starLabel: "The couple", palette: "burgundy_gold", textStyle: "elegant", borders: ["floral", "royal", "red_roses", "watercolour_roses", "golden_leaves", "ornate", "art_deco", "stars"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "anniversary", label: "Wedding anniversary", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: true, sensitive: false,
-    line: "Silver, golden or any year", starLabel: "The couple", palette: "black_gold", textStyle: "elegant", borders: ["art_deco", "royal", "ornate", "floral", "stars", "fine_line"], photoStyle: "arch", tone: "Warm and welcoming" },
+    line: "Silver, golden or any year", starLabel: "The couple", palette: "black_gold", textStyle: "elegant", borders: ["art_deco", "royal", "gold_crown", "red_roses", "golden_leaves", "ornate", "floral", "stars", "fine_line"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "bratabandha", label: "Bratabandha", scale: "celebration", theme: "festive", toggles: { gift_registry: true }, repeatsYearly: false, sensitive: false,
     line: "Sacred thread ceremony", starLabel: "The boy", palette: "saffron", textStyle: "heritage", borders: ["mandala", "royal", "marigold", "dhaka", "ornate"], photoStyle: "arch", tone: "Festive and joyful" },
   { key: "reunion", tag: "new", label: "Reunion or regimental day", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: true, sensitive: false,
     line: "Old comrades, classmates, family", starLabel: "Who's coming together", palette: "regimental", textStyle: "formal", borders: ["laurel", "khukuri", "fine_line", "art_deco", "bunting", "dhaka"], photoStyle: "hero", tone: "Warm and welcoming" },
   { key: "corporate", label: "Corporate event", scale: "celebration", theme: "modern", toggles: { sponsors: true }, repeatsYearly: true, sensitive: false,
-    line: "Dinner, launch, awards", starLabel: "The organisation", palette: "navy_gold", textStyle: "formal", borders: ["fine_line", "art_deco", "none", "stars"], photoStyle: "split", tone: "Formal and elegant" },
+    line: "Dinner, launch, awards", starLabel: "The organisation", palette: "navy_gold", textStyle: "formal", borders: ["fine_line", "art_deco", "gold_crown", "golden_leaves", "none", "stars"], photoStyle: "split", tone: "Formal and elegant" },
   { key: "mela", tag: "soon", soonNote: "Ticket and parking sales arrive in February. You can make the page now.", label: "Mela / festival", scale: "community", theme: "festive",
     toggles: { rsvp: false, tickets: true, stalls: true, parking: true, sponsors: true }, repeatsYearly: true, sensitive: false,
     line: "Stalls, food, music, parking", starLabel: "The festival", palette: "festival_rainbow", textStyle: "bold", borders: ["rainbow", "bunting", "sunburst", "dhaka", "confetti", "marigold"], photoStyle: "hero", tone: "Festive and joyful" },
@@ -86,7 +86,7 @@ export const EVENT_TYPES: EventType[] = [
   { key: "community", label: "Community event", scale: "community", theme: "festive", toggles: { tickets: true, sponsors: true }, repeatsYearly: true, sensitive: false,
     line: "Dashain, Teej, cultural show", starLabel: "The event", palette: "dhaka", textStyle: "heritage", borders: ["dhaka", "bunting", "rainbow", "marigold", "sunburst", "khukuri"], photoStyle: "hero", tone: "Festive and joyful" },
   { key: "memorial", tag: "new", label: "Memorial or funeral", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: false, sensitive: true,
-    line: "Funeral, prayers, remembrance", starLabel: "In memory of", palette: "calm", textStyle: "formal", borders: ["fine_line", "laurel", "khukuri", "vines", "none"], photoStyle: "arch", tone: "Gentle and respectful" },
+    line: "Funeral, prayers, remembrance", starLabel: "In memory of", palette: "calm", textStyle: "formal", borders: ["fine_line", "laurel", "golden_leaves", "khukuri", "vines", "none"], photoStyle: "arch", tone: "Gentle and respectful" },
   // Festive season (owner, 14 Nov 2026: seasonal designs to show off the festive launch; 0004)
   { key: "christmas", tag: "new", label: "Christmas party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,
     line: "Family, friends or work", starLabel: "Who it's for", palette: "christmas", textStyle: "classic", borders: ["snowflakes", "stars", "floral", "bunting"], photoStyle: "hero", tone: "Festive and joyful", effect: "snow" },
@@ -481,7 +481,8 @@ export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [
 export type BorderKey =
   | "none" | "fine_line" | "ornate" | "art_deco" | "laurel" | "floral" | "vines" | "marigold" | "dhaka" | "mandala"
   | "balloons" | "confetti" | "bunting" | "stars" | "sunburst" | "rainbow" | "stripes" | "pitch"
-  | "snowflakes" | "fireworks" | "prayer_flags" | "royal" | "khukuri";
+  | "snowflakes" | "fireworks" | "prayer_flags" | "royal" | "khukuri"
+  | "red_roses" | "watercolour_roses" | "gold_crown" | "golden_leaves";
 
 export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[] = [
   { key: "none", name: "Plain", line: "No border: let the words speak" },
@@ -490,6 +491,11 @@ export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[
   { key: "art_deco", name: "Art Deco", line: "Gold fans and steps: galas and anniversaries" },
   { key: "royal", tag: "new", name: "Royal frame", line: "Gold filigree corners and a lotus crest, like a printed wedding card" },
   { key: "khukuri", tag: "new", name: "Crossed khukuris", line: "Crossed khukuris and fine lines: regimental days and reunions" },
+  // Picture borders from the owner's own frames (16 Nov 2026; public/art/borders/b01…b04)
+  { key: "red_roses", tag: "new", name: "B1 Red roses", line: "Red and pink roses with gold lines, in their own colours" },
+  { key: "watercolour_roses", tag: "new", name: "B2 Watercolour roses", line: "Soft painted roses; best on light colours" },
+  { key: "gold_crown", tag: "new", name: "B3 Gold crown", line: "Gold scroll corners and a crown line; takes your colours" },
+  { key: "golden_leaves", tag: "new", name: "B4 Golden leaves", line: "A fine frame with leafy sprays; takes your colours" },
   { key: "laurel", name: "Laurel", line: "A laurel wreath: regiments, awards, remembrance" },
   { key: "floral", tag: "popular", name: "Flowers", line: "Flower sprays in the corners" },
   { key: "vines", name: "Leafy vine", line: "A vine of many-coloured leaves" },

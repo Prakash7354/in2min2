@@ -190,9 +190,9 @@ function Khukuri() {
   return (
     <>
       <span className="ev-lines ev-linesSingle" />
-      <Svg vb="0 0 240 40" className="ev-topCentre ev-w60 ev-khukuriRules">
-        <path d="M12 20 H72 M168 20 H228" className="ev-sm" strokeWidth="1.2" strokeLinecap="round" />
-        <path d="M8 20 L12 16 L16 20 L12 24Z M232 20 L228 16 L224 20 L228 24Z" className="ev-fa" />
+      <Svg vb="0 0 240 40" className="ev-topCentre ev-w46 ev-khukuriRules">
+        <path d="M30 20 H82 M158 20 H210" className="ev-sm" strokeWidth="1" strokeLinecap="round" />
+        <path d="M26 20 L29 17 L32 20 L29 23Z M214 20 L211 17 L208 20 L211 23Z" className="ev-fa" />
       </Svg>
       <span className="ev-topCentre ev-khukuriMark" />
       <Svg vb="0 0 240 20" className="ev-bottomCentre ev-w52">
@@ -201,6 +201,39 @@ function Khukuri() {
       </Svg>
     </>
   );
+}
+
+// Picture borders (owner, 16 Nov 2026: "include these modern design border
+// lines using their own names or numbers"): his four frames, cut into
+// corner pieces in public/art/borders (b01…b04). The roses keep their own
+// colours; the gold crown and golden leaves are masks in the event's accent
+// colour, with a soft metallic shine.
+type Corner = "tl" | "tr" | "bl" | "br";
+function Pic({ id, corners, mirror = false }: { id: string; corners: Corner[]; mirror?: boolean }) {
+  return (
+    <>
+      {corners.map((c) => <span key={c} className={`ev-pic ${mirror ? `ev-corner ev-${c}` : `ev-pic-${c}`} ev-${id}${mirror ? "" : `-${c}`}`} />)}
+    </>
+  );
+}
+function RedRoses() {
+  return <><span className="ev-picFrame ev-b01-frame" /><Pic id="b01" corners={["tl", "tr", "bl", "br"]} /></>;
+}
+function WatercolourRoses() {
+  return <Pic id="b02" corners={["tl", "tr", "bl", "br"]} />;
+}
+function GoldCrown() {
+  return (
+    <>
+      <span className="ev-picFrame ev-b03-frame" />
+      <Pic id="b03" corners={["tl", "tr", "bl", "br"]} mirror />
+      <span className="ev-pic ev-b03-crown ev-b03-crownTop" />
+      <span className="ev-pic ev-b03-crown ev-b03-crownBottom" />
+    </>
+  );
+}
+function GoldenLeaves() {
+  return <><span className="ev-picFrame ev-b04-frame" /><Pic id="b04" corners={["tl", "br"]} /></>;
 }
 
 function ArtDeco() {
@@ -675,6 +708,10 @@ const ART: Record<BorderKey, () => ReactNode> = {
   art_deco: ArtDeco,
   royal: Royal,
   khukuri: Khukuri,
+  red_roses: RedRoses,
+  watercolour_roses: WatercolourRoses,
+  gold_crown: GoldCrown,
+  golden_leaves: GoldenLeaves,
   laurel: Laurel,
   floral: Floral,
   vines: Vines,

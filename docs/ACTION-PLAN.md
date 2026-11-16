@@ -53,6 +53,8 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
    - Would you use this for your own event?
 5. Send Claude Code the times and notes. The goal: a newcomer finishes in under 2 minutes without help.
 
+**Links for testers:** **in2min2.com/new/guide** (how it works, 2 minutes) and **in2min2.com/new** (make an event). They don't need to sign in to build, preview, change the look or try the photo wheel. Signing in (an emailed code, free) is only needed for the AI writer and for publishing, and so for replies, photos and comments. Until they publish, their event stays only on their own phone.
+
 **Two kinds of test** (both use **in2min2.com/new**; no other link is needed):
 - **Play test (now):** testers make a pretend event on their own phone and try everything, including **Announce**, **Photos** › **Try it with your photos**, and the comments on the photos page. Nothing else is needed first.
 - **Real small event (after the play test):** a real birthday or get-together with real guests, the TV wheel, and comments on the night. Before this one, Claude Code should build the **nightly backup** (Supabase's free plan keeps none, so a mistake could lose real replies), and you should approve the drafts (step 3) so the privacy page is live.

@@ -1,11 +1,21 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.20, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.21, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.21 (16 Nov 2026, ready for the first testers):**
+- **Four picture borders from the owner's own frames**, numbered and named:
+  - **B1 Red roses** and **B2 Watercolour roses** keep their own colours. B2 is best on light colour sets, because the paint is see-through.
+  - **B3 Gold crown** and **B4 Golden leaves** take the event's accent colour with a soft metallic shine.
+  - Each is cut into corner pieces (`public/art/borders/b01…b04`, about 30–750 KB per border), so the corners never stretch, whatever the card's height.
+  - B3's crown line sits at the top and bottom, and small on every third section divider only.
+  - They are suggested for weddings, engagements, anniversaries, birthdays, corporate events and memorials, as each suits.
+- **Crossed khukuris made smaller and rarer**: a small emblem at the top with short fine rules. Section dividers are plain fine lines with a diamond, and only every third one carries a small emblem.
+- Borders show on the invitation and the page, never on the TV, which shows only the photos.
 
 **What changed in version 3.20 (16 Nov 2026):**
 - **Crossed khukuris now use the traditional emblem in its classic shape.** The owner's decision: "use it with the original look design, the lines adaptive to the colours". Our earlier drawing is removed.
