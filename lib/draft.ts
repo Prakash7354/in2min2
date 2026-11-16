@@ -79,6 +79,10 @@ export type Draft = {
   // left out = made from the organiser or family; null = hidden. Published
   // in feature_toggles.settings.credit.
   credit?: CreditChoice;
+  // A blessing line at the very top of the card and page, such as
+  // "॥ श्री गणेशाय नमः ॥" (owner, 16 Nov 2026). Published in
+  // feature_toggles.settings.topline.
+  topLine?: string;
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;
@@ -296,5 +300,6 @@ export function toViewData(d: Draft): EventViewData {
     toggles: d.toggles,
     hideBranding: plan(d.plan).hideBranding,
     credit: creditFor(d.credit, defaultCredit({ scale: d.scale, sensitive: t?.sensitive ?? false, organiserName: d.organiserName, family: d.family })),
+    topLine: (d.topLine ?? "").trim().slice(0, 40),
   };
 }

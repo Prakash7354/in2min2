@@ -1,11 +1,22 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.18, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.19, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.19 (16 Nov 2026, from the owner's examples of the community's favourite cards):**
+- **Traditional designs, our own drawings in that style** (the example cards belong to their designers and are not copied). All take the event's colours:
+  - **Sindoor Red & Gold**: a deep red card with gold letters.
+  - **Royal frame**: a double gold frame, filigree corners, and a lotus crest at the top and bottom.
+  - **Crossed khukuris**: two khukuris crossed above the words, with fine rules. For regimental days, reunions, memorials and community events. Our own drawing of the knife, not any regiment's badge.
+  - **A blessing at the very top**, if the host likes: "॥ श्री गणेशाय नमः ॥", "॥ ॐ ॥", "ॐ मणि पद्मे हूँ", or their own (Words panel). It is kept in `feature_toggles.settings.topline`, like the credit line, so no database change.
+  - **Two complete looks**: "Royal red & gold" (Sindoor, Royal frame, Heritage letters, the heart photo), and "Regimental" (Regimental green, crossed khukuris, Formal letters).
+  - Each kind of event suggests them where they fit: Royal frame for weddings, engagements, anniversaries, Pasni, Bratabandha and ceremonies; khukuris for reunions, memorials and community events.
+  - A dark red card gets the Evening sky behind the photo wheel.
+- **How it works** (`/new/guide`, hidden with the rest of `/new`): six short steps, each with a real, working example (the invitation, the event tiles, the WhatsApp message, replies, the photo wheel with comments and an announcement, the thank-you page), illustrated with drawn hills, rivers and flowers, and a "Try it" button. Linked from the first screen and from You. A guide for bigger and ticketed events comes with the second build.
 
 **What changed in version 3.18 (16 Nov 2026, from the owner's first test of comments; 0011 has run):**
 - **Share is built around what each message is for.**

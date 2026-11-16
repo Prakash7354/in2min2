@@ -43,24 +43,32 @@ export const MORE_TYPES = EVENT_TYPES.map((t) => t.key).filter((k) => !FIRST_TYP
 // host chooses once instead of six times.
 
 export type Look = { key: string; name: string; palette: string; border: BorderKey; textStyle: TextStyle; template: Template; photoStyle: PhotoStyle };
+// Royal red & gold and Regimental (owner, 16 Nov 2026): in the style of the
+// community's favourite printed cards, and for regimental days.
+const ROYAL: Look = { key: "sindoor", name: "Royal red & gold", palette: "sindoor", border: "royal", textStyle: "heritage", template: "classic", photoStyle: "heart" };
+const REGIMENT: Look = { key: "regiment", name: "Regimental", palette: "regimental", border: "khukuri", textStyle: "formal", template: "classic", photoStyle: "hero" };
 const GENERAL: Look[] = [
   { key: "indigo", name: "Marigold & indigo", palette: "marigold_indigo", border: "fine_line", textStyle: "classic", template: "classic", photoStyle: "hero" },
+  ROYAL,
   { key: "rose", name: "Rose and gold", palette: "lali_gurans", border: "floral", textStyle: "elegant", template: "classic", photoStyle: "arch" },
   { key: "midnight", name: "Midnight gold", palette: "midnight_gold", border: "stars", textStyle: "formal", template: "modern", photoStyle: "hero" },
   { key: "party", name: "Party brights", palette: "confetti_brights", border: "confetti", textStyle: "playful", template: "festive", photoStyle: "polaroid" },
   { key: "sunset", name: "Sunset", palette: "sunset", border: "none", textStyle: "contemporary", template: "modern", photoStyle: "hero" },
   { key: "garden", name: "Garden", palette: "garden_green", border: "vines", textStyle: "heritage", template: "classic", photoStyle: "arch" },
   { key: "pastel", name: "Pastel", palette: "pastel_party", border: "balloons", textStyle: "handwritten", template: "festive", photoStyle: "polaroid" },
+  REGIMENT,
 ];
 const CALM: Look[] = [
   { key: "calm", name: "Calm", palette: "calm", border: "fine_line", textStyle: "classic", template: "classic", photoStyle: "arch" },
   { key: "lily", name: "Lily", palette: "lily", border: "laurel", textStyle: "elegant", template: "classic", photoStyle: "arch" },
   { key: "charcoal", name: "Charcoal and silver", palette: "charcoal_silver", border: "fine_line", textStyle: "formal", template: "classic", photoStyle: "hero" },
+  REGIMENT,
 ];
 const COMMUNITY_LOOKS: Look[] = [
   { key: "festival", name: "Festival", palette: "festival_rainbow", border: "bunting", textStyle: "bold", template: "festive", photoStyle: "hero" },
   { key: "saffron", name: "Saffron", palette: "saffron", border: "mandala", textStyle: "heritage", template: "festive", photoStyle: "hero" },
   { key: "royal", name: "Royal blue", palette: "royal_blue", border: "art_deco", textStyle: "formal", template: "modern", photoStyle: "hero" },
+  REGIMENT,
 ];
 
 // The type's own look first, then others that suit it.

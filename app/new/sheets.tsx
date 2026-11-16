@@ -416,6 +416,12 @@ function AccountBody() {
         </div>
       ))}
 
+      <Link className="b2-row" href="/new/guide">
+        <span className="b2-ico b2-ico-soft" aria-hidden="true"><Icon name="book" className="" /></span>
+        <span className="b2-grow"><strong>How it works</strong><small>Six steps, from invitation to thank-you</small></span>
+        <Icon name="next" className="size-5" />
+      </Link>
+
       <Link className="b2-row" href="/builder">
         <span className="b2-ico b2-ico-soft" aria-hidden="true"><Icon name="layout" className="" /></span>
         <span className="b2-grow"><strong>Open the classic builder</strong><small>The same event, in the old look</small></span>

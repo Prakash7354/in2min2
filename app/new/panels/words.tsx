@@ -20,6 +20,8 @@ const TONE_SHORT: Record<string, string> = {
   "Festive and joyful": "Festive", "Sporty and energetic": "Sporty", "Gentle and respectful": "Gentle",
 };
 const MAIN_LANGS = ["en", "ne", "ne-Latn"];
+// Lines families often put at the top of a card (Hindu, Buddhist); any other can be typed.
+const TOP_LINES = ["॥ श्री गणेशाय नमः ॥", "॥ ॐ ॥", "ॐ मणि पद्मे हूँ"];
 const short = (code: string) => (language(code)?.name ?? code).replace("Nepali in English letters", "Nepali (English letters)");
 
 export function WordsPanel() {
@@ -97,6 +99,16 @@ export function WordsPanel() {
           </div>
         )}
         {COPY_KEYS.map((key) => <WordBox key={key} k={key} d={d} second={second?.name} secondCode={second?.code} />)}
+      </Section>
+
+      <Section icon="sparkle" title="A blessing at the very top" line="A short line above everything else, as on printed cards. If you like.">
+        <Chips label="A blessing at the top" small value={TOP_LINES.includes(d.topLine ?? "") ? d.topLine ?? "" : d.topLine ? "own" : ""}
+          options={[{ key: "", label: "None" }, ...TOP_LINES.map((t) => ({ key: t, label: t })), { key: "own", label: "My own" }]}
+          onChange={(v) => update((x) => ({ ...x, topLine: v === "own" ? (x.topLine && !TOP_LINES.includes(x.topLine) ? x.topLine : " ") : v ?? "" }))} />
+        {!!d.topLine && !TOP_LINES.includes(d.topLine) && (
+          <input className="b2-input b2-input-sm" value={d.topLine.trimStart()} maxLength={40} aria-label="Your own line at the top" placeholder="e.g. ॥ जय श्री राम ॥"
+            onChange={(e) => update((x) => ({ ...x, topLine: e.target.value || " " }))} />
+        )}
       </Section>
     </PanelShell>
   );

@@ -46,6 +46,8 @@ export type EventViewData = {
   organiser: { name: string; typeLabel: string; forProfit: boolean | null; charityNumber: string; contact: string } | null;
   // Bottom left of the page: "Hosted by …", "Organised by …" (creditFor).
   credit: Credit | null;
+  // A blessing line at the very top, e.g. "॥ श्री गणेशाय नमः ॥", or "".
+  topLine: string;
   date: string;        // YYYY-MM-DD in the event's own time zone
   startTime: string;   // HH:MM
   endTime: string;     // HH:MM or ""

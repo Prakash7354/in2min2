@@ -7,6 +7,7 @@
 // organising and about parking. Everything else waits on the event Home.
 
 import { useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import Link from "next/link";
 import { motion } from "motion/react";
 import EventView from "@/components/event/event-view";
 import { Icon, type IconName } from "@/components/icons";
@@ -87,7 +88,7 @@ function WhatScreen() {
   return (
     <section className="b2-screen">
       <h1 className="b2-h1">What are you celebrating?</h1>
-      <p className="b2-lead">Tap one. Everything else is set up for you.</p>
+      <p className="b2-lead">Tap one. Everything else is set up for you. <Link className="b2-link" href="/new/guide">See how it works</Link></p>
       <div className="b2-choices">
         {keys.map((k) => {
           const et = eventType(k);

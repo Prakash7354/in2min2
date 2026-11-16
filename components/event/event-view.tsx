@@ -260,6 +260,7 @@ function Card({ d }: { d: EventViewData }) {
       <article className={s.card}>
         <BorderArt kind={d.border} />
         <div className={s.cardInner}>
+        {d.topLine && <p className={s.topLine} lang="ne">{d.topLine}</p>}
         <Photo d={d} />
         <Kicker>{d.sensitive ? "In loving memory" : d.scale === "community" ? d.typeLabel : "You’re invited"}</Kicker>
         <Headline d={d} />
@@ -304,6 +305,7 @@ function Hero({ d, children }: { d: EventViewData; children?: ReactNode }) {
       {top && <Photo d={d} />}
       <div className={`${s.heroBody} ${s.heroBand}`}>
         <BorderArt kind={d.border} className={s.heroArt} />
+        {d.topLine && <p className={s.topLine} lang="ne">{d.topLine}</p>}
         {!top && <Photo d={d} />}
         <Kicker>{kicker}</Kicker>
         <Headline d={d} as="h1" />

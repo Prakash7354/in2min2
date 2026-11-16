@@ -127,6 +127,7 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
   // wall's settings ({ label, name }, { hidden: true }, or left out).
   const cur = await sb.from("feature_toggles").select("settings").eq("event_id", ev.id).maybeSingle();
   const settings: Record<string, unknown> = { ...((cur.data?.settings as Record<string, unknown> | null) ?? {}) };
+  if (d.topLine?.trim()) settings.topline = d.topLine.trim().slice(0, 40); else delete settings.topline;
   if (d.credit === undefined) delete settings.credit;
   else settings.credit = d.credit === null ? { hidden: true } : { label: d.credit.label.trim().slice(0, 30), name: d.credit.name.trim().slice(0, 80) };
   const t = await sb.from("feature_toggles").update({ ...toggles, settings }).eq("event_id", ev.id);

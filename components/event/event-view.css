@@ -36,6 +36,8 @@
    heights as a share of the decorated width; --side is extra side room. */
 .ev-root[data-border="fine_line"] { --bt: 0.03; --bb: 0.03; --side: 3cqi; }
 .ev-root[data-border="ornate"] { --bt: 0.08; --bb: 0.08; --side: 4cqi; }
+.ev-root[data-border="royal"] { --bt: 0.09; --bb: 0.09; --side: 5cqi; }
+.ev-root[data-border="khukuri"] { --bt: 0.18; --bb: 0.06; --side: 3cqi; }
 .ev-root[data-border="art_deco"] { --bt: 0.08; --bb: 0.08; --side: 4cqi; }
 .ev-root[data-border="laurel"] { --bt: 0.05; --bb: 0.2; --side: 2cqi; }
 .ev-root[data-border="floral"] { --bt: 0.07; --bb: 0.07; --side: 2cqi; }
@@ -96,6 +98,11 @@
   text-align: left;
 }
 
+/* A blessing line at the very top: "॥ श्री गणेशाय नमः ॥" */
+.ev-topLine {
+  margin: 0; color: var(--ev-accent); font-family: var(--f-tiro-deva), var(--ev-display);
+  font-size: 0.9em; letter-spacing: 0.06em; line-height: 1.3; text-align: center; justify-self: center;
+}
 .ev-kicker {
   font-size: 0.78em;
   letter-spacing: 0.14em;
@@ -881,6 +888,9 @@
 .ev-w26 { width: 26cqi; }
 .ev-w30 { width: 30cqi; }
 .ev-w34 { width: 34cqi; }
+.ev-w46 { width: 46cqi; }
+.ev-w52 { width: 52cqi; }
+.ev-w60 { width: 60cqi; }
 .ev-corner { position: absolute; display: block; }
 .ev-tl { top: 0; left: 0; }
 .ev-tr { top: 0; right: 0; transform: scaleX(-1); }

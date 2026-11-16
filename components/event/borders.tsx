@@ -128,6 +128,103 @@ function Ornate() {
   );
 }
 
+// Royal frame (owner, 16 Nov 2026, from the community's favourite printed
+// wedding cards): a double gold frame, filigree scrolls curling into each
+// corner, and a lotus crest with scrolling arms at the top and bottom. Our
+// own drawing, in the event's accent colour, so it suits any palette.
+const ROYAL_CORNER = (
+  <g className="ev-sa" strokeLinecap="round" fill="none">
+    <path d="M8 96 V24 Q8 8 24 8 H96" strokeWidth="1.6" />
+    <path d="M24 24 C24 48 42 58 56 48 C66 40 60 28 50 32 C43 35 46 44 52 42" strokeWidth="1.5" />
+    <path d="M24 24 C48 24 58 42 48 56 C40 66 28 60 32 50 C35 43 44 46 42 52" strokeWidth="1.5" />
+    <path d="M62 15 C70 9 80 11 84 17 C87 22 82 26 78 23" strokeWidth="1.1" />
+    <path d="M15 62 C9 70 11 80 17 84 C22 87 26 82 23 78" strokeWidth="1.1" />
+  </g>
+);
+function Lotus({ x, y, s = 1 }: { x: number; y: number; s?: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${s})`}>
+      {[-58, -30, 30, 58].map((a) => (
+        <path key={a} d="M0 0 C-4 -6 -4 -13 0 -18 C4 -13 4 -6 0 0Z" transform={`rotate(${a}) scale(0.8)`} className="ev-fa" opacity="0.75" />
+      ))}
+      <path d="M0 0 C-5 -7 -5 -16 0 -22 C5 -16 5 -7 0 0Z" className="ev-fa" />
+      <path d="M-9 2 H9" className="ev-sa" strokeWidth="1.4" strokeLinecap="round" />
+      <circle cx="0" cy="5.5" r="1.6" className="ev-fa" />
+    </g>
+  );
+}
+function Royal() {
+  const crest = (
+    <>
+      <path d="M100 30 C86 30 80 18 66 18 C56 18 54 27 60 28 C65 29 66 23 62 22" className="ev-sa" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M100 30 C114 30 120 18 134 18 C144 18 146 27 140 28 C135 29 134 23 138 22" className="ev-sa" strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M14 30 H52 M148 30 H186" className="ev-sa" strokeWidth="0.9" strokeLinecap="round" />
+      <circle cx="10" cy="30" r="1.8" className="ev-fa" />
+      <circle cx="190" cy="30" r="1.8" className="ev-fa" />
+      <Lotus x={100} y={27} s={0.9} />
+    </>
+  );
+  return (
+    <>
+      <span className="ev-lines" />
+      <Corners vb="0 0 100 100" width="26cqi">
+        {ROYAL_CORNER}
+        <path d="M24 18 L30 24 L24 30 L18 24Z" className="ev-fa" />
+        <g transform="translate(47 15) rotate(-10)"><path d={leafPath(10, 3)} className="ev-fa" /></g>
+        <g transform="translate(15 47) rotate(100)"><path d={leafPath(10, 3)} className="ev-fa" /></g>
+        <circle cx="88" cy="8" r="1.5" className="ev-fa" />
+        <circle cx="8" cy="88" r="1.5" className="ev-fa" />
+      </Corners>
+      <Svg vb="0 0 200 40" className="ev-topCentre ev-w46">{crest}</Svg>
+      <Svg vb="0 0 200 40" className="ev-bottomCentre ev-w46">{crest}</Svg>
+    </>
+  );
+}
+
+// Crossed khukuris (owner, 16 Nov 2026: "often used in regimental events …
+// in adaptive colours"): two khukuris crossed above the words, with fine
+// rules either side, in the event's main colour. Our own drawing of the
+// traditional knife, not any regiment's badge.
+const KHUKURI = (
+  <g strokeLinejoin="round" strokeLinecap="round">
+    <path d="M2 -3.4 C30 -6.8 62 -5.2 96 9 C84 17.5 66 16.5 52 11.2 C38 6.2 24 7.6 13 6.6 Q10 6.2 9 3.8 Q8 6.4 5 5.6 L2 3.4 Z"
+      className="ev-sm" strokeWidth="1.8" style={{ fill: "color-mix(in srgb, var(--ev-accent) 22%, transparent)" }} />
+    <path d="M16 -1.2 C40 -3.6 64 -2 86 6" className="ev-sm" strokeWidth="0.8" opacity="0.6" />
+    <rect x="-3.2" y="-5.6" width="5.2" height="11.2" rx="1.3" className="ev-fa" />
+    <path d="M-3.2 -4.2 L-27 -3.4 Q-32 0 -27 3.4 L-3.2 4.2 Z" className="ev-fm" />
+    <path d="M-10.5 -3.9 V3.9 M-18.5 -3.6 V3.6" className="ev-sb" strokeWidth="1.3" />
+  </g>
+);
+export function CrossedKhukuris() {
+  return (
+    <>
+      <g transform="translate(44 84) rotate(-48)">{KHUKURI}</g>
+      <g transform="translate(116 84) scale(-1 1) rotate(-48)">{KHUKURI}</g>
+    </>
+  );
+}
+function Khukuri() {
+  const rule = (
+    <>
+      <path d="M12 34 H66 M174 34 H228" className="ev-sm" strokeWidth="1.2" strokeLinecap="round" />
+      <path d="M8 34 L12 30 L16 34 L12 38Z M232 34 L228 30 L224 34 L228 38Z" className="ev-fa" />
+    </>
+  );
+  return (
+    <>
+      <span className="ev-lines ev-linesSingle" />
+      <Svg vb="0 0 240 76" className="ev-topCentre ev-w60">
+        {rule}
+        <g transform="translate(64 2) scale(0.7)"><CrossedKhukuris /></g>
+      </Svg>
+      <Svg vb="0 0 240 20" className="ev-bottomCentre ev-w52">
+        <path d="M30 10 H104 M136 10 H210" className="ev-sm" strokeWidth="1.1" strokeLinecap="round" />
+        <path d="M120 3 L127 10 L120 17 L113 10Z" className="ev-fa" />
+      </Svg>
+    </>
+  );
+}
+
 function ArtDeco() {
   const rays = Array.from({ length: 9 }, (_, i) => {
     const a = (i * 90) / 8 * (Math.PI / 180);
@@ -598,6 +695,8 @@ const ART: Record<BorderKey, () => ReactNode> = {
   fine_line: FineLine,
   ornate: Ornate,
   art_deco: ArtDeco,
+  royal: Royal,
+  khukuri: Khukuri,
   laurel: Laurel,
   floral: Floral,
   vines: Vines,

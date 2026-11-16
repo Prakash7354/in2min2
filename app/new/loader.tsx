@@ -8,3 +8,4 @@ import dynamic from "next/dynamic";
 const shell = () => <div className="b2-shell" aria-busy="true" />;
 export const Builder2 = dynamic(() => import("./app"), { ssr: false, loading: shell });
 export const StyleGuide = dynamic(() => import("./style/style-guide"), { ssr: false, loading: shell });
+export const Guide = dynamic(() => import("./guide/guide"), { ssr: false, loading: shell });
