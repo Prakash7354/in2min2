@@ -2,7 +2,8 @@
 // or projector (components/photos/slideshow.tsx). The QR code in the corner
 // opens the photos page, with a private event's photo key when it has one.
 // ?style=wheel shows the photo wheel in a night sky instead (components/
-// photos/tv-wheel.tsx).
+// photos/tv-wheel.tsx), with guests' live comments on the right or along the
+// bottom as the host chooses; ?comments=right|bottom|off overrides that.
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -41,7 +42,8 @@ export default async function TvPage({ params, searchParams }: PageProps<"/[type
       <main className={eventFontVariables}>
         <TvWheel type={type} slug={slug} token={key ?? null} eventId={ev.id} title={ev.headline || ev.title} joinUrl={join} joinText={joinText}
           vars={eventVars(p, ev.text_style)} display={textStyle(ev.text_style).display} motion celebrate={!ev.sensitive}
-          sky={skyFor(p, w.rules?.sky)} />
+          sky={skyFor(p, w.rules?.sky)}
+          comments={sp.comments === "right" || sp.comments === "bottom" || sp.comments === "off" ? sp.comments : null} />
       </main>
     );
   }

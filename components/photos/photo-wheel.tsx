@@ -117,7 +117,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
         else if (!still && document.visibilityState === "visible") g.angle -= speed * dt;   // clockwise, seen from above
       }
       const W = stage.current?.clientWidth ?? 360;
-      const R = tv ? Math.min(W * 0.4, 1100) : Math.min(W * 0.5, 460);
+      const R = tv ? Math.min(W * 0.32, 900) : Math.min(W * 0.5, 460);
       let bestCos = -2, bestI = g.front;
       for (let i = 0; i < SLOTS; i++) {
         const el = cards.current[i];
@@ -152,7 +152,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
     const g = st.current;
     if (!g.drag) return;
     const W = stage.current?.clientWidth ?? 360;
-    const R = tv ? Math.min(W * 0.4, 1100) : Math.min(W * 0.5, 460);
+    const R = tv ? Math.min(W * 0.32, 900) : Math.min(W * 0.5, 460);
     const dx = e.clientX - g.drag.x;
     g.drag.moved = Math.max(g.drag.moved, Math.abs(dx));
     if (g.drag.moved > 6) stage.current?.setPointerCapture?.(e.pointerId);

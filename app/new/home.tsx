@@ -87,6 +87,8 @@ export function Home() {
             line={!d.toggles.photo_wall ? "Switched off" : onWall !== null ? "on the wall" : live ? (b.session ? "Loading…" : "Sign in to see") : "Try the photo wheel now"} />
           <Tile span icon="calendar" colour="#22b8cf" label="When and where" delay={0.16} panel="details"
             line={[when || "Add the date", d.venueName || "Add the place"].join(" · ")} />
+          <Tile span icon="megaphone" colour="#ff7a59" label="Announce" delay={0.18} panel="announce"
+            line={live ? "Tell guests news: running late, car park full, a weather plan" : "Short updates for guests, once your page is published"} />
           <Tile icon="clock" colour="#45c486" label={d.scale === "community" ? "Programme" : "Day plan"} delay={0.2} panel="plan"
             big={plan.length ? String(plan.length) : undefined}
             line={plan.length ? `first: ${plan[0].title}` : "Add what happens when"} />

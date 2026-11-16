@@ -28,7 +28,8 @@ const s = new Proxy({} as Record<string, string>, { get: (_, key) => `ev-${Strin
 // Without it, the reply buttons are drawn as a preview.
 // photos: the public page's working photo wall (components/photos). Shown on
 // the day and afterwards; before the day only if the host opened it early.
-type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: boolean; anchors?: boolean; reply?: ReactNode; photos?: ReactNode };
+// notice: the public page's live announcements (app/[type]/[slug]/live-notices.tsx), at the very top.
+type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: boolean; anchors?: boolean; reply?: ReactNode; photos?: ReactNode; notice?: ReactNode };
 
 // The event's colours and fonts as CSS variables. Also used by the photos
 // page, the TV slideshow and the table cards, which wear the event's design.
@@ -43,7 +44,7 @@ export function eventVars(p: Palette, textStyleKey: string): CSSProperties {
   } as CSSProperties;
 }
 
-export default function EventView({ data, view, now, thumb = false, anchors = false, reply, photos }: Props) {
+export default function EventView({ data, view, now, thumb = false, anchors = false, reply, photos, notice }: Props) {
   const p = data.palette;
   const vars = eventVars(p, data.textStyle);
 
@@ -62,6 +63,7 @@ export default function EventView({ data, view, now, thumb = false, anchors = fa
       >
         {data.demo && <span className={s.demo}>Demo</span>}
         {!thumb && data.motion && !data.sensitive && <Effect kind={data.effect} />}
+        {view !== "card" && notice}
         {view === "card" && <Card d={data} />}
         {view === "page" && <Page d={data} now={now} a={anchors} reply={reply} photos={photos} />}
         {view === "live" && <Live d={data} now={now} a={anchors} photos={photos} />}

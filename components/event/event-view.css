@@ -1536,13 +1536,15 @@ button.ev-btn { cursor: pointer; }
 /* The TV wheel fills the screen. */
 .ev-wheelWrap[data-size="tv"] {
   margin: 0;
-  height: 100dvh;
+  height: 100%;
   padding: 0;
   grid-template-rows: 1fr auto;
   font-size: clamp(16px, 1.6vw, 30px);
 }
 .ev-wheelWrap[data-size="tv"] .ev-wheel { height: auto; }
-.ev-wheelWrap[data-size="tv"] .ev-wheelCard { --cw: min(16vw, 32vh); top: 22%; }
+/* In the middle of the space left by the comments (owner, 16 Nov 2026: the
+   wheel sat too high, and the photos were spread too wide). */
+.ev-wheelWrap[data-size="tv"] .ev-wheelCard { --cw: min(15vw, 30vh); top: calc(47% - var(--cw) * 0.667); }
 .ev-wheelWrap[data-size="tv"] .ev-wheelCaption { padding-bottom: 4vh; font-size: 1.3em; }
 @media (prefers-reduced-motion: reduce) {
   .ev-burst { display: none; }
@@ -1671,7 +1673,25 @@ button.ev-btn { cursor: pointer; }
   -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 28%);
   mask-image: linear-gradient(180deg, #000 0%, transparent 28%);
 }
-.ev-sky[data-sky="morning"]::after { display: none; }
+/* A young sun just rising in the bottom-right corner: a soft cream disc,
+   a gentle halo and faint rays, coming up slowly once, never glaring. */
+.ev-sky[data-sky="morning"]::after {
+  inset: auto 4% -9% auto;
+  width: clamp(110px, 24%, 420px);
+  aspect-ratio: 1;
+  z-index: -1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, #fffaf0 0 21%, #ffeec8 25%, rgba(255, 226, 170, 0.75) 29%, rgba(255, 214, 160, 0.32) 40%, rgba(255, 205, 160, 0) 62%),
+    repeating-conic-gradient(from 8deg, rgba(255, 238, 200, 0.34) 0deg 5deg, rgba(255, 238, 200, 0) 5deg 15deg);
+  -webkit-mask-image: radial-gradient(circle, #000 34%, rgba(0, 0, 0, 0.5) 50%, transparent 70%);
+  mask-image: radial-gradient(circle, #000 34%, rgba(0, 0, 0, 0.5) 50%, transparent 70%);
+  animation: ev-sunrise 7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@keyframes ev-sunrise {
+  from { transform: translateY(26%); opacity: 0.4; }
+  to { transform: translateY(0); opacity: 1; }
+}
 .ev-sky[data-sky="morning"] .ev-wheelShade { background: #c1bce8; }
 
 /* Day: a clear blue sky with soft clouds at the edges, and no bright sun, so
@@ -1788,3 +1808,162 @@ button.ev-btn { cursor: pointer; }
   line-height: 1.3;
 }
 .ev-pgText span { color: var(--ev-muted); font-size: 0.9em; }
+
+/* ───────── Announcements and live comments (0011) ───────── */
+
+/* The hosts' announcements, at the top of a page */
+.ev-notices { display: grid; gap: 0.5em; padding: min(calc(var(--u) * 3), 14px) min(calc(var(--u) * 5), 24px) 0; }
+.ev-photoWall > .ev-notices { padding: 0; }
+.ev-notice {
+  display: flex; gap: 0.7em; align-items: flex-start; padding: 0.8em 1em; border-radius: 14px;
+  background: color-mix(in srgb, var(--ev-accent) 16%, var(--ev-bg)); color: var(--ev-ink);
+  box-shadow: inset 4px 0 0 var(--ev-accent); animation: ev-cheerIn 0.5s ease-out both;
+}
+.ev-notice[data-kind="happy"] { background: color-mix(in srgb, var(--ev-main) 12%, var(--ev-bg)); box-shadow: inset 4px 0 0 var(--ev-main); }
+.ev-notice[data-kind="urgent"] { background: #fdecea; color: #7f1d1d; box-shadow: inset 4px 0 0 #c62828; }
+.ev-noticeIcon { flex: none; width: 1.4em; height: 1.4em; color: var(--ev-main); }
+.ev-notice[data-kind="urgent"] .ev-noticeIcon { color: #c62828; }
+.ev-noticeIcon svg, .ev-tvNotice svg { width: 100%; height: 100%; }
+.ev-noticeText { display: grid; gap: 0.15em; min-width: 0; overflow-wrap: anywhere; line-height: 1.35; }
+.ev-noticeText strong { font-size: 0.75em; letter-spacing: 0.08em; text-transform: uppercase; }
+.ev-noticeText small { font-size: 0.75em; opacity: 0.7; }
+.ev-noticeMore { justify-self: start; border: 0; background: none; padding: 0.2em 0; font: inherit; font-size: 0.85em; font-weight: 700; color: var(--ev-main); text-decoration: underline; cursor: pointer; }
+
+/* Emoji cheers floating up the photo show */
+.ev-wheelHold { position: relative; }
+.ev-floats { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; }
+.ev-floats[data-fixed] { position: fixed; inset: 15vh 0 0 auto; width: min(45vw, 260px); z-index: 40; }
+.ev-floats span {
+  --rise: -320px;
+  position: absolute; bottom: 6%; left: calc(64% + var(--x) * 0.3);
+  font-size: clamp(26px, 8vw, 42px); line-height: 1;
+  animation: ev-floatUp 3.8s ease-out var(--d, 0s) both;
+}
+@keyframes ev-floatUp {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  12% { transform: translateY(-6%) scale(1.1); opacity: 1; }
+  100% { transform: translate(-3vw, var(--rise)) scale(0.9); opacity: 0; }
+}
+
+/* Live comments on a guest's phone */
+.ev-cheers {
+  display: grid; gap: 0.8em; padding: 1em; border-radius: 16px;
+  background: color-mix(in srgb, var(--ev-main) 6%, var(--ev-bg));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ev-ink) 8%, transparent);
+}
+.ev-cheersHead { display: flex; align-items: center; gap: 0.5em; margin: 0; font-weight: 800; font-size: 1.05em; }
+.ev-liveDot { flex: none; width: 0.6em; height: 0.6em; border-radius: 50%; background: #e0245e; animation: ev-livePulse 1.8s ease-out infinite; }
+@keyframes ev-livePulse {
+  0% { box-shadow: 0 0 0 0 rgba(224, 36, 94, 0.55); }
+  100% { box-shadow: 0 0 0 0.6em rgba(224, 36, 94, 0); }
+}
+.ev-emojiRow { display: flex; gap: 0.4em; overflow-x: auto; scrollbar-width: none; margin: 0 -1em; padding: 2px 1em 4px; }
+.ev-emojiRow::-webkit-scrollbar { display: none; }
+.ev-emojiBtn {
+  flex: none; display: grid; place-items: center; width: 2.35em; height: 2.35em; border: 0; border-radius: 50%;
+  background: var(--ev-bg); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ev-ink) 12%, transparent), 0 4px 10px -6px rgba(0, 0, 0, 0.3);
+  font-size: 1.2em; line-height: 1; cursor: pointer; transition: transform 0.12s ease;
+}
+.ev-emojiBtn:active { transform: scale(1.3); }
+.ev-emojiBtn[disabled] { opacity: 0.5; }
+.ev-phraseRow { display: flex; gap: 0.45em; overflow-x: auto; scrollbar-width: none; margin: 0 -1em; padding: 0 1em 2px; }
+.ev-phraseRow::-webkit-scrollbar { display: none; }
+.ev-phrase {
+  flex: none; border: 0; border-radius: 999px; padding: 0.5em 0.95em; white-space: nowrap; cursor: pointer;
+  background: color-mix(in srgb, var(--ev-accent) 18%, var(--ev-bg)); color: var(--ev-ink); font: inherit; font-size: 0.9em; font-weight: 600;
+}
+.ev-cheerForm { display: flex; gap: 0.5em; }
+.ev-cheerForm .ev-input { flex: 1; min-width: 0; }
+.ev-cheerList { display: grid; gap: 0.65em; margin: 0; padding: 0; list-style: none; }
+.ev-cheer { display: flex; gap: 0.6em; align-items: flex-start; animation: ev-cheerIn 0.45s ease-out both; }
+@keyframes ev-cheerIn {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.ev-cheerAvatar {
+  flex: none; display: grid; place-items: center; width: 2.1em; height: 2.1em; border-radius: 50%;
+  background: var(--ev-accent); color: var(--ev-on-accent); font-weight: 800; font-size: 0.95em;
+}
+.ev-cheerText { display: grid; gap: 0.1em; min-width: 0; line-height: 1.3; overflow-wrap: anywhere; }
+.ev-cheerText strong { font-size: 0.85em; }
+.ev-cheerText small { font-size: 0.75em; color: var(--ev-muted); }
+
+/* ───────── The TV wheel's layout (0011) ───────── */
+.ev-tv { position: relative; height: 100dvh; overflow: hidden; --side: clamp(280px, 25vw, 560px); --band: clamp(64px, 11vh, 150px); }
+.ev-tv > .ev-wheelWrap { height: 100%; }
+.ev-tv[data-cheers="right"] > .ev-wheelWrap { padding-right: calc(var(--side) + 3vw); }
+.ev-tv[data-cheers="bottom"] > .ev-wheelWrap { padding-bottom: var(--band); }
+.ev-tvEmpty { display: grid; place-items: center; }
+.ev-tv .ev-floats span { --rise: -70vh; font-size: clamp(36px, 3.4vw, 80px); }
+.ev-tv[data-cheers="right"] .ev-floats { right: calc(var(--side) + 3vw); }
+.ev-tv[data-cheers="bottom"] .ev-floats { bottom: var(--band); }
+.ev-tvTitle {
+  position: absolute; left: 3vw; top: 3vh; z-index: 5; max-width: 52vw; margin: 0; pointer-events: none;
+  color: #fff; font-size: clamp(22px, 3.2vw, 56px); font-weight: 700; line-height: 1.1; text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+}
+.ev-tvNotice {
+  position: absolute; top: 11vh; left: 0; right: 0; z-index: 6; width: fit-content; margin-inline: auto;
+  display: flex; align-items: center; gap: 0.6em; max-width: 54vw; padding: 0.55em 1.3em; border-radius: 999px;
+  background: var(--ev-main); color: var(--ev-on-main); font-weight: 800; font-size: clamp(16px, 1.6vw, 30px); line-height: 1.25;
+  box-shadow: 0 14px 32px -12px rgba(0, 0, 0, 0.6); animation: ev-cheerIn 0.6s ease-out both;
+}
+.ev-tv[data-cheers="right"] .ev-tvNotice { right: calc(var(--side) + 3vw); max-width: 46vw; }
+.ev-tvNotice[data-kind="urgent"] { background: #c62828; color: #fff; }
+.ev-tvNotice > span { flex: none; width: 1.3em; height: 1.3em; }
+.ev-tvSide { position: absolute; top: 3vh; right: 2vw; bottom: 3vh; z-index: 4; width: var(--side); display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 2vh; }
+.ev-tvCheers {
+  min-height: 0; display: flex; flex-direction: column; gap: 1.4vh; overflow: hidden;
+  padding: 2vh 1.3vw; border-radius: clamp(16px, 1.4vw, 28px);
+  background: rgba(12, 10, 32, 0.46); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2);
+  color: #fff; font-size: clamp(14px, 1.15vw, 24px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+}
+.ev-tvCheers .ev-cheerList {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 1.3vh; overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%);
+}
+.ev-tvCheers .ev-cheerText strong, .ev-tvBandItem strong { color: #ffd56b; }
+.ev-tvHint { margin: auto 0 0; opacity: 0.75; }
+.ev-tvQr { display: grid; justify-items: center; gap: 0.6vh; padding: 1vw; border-radius: 1.4vw; text-align: center; box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.6); }
+.ev-tvQrCode { width: 100%; padding: 0.4vw; border-radius: 0.8vw; background: #fff; }
+.ev-tvQrTitle { margin: 0; font-size: clamp(14px, 1.4vw, 26px); font-weight: 800; line-height: 1.15; }
+.ev-tvQrLine { margin: 0; font-size: clamp(11px, 0.9vw, 17px); line-height: 1.3; opacity: 0.85; }
+.ev-tvSide .ev-tvQr { grid-template-columns: minmax(0, 38%) 1fr; align-items: center; justify-items: start; column-gap: 1vw; text-align: left; }
+.ev-tvSide .ev-tvQrCode { grid-row: span 2; }
+/* Bottom left, so the Morning sky's sunrise (bottom right) stays in view. */
+.ev-tvCorner { position: absolute; left: 2.5vw; bottom: 3vh; z-index: 4; width: clamp(150px, 14vw, 250px); }
+.ev-tv[data-cheers="bottom"] .ev-tvCorner { bottom: calc(var(--band) + 2vh); }
+.ev-tvBand {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; height: var(--band);
+  display: flex; align-items: center; gap: 1.4vw; padding: 0 2vw;
+  background: rgba(12, 10, 32, 0.56); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  color: #fff; font-size: clamp(16px, 1.5vw, 30px);
+}
+.ev-tvBandLabel {
+  flex: none; display: inline-flex; align-items: center; gap: 0.5em; padding: 0.35em 0.9em; border-radius: 999px;
+  background: #e0245e; font-size: 0.8em; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.ev-tvBandLabel .ev-liveDot { background: #fff; }
+.ev-tvBandTrack {
+  flex: 1; min-width: 0; overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent);
+}
+.ev-tvBandMove { display: flex; width: max-content; animation: ev-band var(--dur, 40s) linear infinite; }
+.ev-tvBandSet { display: flex; gap: 3.5vw; padding-right: 3.5vw; }
+.ev-tvBandItem { white-space: nowrap; }
+.ev-tvBandItem strong { margin-right: 0.3em; }
+@keyframes ev-band {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.ev-tvFull {
+  position: absolute; right: 2vw; top: 2.5vh; z-index: 7; min-height: 48px; padding: 0 20px; border: 0; border-radius: 999px;
+  background: #fff; color: #000; font: inherit; font-weight: 700; box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.6); cursor: pointer; transition: opacity 0.3s ease;
+}
+.ev-tv[data-cheers="right"] .ev-tvFull { top: auto; right: auto; left: 2vw; bottom: 2.5vh; }
+@media (prefers-reduced-motion: reduce) {
+  .ev-sky[data-sky="morning"]::after, .ev-liveDot, .ev-cheer, .ev-notice, .ev-tvNotice { animation: none; }
+  .ev-tvBandMove { animation-duration: calc(var(--dur, 40s) * 3); }
+  .ev-floats { display: none; }
+}

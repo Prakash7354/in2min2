@@ -14,6 +14,7 @@ import { SKY_SWATCH, asked, type HostPhoto, type Photographer, type PhotosState 
 import { useB2 } from "../context";
 import { PanelShell } from "../panels";
 import { Field, Note, Row, Section, Toggle } from "../ui";
+import { CheersSection } from "./cheers";
 import { WheelTry } from "./wheel";
 
 export function PhotosPanel() {
@@ -144,6 +145,8 @@ export function PhotosPanel() {
             onChange={async (v) => b.say((await state.saveRules({ early: v })) ? (v ? "Guests can add photos now." : "Photos will open on the day.") : "Couldn't save. Please try again.")} />
         </Section>
       )}
+
+      <CheersSection eventId={eventId} checkByDefault={d.scale === "community" || !!eventType(d.eventType)?.sensitive} />
 
       {photosLink && (
         <Section icon="tv" title="On the day" line={`Run the TV on a laptop plugged into the venue's TV, or a smart TV's browser, and press Full screen.${w?.isPrivate ? " These links carry your event's photo key: share them only at the venue." : ""}`}>

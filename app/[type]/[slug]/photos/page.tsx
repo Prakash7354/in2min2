@@ -32,7 +32,7 @@ export default async function PhotosPage({ params, searchParams }: PageProps<"/[
       <div className="ev-banner">{ev.sensitive ? "Photos and memories" : w.stage === "post" ? "The gallery" : "Share your photos"}</div>
       <section className="ev-section">
         <h1 className="ev-sectionTitle">{ev.headline || ev.title}</h1>
-        <PhotoWall type={type} slug={slug} token={key ?? null} sensitive={ev.sensitive} live={w.stage === "live"} />
+        <PhotoWall type={type} slug={slug} token={key ?? null} sensitive={ev.sensitive} live={w.stage === "live"} notices />
       </section>
       <footer className="ev-footer">
         {!ev.private && <Link href={`/${type}/${slug}`} className="ev-btn ev-btnGhost ev-btnSmall">See the event page</Link>}

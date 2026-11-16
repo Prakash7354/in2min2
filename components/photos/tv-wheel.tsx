@@ -6,19 +6,33 @@
 // each new one arrives next with confetti. Love counts show on the cards.
 // Keeps the screen awake. The hosts' favourites and the most-loved photos
 // come round more often (0008).
+//
+// Live comments (0011, owner 16 Nov 2026): guests' words in a frosted column
+// on the right (the QR code at its foot), or a band moving along the bottom,
+// as the host chooses (or ?comments=right|bottom|off on the link); emoji
+// cheers float up the screen; a new announcement shows at the top for an
+// hour. The wheel sits in the middle of the space that's left.
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { QrCode } from "@/components/qr-code";
 import type { Sky } from "@/lib/catalog";
+import { CheerFloats, MegaphoneIcon, TvCheers } from "@/components/live/cheers";
+import { useLive } from "@/lib/live";
 import { publicRpc, type PublicWall, type WallPhoto } from "@/lib/photos";
 import { PhotoWheel } from "./photo-wheel";
 
 type Props = {
   type: string; slug: string; token: string | null; eventId: string; title: string;
   joinUrl: string; joinText: string; vars: CSSProperties; display: string; motion: boolean; celebrate: boolean; sky: Sky;
+  comments?: "right" | "bottom" | "off" | null;
 };
 
-export function TvWheel({ type, slug, token, eventId, title, joinUrl, joinText, vars, display, motion, celebrate, sky }: Props) {
+export function TvWheel({ type, slug, token, eventId, title, joinUrl, joinText, vars, display, motion, celebrate, sky, comments }: Props) {
+  const lv = useLive(type, slug, token, 6_000);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const t = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(t); }, []);
+  const mode = lv.rules?.on ? comments ?? lv.rules.tv : "off";
+  const notice = lv.announcements.find((a) => now - new Date(a.at).getTime() < 60 * 60_000) ?? null;
   const [photos, setPhotos] = useState<WallPhoto[]>([]);
   const [featured, setFeatured] = useState<WallPhoto[]>([]);
   const [arrivals, setArrivals] = useState<{ ids: string[]; n: number }>({ ids: [], n: 0 });
@@ -71,36 +85,50 @@ export function TvWheel({ type, slug, token, eventId, title, joinUrl, joinText, 
   const latest = new Map(photos.map((p) => [p.id, p]));
   const wheelPhotos = [...featured.map((p) => latest.get(p.id) ?? p), ...photos.filter((p) => !featuredIds.has(p.id))];
 
+  const qr = (
+    <div className="ev-tvQr" style={{ background: "var(--ev-main)", color: "var(--ev-on-main)" }}>
+      <div className="ev-tvQrCode"><QrCode text={joinUrl} className="block w-full" label="Scan to add your photos" /></div>
+      <p className="ev-tvQrTitle">{mode === "off" ? "Add your photos" : "Add photos and comments"}</p>
+      <p className="ev-tvQrLine">{joinText}</p>
+    </div>
+  );
   return (
     <div className="ev-frame fixed inset-0" style={{ cursor: idle ? "none" : "auto" }}>
-      <div className="ev-root h-full" style={vars} data-motion={motion ? "on" : "off"}>
+      <div className="ev-root ev-tv" style={vars} data-motion={motion ? "on" : "off"} data-cheers={mode}>
         {wheelPhotos.length >= 3 ? (
           <PhotoWheel size="tv" eventId={eventId} photos={wheelPhotos} stars={featured.map((p) => p.id)} arrivals={arrivals}
             motion={motion} celebrate={celebrate} sky={sky} />
         ) : (
-          <div className="ev-wheelWrap ev-sky grid h-dvh place-items-center text-center" data-size="tv" data-sky={sky}>
-            <div className="grid max-w-[60vw] gap-[2vh]">
+          <div className="ev-wheelWrap ev-sky ev-tvEmpty" data-size="tv" data-sky={sky}>
+            <div className="grid max-w-[60vw] gap-[2vh] text-center">
               <p className="m-0 text-[clamp(28px,4.5vw,80px)] font-bold leading-tight" style={{ fontFamily: display }}>
                 {photos.length ? "More photos, please!" : "Be the first to add a photo"}
               </p>
-              <p className="m-0 text-[clamp(16px,2vw,34px)] text-white/80">Scan the code with your phone’s camera. No app needed.</p>
+              <p className="m-0 text-[clamp(16px,2vw,34px)] opacity-80">Scan the code with your phone’s camera. No app needed.</p>
             </div>
           </div>
         )}
+        <CheerFloats floats={lv.floats} />
 
-        <p className="pointer-events-none absolute left-[3vw] top-[3vh] m-0 text-[clamp(22px,3.4vw,56px)] font-bold leading-tight text-white drop-shadow-lg"
-          style={{ fontFamily: display }}>{title}</p>
+        <p className="ev-tvTitle" style={{ fontFamily: display }}>{title}</p>
+        {notice && (
+          <div className="ev-tvNotice" data-kind={notice.kind} role="status">
+            <span aria-hidden="true"><MegaphoneIcon /></span>{notice.body}
+          </div>
+        )}
 
-        <div className="absolute bottom-[3vh] right-[2.5vw] grid w-[clamp(150px,15vw,260px)] justify-items-center gap-2 rounded-[1.4vw] p-[1vw] text-center shadow-2xl"
-          style={{ background: "var(--ev-main)", color: "var(--ev-on-main)" }}>
-          <div className="w-full rounded-[0.8vw] bg-white p-[0.4vw]"><QrCode text={joinUrl} className="block w-full" label="Scan to add your photos" /></div>
-          <p className="m-0 text-[clamp(14px,1.5vw,26px)] font-extrabold leading-tight">Add your photos</p>
-          <p className="m-0 text-[clamp(11px,0.95vw,17px)] leading-snug opacity-85">{joinText}</p>
-        </div>
+        {mode === "right" ? (
+          <div className="ev-tvSide"><TvCheers cheers={lv.cheers} mode="right" />{qr}</div>
+        ) : (
+          <>
+            <div className="ev-tvCorner">{qr}</div>
+            {mode === "bottom" && <TvCheers cheers={lv.cheers} mode="bottom" />}
+          </>
+        )}
 
         {!full && (
           <button type="button" onClick={() => void document.documentElement.requestFullscreen?.().catch(() => {})}
-            className={`absolute right-[2vw] top-[2.5vh] min-h-12 rounded-full bg-white px-5 font-bold text-black shadow-lg transition-opacity ${idle ? "opacity-0" : "opacity-100"}`}>
+            className={`ev-tvFull ${idle ? "opacity-0" : "opacity-100"}`}>
             Full screen
           </button>
         )}

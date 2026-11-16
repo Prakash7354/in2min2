@@ -14,6 +14,8 @@ import { createPortal } from "react-dom";
 import { paletteFor, skyFor } from "@/lib/catalog";
 import { preparePhoto } from "@/lib/photo-prep";
 import { queueDelete, queueList, queuePut, sendPhoto, type Queued } from "@/lib/photo-queue";
+import { CheerBox, CheerFloats, Notices } from "@/components/live/cheers";
+import { useLive } from "@/lib/live";
 import { PhotoWheel } from "./photo-wheel";
 import {
   PHOTO_MESSAGES, RETRY_REASONS, bookingHref, deviceId, loadWall, lovePhoto, photoUrl, publicRpc,
@@ -24,7 +26,9 @@ const s = (k: string) => `ev-${k}`;
 
 // motion: the host's "Gentle movement" (the wheel turns by itself, and new
 // photos arrive with confetti). Off, the wheel stays still but can be swiped.
-type Props = { type: string; slug: string; token: string | null; sensitive: boolean; live: boolean; motion?: boolean };
+// notices: show the hosts' announcements at the top (the photos page; the
+// event page shows them itself).
+type Props = { type: string; slug: string; token: string | null; sensitive: boolean; live: boolean; motion?: boolean; notices?: boolean };
 type Sending = { total: number; done: number; waitingForSignal: number; message: string | null; tone: "info" | "error" };
 
 function ago(iso: string): string {
@@ -45,7 +49,9 @@ function savedName(type: string, slug: string): string {
   } catch { return ""; }
 }
 
-export function PhotoWall({ type, slug, token, sensitive, live, motion = true }: Props) {
+export function PhotoWall({ type, slug, token, sensitive, live, motion = true, notices = false }: Props) {
+  // Announcements and live comments (0011): every 10 seconds on the day.
+  const lv = useLive(type, slug, token, live ? 10_000 : 30_000);
   const wallId = `${type}/${slug}`;
   const [wall, setWall] = useState<PublicWall | null | "error">(null);
   const [photos, setPhotos] = useState<WallPhoto[]>([]);
@@ -223,10 +229,14 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
 
   return (
     <div className={s("photoWall")}>
+      {notices && <Notices list={lv.announcements} />}
+      <CheerFloats floats={lv.floats} fixed />
       {wheelPhotos.length >= 3 && (
-        <PhotoWheel eventId={ev.id} photos={wheelPhotos} stars={featured.map((p) => p.id)} arrivals={arrivals} motion={motion}
-          celebrate={motion && !sensitive} onLove={(id) => void love(id)} sky={sky}
-          onOpen={(id) => { const i = wheelPhotos.findIndex((p) => p.id === id); if (i >= 0) setOpen({ from: "wheel", i }); }} />
+        <div className={s("wheelHold")}>
+          <PhotoWheel eventId={ev.id} photos={wheelPhotos} stars={featured.map((p) => p.id)} arrivals={arrivals} motion={motion}
+            celebrate={motion && !sensitive} onLove={(id) => void love(id)} sky={sky}
+            onOpen={(id) => { const i = wheelPhotos.findIndex((p) => p.id === id); if (i >= 0) setOpen({ from: "wheel", i }); }} />
+        </div>
       )}
       {(wall.photographers ?? []).map((g) => {
         const href = bookingHref(g.link);
@@ -270,6 +280,9 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true }:
       ) : (
         <p className={s("muted")}>From midnight on the day, guests can add their photos here.</p>
       )}
+
+      <CheerBox type={type} slug={slug} token={token} device={() => device.current} name={name} sensitive={sensitive}
+        rules={lv.rules} cheers={lv.cheers} onSent={lv.mine} />
 
       {visible.length > 0 ? (
         <div className={s("photoGrid")}>

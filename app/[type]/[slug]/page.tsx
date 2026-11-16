@@ -13,6 +13,7 @@ import { formatDate, formatTime } from "@/lib/event-view";
 import { getPublicEvent } from "@/lib/public-event";
 import { PhotoWall } from "@/components/photos/photo-wall";
 import { Rsvp } from "./rsvp";
+import { LiveNotices } from "./live-notices";
 import { ShareButton } from "./share-button";
 
 const token = (sp: Record<string, string | string[] | undefined>) => (typeof sp.g === "string" && /^[A-Za-z0-9]{16,64}$/.test(sp.g) ? sp.g : undefined);
@@ -83,7 +84,8 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
   return (
     <main className={`${eventFontVariables} min-h-dvh sm:py-8`} style={{ background: p.gradient ? `linear-gradient(${p.soft}e6, ${p.soft}e6), ${p.gradient}` : p.soft }}>
       <div className="mx-auto w-full max-w-2xl overflow-hidden sm:rounded-3xl sm:shadow-[0_24px_60px_-28px_rgba(0,0,0,0.45)]">
-        <EventView data={page.data} view={page.view} now={serverNow()} anchors reply={reply} photos={photos} />
+        <EventView data={page.data} view={page.view} now={serverNow()} anchors reply={reply} photos={photos}
+          notice={<LiveNotices type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} />} />
       </div>
       <ShareButton title={page.title} colour={p.main} textColour={p.onMain} />
     </main>

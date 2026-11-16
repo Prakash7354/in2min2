@@ -1,11 +1,30 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.16, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.17, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.17 (16 Nov 2026; the owner ran 0010 and said "go with announcements"):**
+- **Announcements are built (10x)**, needing [0011](../supabase/migrations/0011_announcements_and_cheers.sql):
+  - The **Announce** tile on the event Home has quick choices (running late, car park full, weather plan, change of place, doors open, food is served…) and three kinds: Update, Important (in red) and Good news.
+  - An update shows at once at the top of the event page and the photos page (checked every minute), and on the TV for an hour.
+  - One tap sends it on WhatsApp. Up to 10 a day.
+  - An Important update from the last six hours stays in view even after newer ones.
+- **Live comments and cheers on the photo show (12x, new)**, also 0011:
+  - Guests tap popular emojis (cheering 👏, love ❤️, party 🎉, amazing 🤩, goosebumps 🥹, funny 😂, on fire 🔥, blessings 🙏; memorials get only ❤️ 🙏 🥹), pick ready-made words, or write their own (140 letters). No account is needed.
+  - Emojis float up the screen on the phone and the TV. Comments list under the wheel and stay readable after the event.
+  - On the TV the host chooses a frosted column on the right (newest at the bottom, the QR code at its foot), a band moving along the bottom, or none.
+  - Words wait for the host's OK when "Check words before they show" is on, which is the default for community events and memorials. Helpers can hide a comment; it leaves every screen at the next check.
+  - Each phone can send up to 20 comments and 80 cheers in 10 minutes.
+- **The TV wheel** now sits in the middle of the space left by the comments, and the photos are closer together. The QR card moved to the bottom left, so Morning's sunrise shows in the bottom right.
+- **Morning now has a real young sun** rising in the bottom-right corner: a soft cream disc with a gentle halo and faint rays, rising slowly once.
+- **The owner's decisions:**
+  - Seating plans later; they need each venue set up, so not yet.
+  - Licences: a respectful reminder only, never a block.
+  - Agreed: big-screen modes, and checking photos and comments for quality.
 
 **What changed in version 3.16 (16 Nov 2026, from the owner's second set of notes):**
 - **Letter styles work in Builder 2.0.** Handwritten, Calligraphy and Elegant (italic) fell back to the phone's plain letters at `/new`, because its layout didn't load the event fonts. The public page and `/builder` were already right.
@@ -925,9 +944,9 @@ The owner's aim is to replace paper lists, guesswork, extra volunteers and endle
 - For large public events, many councils ask for an event management plan through their Safety Advisory Group. The event pack supplies its numbers and lists, but it isn't the plan itself.
 - Never use words like "safety approved" or "compliant".
 
-### 10x. Announcements from the host to guests (Recommended; owner's request, 16 Nov 2026; awaiting his go)
+### 10x. Announcements from the host to guests (Decided and built, 16 Nov 2026; 0011)
 
-"News updates, a change of weather plan, car park full, we're excited to see everyone." Not built yet: it needs one database file and is a new screen, so it waits for the owner's go.
+"News updates, a change of weather plan, car park full, we're excited to see everyone." Built as below, except the AI tidy-up, email and notifications, which come later.
 
 - **Writing one.** An **Announce** button (a megaphone) on the event Home. Quick choices for each kind of event, then a box: *Running 15 minutes late* · *Car park full: please use …* · *Weather plan: we're moving indoors to …* · *Doors are open* · *Change of place* (shown in red) · *We can't wait to see you!*. The AI can tidy the words and add the second language, as for the invitation.
 - **Where guests see it.** A banner at the top of the event page, with how long ago it was posted ("10 minutes ago"). The newest is shown in full and older ones fold away. The host can remove one. On the day it also shows on the TV wheel and slideshow, as a strip along the bottom.
@@ -1180,7 +1199,7 @@ Community organisers already run these in halls, restaurants, hotels and stadium
 3. **Seating, simplest first:**
    - (a) **Unreserved**, the default.
    - (b) **Zones or tables:** VIP rows, Table 1–20. The host sets them, and the buyer's pass says "Table 7".
-   - (c) **A seat-by-seat map** only if organisers ask for it after the pilot. Maps are costly to build, and most community shows don't need them.
+   - (c) **A seat-by-seat map** only if organisers ask for it after the pilot. Maps are costly to build, and most community shows don't need them. Owner, 16 Nov 2026: seating plans are for later, because they need each venue set up.
 4. **Paying at the door without a card reader:** the "Pay here" QR (14c) as now. Organisers who want to take a card on a helper's phone could add **Stripe Tap to Pay** later; it works on iPhone and Android in the UK with no reader. Check Stripe's UK in-person fee before deciding.
 5. **The big screen:** guests love seeing themselves on it. Two new TV modes join the wheel and the slideshow:
    - **Spotlight:** one guest photo, large, with their name and a short message.
@@ -1188,7 +1207,7 @@ Community organisers already run these in halls, restaurants, hotels and stadium
 
    A small "Add yours" QR code sits in the corner of every mode. Photos at public shows are checked by the host before they show (0006 already does this for community events).
 
-**Licences: a checklist in the builder, not legal advice.**
+**Licences: a checklist in the builder, not legal advice.** The owner's rule (16 Nov 2026): remind organisers respectfully, but never stop anyone using In2Min2 over it; the law is theirs to follow.
 - **Film nights:** charging admission for a film needs a licence for that film, such as Filmbank's Single Title Screening Licence. It covers one film at one event, and the price depends on the venue size and whether you charge. Box office figures go back to Filmbank.
 - **Music:** venues and community halls usually hold TheMusicLicence (PPL PRS). If a hall is hired, the hirer may need their own. One-off events can be licensed, and charities can ask for a discount at least 14 days before.
 - **Alcohol or late entertainment** may need a Temporary Event Notice.
@@ -1196,6 +1215,18 @@ Community organisers already run these in halls, restaurants, hotels and stadium
 The builder asks "Is the venue covering the music licence?" and links each body. In2Min2 never says an event is licensed.
 
 **Pricing:** as for every community sale, the per-order booking fee (5d), paid by the buyer, with free events still free. Built with payments (phase 4, February), because tiers and zones need orders and passes.
+
+### 12x. Live comments and cheers on the photo show (Decided and built, 16 Nov 2026; 0011)
+
+Owner: "display guests' comments like on YouTube or Zoom live shows: people cheering, loving, goosebumps or advice … if too many, auto scroll up or horizontal … people might enjoy reading them later."
+- **Tables and functions:**
+  - `event_cheers`: device, name, words of up to 140 letters, one emoji key, and status (shown, waiting or hidden).
+  - `post_cheer()`, with no account.
+  - `public_live()`: announcements, switches and the newest 80.
+  - `cheer_rules()`: the switches in `feature_toggles.settings.cheers`, namely `on`, `approve_first` and `tv` (right, bottom or off).
+- **Who can do what:** the owner, co-hosts and helpers can read and hide comments; only the owner and co-hosts can delete them. The public reads only through the functions.
+- **When comments are open:** whenever photos are open (on the day, or before if "photos before the day" is on), until the page closes.
+- **Later:** comments become the guestbook on the "After" page; the TV slideshow gets the same comments; a list of banned words for the automatic check.
 
 ## 14. Money, receipts and proof of payment
 

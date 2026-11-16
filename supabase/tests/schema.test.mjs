@@ -825,6 +825,97 @@ ok("…and their link stops working", (await q(`select photographer_wall($1) as 
 await as(A);
 await q(`delete from events where id = $1`, [pgev.id]);
 
+console.log("Announcements and live comments (0011):");
+const D = "dddddddd-0000-0000-0000-000000000004";
+await db.exec(`reset role; insert into auth.users values ('${D}')`);
+await as(A);
+const [lev] = await q(`insert into events (event_type, slug, title, starts_at, ends_at, status)
+  values ('birthday','live-party','Live party', now() - interval '1 hour', now() + interval '5 hours', 'published') returning id`);
+await q(`insert into event_hosts (event_id, user_id, role) values ($1, $2, 'co_host'), ($1, $3, 'helper')`, [lev.id, D, C]);
+await q(`insert into event_announcements (event_id, kind, body) values ($1, 'urgent', 'Car park full: please use the school car park')`, [lev.id]);
+ok("the owner posts an announcement", (await q(`select count(*)::int n from event_announcements where event_id = $1`, [lev.id]))[0].n === 1);
+await as(D);
+await q(`insert into event_announcements (event_id, body) values ($1, 'We can''t wait to see you!')`, [lev.id]);
+ok("a co-host posts one too", (await q(`select count(*)::int n from event_announcements where event_id = $1`, [lev.id]))[0].n === 2);
+await as(C);
+ok("a helper can read them", (await q(`select id from event_announcements where event_id = $1`, [lev.id])).length === 2);
+await expectError("…but can't post one", `insert into event_announcements (event_id, body) values ('${lev.id}', 'Helper news')`, /row-level security/);
+ok("…or delete one", (await db.query(`delete from event_announcements where event_id = $1`, [lev.id])).affectedRows === 0);
+await as(B);
+ok("another host can't read them", (await q(`select id from event_announcements where event_id = $1`, [lev.id])).length === 0);
+await expectError("…or post on someone else's event", `insert into event_announcements (event_id, body) values ('${lev.id}', 'Spam')`, /row-level security/);
+await as(null);
+await expectError("the public can't read the table", `select * from event_announcements`, /permission denied/);
+await expectError("…or post", `insert into event_announcements (event_id, body) values ('${lev.id}', 'Spam')`, /permission denied/);
+let live = (await q(`select public_live('birthday','live-party') as r`))[0].r;
+ok("guests see the announcements, newest first", live.announcements.length === 2 && live.announcements[0].body === "We can't wait to see you!" && live.announcements[1].kind === "urgent");
+await as(A);
+await expectError("an announcement can't be too long", `insert into event_announcements (event_id, body) values ('${lev.id}', '${"x".repeat(281)}')`, /check constraint/);
+for (let i = 0; i < 8; i++) await q(`insert into event_announcements (event_id, body) values ($1, $2)`, [lev.id, `Update ${i}`]);
+await expectError("no more than 10 a day", `insert into event_announcements (event_id, body) values ('${lev.id}', 'The eleventh')`, /row-level security/);
+await as(D);
+ok("a co-host can remove one", (await db.query(`delete from event_announcements where event_id = $1 and body = 'Update 0'`, [lev.id])).affectedRows === 1);
+
+await as(null);
+const dev1 = "phoneone0000000000000001", dev2 = "phonetwo0000000000000002";
+const cheer = async (dev, name, body, emoji, slug = "live-party", token = null, type = "birthday") =>
+  (await q(`select post_cheer($1, $2, $3, $4, $5, $6, $7) as r`, [type, slug, token, dev, name, body, emoji]))[0].r;
+let c1 = await cheer(dev1, "Asha", null, "clap");
+ok("a guest cheers with an emoji, no account", c1.ok === true && c1.status === "shown", JSON.stringify(c1));
+let c2 = await cheer(dev2, "Hari", "Happy birthday Sita!", "love");
+ok("…and with words, shown at once on a family party", c2.ok === true && c2.status === "shown");
+live = (await q(`select public_live('birthday','live-party') as r`))[0].r;
+ok("guests and the TV see the cheers, newest first", live.cheers.length === 2 && live.cheers[0].body === "Happy birthday Sita!" && live.cheers[0].name === "Hari");
+ok("…the TV puts them on the right unless the host says otherwise", live.cheer_rules.tv === "right" && live.cheer_rules.open === true);
+const after = (await q(`select public_live('birthday','live-party', null, $1) as r`, [live.cheers[0].at]))[0].r;
+ok("a poll with a time brings only newer ones", after.cheers.length === 0);
+ok("a made-up emoji is refused", (await cheer(dev1, null, null, "skull")).reason === "bad");
+ok("…and so is a long comment", (await cheer(dev1, null, "x".repeat(141), null)).reason === "bad");
+ok("…and an empty one", (await cheer(dev1, null, "   ", null)).reason === "bad");
+ok("…and a bad phone id", (await cheer("NOT A DEVICE", null, "hi", null)).reason === "bad");
+await expectError("the public can't read the comments table", `select * from event_cheers`, /permission denied/);
+let busy = null;
+for (let i = 0; i < 21 && !busy; i++) { const r = await cheer(dev1, null, `Comment ${i}`, null); if (!r.ok) busy = r.reason; }
+ok("one phone can't flood the screen", busy === "busy");
+
+await as(A);
+await q(`update feature_toggles set settings = settings || '{"cheers": {"approve_first": true, "tv": "bottom"}}' where event_id = $1`, [lev.id]);
+await as(null);
+const c3 = await cheer(dev2, "Hari", "Waiting for an OK", null);
+ok("with checking on, words wait for the host's OK", c3.status === "waiting");
+ok("…but an emoji still shows at once", (await cheer(dev2, null, null, "party")).status === "shown");
+live = (await q(`select public_live('birthday','live-party') as r`))[0].r;
+ok("…waiting ones stay off the screen, and the TV moves them to the bottom", !live.cheers.some((c) => c.body === "Waiting for an OK") && live.cheer_rules.tv === "bottom");
+await as(C);
+ok("a helper can show a waiting comment", (await db.query(`update event_cheers set status = 'shown' where id = $1`, [c3.id])).affectedRows === 1);
+ok("…and hide one", (await db.query(`update event_cheers set status = 'hidden' where id = $1`, [c2.id])).affectedRows === 1);
+ok("…but not delete one", (await db.query(`delete from event_cheers where id = $1`, [c2.id])).affectedRows === 0);
+await as(B);
+ok("another host sees none of the comments", (await q(`select id from event_cheers where event_id = $1`, [lev.id])).length === 0);
+ok("…and can't hide them", (await db.query(`update event_cheers set status = 'hidden' where id = $1`, [c3.id])).affectedRows === 0);
+await as(D);
+ok("a co-host can delete one", (await db.query(`delete from event_cheers where id = $1`, [c2.id])).affectedRows === 1);
+await as(null);
+live = (await q(`select public_live('birthday','live-party') as r`))[0].r;
+ok("a hidden or deleted comment leaves the screen", !live.cheers.some((c) => c.body === "Happy birthday Sita!") && live.cheers.some((c) => c.body === "Waiting for an OK"));
+await as(A);
+await q(`update feature_toggles set settings = settings || '{"cheers": {"on": false}}' where event_id = $1`, [lev.id]);
+await as(null);
+ok("the host can switch comments off", (await cheer(dev2, null, null, "clap")).reason === "off"
+  && (await q(`select public_live('birthday','live-party') as r`))[0].r.cheers.length === 0);
+await as(A);
+const [fut] = await q(`insert into events (event_type, slug, title, starts_at, ends_at, status, is_private)
+  values ('birthday','next-month','Next month', now() + interval '30 days', now() + interval '30 days 4 hours', 'published', true) returning id`);
+await as(null);
+ok("a private event's comments need its link", (await cheer(dev1, null, null, "clap", "next-month")).reason === "private"
+  && (await q(`select public_live('birthday','next-month') as r`))[0].r.private === true);
+await db.exec(`reset role`);
+const futKey = (await q(`select wall_key from events where id = $1`, [fut.id]))[0].wall_key;
+await as(null);
+ok("…and before the day they're closed, like the photos", (await cheer(dev1, null, null, "clap", "next-month", futKey)).reason === "not_open");
+await as(A);
+await q(`delete from events where id in ($1, $2)`, [lev.id, fut.id]);
+
 console.log("Delete everything:");
 await as(C);  // C is a helper on A's wedding
 const hd = await db.query(`delete from events where id = $1`, [ev.id]);

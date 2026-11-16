@@ -11,6 +11,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 - [x] Design agreed, logo C chosen, six questions answered (13–14 Nov).
 - [x] Supabase set up. All six database files run, 0001 to [0006](../supabase/migrations/0006_photo_wall.sql) (14 Nov): replies, festive designs, the WhatsApp preview picture and the guests' photo wall.
 - [x] Photo store created on Cloudflare, in Europe (14 Nov). Database files 0007, 0008 and 0009 run (15 Nov).
+- [x] Database file 0010 run: the heart photo shape and the Morning sky (16 Nov).
 - [x] New look decided: dark by default with a light option, the Motion library, one thing per screen (15 Nov).
 - [x] hello@in2min2.com forwards to hello@gochuchuro.com (14 Nov).
 - [x] Gemini key working. Check any time: https://in2min2.com/api/health should say `"ai":"ready"`.
@@ -21,13 +22,13 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
-### [ ] 0. Run database file 0010 (2 minutes)
+### [ ] 0. Run database file 0011 (2 minutes)
 
-This adds the heart photo shape and the Morning sky. Until it runs, publishing a page with the heart shape shows an error.
-1. Open [0010_heart_and_morning.sql](../supabase/migrations/0010_heart_and_morning.sql) in VS Code, then press **Cmd+A**, then **Cmd+C**.
+This switches on announcements and live comments. (0010 ran on 16 Nov.)
+1. Open [0011_announcements_and_cheers.sql](../supabase/migrations/0011_announcements_and_cheers.sql) in VS Code, then press **Cmd+A**, then **Cmd+C**.
 2. Go to **supabase.com** › your project › **SQL Editor** (left side) › **New query**.
 3. Paste with **Cmd+V**, then press **Run** (bottom right). It should say **Success. No rows returned**.
-4. Tell Claude Code "0010 ran".
+4. Tell Claude Code "0011 ran".
 
 ### [ ] 1. Try Builder 2.0 on your phone, then test it with 5 people (about 40 minutes in all)
 
@@ -58,6 +59,10 @@ This adds the heart photo shape and the Morning sky. Until it runs, publishing a
    - What was confusing?
    - Would you use this for your own event?
 5. Send Claude Code the times and notes. The goal: a newcomer finishes in under 2 minutes without help.
+
+**Two kinds of test** (both use **in2min2.com/new**; no other link is needed):
+- **Play test (now):** testers make a pretend event on their own phone and try everything, including **Announce**, **Photos** › **Try it with your photos**, and the comments on the photos page. Nothing else is needed first.
+- **Real small event (after the play test):** a real birthday or get-together with real guests, the TV wheel, and comments on the night. Before this one, Claude Code should build the **nightly backup** (Supabase's free plan keeps none, so a mistake could lose real replies), and you should approve the drafts (step 3) so the privacy page is live.
 
 The classic builder stays at **in2min2.com/builder** until you're happy with the new one. The style page is still at **in2min2.com/new/style**.
 

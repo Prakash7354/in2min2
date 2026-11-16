@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import type { IconName } from "@/components/icons";
 import { useB2 } from "./context";
 import type { Panel } from "./nav";
+import { AnnouncePanel } from "./panels/announce";
 import { DetailsPanel } from "./panels/details";
 import { LookPanel } from "./panels/look";
 import { PeoplePanel } from "./panels/people";
@@ -33,6 +34,7 @@ export function PanelView({ panel }: { panel: Panel }) {
     case "preview": return <PreviewPanel />;
     case "replies": return <RepliesPanel />;
     case "photos": return <PhotosPanel />;
+    case "announce": return <AnnouncePanel />;
   }
 }
 
