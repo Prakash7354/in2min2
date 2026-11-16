@@ -181,42 +181,20 @@ function Royal() {
   );
 }
 
-// Crossed khukuris (owner, 16 Nov 2026: "often used in regimental events …
-// in adaptive colours"): two khukuris crossed above the words, with fine
-// rules either side, in the event's main colour. Our own drawing of the
-// traditional knife, not any regiment's badge.
-const KHUKURI = (
-  <g strokeLinejoin="round" strokeLinecap="round">
-    <path d="M2 -3.4 C30 -6.8 62 -5.2 96 9 C84 17.5 66 16.5 52 11.2 C38 6.2 24 7.6 13 6.6 Q10 6.2 9 3.8 Q8 6.4 5 5.6 L2 3.4 Z"
-      className="ev-sm" strokeWidth="1.8" style={{ fill: "color-mix(in srgb, var(--ev-accent) 22%, transparent)" }} />
-    <path d="M16 -1.2 C40 -3.6 64 -2 86 6" className="ev-sm" strokeWidth="0.8" opacity="0.6" />
-    <rect x="-3.2" y="-5.6" width="5.2" height="11.2" rx="1.3" className="ev-fa" />
-    <path d="M-3.2 -4.2 L-27 -3.4 Q-32 0 -27 3.4 L-3.2 4.2 Z" className="ev-fm" />
-    <path d="M-10.5 -3.9 V3.9 M-18.5 -3.6 V3.6" className="ev-sb" strokeWidth="1.3" />
-  </g>
-);
-export function CrossedKhukuris() {
-  return (
-    <>
-      <g transform="translate(44 84) rotate(-48)">{KHUKURI}</g>
-      <g transform="translate(116 84) scale(-1 1) rotate(-48)">{KHUKURI}</g>
-    </>
-  );
-}
+// Crossed khukuris (owner, 16 Nov 2026: "keep the exact shape … the lines
+// adaptive to the border colours"): the traditional emblem in its classic
+// shape, from the picture the owner supplied (public/art/crossed-khukuris.png,
+// made into a transparent mask), so its lines take the event's main colour at
+// any size. Fine rules either side.
 function Khukuri() {
-  const rule = (
-    <>
-      <path d="M12 34 H66 M174 34 H228" className="ev-sm" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M8 34 L12 30 L16 34 L12 38Z M232 34 L228 30 L224 34 L228 38Z" className="ev-fa" />
-    </>
-  );
   return (
     <>
       <span className="ev-lines ev-linesSingle" />
-      <Svg vb="0 0 240 76" className="ev-topCentre ev-w60">
-        {rule}
-        <g transform="translate(64 2) scale(0.7)"><CrossedKhukuris /></g>
+      <Svg vb="0 0 240 40" className="ev-topCentre ev-w60 ev-khukuriRules">
+        <path d="M12 20 H72 M168 20 H228" className="ev-sm" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M8 20 L12 16 L16 20 L12 24Z M232 20 L228 16 L224 20 L228 24Z" className="ev-fa" />
       </Svg>
+      <span className="ev-topCentre ev-khukuriMark" />
       <Svg vb="0 0 240 20" className="ev-bottomCentre ev-w52">
         <path d="M30 10 H104 M136 10 H210" className="ev-sm" strokeWidth="1.1" strokeLinecap="round" />
         <path d="M120 3 L127 10 L120 17 L113 10Z" className="ev-fa" />

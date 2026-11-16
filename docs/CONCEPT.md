@@ -1,11 +1,18 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.19, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.20, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.20 (16 Nov 2026):**
+- **Crossed khukuris now use the traditional emblem in its classic shape.** The owner's decision: "use it with the original look design, the lines adaptive to the colours". Our earlier drawing is removed.
+  - The picture the owner supplied is made into a transparent mask (`public/art/crossed-khukuris.png`, 898×633, traced from 225 px), so its exact lines take the event's colour at any size.
+  - A sharper file from the owner (SVG, or a PNG at least 1,000 px wide) can replace it later with no code change.
+- **Dividers between sections** match the border: lotus flourishes for Royal frame, scrolls for Ornate, a lotus for Mandala, a marigold string, a flower, diamonds for the fine and formal borders, a dhaka zigzag, and the crossed-khukuri emblem with rules. They are drawn as single-colour masks in the event's colours.
+- **On a coloured top band**, border lines now take the band's text colour (for example white khukuris on green), so they never vanish.
 
 **What changed in version 3.19 (16 Nov 2026, from the owner's examples of the community's favourite cards):**
 - **Traditional designs, our own drawings in that style** (the example cards belong to their designers and are not copied). All take the event's colours:
