@@ -1,11 +1,24 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.17, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.18, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.18 (16 Nov 2026, from the owner's first test of comments; 0011 has run):**
+- **Share is built around what each message is for.**
+  - The invitation is the main link, at the top ("Send this first"): the message guests get, Send on WhatsApp, More ways, Copy, and a QR code for printed cards.
+  - Then "Later, send these", each with its date, what it opens, and whether it's ready: the running order (the week before; "Add the day plan first" until there is one), directions and parking, a reminder (the day before), "On the day: photos and comments" (opens the photo wall), and News and updates (these sit on the page by themselves; an urgent one goes on WhatsApp from Announce).
+  - **Thank you** stays locked until the event is over and the page has turned into the thank-you page, with a "Preview the thank-you page" button. The bell holds it back too.
+- **The wheel feels live on the phone:**
+  - The newest comments drift over the wheel in the sky under the photos, as on a live video.
+  - Right under the wheel: one-tap emojis, a comment box, ready-made words and Share.
+  - Every comment is listed further down, to read during and after the event.
+  - On the day, the event page itself shows this near the top, so guests watch and comment from their phones; the TV is the step beyond.
+- **The builder's preview wheel turns** (it was a still picture), with the host's photos and drawn ones.
+- **TV spacing:** the card size now comes from the space on the screen, and the ring is always about twice a card's width. The photos fill the screen with clear sky between them, the same look as on a phone, and never touch.
 
 **What changed in version 3.17 (16 Nov 2026; the owner ran 0010 and said "go with announcements"):**
 - **Announcements are built (10x)**, needing [0011](../supabase/migrations/0011_announcements_and_cheers.sql):

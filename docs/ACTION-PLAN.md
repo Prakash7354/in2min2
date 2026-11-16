@@ -11,7 +11,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 - [x] Design agreed, logo C chosen, six questions answered (13–14 Nov).
 - [x] Supabase set up. All six database files run, 0001 to [0006](../supabase/migrations/0006_photo_wall.sql) (14 Nov): replies, festive designs, the WhatsApp preview picture and the guests' photo wall.
 - [x] Photo store created on Cloudflare, in Europe (14 Nov). Database files 0007, 0008 and 0009 run (15 Nov).
-- [x] Database file 0010 run: the heart photo shape and the Morning sky (16 Nov).
+- [x] Database files 0010 and 0011 run: the heart photo shape, the Morning sky, announcements and live comments (16 Nov).
 - [x] New look decided: dark by default with a light option, the Motion library, one thing per screen (15 Nov).
 - [x] hello@in2min2.com forwards to hello@gochuchuro.com (14 Nov).
 - [x] Gemini key working. Check any time: https://in2min2.com/api/health should say `"ai":"ready"`.
@@ -22,13 +22,6 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
-### [ ] 0. Run database file 0011 (2 minutes)
-
-This switches on announcements and live comments. (0010 ran on 16 Nov.)
-1. Open [0011_announcements_and_cheers.sql](../supabase/migrations/0011_announcements_and_cheers.sql) in VS Code, then press **Cmd+A**, then **Cmd+C**.
-2. Go to **supabase.com** › your project › **SQL Editor** (left side) › **New query**.
-3. Paste with **Cmd+V**, then press **Run** (bottom right). It should say **Success. No rows returned**.
-4. Tell Claude Code "0011 ran".
 
 ### [ ] 1. Try Builder 2.0 on your phone, then test it with 5 people (about 40 minutes in all)
 

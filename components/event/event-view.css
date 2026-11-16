@@ -1544,7 +1544,7 @@ button.ev-btn { cursor: pointer; }
 .ev-wheelWrap[data-size="tv"] .ev-wheel { height: auto; }
 /* In the middle of the space left by the comments (owner, 16 Nov 2026: the
    wheel sat too high, and the photos were spread too wide). */
-.ev-wheelWrap[data-size="tv"] .ev-wheelCard { --cw: min(15vw, 30vh); top: calc(47% - var(--cw) * 0.667); }
+.ev-wheelWrap[data-size="tv"] .ev-wheelCard { --cw: var(--tvcw, min(15vw, 30vh)); top: calc(47% - var(--cw) * 0.667); }
 .ev-wheelWrap[data-size="tv"] .ev-wheelCaption { padding-bottom: 4vh; font-size: 1.3em; }
 @media (prefers-reduced-motion: reduce) {
   .ev-burst { display: none; }
@@ -1852,6 +1852,25 @@ button.ev-btn { cursor: pointer; }
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--ev-ink) 8%, transparent);
 }
 .ev-cheersHead { display: flex; align-items: center; gap: 0.5em; margin: 0; font-weight: 800; font-size: 1.05em; }
+.ev-shareMini {
+  display: inline-flex; align-items: center; gap: 0.35em; margin-left: auto; min-height: 36px; padding: 0 0.9em; border: 0; border-radius: 999px;
+  background: var(--ev-bg); color: var(--ev-ink); font: inherit; font-size: 0.85em; font-weight: 700; cursor: pointer;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ev-ink) 14%, transparent);
+}
+.ev-shareMini svg { width: 1.05em; height: 1.05em; }
+.ev-cheerAll { display: grid; gap: 0.7em; }
+/* The newest comments drifting over the wheel on a phone, in the sky under the photos */
+.ev-liveOverlay {
+  position: absolute; left: 4%; right: 30%; bottom: calc(min(calc(var(--u) * 4), 22px) + 3.1em); z-index: 2;
+  display: grid; gap: 0.35em; margin: 0; padding: 0; list-style: none; pointer-events: none;
+  -webkit-mask-image: linear-gradient(transparent, #000 30%); mask-image: linear-gradient(transparent, #000 30%);
+}
+.ev-liveOverlay li {
+  justify-self: start; max-width: 100%; padding: 0.35em 0.75em; border-radius: 14px;
+  background: rgba(12, 10, 32, 0.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  color: #fff; font-size: 0.82em; line-height: 1.3; overflow-wrap: anywhere; animation: ev-cheerIn 0.5s ease-out both;
+}
+.ev-liveOverlay strong { color: #ffd56b; }
 .ev-liveDot { flex: none; width: 0.6em; height: 0.6em; border-radius: 50%; background: #e0245e; animation: ev-livePulse 1.8s ease-out infinite; }
 @keyframes ev-livePulse {
   0% { box-shadow: 0 0 0 0 rgba(224, 36, 94, 0.55); }

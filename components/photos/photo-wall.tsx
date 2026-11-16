@@ -14,7 +14,7 @@ import { createPortal } from "react-dom";
 import { paletteFor, skyFor } from "@/lib/catalog";
 import { preparePhoto } from "@/lib/photo-prep";
 import { queueDelete, queueList, queuePut, sendPhoto, type Queued } from "@/lib/photo-queue";
-import { CheerBox, CheerFloats, Notices } from "@/components/live/cheers";
+import { CheerBar, CheerFloats, CheerList, LiveOverlay, Notices } from "@/components/live/cheers";
 import { useLive } from "@/lib/live";
 import { PhotoWheel } from "./photo-wheel";
 import {
@@ -236,8 +236,11 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true, n
           <PhotoWheel eventId={ev.id} photos={wheelPhotos} stars={featured.map((p) => p.id)} arrivals={arrivals} motion={motion}
             celebrate={motion && !sensitive} onLove={(id) => void love(id)} sky={sky}
             onOpen={(id) => { const i = wheelPhotos.findIndex((p) => p.id === id); if (i >= 0) setOpen({ from: "wheel", i }); }} />
+          <LiveOverlay cheers={lv.cheers} />
         </div>
       )}
+      <CheerBar type={type} slug={slug} token={token} device={() => device.current} name={name} sensitive={sensitive}
+        rules={lv.rules} count={lv.cheers.filter((c) => c.body).length} title={ev.headline || ev.title} onSent={lv.mine} />
       {(wall.photographers ?? []).map((g) => {
         const href = bookingHref(g.link);
         return (
@@ -281,8 +284,7 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true, n
         <p className={s("muted")}>From midnight on the day, guests can add their photos here.</p>
       )}
 
-      <CheerBox type={type} slug={slug} token={token} device={() => device.current} name={name} sensitive={sensitive}
-        rules={lv.rules} cheers={lv.cheers} onSent={lv.mine} />
+      <CheerList cheers={lv.cheers} sensitive={sensitive} />
 
       {visible.length > 0 ? (
         <div className={s("photoGrid")}>

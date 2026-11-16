@@ -4,8 +4,9 @@
 // announcements, drawn in the event's own colours (inside .ev-root).
 //
 // - CheerFloats: emojis rising up the screen, as on live video shows.
-// - CheerBox: on a guest's phone, under the wheel: one-tap emojis,
-//   ready-made words, or their own; then the latest comments.
+// - LiveOverlay: the newest comments drifting over the wheel on a phone.
+// - CheerBar: right under the wheel: one-tap emojis, a comment box,
+//   ready-made words, and Share. CheerList: every comment, to read later.
 // - TvCheers: on the TV, a column on the right that scrolls up as new
 //   comments arrive, or a band along the bottom that moves right to left.
 // - Notices: the hosts' announcements, newest first, at the top of a page.
@@ -15,6 +16,7 @@ import {
   CHEER_EMOJI, CHEER_MESSAGES, CHEER_ORDER, GENTLE_ORDER, cheerPhrases, postCheer, timeAgo,
   type Announcement, type Cheer, type CheerEmoji, type CheerRules, type Float,
 } from "@/lib/live";
+import { shareLink } from "@/lib/share";
 
 const s = (k: string) => `ev-${k}`;
 
@@ -45,20 +47,32 @@ function Bubble({ c, now }: { c: Cheer; now?: number }) {
   );
 }
 
-export function CheerBox({ type, slug, token, device, name, sensitive, rules, cheers, onSent }: {
+// Over the wheel on a phone: the newest few comments drift up in the empty
+// sky under the photos, as on a live video (owner, 16 Nov 2026: comments
+// "next to the photo display or underneath").
+export function LiveOverlay({ cheers }: { cheers: Cheer[] }) {
+  const list = cheers.filter((c) => c.body).slice(0, 3).reverse();
+  if (!list.length) return null;
+  return (
+    <ul className={s("liveOverlay")} aria-hidden="true">
+      {list.map((c) => (
+        <li key={c.id}><strong>{c.name?.trim() || "A guest"}</strong> {c.body}{c.emoji ? ` ${CHEER_EMOJI[c.emoji].char}` : ""}</li>
+      ))}
+    </ul>
+  );
+}
+
+// Right under the wheel: love it, comment, share. One-tap emojis, ready-made
+// words or their own, and a Share button for the photos page.
+export function CheerBar({ type, slug, token, device, name, sensitive, rules, count, title, onSent }: {
   type: string; slug: string; token: string | null; device: () => string; name: string; sensitive: boolean;
-  rules: CheerRules | null; cheers: Cheer[]; onSent: () => void;
+  rules: CheerRules | null; count: number; title: string; onSent: () => void;
 }) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
-  const [all, setAll] = useState(false);
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => { const t = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(t); }, []);
   if (!rules?.on) return null;
   const order = sensitive ? GENTLE_ORDER : CHEER_ORDER;
-  const words = cheers.filter((c) => c.body);
-  const shown = all ? words : words.slice(0, 6);
 
   async function send(emoji: CheerEmoji | null, body: string) {
     if (busy) return;
@@ -68,13 +82,21 @@ export function CheerBox({ type, slug, token, device, name, sensitive, rules, ch
     setBusy(false);
     if (!r.ok) { setNote({ tone: "error", text: r.reason === "network" ? "No signal just now. Please try again." : CHEER_MESSAGES[r.reason ?? ""] ?? "That couldn't be sent." }); return; }
     if (body) setText("");
-    if (r.status === "waiting") setNote({ tone: "ok", text: "Sent! It shows once the host has checked it." });
+    setNote(r.status === "waiting" ? { tone: "ok", text: "Sent! It shows once the host has checked it." } : null);
     onSent();
+  }
+  async function share() {
+    const r = await shareLink(window.location.href, title, sensitive ? "Photos and memories:" : "Add your photos and comments here:");
+    if (r === "copied") setNote({ tone: "ok", text: "Link copied. Paste it into WhatsApp or a text." });
   }
 
   return (
-    <section className={s("cheers")} aria-label="Live comments">
-      <p className={s("cheersHead")}><span className={s("liveDot")} aria-hidden="true" />{sensitive ? "Messages" : "Live comments"}</p>
+    <section className={s("cheers")} aria-label="Comments">
+      <div className={s("cheersHead")}>
+        <span className={s("liveDot")} aria-hidden="true" />
+        <span>{sensitive ? "Messages" : "Live"}{count ? ` · ${count} ${count === 1 ? "comment" : "comments"}` : ""}</span>
+        <button type="button" className={s("shareMini")} onClick={() => void share()}><ShareIcon />Share</button>
+      </div>
       {rules.open ? (
         <>
           <div className={s("emojiRow")} role="group" aria-label="Send a cheer">
@@ -84,33 +106,52 @@ export function CheerBox({ type, slug, token, device, name, sensitive, rules, ch
               </button>
             ))}
           </div>
-          <div className={s("phraseRow")} role="group" aria-label="Ready-made words">
-            {cheerPhrases(sensitive, type).map((p) => (
-              <button key={p} type="button" className={s("phrase")} disabled={busy} onClick={() => void send(null, p)}>{p}</button>
-            ))}
-          </div>
           <form className={s("cheerForm")} onSubmit={(e) => { e.preventDefault(); if (text.trim()) void send(null, text); }}>
             <input className={s("input")} value={text} maxLength={140} placeholder={sensitive ? "Share a few words…" : "Say something nice…"}
               aria-label="Your comment" enterKeyHint="send" onChange={(e) => setText(e.target.value)} />
             <button type="submit" className={`${s("btn")} ${s("btnAccent")}`} disabled={busy || !text.trim()}>Send</button>
           </form>
+          <div className={s("phraseRow")} role="group" aria-label="Ready-made words">
+            {cheerPhrases(sensitive, type).map((p) => (
+              <button key={p} type="button" className={s("phrase")} disabled={busy} onClick={() => void send(null, p)}>{p}</button>
+            ))}
+          </div>
           {note && <p className={note.tone === "error" ? s("replyError") : s("photoNote")} role="status">{note.text}</p>}
-          <p className={s("muted")}>{name.trim() ? `Shown as ${name.trim()}.` : "Add your name above, if you like."}{rules.approve_first ? " The host checks words before they show." : ""}</p>
+          <p className={s("muted")}>{name.trim() ? `Shown as ${name.trim()}.` : "Add your name below, if you like."}{rules.approve_first ? " The host checks words before they show." : ""}</p>
         </>
       ) : (
         <p className={s("muted")}>Comments open with the photos, on the day.</p>
       )}
-      {words.length > 0 && (
-        <ul className={s("cheerList")}>
-          {shown.map((c) => <Bubble key={c.id} c={c} now={now} />)}
-        </ul>
-      )}
+    </section>
+  );
+}
+
+// Every comment, newest first, to read during and after the event.
+export function CheerList({ cheers, sensitive }: { cheers: Cheer[]; sensitive: boolean }) {
+  const [all, setAll] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const t = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(t); }, []);
+  const words = cheers.filter((c) => c.body);
+  if (!words.length) return null;
+  const shown = all ? words : words.slice(0, 6);
+  return (
+    <section className={s("cheerAll")} aria-label="All comments">
+      <p className={s("cheersHead")}>{sensitive ? "Messages for the family" : "Comments"}</p>
+      <ul className={s("cheerList")}>{shown.map((c) => <Bubble key={c.id} c={c} now={now} />)}</ul>
       {words.length > 6 && (
         <div><button type="button" className={`${s("btn")} ${s("btnGhost")} ${s("btnSmall")}`} onClick={() => setAll(!all)}>
-          {all ? "Show fewer" : `Show all ${words.length} comments`}
+          {all ? "Show fewer" : `Show all ${words.length}`}
         </button></div>
       )}
     </section>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 3v12M7.5 7.5L12 3l4.5 4.5" /><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H16" />
+    </svg>
   );
 }
 

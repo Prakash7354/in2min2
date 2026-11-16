@@ -22,7 +22,7 @@
 // Moves by writing styles straight to the cards each frame (no React
 // re-render), so it stays smooth on older phones.
 
-import { useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import type { Sky } from "@/lib/catalog";
 import { photoUrl, type WallPhoto } from "@/lib/photos";
 
@@ -79,6 +79,27 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
     if (next) setSlots((prev) => prev.map((id, j) => (j === i ? next : id)));
   };
 
+  // The ring's size. On a phone it follows the page width, as before. On a
+  // TV the cards are as big as the space allows (the space left by the
+  // comments), and the ring is always about twice a card's width, so there's
+  // the same clear sky between photos as on a phone, and they never touch
+  // (owner, 16 Nov 2026). The depth follows the ring, so it looks the same.
+  const sized = useRef({ w: 0, h: 0, R: 0 });
+  const ring = useCallback(() => {
+    const el = stage.current;
+    const W = el?.clientWidth ?? 360;
+    if (!tv) return Math.min(W * 0.5, 460);
+    const H = el?.clientHeight ?? 600;
+    const z = sized.current;
+    if (el && (z.w !== W || z.h !== H)) {
+      const cw = Math.max(80, Math.min(W * 0.2, H * 0.34));
+      z.w = W; z.h = H; z.R = cw * 2.05;
+      el.style.setProperty("--tvcw", `${cw.toFixed(0)}px`);
+      el.style.perspective = `${(z.R * 5.6).toFixed(0)}px`;
+    }
+    return z.R || Math.min(W * 0.32, 900);
+  }, [tv]);
+
   // New photos: straight into the hidden card that comes round next.
   useEffect(() => {
     if (!arrivals.ids.length) return;
@@ -116,8 +137,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
         if (Math.abs(g.vel) > 0.02) { g.angle += g.vel * dt; g.vel *= Math.pow(0.05, dt); }
         else if (!still && document.visibilityState === "visible") g.angle -= speed * dt;   // clockwise, seen from above
       }
-      const W = stage.current?.clientWidth ?? 360;
-      const R = tv ? Math.min(W * 0.32, 900) : Math.min(W * 0.5, 460);
+      const R = ring();
       let bestCos = -2, bestI = g.front;
       for (let i = 0; i < SLOTS; i++) {
         const el = cards.current[i];
@@ -140,7 +160,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [motion, tv]);
+  }, [motion, tv, ring]);
 
   // Swipe to spin; a tap opens the photo.
   const down = (e: PointerEvent) => {
@@ -151,8 +171,7 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
   const move = (e: PointerEvent) => {
     const g = st.current;
     if (!g.drag) return;
-    const W = stage.current?.clientWidth ?? 360;
-    const R = tv ? Math.min(W * 0.32, 900) : Math.min(W * 0.5, 460);
+    const R = ring();
     const dx = e.clientX - g.drag.x;
     g.drag.moved = Math.max(g.drag.moved, Math.abs(dx));
     if (g.drag.moved > 6) stage.current?.setPointerCapture?.(e.pointerId);

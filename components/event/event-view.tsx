@@ -13,6 +13,7 @@ import {
   type EventStageView, type EventViewData, type MenuItem,
 } from "@/lib/event-view";
 import { Icon, type IconName } from "@/components/icons";
+import { PreviewWheel } from "@/components/photos/preview-wheel";
 import BorderArt from "./borders";
 import Effect from "./effects";
 // Styles: components/event/event-view.css, loaded once in app/layout.tsx.
@@ -66,8 +67,8 @@ export default function EventView({ data, view, now, thumb = false, anchors = fa
         {view !== "card" && notice}
         {view === "card" && <Card d={data} />}
         {view === "page" && <Page d={data} now={now} a={anchors} reply={reply} photos={photos} />}
-        {view === "live" && <Live d={data} now={now} a={anchors} photos={photos} />}
-        {view === "after" && <After d={data} a={anchors} photos={photos} />}
+        {view === "live" && <Live d={data} now={now} a={anchors} photos={photos} thumb={thumb} />}
+        {view === "after" && <After d={data} a={anchors} photos={photos} thumb={thumb} />}
       </div>
     </div>
   );
@@ -534,7 +535,7 @@ function shortDate(date: string): string {
   return `${dow.slice(0, 3)} ${day} ${month.slice(0, 3)}`;
 }
 
-function Live({ d, now, a, photos }: { d: EventViewData; now: number; a: boolean; photos?: ReactNode }) {
+function Live({ d, now, a, photos, thumb }: { d: EventViewData; now: number; a: boolean; photos?: ReactNode; thumb: boolean }) {
   return (
     <>
       <div className={s.banner}>{d.sensitive ? "Today" : "Happening today"}</div>
@@ -551,10 +552,10 @@ function Live({ d, now, a, photos }: { d: EventViewData; now: number; a: boolean
       {d.toggles.photo_wall && !photos && (
         <section className={s.section}>
           <Title icon="camera">{d.sensitive ? "Photos and memories" : "Photos from today"}</Title>
-          <Fan d={d} />
+          {thumb ? <Fan d={d} /> : <PreviewWheel d={d} />}
           <span className={`${s.btn} ${s.btnAccent} ${s.btnBig}`}>{d.sensitive ? "Share a photo or memory" : "Add your photos"}</span>
           <div className={s.wall} aria-hidden="true">{Array.from({ length: 6 }, (_, i) => <span key={i} />)}</div>
-          <p className={s.muted}>Preview only. On your live page, guests&apos; photos turn here slowly like a wheel, and the button works on the day. You can add your own from Photos in step 7.</p>
+          <p className={s.muted}>Preview: guests&apos; photos turn on this wheel, with their comments. Drawn pictures stand in until then, and the button works on the day.</p>
         </section>
       )}
       <WhenWhere d={d} a={a} />
@@ -563,7 +564,7 @@ function Live({ d, now, a, photos }: { d: EventViewData; now: number; a: boolean
   );
 }
 
-function After({ d, a, photos }: { d: EventViewData; a: boolean; photos?: ReactNode }) {
+function After({ d, a, photos, thumb }: { d: EventViewData; a: boolean; photos?: ReactNode; thumb: boolean }) {
   const { main, second, secondLang } = words(d);
   return (
     <>
@@ -582,7 +583,7 @@ function After({ d, a, photos }: { d: EventViewData; a: boolean; photos?: ReactN
       {d.toggles.photo_wall && !photos && (
         <section className={s.section}>
           <Title icon="images">{d.sensitive ? "Photos and memories" : "The gallery"}</Title>
-          <Fan d={d} />
+          {thumb ? <Fan d={d} /> : <PreviewWheel d={d} />}
           <div className={s.wall} aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} />)}</div>
           <p className={s.muted}>Every guest’s photos, in one place.</p>
         </section>

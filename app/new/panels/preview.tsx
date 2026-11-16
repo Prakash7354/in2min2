@@ -15,9 +15,13 @@ const VIEWS: { key: EventStageView; label: string }[] = [
   { key: "card", label: "Invitation" }, { key: "page", label: "Event page" }, { key: "live", label: "On the day" }, { key: "after", label: "After" },
 ];
 
+// Which stage to open on next time (Share › "Preview the thank-you page" opens "after").
+let startAt: EventStageView = "card";
+export function previewAt(v: EventStageView) { startAt = v; }
+
 export function PreviewPanel() {
   const { d, now } = useB2();
-  const [view, setView] = useState<EventStageView>("card");
+  const [view, setView] = useState<EventStageView>(() => { const v = startAt; startAt = "card"; return v; });
   return (
     <PanelShell icon="eye" title="As guests see it" line="Exactly what guests get, at each stage.">
       <div className="b2-tabs">

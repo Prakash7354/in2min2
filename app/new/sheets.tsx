@@ -13,12 +13,15 @@ import { QrCode } from "@/components/qr-code";
 import { eventType } from "@/lib/catalog";
 import { missingForPublish, toViewData, unpublishedChanges, type Draft } from "@/lib/draft";
 import { formatDate } from "@/lib/event-view";
+import { wallPath } from "@/lib/photos";
 import { copyLink, shareLink, whatsappUrl } from "@/lib/share";
 import { supabase } from "@/lib/supabase/client";
 import { moments } from "../builder/share-links";
 import { totals } from "../builder/replies";
 import { MISSING_PANEL, useB2, type B2 } from "./context";
 import type { Panel } from "./nav";
+import { dateLine } from "./kinds";
+import { previewAt } from "./panels/preview";
 import { Chips, RoundButton, Sheet, Toggle, useTheme } from "./ui";
 
 export function eventLink(d: Draft): string | null {
@@ -89,12 +92,29 @@ function ShareBody() {
   return <ShareLinks d={b.d} link={link} say={b.say} />;
 }
 
+// The invitation is the main link, at the top (owner, 16 Nov 2026: "the
+// invite or RSVP link … should stay at the top"). Then each later message
+// for its own purpose, with when to send it and whether it's ready: the
+// thank-you stays locked until the page has turned into the thank-you page.
 function ShareLinks({ d, link, say }: { d: Draft; link: string; say: (m: string) => void }) {
+  const b = useB2();
+  const fromSheet = useFromSheet();
+  const [qr, setQr] = useState(false);
   const short = d.shortPath ? `${window.location.origin}${d.shortPath}` : null;
   const title = d.title.trim() || "Our event";
   const bare = (u: string) => u.replace(/^https?:\/\//, "");
+  const t = eventType(d.eventType);
+  const sensitive = !!t?.sensitive;
+  const community = d.scale === "community";
   const list = moments(d);
-  const first = list[0];
+  const invite = list[0];
+  const dates = reminderDates(d);
+  const ended = eventEnded(d, b.now);
+  const w = b.photos.wall;
+  const [, type, slug] = (d.publishedPath ?? "").split("/");
+  const photosUrl = type && slug ? `${window.location.origin}${wallPath(type, slug, w?.isPrivate ? w.wallKey : null)}` : `${link}#photos`;
+  const hasOrder = d.toggles.schedule && d.functions.some((f) => f.title.trim());
+
   async function share(url: string, text: string) {
     const r = await shareLink(url, title, text);
     if (r === "copied") say("Message and link copied. Paste them into WhatsApp or a text.");
@@ -103,48 +123,97 @@ function ShareLinks({ d, link, say }: { d: Draft; link: string; say: (m: string)
   async function copy(text: string, what: string) {
     say((await copyLink(text)) === "copied" ? `${what} copied.` : "Couldn't copy here. Press and hold the text to copy it.");
   }
+  const day = (k: string) => (dates[k] ? dateLine("", dates[k]) : "");
+  const find = (k: string) => list.find((m) => m.key === k);
+
+  type Step = { key: string; icon: IconName; label: string; when: string; what: string; text?: string; url?: string; locked?: { why: string; label: string; run: () => void } };
+  const steps: Step[] = [];
+  const order = find("order");
+  steps.push(hasOrder && order
+    ? { key: "order", icon: "list", label: order.label, when: `The week before${day("order") ? ` · ${day("order")}` : ""}`, what: "Opens the page at the running order, with the menu.", text: order.text, url: link + (order.hash ?? "") }
+    : { key: "order", icon: "list", label: community ? "The programme" : "The running order", when: "The week before", what: "What happens when, and the menu.",
+        locked: { why: "Add your day plan first.", label: community ? "Add the programme" : "Add the day plan", run: () => void fromSheet("plan") } });
+  const where = find("where");
+  steps.push(where
+    ? { key: "where", icon: "pin", label: where.label, when: `The day before${day("where") ? ` · ${day("where")}` : ""}`, what: "Opens the map, directions and parking.", text: where.text, url: link + (where.hash ?? "") }
+    : { key: "where", icon: "pin", label: "Directions and parking", when: "The day before", what: "The map and where to park.",
+        locked: { why: "Add the place first.", label: "Add the place", run: () => void fromSheet("details") } });
+  const reminder = find("reminder");
+  if (reminder) steps.push({ key: "reminder", icon: "bell", label: reminder.label, when: `The day before${day("reminder") ? ` · ${day("reminder")}` : ""}`, what: "A friendly nudge, with the invitation link.", text: reminder.text, url: link });
+  if (d.toggles.photo_wall) steps.push({ key: "photos", icon: "camera", label: sensitive ? "Photos and memories" : "On the day: photos and comments",
+    when: `On the day${day("today") ? ` · ${day("today")}` : ""}`, what: "Opens the photo wall: guests add photos and cheer along, live.",
+    text: sensitive ? `Photos and memories of ${title}. Please add yours here:` : `${title} is today! Add your photos and cheer along here:`, url: photosUrl });
+  steps.push({ key: "news", icon: "megaphone", label: "News and updates", when: "Any time", what: "Updates show at the top of your page by themselves. Send an urgent one on WhatsApp too, because guests won't be looking at the page.",
+    locked: { why: "", label: "Open Announce", run: () => void fromSheet("announce") } });
+  const thanks = find("thanks");
+  steps.push(ended && thanks
+    ? { key: "thanks", icon: "heart", label: thanks.label, when: "Afterwards", what: "Opens your thank-you page, with everyone's photos.", text: thanks.text, url: link }
+    : { key: "thanks", icon: "heart", label: "Thank you", when: `Afterwards${day("thanks") ? ` · from ${day("thanks")}` : ""}`,
+        what: "Ready once the event is over: your page turns into the thank-you page, with the thank-you message and everyone's photos.",
+        locked: { why: "Not ready to send yet.", label: "Preview the thank-you page", run: () => { previewAt("after"); void fromSheet("preview"); } } });
+
   return (
     <div style={{ display: "grid", gap: 16 }}>
-      <div className="b2-qr">
-        <span><QrCode text={short ?? link} className="block w-full" label="QR code for your event" /></span>
-        <div style={{ display: "grid", gap: 6, minWidth: 0 }}>
-          <p className="b2-small">One link does it all: the invitation now, the live page on the day, the thank-you afterwards.</p>
-          <button type="button" className="b2-linkcopy" onClick={() => void copy(link, "Link")}>
-            <span>{bare(link)}</span><Icon name="copy" className="" />
-          </button>
-          {short && (
-            <button type="button" className="b2-linkcopy" onClick={() => void copy(short, "Short link")}>
-              <span>{bare(short)}</span><Icon name="copy" className="" />
-            </button>
-          )}
+      <section className="b2-invite">
+        <p className="b2-kicker">Send this first</p>
+        <h3 className="b2-h3">{community ? "Your event page" : sensitive ? "The details, for family and friends" : "Your invitation"}</h3>
+        <p className="b2-small">{d.toggles.rsvp ? (sensitive ? "Guests open it and let the family know if they can come." : "Guests open the invitation and reply on it: yes, no or maybe.") : "Guests open it for all the details."}</p>
+        <p className="b2-msgtext">{invite.text}<br /><span>{bare(link)}</span></p>
+        <a className="b2-btn b2-primary b2-block b2-wa" href={whatsappUrl(link, invite.text)} target="_blank" rel="noreferrer">
+          <Icon name="message" className="" />Send on WhatsApp
+        </a>
+        <div className="b2-chips">
+          <button type="button" className="b2-chip b2-chip-sm" onClick={() => void share(link, invite.text)}><Icon name="share" className="" />More ways</button>
+          <button type="button" className="b2-chip b2-chip-sm" onClick={() => void copy(`${invite.text}\n${link}`, "Invitation")}><Icon name="copy" className="" />Copy</button>
+          <button type="button" className="b2-chip b2-chip-sm" aria-expanded={qr} onClick={() => setQr(!qr)}><Icon name="qr" className="" />QR code</button>
         </div>
-      </div>
-      <a className="b2-btn b2-primary b2-block b2-wa" href={whatsappUrl(link, first.text)} target="_blank" rel="noreferrer">
-        <Icon name="message" className="" />Send on WhatsApp
-      </a>
-      <button type="button" className="b2-btn b2-secondary b2-block" onClick={() => void share(link, first.text)}>
-        <Icon name="share" className="" />More ways to share
-      </button>
-
-      <p className="b2-kicker" style={{ marginTop: 6 }}>Ready-made messages</p>
-      {list.map((m) => {
-        const url = link + (m.hash ?? "");
-        return (
-          <div key={m.key} className="b2-msg">
-            <p style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", margin: 0 }}>
-              <strong>{m.label}</strong><span className="b2-pill">{m.when}</span>
-            </p>
-            <p className="b2-small" style={{ whiteSpace: "pre-line" }}>{m.text}</p>
-            <div className="b2-chips">
-              <a className="b2-chip b2-chip-sm b2-wa" href={whatsappUrl(url, m.text)} target="_blank" rel="noreferrer"><Icon name="message" className="" />WhatsApp</a>
-              <button type="button" className="b2-chip b2-chip-sm" onClick={() => void share(url, m.text)}><Icon name="share" className="" />Share</button>
-              <button type="button" className="b2-chip b2-chip-sm" onClick={() => void copy(`${m.text}\n${url}`, "Message")}><Icon name="copy" className="" />Copy</button>
+        {qr && (
+          <div className="b2-qr">
+            <span><QrCode text={short ?? link} className="block w-full" label="QR code for your invitation" /></span>
+            <div style={{ display: "grid", gap: 6, minWidth: 0 }}>
+              <p className="b2-small">For printed cards and posters: point a phone’s camera at it.</p>
+              <button type="button" className="b2-linkcopy" onClick={() => void copy(link, "Link")}><span>{bare(link)}</span><Icon name="copy" className="" /></button>
+              {short && <button type="button" className="b2-linkcopy" onClick={() => void copy(short, "Short link")}><span>{bare(short)}</span><Icon name="copy" className="" /></button>}
             </div>
           </div>
-        );
-      })}
+        )}
+      </section>
+
+      <p className="b2-kicker" style={{ marginTop: 6 }}>Later, send these</p>
+      {steps.map((m) => (
+        <div key={m.key} className="b2-msg" data-locked={m.locked && m.key !== "news" ? "" : undefined}>
+          <p className="b2-msgtitle"><Icon name={m.icon} className="" /><strong>{m.label}</strong></p>
+          <p className="b2-when"><Icon name="calendar" className="" />{m.when}</p>
+          <p className="b2-small">{m.what}</p>
+          {m.locked ? (
+            <>
+              {m.locked.why && <p className="b2-small" style={{ color: "var(--b2-text)", fontWeight: 700 }}>{m.locked.why}</p>}
+              <div className="b2-chips">
+                <button type="button" className="b2-chip b2-chip-sm" onClick={m.locked.run}>{m.locked.label}</button>
+              </div>
+            </>
+          ) : m.text && m.url && (
+            <>
+              <p className="b2-msgtext">{m.text}</p>
+              <div className="b2-chips">
+                <a className="b2-chip b2-chip-sm b2-wa" href={whatsappUrl(m.url, m.text)} target="_blank" rel="noreferrer"><Icon name="message" className="" />WhatsApp</a>
+                <button type="button" className="b2-chip b2-chip-sm" onClick={() => void share(m.url!, m.text!)}><Icon name="share" className="" />Share</button>
+                <button type="button" className="b2-chip b2-chip-sm" onClick={() => void copy(`${m.text}\n${m.url}`, "Message")}><Icon name="copy" className="" />Copy</button>
+              </div>
+            </>
+          )}
+        </div>
+      ))}
     </div>
   );
+}
+
+// Has the event finished (so the page now shows the thank-you)? The end
+// time if there is one, otherwise midnight after the day, on this phone's clock.
+export function eventEnded(d: Draft, now: number): boolean {
+  if (!d.date) return false;
+  const end = d.endTime ? new Date(`${d.date}T${d.endTime}:00`) : (() => { const x = new Date(`${d.date}T00:00:00`); x.setDate(x.getDate() + 1); return x; })();
+  return now >= end.getTime();
 }
 
 // ─────────────── Preview: the card or the page, as guests will see it ───────────────
@@ -284,9 +353,13 @@ function BellBody() {
               <div style={{ display: "grid", gap: 4, flex: 1, minWidth: 0 }}>
                 <strong>{m.label}</strong>
                 <span className="b2-small">{now ? "Send it today" : past ? `Was for ${formatDate(when, false)}` : `Send on ${formatDate(when, false)}`}</span>
-                <a className="b2-chip b2-chip-sm b2-wa" style={{ justifySelf: "start", marginTop: 4 }} href={whatsappUrl(link + (m.hash ?? ""), m.text)} target="_blank" rel="noreferrer">
-                  <Icon name="message" className="" />Send on WhatsApp
-                </a>
+                {m.key === "thanks" && !eventEnded(b.d, b.now) ? (
+                  <span className="b2-small">Ready once the event is over, when your page becomes the thank-you page.</span>
+                ) : (
+                  <a className="b2-chip b2-chip-sm b2-wa" style={{ justifySelf: "start", marginTop: 4 }} href={whatsappUrl(link + (m.hash ?? ""), m.text)} target="_blank" rel="noreferrer">
+                    <Icon name="message" className="" />Send on WhatsApp
+                  </a>
+                )}
               </div>
             </div>
           );
