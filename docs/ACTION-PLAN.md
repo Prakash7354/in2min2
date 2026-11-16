@@ -1,6 +1,6 @@
 # Your action plan
 
-*For Prakash. Updated 15 November 2026. The full plan is `docs/CONCEPT.md`.*
+*For Prakash. Updated 16 November 2026. The full plan is `docs/CONCEPT.md`.*
 
 Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks different from the steps, describe what you see. **Never paste a secret key into the chat or any file.**
 
@@ -21,15 +21,25 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
-### [ ] 1. Try the new look, then test it with 5 people (about 30 minutes in all)
+### [ ] 1. Try Builder 2.0 on your phone, then test it with 5 people (about 40 minutes in all)
 
-Three hidden pages (not linked anywhere, nothing is saved or sent):
-- **in2min2.com/new/style**: the new look on one page. Tap the sun or moon to switch dark and light. Try the skies under "The photo wheel".
-- **in2min2.com/new**: the 6-screen Quick start.
-- **in2min2.com/new/home**: the event Home. Tap each tile.
+**in2min2.com/new** is now the real builder in the new look. It's hidden (not linked anywhere) and works on the same event as the classic builder, so your test event may open straight on its Home.
+
+**Try it yourself first (15 minutes):**
+1. Open **in2min2.com/new** on your phone. To start fresh, tap **You** (the round person button, top right) › **Start a new event** › **Yes, start new**.
+2. Tap **Birthday**, type a name and tap **50th**. On each screen, tap the quick choices (**This Saturday**, **2pm**, **Community hall**). Swipe to choose a look, and add a photo.
+3. On **Your invitation is ready**, tap **Sign in and write it**. Sign in with the code we email you, and watch the AI write the words.
+4. Tap **Go to your event home** and open each tile:
+   - **Invitation words**: tap **Shorter** or **Warmer** under a box.
+   - **Day plan**: tap **Use this plan**, then tap **Food** and add a dish.
+   - **Look**: swipe the looks, then try **Colours**, **Border** and **Letters**.
+5. Tap **Publish** at the bottom, turn on **I've checked it**, and tap **Publish**. The Share sheet opens: send the link to yourself on WhatsApp.
+6. Try the top bar: **Share**, the **bell** (updates, and reminders of what to send when), and **You** (sign out, dark or light).
+7. Press your phone's own **Back** button, or swipe back. It should go back one screen, or close the open panel.
+8. Also try a **Christmas party**, a **Lhosar celebration** and a **Wedding**: each asks its own questions.
 
 **The 5-person test.** Use colleagues, a grandparent, a teenager, and someone who isn't confident with phones.
-1. Open **in2min2.com/new** on *their* phone (or yours). Say only: *"Make an invitation for a birthday and get it ready to share."*
+1. On *their* phone (or yours, after **You** › **Start a new event**), open **in2min2.com/new**. Say only: *"Make an invitation for a birthday and get it ready to share."*
 2. Don't help or point. Time them from the first tap to **Your invitation is ready**.
 3. Note where they stop or hesitate, and anything they say out loud.
 4. Afterwards, ask three questions:
@@ -37,6 +47,8 @@ Three hidden pages (not linked anywhere, nothing is saved or sent):
    - What was confusing?
    - Would you use this for your own event?
 5. Send Claude Code the times and notes. The goal: a newcomer finishes in under 2 minutes without help.
+
+The classic builder stays at **in2min2.com/builder** until you're happy with the new one. The style page is still at **in2min2.com/new/style**.
 
 ### [ ] 2. Test with a second phone, such as your wife's (20 minutes)
 

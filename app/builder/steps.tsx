@@ -6,6 +6,8 @@
 import { useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { COPY_FIELDS, COPY_KEYS, charCount, type CopyKey, type CopyResponse } from "@/lib/ai/copy";
+import { copyRequest } from "@/lib/ai/request";
+import { COURSES, DEFAULT_RUN, MEAL_WORDS, RUN_SUGGESTIONS, nextTime } from "@/lib/running-order";
 import {
   BORDERS, COVER_FITS, EFFECTS, EVENT_TYPES, HERO_MOTIONS, LANGUAGES, MAX_SHOWCASE, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
   TEMPLATES, TEXT_STYLES, TOGGLES, TONES, eventType, formatPence, language, paletteFor, plan, plansFor, quote,
@@ -191,42 +193,6 @@ function Organiser({ d, update }: Pick<StepProps, "d" | "update">) {
 }
 
 // ───────────────────────────── 3. When, where and how many ─────────────────────────────
-
-// Quick-add ideas for the running order. Anything that sounds like a meal
-// starts as a meal, ready for its menu.
-const RUN_SUGGESTIONS: Record<string, string[]> = {
-  wedding: ["Mehndi", "Haldi", "Janti arrives", "Ceremony", "Photos", "Reception", "Dinner", "First dance"],
-  engagement: ["Guests arrive", "Tika", "Ring ceremony", "Dinner"],
-  anniversary: ["Guests arrive", "Welcome", "Cake", "Dinner", "Dancing"],
-  birthday: ["Guests arrive", "Games", "Cake", "Food", "Party ends"],
-  party: ["Guests arrive", "Food", "Cake", "Dancing"],
-  pasni: ["Guests arrive", "Puja", "Rice feeding", "Lunch", "Tika and blessings"],
-  ceremony: ["Guests arrive", "Puja", "Lunch", "Tika and blessings"],
-  bratabandha: ["Puja", "Bratabandha ceremony", "Lunch", "Tika and blessings"],
-  reunion: ["Guests arrive", "Welcome speech", "Lunch", "Cultural programme", "Raffle", "Close"],
-  memorial: ["Funeral", "Prayers", "13th-day rites", "Remembrance meal"],
-  sport: ["Opening ceremony", "Group games", "Lunch", "Semi-finals", "Final", "Prize-giving"],
-  mela: ["Opening", "Cultural show", "Food stalls open", "Raffle draw", "Close"],
-  charity: ["Registration", "Start", "Lunch", "Prize-giving"],
-  community: ["Welcome", "Programme", "Food", "Close"],
-  corporate: ["Arrival drinks", "Welcome", "Dinner", "Awards", "Close"],
-  christmas: ["Guests arrive", "Christmas dinner", "Secret Santa", "Games", "Carols"],
-  "new-year": ["Guests arrive", "Dinner", "Dancing", "Countdown to midnight", "Fireworks"],
-  lhosar: ["Welcome", "Prayers and blessings", "Cultural programme", "Cultural dances", "Lunch", "Tika and close"],
-};
-const DEFAULT_RUN = ["Guests arrive", "Welcome", "Lunch", "Dinner"];
-const MEAL_WORDS = /\b(lunch|dinner|breakfast|brunch|meal|food|tea|buffet|bhoj|canap|supper|feast)/i;
-const COURSES = ["Starter", "Main", "Side", "Dessert", "Drinks", "Snacks", "Sweets"];
-
-// The next item's time: an hour after the latest one, or the start time.
-function nextTime(d: Draft): string {
-  const times = d.functions.map((f) => f.time).filter(Boolean).sort();
-  const last = times[times.length - 1] ?? d.startTime;
-  if (!last) return "";
-  const [h, m] = last.split(":").map(Number);
-  const t = Math.min(h * 60 + m + (times.length ? 60 : 0), 23 * 60 + 59);
-  return `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`;
-}
 
 function RunningOrderEditor({ d, update }: Pick<StepProps, "d" | "update">) {
   const community = d.scale === "community";
@@ -473,7 +439,6 @@ export function StepWords({ d, update, session, askSignIn }: StepProps) {
   const [w, setW] = useState<WriteState>({ busy: false, error: null, trimmed: [], done: false });
   const main = language(d.languages[0]) ?? LANGUAGES[0];
   const second = language(d.languages[1]);
-  const t = eventType(d.eventType);
 
   async function writeForMe() {
     // The token is read fresh, so this also works straight after signing in.
@@ -484,25 +449,7 @@ export function StepWords({ d, update, session, askSignIn }: StepProps) {
       return;
     }
     setW({ busy: true, error: null, trimmed: [], done: false });
-    const fam = d.family.map((f) => [f.relation, f.names].filter(Boolean).join(": ")).filter(Boolean);
-    const parking = PARKING_OPTIONS.find((p) => p.key === d.parking);
-    const details = [
-      d.stars.names && `${d.stars.relation || "For"}: ${d.stars.names}`,
-      fam.length && `${t?.sensitive ? "With love from" : "With blessings from"} ${fam.join("; ")}`,
-      parking && `Parking: ${parking.label}${d.parkingNote ? ` (${d.parkingNote})` : ""}`,
-      d.functions.length && `Running order: ${d.functions.map((f) => [f.time && formatTime(f.time), f.title, f.date && f.date !== d.date && formatDate(f.date, false)].filter(Boolean).join(" ")).join("; ")}`,
-      d.scale === "community" && d.organiserName && `Organised by ${d.organiserName}`,
-    ].filter(Boolean).join(". ");
-    const body = {
-      eventType: `${t?.label ?? "Event"}${t?.sensitive ? " (a funeral or memorial)" : ""}`.slice(0, 60),
-      hostNames: [d.title, d.stars.names].filter(Boolean).join(" — ").slice(0, 120) || t?.label || "Our event",
-      dateAndVenue: [d.date && formatDate(d.date), d.startTime && formatTime(d.startTime), d.venueName, d.venueAddress.split(/\n|,/)[0]]
-        .filter(Boolean).join(", ").slice(0, 200) || "Date and venue to follow",
-      languageMix: main.ai,
-      tone: d.tone,
-      secondLanguage: second?.ai,
-      details: details.slice(0, 400) || undefined,
-    };
+    const body = copyRequest(d);
     try {
       const res = await fetch("/api/generate-copy", {
         method: "POST",
@@ -940,8 +887,9 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
     // page is still published; it just shows initials and no picture.
     const m = await saveMedia(supabase(), { ...d, eventId: r.eventId }, r.eventId).catch((e: unknown) => ({ ok: false as const, message: String(e) }));
     update((x) => {
+      // Keep the published web address, so changing the name later never breaks links already shared.
       const next = {
-        ...x, eventId: r.eventId, publishedPath: r.path, shortPath: r.shortPath, offerClaimed: x.offerClaimed || !!r.offer?.ok,
+        ...x, slug: x.slug || r.path.split("/")[2] || "", eventId: r.eventId, publishedPath: r.path, shortPath: r.shortPath, offerClaimed: x.offerClaimed || !!r.offer?.ok,
         ...(m.ok ? { coverKey: m.coverKey, shareKey: m.shareKey, mediaHash: m.mediaHash, heroKeys: m.heroKeys, heroHash: m.heroHash } : {}),
       };
       return { ...next, publishedHash: fingerprint(next) };

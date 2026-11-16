@@ -1,11 +1,41 @@
 # In2Min2: concept, business plan and build plan
 
-*Version 3.13, 15 November 2026 (night). Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
+*Version 3.14, 16 November 2026. Live at https://in2min2.com. Owner: Prakash (GoChuchuro). Repository: `Prakash7354/in2min2`. Preview: https://in2min2.pksgrg.workers.dev*
 
 This is the source of truth for what In2Min2 is and how it gets built. Claude Code: read this, then `CLAUDE.md`, then the code. The owner's step-by-step list is `docs/ACTION-PLAN.md`. Two kinds of statement appear:
 
 - **Decided**: the owner has said so. Build to it.
 - **Recommended**: advice not yet confirmed by the owner. Build it so it is easy to change (prices and limits live in the `plans` table, not in code), and keep it in section 23 until he confirms.
+
+**What changed in version 3.14 (16 Nov 2026):**
+- **Builder 2.0 is built: the real builder in the new look (7e), at in2min2.com/new.** It is hidden until proven, and works on the same event, sign-in, AI writer and database as `/builder`.
+- **The Quick start adapts to each kind of event** (`app/new/kinds.ts`):
+  - A birthday asks "Which birthday?" (1st, 16th, 18th, 21st, 30th to 60th).
+  - Weddings, engagements and anniversaries ask for two names. Anniversaries also ask how many years.
+  - A memorial asks what it is: a funeral, prayers, a memorial service, a remembrance or one year on. It has no confetti.
+  - Parties, reunions and community events choose from popular names.
+  - Public events also ask who's organising, whether anyone makes a profit, and about parking.
+- **Quick choices everywhere:**
+  - Dates: this Saturday, next Saturday, in 2 weeks, in a month. Christmas has Christmas Eve, Christmas Day and Boxing Day; New Year has New Year's Eve.
+  - The usual start times and end times for each kind of event.
+  - Popular places, and how many people.
+  - Relations for the family (Parents, Grandparents…).
+  - A timed day plan for each kind of event, in one tap.
+  - Popular dishes for each meal: Nepali, Christmas or general.
+- **More AI:**
+  - Ready-made words appear at once, with no sign-in.
+  - Once signed in, the AI writes the words in the background while the host picks a look and a photo.
+  - Each box can be made shorter, warmer, more formal or more fun with one tap (one AI write each; `/api/generate-copy` takes `only`, `current` and `adjust`).
+- **The event Home:**
+  - Tiles for the words, replies, photos, when and where, the day plan, the look, people and settings. Each opens one full-screen panel.
+  - One button at the bottom: Publish, Update or Share.
+- **Kept apart from the steps, in the top bar (owner's request):**
+  - **Share:** the QR code, the link and the short link, WhatsApp, and every ready-made message.
+  - **The bell:** what needs doing, and reminders of what to send when. The running order goes a week before, a reminder the day before, the live link on the day, and thank you afterwards.
+  - **You:** sign in and out, dark or light, a new event, and the classic builder.
+- **The phone's own Back button** steps back a screen or closes the open panel.
+- **Fix in both builders:** publishing keeps the web address, so renaming an event after publishing no longer changes its link.
+- No database change.
 
 **What changed in version 3.13 (15 Nov 2026, night):**
 - 0008 has run.
@@ -539,7 +569,7 @@ There is never a separate "preview mode" that looks different from the real page
 4. **The words.**
    - Choose up to two languages (section 8b).
    - Press **"Write it for me"** and the boxes fill in both languages, each with a character counter. It sits in its own highlighted panel (owner, 14 Nov 2026: "make the AI writing a bit obvious"); without an account it says "Sign in and write it for me" and writes straight after sign-in.
-   - Every box has small buttons: *Shorter · Warmer · More formal · More fun · Rewrite*.
+   - Every box has small buttons: *Shorter · Warmer · More formal · More fun · Try again* (built in Builder 2.0, 16 Nov 2026).
    - Edit anything.
 5. **The look (Decided in outline, owner, 13 Nov 2026: "verities makes people … feel good like shopping in the high street").** Every choice is shown on the host's own card, never as a settings form. Suggestions for this kind of event come first, then everything else. Built in `lib/catalog.ts` and `components/event/`; checked by `npm run test:db`.
    - **Main photo**, made smaller on the phone with its location data removed. **How it fits** (0003, `events.cover_fit`): *Fill the space* (photos) or *Show the whole picture* (logos and posters: never cropped, on a soft blurred copy of itself). A square or tall picture starts as "whole". A Hero photo runs edge to edge above the border, so the border never sits under it (owner's test, 14 Nov 2026).
@@ -646,13 +676,40 @@ Everything else stays still. People who have reduced motion switched on see no a
 
 ### 7e. Design 2.0: bold, mobile-first, one thing per screen (Decided by the owner, 15 Nov 2026: dark by default with a light option, the Motion library, and "go")
 
-**Built 15 Nov 2026 (prototype, no database):**
-- `/new/style`: the style page. Colours, letters, buttons, tiles, inputs, the bottom sheet, icons, and the frameless photo wheel in every sky.
-- `/new`: the 6-screen Quick start. What → whose → when → where → pick a look (swipe complete designs) → photo, then "Your invitation is ready" with a share sheet.
-- `/new/home`: the event Home. Big tiles with live numbers (pretend), each opening one bottom sheet.
-- The real photo wheel is now frameless, with clear space between photos (smaller cards on a wider ring).
+**Built:**
+- 15 Nov 2026:
+  - `/new/style`: the style page. Colours, letters, buttons, tiles, inputs, the bottom sheet, icons, and the frameless photo wheel in every sky.
+  - A clickable prototype of the Quick start and the event Home.
+  - The real photo wheel is now frameless, with clear space between photos.
+- 16 Nov 2026: **Builder 2.0 at `/new`.** The real builder in this style, on the same draft, sign-in and database as `/builder`. `/new/home` now opens `/new`.
+  - **Quick start, adapting to each kind of event.** Six screens, or nine for public events:
+    1. What are you celebrating?
+    2. Whose day, or the event's name.
+    3. Public events only: who's organising, then whether anyone makes a profit.
+    4. When.
+    5. Where.
+    6. Public events only: parking.
+    7. Pick a look.
+    8. A photo.
 
-Next: the owner's 5-person test (ACTION-PLAN step 1), then rebuilding the real builder in this style.
+    Then "Your invitation is ready".
+  - **The event Home.** Tiles open full-screen panels:
+    - Words: the AI writer, tone, languages, and one-tap changes to each box.
+    - When and where.
+    - Day plan.
+    - Look: complete looks, then photos, colours, border, letters and more.
+    - People, or the organiser.
+    - Settings, Replies and Photos.
+    - Check and publish, and As guests see it.
+  - Share, the bell (updates and reminders) and You sit in the top bar.
+  - Files:
+    - `app/new/app.tsx`: state, saving, sign-in, the AI and publishing.
+    - `kinds.ts`: what each kind of event asks.
+    - `quick.tsx`, `home.tsx`, `panels/*.tsx` and `sheets.tsx`: the screens.
+    - `nav.ts`: the Back button.
+    - `ui.tsx` and `new.css`: the look.
+
+Next: the owner tries `/new` on his phone, then the 5-person test (ACTION-PLAN step 1). Once Builder 2.0 is proven, `/builder` switches over to it.
 
 **What users told the owner.** They said "show me on the phone". The current look, pale and subtle, was missed and felt hard. Another app that was bold, colourful and visually striking won. Users want it simple, with nothing to hunt for, and mobile first. The owner pictures slick cards a shade lighter than the background, depth and space, and photos with no frames and clear space between them.
 
@@ -1379,6 +1436,7 @@ Small events run all year, so the personal and celebration side comes first and 
 | 1c (built 14 Nov, evening) | After the owner's first phone test: the running order with menus and two switches (0003); the photo above the border and "show the whole picture"; a smarter event page (countdown, date-and-place card, timeline, big reply buttons, minimum text sizes); Share, the bell and Settings at the top right; the AI writer panel; sign-in in its own window; Share on the public page | Live once the owner runs 0003 | The owner adds a running order with a menu on his phone and sees it on the guest link |
 | 1d (built 14 Nov, night) | The Share panel with every link and a ready-made message per moment; links to parts of the page; drafts of the privacy notice, terms and prices and fair fees | | Tested in Chrome at phone width |
 | 1e (built 14 Nov, late night) | Working replies with calendar links, the Replies window and bell; the main photo and WhatsApp preview picture; festive types, seasonal colours, three borders and moving effects; the festive banner on the home page | Live (0004 and 0005 run 14 Nov) | A guest replies from a WhatsApp link on a second phone and the host sees it |
+| 1j (built 16 Nov) | Builder 2.0 at `/new` (7e): a Quick start that adapts to each kind of event with quick choices; ready-made words, the AI writing in the background, and one-tap changes per box; the event Home with tiles and panels; Share, the bell with reminders, and You in the top bar; the Back button | Hidden until proven, then it replaces `/builder` | A newcomer makes, publishes and shares an invitation on their own phone in under 2 minutes |
 | 1i (built 15 Nov, night) | Five skies behind the wheel; photographers with a private link, credits and "Book them" | Live once the owner runs 0009 | A photographer adds 20 photos from a laptop; guests see the credit and the card |
 | 1h (built 15 Nov, evening) | Zoom in and zoom out movements; the wheel in a night sky; love taps with counts; hosts' favourites; the TV wheel | Live once the owner runs 0008 | Guests love photos on two phones; the counts match on the TV wheel |
 | 1g (built 15 Nov) | Up to five photos at the top with fade, zoom or slide; hosts' own photos on the wall; icons beside headings; the pricing principle (5i) | Live once the owner runs 0007 | The owner adds four photos on his phone and watches them take turns on the guest link |

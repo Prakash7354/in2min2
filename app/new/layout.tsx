@@ -1,6 +1,7 @@
-// /new: Design 2.0, the style page and the clickable prototype (owner's
-// decision, 15 Nov 2026; CONCEPT 7e). Hidden: not linked anywhere, and search
-// engines are told to ignore it. Nothing here touches the database.
+// /new: Design 2.0 (owner's decision, 15 Nov 2026; CONCEPT 7e). Builder 2.0,
+// the real builder in the new look, and the style page. Hidden until it
+// replaces the classic builder: not linked anywhere, and search engines are
+// told to ignore it. It uses the same draft, sign-in and database as /builder.
 //
 // Dark by default with a light option. The choice sits on #b2 as
 // data-theme, set by a tiny script before the first paint so there's no
@@ -10,7 +11,7 @@ import type { Metadata, Viewport } from "next";
 import "./new.css";
 
 export const metadata: Metadata = {
-  title: "In2Min2 · New look (prototype)",
+  title: "In2Min2 · Make your event",
   robots: { index: false, follow: false },
 };
 

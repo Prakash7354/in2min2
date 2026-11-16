@@ -14,9 +14,9 @@ import { eventType } from "@/lib/catalog";
 import { formatDate, formatTime } from "@/lib/event-view";
 import { copyLink, shareLink, whatsappUrl } from "@/lib/share";
 
-type Moment = { key: string; label: string; when: string; text: string; hash?: string; opens?: string };
+export type Moment = { key: string; label: string; when: string; text: string; hash?: string; opens?: string };
 
-function moments(d: Draft): Moment[] {
+export function moments(d: Draft): Moment[] {
   const t = eventType(d.eventType);
   const sensitive = t?.sensitive ?? false;
   const community = d.scale === "community";

@@ -38,6 +38,17 @@ export type EventCopy = Record<CopyKey, string>;
 
 export const COPY_KEYS = Object.keys(COPY_FIELDS) as CopyKey[];
 
+// Quick changes to one box (Builder 2.0): the host taps "Shorter", "Warmer"…
+// and only that box is written again.
+export const ADJUSTMENTS = {
+  shorter: { label: "Shorter", ask: "noticeably shorter, keeping the meaning" },
+  warmer: { label: "Warmer", ask: "warmer and more personal" },
+  formal: { label: "More formal", ask: "more formal and dignified" },
+  fun: { label: "More fun", ask: "more fun and playful" },
+  again: { label: "Try again", ask: "fresh, written a different way" },
+} as const;
+export type Adjustment = keyof typeof ADJUSTMENTS;
+
 // What the host types in before pressing Generate.
 export type CopyRequest = {
   eventType: string;
@@ -49,10 +60,16 @@ export type CopyRequest = {
   // shows both), and extra facts such as the family to honour or parking.
   secondLanguage?: string;
   details?: string;
+  // Optional: write only this box again, changed as asked (ADJUSTMENTS).
+  only?: string;
+  current?: string;
+  adjust?: string;
 };
 
-// The reply: the five boxes, plus the same five in the second language if one was asked for.
+// The reply: the five boxes, plus the same five in the second language if one
+// was asked for. With `only`, just that one box (and its translation).
 export type CopyResponse = EventCopy & { translation?: EventCopy };
+export type OneBoxResponse = Partial<EventCopy> & { translation?: Partial<EventCopy> };
 
 // Character count as people (and Postgres char_length) see it, so an emoji or
 // a Devanagari letter counts once rather than as two UTF-16 units.

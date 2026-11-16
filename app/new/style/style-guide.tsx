@@ -13,7 +13,7 @@ import { ICON_NAMES, Icon } from "@/components/icons";
 import { PhotoWheel } from "@/components/photos/photo-wheel";
 import { SKIES, paletteFor, type Sky } from "@/lib/catalog";
 import type { WallPhoto } from "@/lib/photos";
-import { TYPE_ART } from "../model";
+import { TYPE_ART } from "../kinds";
 import { Sheet, ThemeButton, useToast } from "../ui";
 
 // Sample photos for the wheel: small drawn scenes, landscape and portrait.

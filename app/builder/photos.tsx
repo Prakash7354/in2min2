@@ -49,7 +49,7 @@ export type PhotosState = {
   removePhotographer: (id: string) => Promise<boolean>;
 };
 
-const asked = (p: HostPhoto) => !!p.removal_asked_at && p.status === "hidden" && !p.kept_at && (!p.reviewed_at || p.reviewed_at <= p.removal_asked_at);
+export const asked = (p: HostPhoto) => !!p.removal_asked_at && p.status === "hidden" && !p.kept_at && (!p.reviewed_at || p.reviewed_at <= p.removal_asked_at);
 
 export function usePhotos(eventId: string | undefined, session: Session | null, scale: string, sensitive: boolean): PhotosState {
   const [rows, setRows] = useState<HostPhoto[] | null>(null);
@@ -501,7 +501,7 @@ function Toggle({ checked, label, line, onChange }: { checked: boolean; label: s
 }
 
 // Small previews of each sky for the chooser.
-const SKY_SWATCH: Record<Sky, string> = {
+export const SKY_SWATCH: Record<Sky, string> = {
   day: "linear-gradient(180deg, #5aa8ec, #cfe9fc)",
   evening: "linear-gradient(180deg, #57286e, #df6956 60%, #ffd38c)",
   night: "radial-gradient(circle at 30% 30%, #fff 0 1px, transparent 2px), radial-gradient(circle at 70% 60%, #fff 0 1px, transparent 2px), linear-gradient(180deg, #06061a, #120d2c)",

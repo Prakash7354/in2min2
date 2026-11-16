@@ -55,6 +55,13 @@ const PATHS = {
   message: <path d="M4.5 6.5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-6.5L7 20v-3.5h-.5a2 2 0 0 1-2-2z" />,
   printer: <><path d="M7 9V3.5h10V9M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2" /><path d="M7 14h10v6.5H7z" /></>,
   tv: <><rect x="3" y="5" width="18" height="12" rx="2" /><path d="M8 20.5h8M12 17v3.5" /></>,
+  // Builder 2.0's top bar and panels (15 Nov 2026)
+  user: <><circle cx="12" cy="8.5" r="4" /><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0" /></>,
+  bell: <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15l1.5-2zM10 20.5a2 2 0 0 0 4 0" />,
+  lock: <><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /></>,
+  logout: <><path d="M14 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H14" /><path d="M10 12h10.5M17 8.5l3.5 3.5-3.5 3.5" /></>,
+  trash: <><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13" /><path d="M10 11v5.5M14 11v5.5" /></>,
+  bowlfood: <><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z" /><path d="M8 8.5c0-2 1.5-3 3-3M12.5 8.5c0-2 1.5-3 3-3" /></>,
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;

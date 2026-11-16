@@ -68,6 +68,13 @@ export type Draft = {
   heroKeys?: string[];    // the four more, as stored (0007)
   heroHash?: string;      // what they were made from, so unchanged photos aren't sent again
   mediaHash?: string;
+  // Builder 2.0 (/new), kept on this phone only: where the Quick start got
+  // to, whether it's finished, who wrote the words (the AI, ready-made
+  // suggestions, or the host), and a milestone such as "50th" for the title.
+  quickAt?: string;
+  quickDone?: boolean;
+  wordsBy?: "ai" | "suggested" | "host";
+  milestone?: string;
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;
@@ -206,7 +213,7 @@ export function slugOk(slug: string): boolean {
 // say "you have changes that aren't live yet". The photo isn't sent yet
 // (photo storage comes later), so it's left out.
 const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "shortPath", "offerClaimed", "publishedHash", "cover", "offerCode",
-  "coverKey", "shareKey", "mediaHash", "moreCovers", "heroKeys", "heroHash"] as const;
+  "coverKey", "shareKey", "mediaHash", "moreCovers", "heroKeys", "heroHash", "quickAt", "quickDone", "wordsBy", "milestone"] as const;
 export function fingerprint(d: Draft): string {
   const rest: Record<string, unknown> = { ...d };
   for (const k of LOCAL_ONLY) delete rest[k];

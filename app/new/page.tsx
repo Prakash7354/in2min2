@@ -1,6 +1,6 @@
-// in2min2.com/new: the Design 2.0 prototype of Quick start (CONCEPT 7e).
-import { QuickStart } from "./loader";
+// in2min2.com/new: Builder 2.0, the real builder in the new look (CONCEPT 7e).
+import { Builder2 } from "./loader";
 
 export default function NewPage() {
-  return <QuickStart />;
+  return <Builder2 />;
 }
