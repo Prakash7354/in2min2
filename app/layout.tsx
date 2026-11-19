@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import ErrorReporter from "@/components/error-reporter";
 import { fontVariables } from "./fonts";
 import "./globals.css";
 import "@/components/event/event-view.css";
@@ -16,7 +17,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en-GB" className={`${fontVariables} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">{children}<ErrorReporter /></body>
     </html>
   );
 }

@@ -23,6 +23,7 @@ import type { Panel } from "./nav";
 import { dateLine } from "./kinds";
 import { previewAt } from "./panels/preview";
 import { Chips, RoundButton, Sheet, Toggle, useTheme } from "./ui";
+import { CAPTCHA_WAIT, useCaptcha } from "@/components/captcha";
 
 export function eventLink(d: Draft): string | null {
   return d.publishedPath ? `${window.location.origin}${d.publishedPath}` : null;
@@ -457,12 +458,15 @@ function SignInBody({ why, onDone }: { why: string; onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ text: string; detail: string } | null>(null);
   const fail = (e: { message: string; status?: number }) => setError({ text: friendly(e.message), detail: `${e.message}${e.status ? ` (${e.status})` : ""}` });
+  const { box: captchaBox, token: captchaToken, used: captchaUsed, on: captchaOn } = useCaptcha();
 
   async function sendCode() {
     const clean = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { setError({ text: "Please check the email address.", detail: "" }); return; }
+    if (captchaOn && !captchaToken) { setError({ text: CAPTCHA_WAIT, detail: "" }); return; }
     setBusy(true); setError(null);
-    const { error: e } = await supabase().auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } });
+    const { error: e } = await supabase().auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true, captchaToken: captchaToken ?? undefined } });
+    captchaUsed();
     setBusy(false);
     if (e) { fail(e); return; }
     setEmail(clean);
@@ -498,6 +502,7 @@ function SignInBody({ why, onDone }: { why: string; onDone: () => void }) {
           <button type="button" className="b2-btn b2-quiet" onClick={() => { setStage("email"); setCode(""); setError(null); }}>Use another email</button>
         </form>
       )}
+      <div ref={captchaBox} />
       {error && <p className="b2-note" data-tone="warn">{error.text}</p>}
       {error?.detail && <p className="b2-small">Details for Claude Code: {error.detail}</p>}
       <p className="b2-small">Free. Your event is kept safe in your account, and you can sign in on any phone.</p>

@@ -5,13 +5,15 @@
 // "name" MUST match the Worker's name in the Cloudflare dashboard, or the
 // Git build fails. The preview address is https://in2min2.<account>.workers.dev
 //
-// Public values only. Secrets (GEMINI_API_KEY, later the Supabase secret key
-// and Stripe keys) are set with `npx wrangler secret put NAME` or in the
+// Public values only. Secrets (GEMINI_API_KEY, SUPABASE_SECRET_KEY,
+// ALERT_EMAIL, later Stripe keys) are set with `npx wrangler secret put NAME` or in the
 // dashboard as type "Secret". Never put them in this file.
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "in2min2",
-	"main": ".open-next/worker.js",
+	// worker/main.js wraps the app OpenNext builds (.open-next/worker.js) and
+	// adds the hourly safety job: database check, error emails, nightly backup.
+	"main": "worker/main.js",
 	"compatibility_date": "2026-11-01",
 	"compatibility_flags": [
 		"nodejs_compat",
@@ -43,8 +45,20 @@
 	// a different bucket. Local `npm run dev` uses a local stand-in, never the
 	// real photos.
 	"r2_buckets": [
-		{ "binding": "PHOTOS", "bucket_name": "in2min2-photos", "jurisdiction": "eu" }
+		{ "binding": "PHOTOS", "bucket_name": "in2min2-photos", "jurisdiction": "eu" },
+		// Nightly database copies and error notes (worker/main.js, lib/ops.ts).
+		// Private: nothing serves it to the web. Created 19 Nov 2026, EU.
+		{ "binding": "BACKUPS", "bucket_name": "in2min2-backups", "jurisdiction": "eu" }
 	],
+	// Alert emails to the owner, through Cloudflare Email Routing (free). The
+	// address is the Worker secret ALERT_EMAIL, never written here.
+	"send_email": [
+		{ "name": "ALERTS" }
+	],
+	// The safety job runs at 7 minutes past every hour (worker/main.js).
+	"triggers": {
+		"crons": ["7 * * * *"]
+	},
 	"services": [
 		// Lets the app call itself (used by OpenNext for caching). Must match "name".
 		{

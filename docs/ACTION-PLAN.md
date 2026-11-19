@@ -34,7 +34,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 - [x] **Look › Background**: 9 of your painted backgrounds. Choosing one also picks letter colours that read well on it.
 
 **Next, Claude Code (in this order; each builds on the one before):**
-1. **Safety before real guests:** nightly backup with a practice restore, error alerts, the anti-spam check (Turnstile), and a daily "keep awake" call so the free Supabase plan doesn't pause.
+1. [x] **Safety before real guests (built 19 Nov; switch it on with step 4 below):** nightly backup and a practice-restore tool, error emails, an hourly database check that also keeps the free Supabase plan awake, and the anti-spam check on sign-in.
 2. **Your events on every device:** a "Your events" list from your account, so the same event opens on your phone and your laptop. Builder 2.0 also gets a wider layout for laptops.
 3. **Edit, save and remove beside the invitation** on Home (remove asks first, and can be undone for 30 days).
 4. **Co-hosts** (a mum and son building together): invite by link. The database already has co-hosts; this adds the screens.
@@ -129,6 +129,31 @@ Everything you decided is now in them, and the yellow boxes are gone. The ICO nu
 - [Prices and fair fees](https://in2min2.com/pricing)
 
 When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Draft" label and links them from the bottom of every page and from sign-in.
+
+### [ ] 4. Switch on the safety net (15 minutes)
+
+**A. Run the database file** [0012_backup.sql](../supabase/migrations/0012_backup.sql)
+1. Open the file on your Mac, select everything (Cmd+A) and copy (Cmd+C).
+2. Supabase › your project › **SQL Editor** › **New query** › paste › **Run**.
+3. You should see "Success. No rows returned." Tell Claude Code.
+
+**B. Give the Worker the database's secret key** (for the nightly backup)
+1. Supabase › **Project Settings** (the cog) › **API Keys** › **Secret keys**. Copy the key that starts `sb_secret_`. If there isn't one, tap **Add new secret key** and name it `worker-backup`.
+2. Cloudflare dashboard › **Workers & Pages** › **in2min2** › **Settings** › **Variables and Secrets** › **+ Add**.
+3. Type: **Secret**. Variable name: `SUPABASE_SECRET_KEY`. Value: paste the key. Tap **Deploy**.
+4. Never paste this key into a chat or a file.
+
+**C. Say where alerts go**
+1. Cloudflare dashboard › **in2min2.com** › **Email** › **Email Routing** › **Destination addresses**. Check your own email address shows **Verified**.
+2. **Workers & Pages** › **in2min2** › **Settings** › **Variables and Secrets** › **+ Add**. Type: **Secret**. Name: `ALERT_EMAIL`. Value: that same email address. Tap **Deploy**.
+3. From then on you get an email only if something breaks, plus a short "All well" every Monday morning. Forward any alert to Claude Code.
+
+**D. The anti-spam check on sign-in (Turnstile)**
+1. Cloudflare dashboard › **Turnstile** › **Add widget**. Name: `In2Min2 sign-in`. Hostnames: `in2min2.com`, `www.in2min2.com`, `in2min2.pksgrg.workers.dev`. Mode: **Managed**. Tap **Create**.
+2. Send Claude Code the **Site key** (it's public). Keep the **Secret key** to yourself for now.
+3. Only after Claude Code says the site key is live: Supabase › **Authentication** › **Attack Protection** › turn on **Captcha protection** › provider **Turnstile** › paste the **Secret key** › **Save**. (Doing this first would stop everyone signing in.)
+
+**E. Practice restore:** after the first night's backup, Claude Code loads it into a throwaway copy on your Mac and checks every row. Nothing for you to do.
 
 ## Before the January pilot, or before sharing links widely
 

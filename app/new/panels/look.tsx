@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import EventView from "@/components/event/event-view";
 import { Icon } from "@/components/icons";
 import {
-  BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, PHOTO_STYLES, TEMPLATES, TEXT_STYLES,
+  BACKDROP_GROUPS, BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, PHOTO_STYLES, TEMPLATES, TEXT_STYLES,
   eventType, language, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle,
 } from "@/lib/catalog";
 import { toViewData } from "@/lib/draft";
@@ -238,7 +238,12 @@ function Backgrounds() {
           <span className="b2-cardpick-view" aria-hidden="true"><EventView data={{ ...data, backdrop: null }} view="card" now={now} thumb /></span>
           <span>None</span>
         </button>
-        {BACKDROPS.map((b) => (
+      </div>
+      {BACKDROP_GROUPS.map((g) => (
+      <div key={g.key} style={{ display: "grid", gap: 10 }}>
+      <span className="b2-label">{g.name}</span>
+      <div className="b2-cardgrid" role="radiogroup" aria-label={`${g.name} backgrounds`}>
+        {BACKDROPS.filter((b) => b.group === g.key).map((b) => (
           <button key={b.key} type="button" role="radio" aria-checked={d.backdrop === b.key} className="b2-cardpick"
             onClick={() => {
               update((x) => ({ ...x, backdrop: b.key, palette: b.palette, border: b.frame ? "none" : x.border }));
@@ -251,6 +256,8 @@ function Backgrounds() {
           </button>
         ))}
       </div>
+      </div>
+      ))}
     </Section>
   );
 }

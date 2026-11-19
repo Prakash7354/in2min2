@@ -288,6 +288,15 @@ export const PALETTES: Palette[] = [
   // wedding cards (owner, 16 Nov 2026). Our own colours, not a copy of any card.
   { key: "sindoor", tag: "new", name: "Sindoor Red & Gold", family: "Nepali and South Asian", dark: true, bg: "#7A1020", main: "#F3C969", onMain: "#4A0A12", accent: "#E8B04B", onAccent: "#3D0710", soft: "#5A0B16", ink: "#FFF3DE", muted: "#F0D3B0",
     party: ["#F3C969", "#E8B04B", "#FFF3DE", "#F28C28", "#D9485F"] },
+  // Jewel tones with gold (owner, 19 Nov 2026): the page carries on in the colour of the drawn backgrounds.
+  { key: "emerald_gold", tag: "new", name: "Emerald & Gold", family: "Nepali and South Asian", dark: true, bg: "#0E4D32", main: "#F3C969", onMain: "#0A2E1E", accent: "#E8B04B", onAccent: "#0A2E1E", soft: "#0A3A26", ink: "#FFF6E0", muted: "#D5E6C8",
+    party: ["#F3C969", "#E8B04B", "#FFF6E0", "#3FB27F", "#D9485F"] },
+  { key: "royal_blue_gold", tag: "new", name: "Royal Blue & Gold", family: "Nepali and South Asian", dark: true, bg: "#13297A", main: "#F3C969", onMain: "#0B1A4F", accent: "#E8B04B", onAccent: "#0B1A4F", soft: "#0D1F5E", ink: "#FFF6E0", muted: "#CBD5F5",
+    party: ["#F3C969", "#E8B04B", "#FFF6E0", "#6C8CFF", "#D9485F"] },
+  { key: "rani_gold", tag: "new", name: "Rani Pink & Gold", family: "Nepali and South Asian", dark: true, bg: "#8A0F4F", main: "#F3C969", onMain: "#4A0729", accent: "#E8B04B", onAccent: "#3D0622", soft: "#6B0B3D", ink: "#FFF3E8", muted: "#F5CFE0",
+    party: ["#F3C969", "#E8B04B", "#FFF3E8", "#FF7AB6", "#7A5CFF"] },
+  { key: "indigo_gold", tag: "new", name: "Indigo & Gold", family: "Nepali and South Asian", dark: true, bg: "#261A6B", main: "#F3C969", onMain: "#170F45", accent: "#E8B04B", onAccent: "#170F45", soft: "#1D1454", ink: "#FFF6E0", muted: "#D4CCF5",
+    party: ["#F3C969", "#E8B04B", "#FFF6E0", "#8C7CFF", "#FF7AB6"] },
   { key: "dhaka", name: "Dhaka Red", family: "Nepali and South Asian", bg: "#FFF8F0", main: "#A8201A", onMain: "#FFFFFF", accent: "#E39B2D", onAccent: "#1B1B1B", soft: "#F2E3CF", ink: "#1B1B1B", muted: "#5E534A",
     party: ["#A8201A", "#1B1B1B", "#E39B2D", "#F2E3CF", "#7A5C2E"] },
   { key: "saffron", name: "Saffron & Maroon", family: "Nepali and South Asian", bg: "#FFF7EA", main: "#7A1F2B", onMain: "#FFFFFF", accent: "#F08A24", onAccent: "#2A0E12", soft: "#FBE3C1", ink: "#2A0E12", muted: "#6B4F44" },
@@ -526,19 +535,52 @@ export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[
 // their own frame painted in, so they go without a border. Kept in
 // feature_toggles.settings.backdrop (no database change). `shade` darkens
 // the middle a little where a bright centre makes the words hard to read.
-export type Backdrop = { key: string; name: string; file: string; dark: boolean; palette: string; frame?: boolean; shade?: number };
+// The owner's are pictures (`file`); ours are drawn in CSS (`css`), so they
+// cost nothing to load. The last layer of `css` is sized to cover the card.
+export type BackdropGroup = "yours" | "glowing" | "traditional" | "modern";
+export type Backdrop = { key: string; name: string; group: BackdropGroup; file?: string; css?: string; dark: boolean; palette: string; frame?: boolean; shade?: number };
+export const BACKDROP_GROUPS: { key: BackdropGroup; name: string }[] = [
+  { key: "yours", name: "Painted" }, { key: "glowing", name: "Glowing" }, { key: "traditional", name: "Traditional" }, { key: "modern", name: "Modern" },
+];
+const svgUrl = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+// A fine grain, so a glow looks printed rather than flat.
+const GRAIN = `${svgUrl("<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(#n)'/></svg>")} 0 0 / 180px 180px repeat`;
+// A jali (trellis) in fine gold lines, as on wedding cards and carved screens.
+const JALI = `${svgUrl("<svg xmlns='http://www.w3.org/2000/svg' width='40' height='60' viewBox='0 0 40 60'><path d='M20 0C20 15 0 15 0 30S20 45 20 60M20 0C20 15 40 15 40 30S20 45 20 60' fill='none' stroke='#EBC66B' stroke-opacity='.24' stroke-width='1.1'/><g fill='#EBC66B' fill-opacity='.3'><circle cx='20' cy='30' r='1.8'/><circle cx='0' cy='0' r='1.8'/><circle cx='40' cy='0' r='1.8'/><circle cx='0' cy='60' r='1.8'/><circle cx='40' cy='60' r='1.8'/></g></svg>")} 0 0 / 40px 60px repeat`;
+const VIGNETTE = "radial-gradient(ellipse 90% 75% at 50% 45%, transparent 55%, rgb(0 0 0 / 0.42) 100%)";
+const glowing = (a: string, b: string, c: string, d: string) =>
+  `${GRAIN}, radial-gradient(ellipse 78% 58% at 50% 42%, ${a} 0%, ${b} 42%, ${c} 82%, ${d} 100%)`;
+const trellis = (a: string, b: string, c: string) =>
+  `${VIGNETTE}, ${JALI}, radial-gradient(ellipse 80% 60% at 50% 42%, ${a} 0%, ${b} 58%, ${c} 100%)`;
+const mesh = (base: string, spots: [string, string, string, string]) =>
+  `radial-gradient(at 12% 8%, ${spots[0]} 0, transparent 52%), radial-gradient(at 88% 18%, ${spots[1]} 0, transparent 48%), radial-gradient(at 85% 88%, ${spots[2]} 0, transparent 52%), radial-gradient(at 10% 92%, ${spots[3]} 0, transparent 48%), linear-gradient(${base}, ${base})`;
+
 export const BACKDROPS: Backdrop[] = [
-  { key: "ivory_frame", name: "Ivory and gold", file: "/art/backgrounds/minimalist-ivory-elegant-bg.webp", dark: false, palette: "navy_gold", frame: true },
-  { key: "rose_frame", name: "Rose blush", file: "/art/backgrounds/rose-pink-whimsical-bg.webp", dark: false, palette: "lali_gurans", frame: true },
-  { key: "red_gold_frame", name: "Red and gold frame", file: "/art/backgrounds/red-gold-frame-bg.jpg", dark: true, palette: "sindoor", frame: true },
-  { key: "luminous_red", name: "Glowing red", file: "/art/backgrounds/luminous-red-gradient-bg.webp", dark: true, palette: "sindoor" },
-  { key: "luminous_blue", name: "Glowing blue", file: "/art/backgrounds/luminous-blue-gradient-bg.webp", dark: true, palette: "midnight_gold", shade: 0.25 },
-  { key: "luminous_green", name: "Glowing green", file: "/art/backgrounds/luminous-green-gradient-bg.webp", dark: true, palette: "black_gold" },
-  { key: "luminous_teal", name: "Glowing teal", file: "/art/backgrounds/luminous-teal-gradient-bg.webp", dark: true, palette: "black_gold", shade: 0.5 },
-  { key: "fireworks_blue", name: "Fireworks", file: "/art/backgrounds/royal-blue-celebration-bg.webp", dark: true, palette: "midnight_gold" },
-  { key: "festive_teal", name: "Festive baubles", file: "/art/backgrounds/scarlet-festive-party-bg.webp", dark: true, palette: "black_gold" },
+  { key: "ivory_frame", group: "yours", name: "Ivory and gold", file: "/art/backgrounds/minimalist-ivory-elegant-bg.webp", dark: false, palette: "navy_gold", frame: true },
+  { key: "rose_frame", group: "yours", name: "Rose blush", file: "/art/backgrounds/rose-pink-whimsical-bg.webp", dark: false, palette: "lali_gurans", frame: true },
+  { key: "red_gold_frame", group: "yours", name: "Red and gold frame", file: "/art/backgrounds/red-gold-frame-bg.jpg", dark: true, palette: "sindoor", frame: true },
+  { key: "luminous_red", group: "yours", name: "Glowing red", file: "/art/backgrounds/luminous-red-gradient-bg.webp", dark: true, palette: "sindoor" },
+  { key: "luminous_blue", group: "yours", name: "Glowing blue", file: "/art/backgrounds/luminous-blue-gradient-bg.webp", dark: true, palette: "royal_blue_gold", shade: 0.25 },
+  { key: "luminous_green", group: "yours", name: "Glowing green", file: "/art/backgrounds/luminous-green-gradient-bg.webp", dark: true, palette: "emerald_gold" },
+  { key: "luminous_teal", group: "yours", name: "Glowing teal", file: "/art/backgrounds/luminous-teal-gradient-bg.webp", dark: true, palette: "black_gold", shade: 0.5 },
+  { key: "fireworks_blue", group: "yours", name: "Fireworks", file: "/art/backgrounds/royal-blue-celebration-bg.webp", dark: true, palette: "midnight_gold" },
+  { key: "festive_teal", group: "yours", name: "Festive baubles", file: "/art/backgrounds/scarlet-festive-party-bg.webp", dark: true, palette: "black_gold" },
+  // Drawn by us (19 Nov 2026): the colours the owner asked for, in three styles.
+  { key: "glow_rani", group: "glowing", name: "Glowing pink", css: glowing("#FF6FAE", "#C2185B", "#5E0A31", "#2E0418"), dark: true, palette: "rani_gold", shade: 0.3 },
+  { key: "glow_indigo", group: "glowing", name: "Glowing indigo", css: glowing("#8C7CFF", "#3B2BB0", "#160F55", "#0A0628"), dark: true, palette: "indigo_gold", shade: 0.2 },
+  { key: "glow_emerald", group: "glowing", name: "Glowing emerald", css: glowing("#3DBE82", "#0F6B43", "#06321F", "#021A10"), dark: true, palette: "emerald_gold", shade: 0.2 },
+  { key: "glow_royal", group: "glowing", name: "Glowing royal blue", css: glowing("#5B86FF", "#1A3BB0", "#0A1A55", "#040B2A"), dark: true, palette: "royal_blue_gold", shade: 0.2 },
+  { key: "jali_emerald", group: "traditional", name: "Emerald jali", css: trellis("#2E9E68", "#0E5A38", "#05281A"), dark: true, palette: "emerald_gold" },
+  { key: "jali_royal", group: "traditional", name: "Royal blue jali", css: trellis("#3E6BF0", "#15349A", "#071A4E"), dark: true, palette: "royal_blue_gold" },
+  { key: "jali_rani", group: "traditional", name: "Rani pink jali", css: trellis("#E0408A", "#A0125B", "#4A0628"), dark: true, palette: "rani_gold" },
+  { key: "jali_indigo", group: "traditional", name: "Indigo jali", css: trellis("#6A5CFF", "#2C1F8A", "#0F0A3A"), dark: true, palette: "indigo_gold" },
+  { key: "mesh_blush", group: "modern", name: "Blush", css: mesh("#FFF6F9", ["#FFC2D9", "#FFE0C7", "#F1C8FF", "#FFD3E1"]), dark: false, palette: "lali_gurans" },
+  { key: "mesh_mint", group: "modern", name: "Mint", css: mesh("#F4FFF9", ["#BFF0D6", "#D3EBFF", "#FFF1BF", "#CFF5E4"]), dark: false, palette: "garden_green" },
+  { key: "mesh_sky", group: "modern", name: "Sky", css: mesh("#F5F8FF", ["#C9DAFF", "#E3D6FF", "#CFF3FF", "#DCE6FF"]), dark: false, palette: "royal_blue" },
+  { key: "mesh_night", group: "modern", name: "Night glow", css: mesh("#0B1033", ["#3B5BDB", "#7B2FF7", "#1098AD", "#3A1C8C"]), dark: true, palette: "indigo_gold", shade: 0.15 },
 ];
 export const backdropOf = (key: string | null | undefined) => BACKDROPS.find((b) => b.key === key) ?? null;
+export const backdropImage = (b: Backdrop) => b.css ?? `url(${b.file})`;
 
 // A gentle moving effect over the page (0004, events.effect). Only when
 // Motion is on, never on the builder's small copies, and never for people who

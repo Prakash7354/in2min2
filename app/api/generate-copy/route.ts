@@ -20,6 +20,7 @@
 import { ApiError, GoogleGenAI, Type, type Schema } from "@google/genai/web";
 import { ADJUSTMENTS, COPY_FIELDS, COPY_KEYS, DEFAULT_MODEL, clampText, type Adjustment, type CopyKey, type CopyRequest, type CopyResponse, type EventCopy } from "@/lib/ai/copy";
 import { rpc } from "@/lib/supabase/rest";
+import { recordError } from "@/lib/ops";
 
 
 // Longest value accepted for each input. Keeps prompts small and cheap, and
@@ -157,6 +158,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Please sign in again to use the AI writer." }, { status: 401 });
     }
     console.error("generate-copy: allowance check failed", { status: allowance.status, message: allowance.message });
+    await recordError("AI writer: allowance check", `${allowance.status} ${allowance.message ?? ""}`);
     return Response.json({ error: "The AI writer is busy. Please try again in a minute." }, { status: 503 });
   }
   if (allowance.data !== true) {
@@ -183,6 +185,7 @@ export async function POST(request: Request) {
   } catch (err) {
     const status = err instanceof ApiError ? err.status : undefined;
     console.error("generate-copy: Gemini call failed", { model, status, message: (err as Error)?.message });
+    await recordError("AI writer: Gemini", `${status ?? ""} ${(err as Error)?.message ?? err}`, { model });
     if (status === 429) {
       return Response.json({ error: "The AI is busy. Please try again in a minute." }, { status: 429 });
     }

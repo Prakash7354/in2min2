@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { Button, Field, Notice, inputClass } from "./ui";
+import { CAPTCHA_WAIT, useCaptcha } from "@/components/captcha";
 
 export function useSession(): { session: Session | null; ready: boolean } {
   const [state, setState] = useState<{ session: Session | null; ready: boolean }>({ session: null, ready: false });
@@ -88,12 +89,15 @@ function SignInForm({ onDone }: { onDone: () => void }) {
     setError(friendly(e.message));
     setDetail(`${e.message}${e.status ? ` (${e.status})` : ""}`);
   };
+  const { box: captchaBox, token: captchaToken, used: captchaUsed, on: captchaOn } = useCaptcha();
 
   async function sendCode() {
     const clean = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { setError("Please check the email address."); return; }
+    if (captchaOn && !captchaToken) { setError(CAPTCHA_WAIT); return; }
     setBusy(true); setError(null); setDetail(null);
-    const { error: e } = await supabase().auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true } });
+    const { error: e } = await supabase().auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true, captchaToken: captchaToken ?? undefined } });
+    captchaUsed();
     setBusy(false);
     if (e) { fail(e); return; }
     setEmail(clean);
@@ -140,6 +144,7 @@ function SignInForm({ onDone }: { onDone: () => void }) {
           <Button kind="quiet" onClick={() => { setStage("email"); setCode(""); setError(null); }}>Use another email</Button>
         </form>
       )}
+      <div ref={captchaBox} />
       {error && <Notice tone="warn">{error}</Notice>}
       {detail && <p className="text-xs text-muted">Details for Claude Code: {detail}</p>}
       <p className="text-sm text-muted">Free. Your event is kept safe in your account, and you can sign in on any phone.</p>

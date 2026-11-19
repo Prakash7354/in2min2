@@ -931,5 +931,20 @@ await as(A);
 [cl] = await q(`select claim_offer($1, 'LAUNCH50') as r`, [ab.id]);
 ok("…so deleting and starting again can't claim twice", cl.r.reason === "already_claimed");
 
+console.log("Nightly backup (0012):");
+await as(A);
+await expectError("a host cannot take a backup", `select public.backup_snapshot()`, /permission denied/);
+await as(null);
+await expectError("the public cannot take a backup", `select public.backup_snapshot()`, /permission denied/);
+await db.exec(`reset role; set role service_role`);
+const snap = (await q(`select public.backup_snapshot() as s`))[0].s;
+await db.exec(`reset role`);
+const allTables = (await q(`select tablename from pg_tables where schemaname = 'public'`)).map((r) => r.tablename);
+ok("the server's backup has every table", allTables.length > 10 && allTables.every((t) => Array.isArray(snap.tables[t])),
+  allTables.filter((t) => !Array.isArray(snap.tables[t])).join(", "));
+ok("…with every row in it", snap.tables.events.length === (await q(`select count(*)::int n from events`))[0].n && typeof snap.taken_at === "string");
+// For practising a restore without real data: BACKUP_SAMPLE=/path/file.json npm run test:db
+if (process.env.BACKUP_SAMPLE) fs.writeFileSync(process.env.BACKUP_SAMPLE, JSON.stringify(snap));
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

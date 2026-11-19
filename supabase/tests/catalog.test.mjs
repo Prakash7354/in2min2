@@ -78,6 +78,8 @@ ok("pinks are a small minority (owner, 13 Nov)", cat.PALETTES.filter((p) => /pas
 ok("every palette family has at least two choices", cat.PALETTE_FAMILIES.every((f) => cat.PALETTES.filter((p) => p.family === f).length >= 2));
 ok("formal palettes exist for regiments, memorials and corporate events", ["navy_gold", "regimental", "black_gold", "charcoal_silver"].every((k) => cat.PALETTES.some((p) => p.key === k)));
 ok("memorials start calm and formal", cat.eventType("memorial").palette === "calm" && cat.eventType("memorial").textStyle === "formal" && cat.eventType("memorial").borders[0] === "fine_line");
+ok("every background has letter colours that exist, and a picture or drawing", cat.BACKDROPS.every((b) => cat.PALETTES.some((p) => p.key === b.palette) && (b.file || b.css))
+  && new Set(cat.BACKDROPS.map((b) => b.key)).size === cat.BACKDROPS.length);
 ok("every palette has at least five colours for confetti and bunting", cat.PALETTES.every((p) => cat.partyColours(p).length >= 5));
 const langRe = /^[a-z]{2,3}(-[A-Z][a-z]{3})?$/;
 ok("every language code fits the database check", cat.LANGUAGES.every((l) => langRe.test(l.code)));

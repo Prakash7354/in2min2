@@ -1618,7 +1618,7 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
 
 **Against system failure:**
 - **Backups without paying for Pro yet** (owner's question). From the first real guest, a **nightly, encrypted copy** of the database goes to a private Cloudflare R2 store that In2Min2 controls.
-  - It is made by a scheduled GitHub job using Supabase's own export tool: about a minute a night, well inside GitHub's free allowance. Supabase itself advises free projects to export their data regularly.
+  - **Built 19 Nov 2026:** the Worker's own hourly job (`worker/main.js`), at 02:07 UTC, copies every table (`backup_snapshot()`, 0012) and the sign-in accounts to the private R2 bucket `in2min2-backups` (EU; R2 encrypts what it stores). No GitHub minutes are used. The table designs are in the migrations, so data plus migrations is a full copy. `scripts/backup/restore-check.mjs` practises a restore. Not yet copied: the hosts' cover pictures in Supabase Storage (to move to R2 later).
   - Copies are kept 30 days, then deleted.
   - A restore is practised once before the pilot, so we know it works.
   - Later, Supabase Pro adds its own daily backups, and the nightly copy carries on as a second copy.
@@ -1629,6 +1629,7 @@ Each phase ends deployed to the preview, with exactly what was tested stated: re
 - **Paper fallback** for every big day: a printable door list, numbered car park slips and the event pack.
 - **Watching:**
   - Cloudflare's logs and alerts are switched on;
+  - **built 19 Nov 2026:** errors on the server or on guests' phones are noted (`lib/ops.ts`) and emailed to the owner once an hour, with an email if the database stops answering, and an "all well" email each Monday (Cloudflare Email Routing, free);
   - an uptime check emails the owner if the site stops answering (choose the service in phase 2);
   - a support contact is on every organiser's dashboard for the day.
 - **If data is ever exposed:** tell the ICO within 72 hours if people are at risk, and tell the affected hosts. A one-page plan goes in `docs/` before launch.
