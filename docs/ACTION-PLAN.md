@@ -32,29 +32,27 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 - [x] Sign-in: **Send the code again** (after 60 seconds), and a hint to check Junk for codes@in2min2.com.
 - [x] Your border designs as **B5 Christmas greenery, B6 Golden roses, B7 Ornate flowers, B8 Wedding lines**. Each takes the event's colours.
 - [x] **Look › Background**: 9 of your painted backgrounds. Choosing one also picks letter colours that read well on it.
+- [x] **More backgrounds (19 Nov):** emerald, royal blue, rani pink and indigo, each glowing and as a gold lattice (jali), plus four soft modern ones.
+- [x] **Music and the envelope (19 Nov):** Look › **Music**. Your three tunes (Happy Birthday, We Wish You a Merry Christmas, Wedding vows); this kind of event's tune comes first. Guests see a sealed envelope in the event's colours, with a wax seal of the initials and the event's name (or their own name, once personal links are built). One tap breaks the seal, the card slides out, and the music fades in and loops. A button at the bottom left turns it off. Without the envelope, guests get a "Play music" button. Where each tune came from: [music.md](reference/music.md).
 
 **Next, Claude Code (in this order; each builds on the one before):**
 1. [x] **Safety before real guests (built 19 Nov; switch it on with step 4 below):** nightly backup and a practice-restore tool, error emails, an hourly database check that also keeps the free Supabase plan awake, and the anti-spam check on sign-in.
 2. **Your events on every device:** a "Your events" list from your account, so the same event opens on your phone and your laptop. Builder 2.0 also gets a wider layout for laptops.
 3. **Edit, save and remove beside the invitation** on Home (remove asks first, and can be undone for 30 days).
 4. **Co-hosts** (a mum and son building together): invite by link. The database already has co-hosts; this adds the screens.
-5. **Link pictures:** each event's own picture when its link is shared on WhatsApp or Facebook, and a share-as-image button for Instagram.
-6. **Install on the phone:** "Add to Home Screen" with the In2Min2 icon. No app store needed.
-7. **Music on the invitation** (once you decide, below).
-8. **Marketing website** with the animated "how it works", then the ads and the quiz.
-9. After the tests: AI quick-fill from one sentence, an "Other" event type, "show the thank-you page now", and "What's new" notes for hosts.
-
-**Waiting for your answer** (Claude Code's recommendation in brackets):
-- Music: our own library of licensed tracks, played after the guest's first tap, looping until they switch it off (yes).
-- 3D-style icons from Microsoft's free Fluent Emoji set (yes, they're free for business use).
-- Marketing site and animated hero: build after the real-event test (yes).
-- Ads and quiz: after the marketing site, when there is something to sell (yes).
+5. **Personal links for each guest** (already in the plan): type your guests' names and get one link each, so the envelope says "For Maya & family" and their reply is already filled in. The database already supports these links.
+6. **Link pictures:** each event's own picture when its link is shared on WhatsApp or Facebook, and a share-as-image button for Instagram.
+7. **Install on the phone:** "Add to Home Screen" with the In2Min2 icon. No app store needed.
+8. **3D-style icons** from Microsoft's free Fluent Emoji set.
+9. After the real-event test: the **marketing website** with the animated "how it works", then the ads and the quiz.
+10. After the tests: AI quick-fill from one sentence, an "Other" event type, "show the thank-you page now", and "What's new" notes for hosts.
 
 **You:**
 - Ask testers to mark the code email **Not junk**.
 - Nothing to do for the email records: checked on 19 Nov, in2min2.com already has all three (DKIM, SPF and DMARC). Codes landing in Junk is normal for a new address; it gets better as people mark it Not junk.
 - Keep collecting notes and screenshots from testers.
 - New designs: see "Making designs" at the end of this file.
+- More music: download tunes into the **music** folder on your Mac (Pixabay is fine; never a film song or chart hit) and tell Claude Code. See [music.md](reference/music.md).
 
 ### [ ] 1. Try Builder 2.0 on your phone, then test it with 5 people (about 40 minutes in all)
 
@@ -132,7 +130,7 @@ When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Dr
 
 ### [ ] 4. Switch on the safety net (15 minutes)
 
-**A. Run the database file** [0012_backup.sql](../supabase/migrations/0012_backup.sql)
+**A. ✓ Done 19 Nov.** Run the database file [0012_backup.sql](../supabase/migrations/0012_backup.sql)
 1. Open the file on your Mac, select everything (Cmd+A) and copy (Cmd+C).
 2. Supabase › your project › **SQL Editor** › **New query** › paste › **Run**.
 3. You should see "Success. No rows returned." Tell Claude Code.
@@ -150,7 +148,7 @@ When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Dr
 
 **D. The anti-spam check on sign-in (Turnstile)**
 1. Cloudflare dashboard › **Turnstile** › **Add widget**. Name: `In2Min2 sign-in`. Hostnames: `in2min2.com`, `www.in2min2.com`, `in2min2.pksgrg.workers.dev`. Mode: **Managed**. Tap **Create**.
-2. Send Claude Code the **Site key** (it's public). Keep the **Secret key** to yourself for now.
+2. ✓ Site key received 19 Nov and built into the sign-in. Keep the **Secret key** to yourself (never in a chat).
 3. Only after Claude Code says the site key is live: Supabase › **Authentication** › **Attack Protection** › turn on **Captcha protection** › provider **Turnstile** › paste the **Secret key** › **Save**. (Doing this first would stop everyone signing in.)
 
 **E. Practice restore:** after the first night's backup, Claude Code loads it into a throwaway copy on your Mac and checks every row. Nothing for you to do.
@@ -195,6 +193,7 @@ When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Dr
   - No event or organiser is named publicly.
 - **Look and website:** design agreed; logo C; a private demo account; a website with a top menu.
 - **Two-step sign-in:** postponed for now.
+- **19 Nov:** music from our own licensed library, started by the guest's tap and looping with an off button; Microsoft Fluent Emoji 3D icons; the marketing site, ads and quiz after the real-event test; safety first.
 
 ## How each phase reaches you
 

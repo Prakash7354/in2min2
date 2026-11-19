@@ -50,7 +50,11 @@ export type EventViewData = {
   topLine: string;
   // A painted background behind the words (BACKDROPS key), or null.
   backdrop: string | null;
-  date: string;        // YYYY-MM-DD in the event's own time zone
+  // Music once the guest opens it (MUSIC key), and whether guests first see a
+  // sealed envelope to tap (components/event/opening.tsx).
+  music: string | null;
+  envelope: boolean;
+  date: string;       // YYYY-MM-DD in the event's own time zone
   startTime: string;   // HH:MM
   endTime: string;     // HH:MM or ""
   timezone: string;
@@ -160,3 +164,7 @@ export function monogram(text: string): string {
   const words = text.split(/[\s&+,]+|\band\b/i).map((w) => w.trim()).filter(Boolean);
   return words.slice(0, 2).map((w) => Array.from(w)[0]?.toUpperCase() ?? "").join(words.length > 1 ? "·" : "");
 }
+
+// Remembers, for this tab only, that a guest has opened an event's envelope
+// (components/event/opening.tsx and the guest page's early check).
+export const openedKey = (id: string) => `in2min2:opened:${id}`;

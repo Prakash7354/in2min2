@@ -6,6 +6,7 @@
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
 import {
   backdropOf,
+  musicOf,
   eventType, heroMotionOf, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
   type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
@@ -86,6 +87,10 @@ export type Draft = {
   topLine?: string;
   // A painted background (catalog BACKDROPS), in feature_toggles.settings.backdrop.
   backdrop?: string;
+  // Music (catalog MUSIC) and the envelope guests tap to open, in
+  // feature_toggles.settings.music and .envelope.
+  music?: string;
+  envelope?: boolean;
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;
@@ -308,5 +313,7 @@ export function toViewData(d: Draft): EventViewData {
     credit: creditFor(d.credit, defaultCredit({ scale: d.scale, sensitive: t?.sensitive ?? false, organiserName: d.organiserName, family: d.family })),
     topLine: (d.topLine ?? "").trim().slice(0, 40),
     backdrop: backdropOf(d.backdrop)?.key ?? null,
+    music: musicOf(d.music)?.key ?? null,
+    envelope: !!d.envelope,
   };
 }

@@ -1,0 +1,213 @@
+/* The envelope guests tap to open (components/event/opening.tsx), drawn in
+   CSS in the event's own colours: no pictures to load. */
+
+.op {
+  position: fixed; inset: 0; z-index: 90;
+  display: grid; place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  color: var(--op-text);
+  font-family: var(--ev-body);
+  -webkit-tap-highlight-color: transparent;
+}
+.op-sky { position: absolute; inset: 0; background: var(--op-sky) center / cover no-repeat, var(--ev-bg); }
+.op-sky::after { /* a soft pool of light behind the envelope */
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 38% at 50% 50%, rgb(255 255 255 / 0.16), transparent 70%);
+}
+
+.op-tap {
+  position: relative; display: grid; justify-items: center; gap: 22px;
+  width: 100%; max-width: 420px; padding: 8px 0;
+  background: none; border: 0; color: inherit; font: inherit; cursor: pointer;
+}
+.op-tap:focus-visible { outline: none; }
+.op-tap:focus-visible .op-env { outline: 3px solid var(--ev-accent); outline-offset: 10px; border-radius: 12px; }
+
+.op-kicker {
+  font-size: 13px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.85;
+}
+
+/* ── The envelope: back, card, pocket (three folds), flap, seal ── */
+.op-env {
+  --w: min(86vw, 370px);
+  position: relative; display: block; width: var(--w); aspect-ratio: 1.36;
+  perspective: 1100px;
+  filter: drop-shadow(0 22px 26px rgb(0 0 0 / 0.28)) drop-shadow(0 4px 6px rgb(0 0 0 / 0.16));
+  animation: op-float 4.5s ease-in-out infinite;
+}
+.op-back, .op-pocket, .op-flap-out, .op-flap-in, .op-card { position: absolute; display: block; }
+.op-back {
+  inset: 0; border-radius: 10px;
+  background: color-mix(in srgb, var(--ev-main) 72%, black);
+}
+.op-card {
+  left: 6%; right: 6%; top: 5%; height: 90%; z-index: 2;
+  display: grid; align-content: center; justify-items: center; gap: 6px; padding: 10% 8%;
+  border-radius: 6px; text-align: center;
+  background: var(--ev-bg); color: var(--ev-ink);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ev-accent) 70%, transparent), inset 0 0 0 6px var(--ev-bg), inset 0 0 0 7px color-mix(in srgb, var(--ev-accent) 45%, transparent);
+}
+.op-card-kicker { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ev-muted); }
+.op-card-title { font-family: var(--ev-display); font-size: clamp(18px, 5.4vw, 24px); line-height: 1.15; color: var(--ev-main); }
+.op-card-date { font-size: 12px; color: var(--ev-muted); }
+
+/* The folds, each a little lighter or darker, like real paper. */
+.op-pocket { inset: 0; z-index: 3; }
+.op-pocket-l { clip-path: polygon(0 0, 50% 52%, 0 100%); background: linear-gradient(100deg, color-mix(in srgb, var(--ev-main) 92%, black), var(--ev-main)); border-radius: 10px 0 0 10px; }
+.op-pocket-r { clip-path: polygon(100% 0, 50% 52%, 100% 100%); background: linear-gradient(260deg, color-mix(in srgb, var(--ev-main) 92%, black), var(--ev-main)); border-radius: 0 10px 10px 0; }
+.op-pocket-b {
+  clip-path: polygon(0 100%, 50% 44%, 100% 100%);
+  background: linear-gradient(0deg, var(--ev-main), color-mix(in srgb, var(--ev-main) 86%, white));
+  border-radius: 0 0 10px 10px;
+}
+
+/* Who it's for, written on the envelope under the seal. */
+.op-to {
+  position: absolute; z-index: 4; left: 10%; right: 10%; top: 67%; bottom: 6%;
+  display: grid; align-content: center; justify-items: center; gap: 2px;
+  color: var(--ev-on-main); text-align: center; pointer-events: none;
+}
+.op-to small { font-size: 10px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; opacity: 0.8; }
+.op-to > span {
+  font-family: var(--ev-display); font-size: clamp(19px, 5.8vw, 26px); line-height: 1.1;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+}
+.op-to[data-long] > span { font-size: clamp(15px, 4.4vw, 19px); }
+
+/* The flap: two faces, the outside and the patterned lining. */
+.op-flap {
+  position: absolute; left: 0; right: 0; top: 0; height: 54%; z-index: 5; display: block;
+  transform-origin: 50% 0; transform-style: preserve-3d;
+}
+.op-flap-out, .op-flap-in { inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.op-flap-out {
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--ev-main) 88%, white), var(--ev-main) 70%, color-mix(in srgb, var(--ev-main) 90%, black));
+  border-radius: 10px 10px 0 0;
+}
+.op-flap-in {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  transform: rotateX(180deg);
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--op-wax-text) 22%, transparent) 1.4px, transparent 1.8px) 0 0 / 12px 12px,
+    linear-gradient(0deg, var(--op-wax), color-mix(in srgb, var(--op-wax) 78%, white));
+}
+
+/* The wax seal at the flap's point. */
+.op-seal {
+  position: absolute; z-index: 6; left: 50%; top: 54%;
+  width: clamp(58px, 17vw, 72px); aspect-ratio: 1; translate: -50% -50%;
+  display: grid; place-items: center; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--op-wax) 60%, white) 0, var(--op-wax) 38%, color-mix(in srgb, var(--op-wax) 62%, black) 100%);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--op-wax) 85%, black),
+    2px 3px 0 3px color-mix(in srgb, var(--op-wax) 70%, black),
+    -2px 2px 0 2px color-mix(in srgb, var(--op-wax) 80%, black),
+    0 6px 12px rgb(0 0 0 / 0.35);
+  color: var(--op-wax-text);
+}
+.op-seal::before { /* the pressed ring */
+  content: ""; position: absolute; inset: 14%; border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--op-wax-text) 35%, transparent), inset 1px 2px 3px rgb(0 0 0 / 0.25);
+}
+.op-seal::after { /* a gleam that passes now and then */
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.45) 50%, transparent 65%) -150% 0 / 250% 100% no-repeat;
+  animation: op-gleam 3.6s ease-in-out 1s infinite;
+}
+/* Engraved capitals, like a real wax stamp, whatever the letters style
+   (Nepali and other scripts fall back to the event's own letters). */
+.op-seal > span {
+  position: relative;
+  font-family: var(--f-cinzel), var(--ev-display); font-size: clamp(20px, 5.8vw, 25px); font-weight: 700; line-height: 1; white-space: nowrap;
+  text-shadow: 0 1px 0 rgb(255 255 255 / 0.3), 0 -1px 0 rgb(0 0 0 / 0.3);
+}
+.op-seal > span[data-two] { font-size: clamp(14px, 4vw, 17px); letter-spacing: 0.02em; }
+
+.op-hint {
+  display: inline-flex; align-items: center; gap: 10px;
+  min-height: 44px; padding: 10px 20px; border-radius: 999px;
+  background: color-mix(in srgb, var(--ev-main) 88%, transparent); color: var(--ev-on-main);
+  font-size: 16px; font-weight: 700;
+  box-shadow: 0 8px 20px -8px rgb(0 0 0 / 0.45);
+}
+.op-hint-music { font-weight: 600; opacity: 0.9; }
+.op-hint-dot { position: relative; width: 10px; height: 10px; border-radius: 50%; background: var(--op-wax); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ev-on-main) 25%, transparent); }
+.op-hint-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--op-wax); animation: op-ping 1.8s ease-out infinite; }
+
+/* A few soft glints that twinkle around the envelope (not for memorials). */
+.op-glints {
+  position: absolute; inset: 0; opacity: 0.9;
+  background:
+    radial-gradient(circle at 18% 22%, var(--ev-accent) 0 1.6px, transparent 2.6px),
+    radial-gradient(circle at 82% 16%, var(--ev-accent) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 30%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 12% 70%, #fff 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 88% 74%, var(--ev-accent) 0 1.8px, transparent 2.8px),
+    radial-gradient(circle at 30% 86%, var(--ev-accent) 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 62% 90%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 44% 12%, #fff 0 1.4px, transparent 2.2px);
+  animation: op-twinkle 3.2s ease-in-out infinite alternate;
+}
+.op-glints::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 26% 40%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 78% 52%, var(--ev-accent) 0 1.6px, transparent 2.6px),
+    radial-gradient(circle at 8% 44%, var(--ev-accent) 0 1.4px, transparent 2.4px),
+    radial-gradient(circle at 92% 38%, #fff 0 1.2px, transparent 2px),
+    radial-gradient(circle at 54% 76%, var(--ev-accent) 0 1.2px, transparent 2px);
+  animation: op-twinkle 2.6s ease-in-out 1.3s infinite alternate-reverse;
+}
+@keyframes op-twinkle { from { opacity: 0.25; } to { opacity: 1; } }
+
+@keyframes op-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes op-gleam { 0%, 60% { background-position: -150% 0; } 100% { background-position: 150% 0; } }
+@keyframes op-ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(2.8); opacity: 0; } }
+
+/* ── Opening ── */
+.op[data-phase="opening"] .op-env { animation: op-lift 2.3s ease-in-out forwards; }
+.op[data-phase="opening"] .op-seal { animation: op-seal 0.5s ease-in forwards; }
+.op[data-phase="opening"] .op-seal::after { animation: none; }
+.op[data-phase="opening"] .op-flap { animation: op-flap 0.75s cubic-bezier(0.5, 0, 0.3, 1) 0.3s forwards; }
+.op[data-phase="opening"] .op-card { animation: op-card 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.95s forwards; }
+.op[data-phase="opening"] .op-to { animation: op-fade 0.3s ease-out forwards; }
+.op[data-phase="opening"] .op-hint, .op[data-phase="opening"] .op-kicker { animation: op-fade 0.35s ease-out forwards; }
+.op[data-phase="opening"] { animation: op-out 0.55s ease-in 1.75s forwards; }
+
+@keyframes op-seal { 30% { transform: scale(1.12); } 100% { transform: scale(0.4) rotate(-25deg); opacity: 0; } }
+@keyframes op-flap {
+  0% { transform: rotateX(0deg); z-index: 5; }
+  49% { z-index: 5; }
+  50% { z-index: 1; }
+  100% { transform: rotateX(180deg); z-index: 1; }
+}
+@keyframes op-card { to { transform: translateY(-58%); } }
+@keyframes op-lift { 0%, 40% { transform: translateY(0) scale(1); } 100% { transform: translateY(14%) scale(1.06); } }
+@keyframes op-fade { to { opacity: 0; } }
+@keyframes op-out { to { opacity: 0; visibility: hidden; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .op-env, .op-seal::after, .op-hint-dot::after, .op-glints, .op-glints::after { animation: none; }
+  .op[data-phase="opening"] .op-env, .op[data-phase="opening"] .op-seal, .op[data-phase="opening"] .op-flap,
+  .op[data-phase="opening"] .op-card, .op[data-phase="opening"] .op-to { animation: none; }
+  .op[data-phase="opening"] { animation: op-out 0.4s ease-out forwards; }
+}
+
+/* The music button, bottom left, once the invitation is open. */
+.op-music {
+  position: fixed; z-index: 40; left: max(14px, env(safe-area-inset-left)); bottom: max(14px, env(safe-area-inset-bottom));
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-width: 48px; height: 48px; padding: 0; border: 0; border-radius: 999px;
+  font: 700 15px/1 var(--f-inter, system-ui), system-ui, sans-serif; cursor: pointer;
+  box-shadow: 0 8px 22px -8px rgb(0 0 0 / 0.5), 0 0 0 2px rgb(255 255 255 / 0.65);
+  animation: op-in 0.4s ease-out;
+}
+.op-music[data-wide] { padding: 0 18px 0 14px; }
+.op-music svg { width: 22px; height: 22px; flex: none; }
+.op-music[data-state="on"] svg { animation: op-beat 1.4s ease-in-out infinite; }
+.op-music[data-state="loading"] svg { animation: op-beat 0.6s ease-in-out infinite; opacity: 0.7; }
+@keyframes op-beat { 50% { transform: scale(1.12); } }
+@keyframes op-in { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .op-music, .op-music svg { animation: none !important; } }

@@ -833,3 +833,10 @@ a.b2-row { color: var(--b2-text); }
 .b2-guidelist small { grid-column: 1 / -1; color: var(--b2-text-2); font-size: 14px; }
 .b2-guidewheel { border-radius: 20px; overflow: hidden; box-shadow: var(--b2-shadow); }
 .b2-guidewheel .ev-notices { padding: 12px 12px 4px; }
+
+/* Look › Music (19 Nov 2026) */
+.b2-tracks { display: grid; gap: 10px; }
+.b2-track[aria-checked="true"], .b2-track[data-on] { box-shadow: 0 0 0 3px var(--b2-accent); }
+.b2-trackpick { display: grid; gap: 2px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.b2-trackpick small { color: var(--b2-text-2); font-size: 14px; }
+.b2-tick { font-weight: 800; color: var(--b2-accent); }

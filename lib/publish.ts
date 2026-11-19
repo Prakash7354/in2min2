@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { COPY_KEYS } from "@/lib/ai/copy";
-import { language, paletteFor, TOGGLE_DEFAULTS, type ToggleKey } from "@/lib/catalog";
+import { language, musicOf, paletteFor, TOGGLE_DEFAULTS, type ToggleKey } from "@/lib/catalog";
 import { slugify, type Draft } from "@/lib/draft";
 import { addDays, zonedToUtcIso } from "@/lib/time";
 
@@ -135,6 +135,8 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
   const settings: Record<string, unknown> = { ...((cur.data?.settings as Record<string, unknown> | null) ?? {}) };
   if (d.topLine?.trim()) settings.topline = d.topLine.trim().slice(0, 40); else delete settings.topline;
   if (d.backdrop) settings.backdrop = d.backdrop; else delete settings.backdrop;
+  if (musicOf(d.music)) settings.music = d.music; else delete settings.music;
+  if (d.envelope) settings.envelope = true; else delete settings.envelope;
   if (d.credit === undefined) delete settings.credit;
   else settings.credit = d.credit === null ? { hidden: true } : { label: d.credit.label.trim().slice(0, 30), name: d.credit.name.trim().slice(0, 80) };
   const t = await sb.from("feature_toggles").update({ ...toggles, settings }).eq("event_id", ev.id);

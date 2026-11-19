@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
 import { Button, Field, Notice, inputClass } from "./ui";
-import { CAPTCHA_WAIT, useCaptcha } from "@/components/captcha";
+import { CAPTCHA_FAILED, useCaptcha } from "@/components/captcha";
 
 export function useSession(): { session: Session | null; ready: boolean } {
   const [state, setState] = useState<{ session: Session | null; ready: boolean }>({ session: null, ready: false });
@@ -23,6 +23,7 @@ export function useSession(): { session: Session | null; ready: boolean } {
 
 function friendly(message: string): string {
   const m = message.toLowerCase();
+  if (m.includes("captcha")) return CAPTCHA_FAILED;
   if (m.includes("fetch") || m.includes("load failed") || m.includes("network")) {
     return "Couldn't connect to the sign-in service. Check your signal and try again.";
   }
@@ -89,14 +90,15 @@ function SignInForm({ onDone }: { onDone: () => void }) {
     setError(friendly(e.message));
     setDetail(`${e.message}${e.status ? ` (${e.status})` : ""}`);
   };
-  const { box: captchaBox, token: captchaToken, used: captchaUsed, on: captchaOn } = useCaptcha();
+  const { box: captchaBox, token: captchaToken, used: captchaUsed } = useCaptcha();
 
   async function sendCode() {
     const clean = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { setError("Please check the email address."); return; }
-    if (captchaOn && !captchaToken) { setError(CAPTCHA_WAIT); return; }
     setBusy(true); setError(null); setDetail(null);
-    const { error: e } = await supabase().auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true, captchaToken: captchaToken ?? undefined } });
+    // Waits for the "are you a person?" check (components/captcha.tsx).
+    const captcha = await captchaToken();
+    const { error: e } = await supabase().auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true, captchaToken: captcha ?? undefined } });
     captchaUsed();
     setBusy(false);
     if (e) { fail(e); return; }

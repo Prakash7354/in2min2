@@ -64,6 +64,10 @@ const PATHS = {
   logout: <><path d="M14 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H14" /><path d="M10 12h10.5M17 8.5l3.5 3.5-3.5 3.5" /></>,
   trash: <><path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13" /><path d="M10 11v5.5M14 11v5.5" /></>,
   bowlfood: <><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0z" /><path d="M8 8.5c0-2 1.5-3 3-3M12.5 8.5c0-2 1.5-3 3-3" /></>,
+  // Music and the envelope (19 Nov 2026)
+  music: <><path d="M9 17.5V6l10-2v11.5" /><circle cx="6.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="15.5" r="2.5" /></>,
+  play: <path d="M8 5.5v13l10.5-6.5z" />,
+  stop: <rect x="6.5" y="6.5" width="11" height="11" rx="2" />,
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;

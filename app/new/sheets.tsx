@@ -23,7 +23,7 @@ import type { Panel } from "./nav";
 import { dateLine } from "./kinds";
 import { previewAt } from "./panels/preview";
 import { Chips, RoundButton, Sheet, Toggle, useTheme } from "./ui";
-import { CAPTCHA_WAIT, useCaptcha } from "@/components/captcha";
+import { CAPTCHA_FAILED, useCaptcha } from "@/components/captcha";
 
 export function eventLink(d: Draft): string | null {
   return d.publishedPath ? `${window.location.origin}${d.publishedPath}` : null;
@@ -443,6 +443,7 @@ function AccountBody() {
 
 function friendly(message: string): string {
   const m = message.toLowerCase();
+  if (m.includes("captcha")) return CAPTCHA_FAILED;
   if (m.includes("fetch") || m.includes("load failed") || m.includes("network")) return "Couldn't connect to the sign-in service. Check your signal and try again.";
   if (m.includes("rate limit") || m.includes("too many") || m.includes("security purposes")) return "Too many codes asked for just now. Please wait a few minutes and try again.";
   if (m.includes("expired") || m.includes("invalid")) return "That code didn't work. Check it, or ask for a new one.";
@@ -458,14 +459,15 @@ function SignInBody({ why, onDone }: { why: string; onDone: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ text: string; detail: string } | null>(null);
   const fail = (e: { message: string; status?: number }) => setError({ text: friendly(e.message), detail: `${e.message}${e.status ? ` (${e.status})` : ""}` });
-  const { box: captchaBox, token: captchaToken, used: captchaUsed, on: captchaOn } = useCaptcha();
+  const { box: captchaBox, token: captchaToken, used: captchaUsed } = useCaptcha();
 
   async function sendCode() {
     const clean = email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) { setError({ text: "Please check the email address.", detail: "" }); return; }
-    if (captchaOn && !captchaToken) { setError({ text: CAPTCHA_WAIT, detail: "" }); return; }
     setBusy(true); setError(null);
-    const { error: e } = await supabase().auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true, captchaToken: captchaToken ?? undefined } });
+    // Waits for the "are you a person?" check (components/captcha.tsx).
+    const captcha = await captchaToken();
+    const { error: e } = await supabase().auth.signInWithOtp({ email: clean, options: { shouldCreateUser: true, captchaToken: captcha ?? undefined } });
     captchaUsed();
     setBusy(false);
     if (e) { fail(e); return; }

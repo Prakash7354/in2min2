@@ -582,6 +582,27 @@ export const BACKDROPS: Backdrop[] = [
 export const backdropOf = (key: string | null | undefined) => BACKDROPS.find((b) => b.key === key) ?? null;
 export const backdropImage = (b: Backdrop) => b.css ?? `url(${b.file})`;
 
+// Music that plays, round and round, once a guest taps to open the invitation
+// (owner, 19 Nov 2026: our own licensed library; he chooses the tunes). Kept
+// in feature_toggles.settings.music (no database change). Files in
+// public/music, made smaller for phones (AAC, 128 kbps); where each came from
+// and its licence: docs/reference/music.md. A changed file gets a new name
+// (…-2.m4a), because phones keep these for a year. `loop` is where the sound
+// starts and fades out, in seconds, so the repeat has no silent gap.
+export type Track = { key: string; name: string; line: string; file: string; seconds: number; loop: [number, number]; kinds: string[] };
+export const MUSIC: Track[] = [
+  { key: "happy_birthday", name: "Happy Birthday", line: "A cheerful party tune", file: "/music/happy-birthday-1.m4a", seconds: 69, loop: [0, 67.4],
+    kinds: ["birthday", "party", "pasni"] },
+  { key: "merry_christmas", name: "We Wish You a Merry Christmas", line: "Bright and festive", file: "/music/merry-christmas-1.m4a", seconds: 68, loop: [1.4, 67.6],
+    kinds: ["christmas", "new-year"] },
+  { key: "wedding_vows", name: "Wedding vows", line: "Soft and romantic, no words", file: "/music/wedding-vows-1.m4a", seconds: 190, loop: [0, 189.3],
+    kinds: ["wedding", "engagement", "anniversary", "ceremony", "bratabandha"] },
+];
+export const musicOf = (key: string | null | undefined) => MUSIC.find((m) => m.key === key) ?? null;
+// This kind's own tunes first.
+export const musicFor = (eventType: string | null | undefined) =>
+  [...MUSIC].sort((a, b) => Number(b.kinds.includes(eventType ?? "")) - Number(a.kinds.includes(eventType ?? "")));
+
 // A gentle moving effect over the page (0004, events.effect). Only when
 // Motion is on, never on the builder's small copies, and never for people who
 // have asked their phone for less motion.

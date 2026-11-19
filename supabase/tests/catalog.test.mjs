@@ -96,6 +96,16 @@ ok(`every one of the ${cat.PALETTES.length} palettes passes the 4.5:1 readabilit
 const own = cat.paletteFor("custom", "#FFE066");
 ok("your own pale colour gets dark text automatically", cat.contrast(own.onMain, own.main) >= 4.5 && own.onMain !== "#FFFFFF");
 
+console.log("Music:");
+{
+  const bad = cat.MUSIC.filter((m) => !fs.existsSync(new URL(`../../public${m.file}`, import.meta.url)) || !(m.loop[0] >= 0 && m.loop[1] > m.loop[0] && m.loop[1] <= m.seconds) || !m.kinds.length);
+  ok(`every one of the ${cat.MUSIC.length} tunes has its file, a sensible loop and kinds of event`, bad.length === 0, bad.map((m) => m.key).join(", "));
+  ok("tunes have different keys and files", new Set(cat.MUSIC.map((m) => m.key)).size === cat.MUSIC.length && new Set(cat.MUSIC.map((m) => m.file)).size === cat.MUSIC.length);
+  ok("a birthday suggests the birthday tune first", cat.musicFor("birthday")[0].key === "happy_birthday");
+  const notes = fs.readFileSync(new URL("../../docs/reference/music.md", import.meta.url), "utf8");
+  ok("each tune's source is written down (docs/reference/music.md)", cat.MUSIC.every((m) => notes.includes(m.file.split("/").pop())));
+}
+
 console.log("Prices:");
 const q = cat.quote;
 ok("one-week birthday for 250: £3", q("popup", 250).totalPence === 300);

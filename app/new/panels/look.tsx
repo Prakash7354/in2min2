@@ -6,10 +6,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import EventView from "@/components/event/event-view";
+import { useMusic, useStopOnLeave } from "@/components/event/music";
+import { Opening } from "@/components/event/opening";
 import { Icon } from "@/components/icons";
 import {
   BACKDROP_GROUPS, BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, PHOTO_STYLES, TEMPLATES, TEXT_STYLES,
-  eventType, language, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle,
+  eventType, language, musicFor, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle,
 } from "@/lib/catalog";
 import { toViewData } from "@/lib/draft";
 import { resizePhoto } from "@/lib/image";
@@ -18,10 +20,11 @@ import { applyLook, currentLook, looksFor } from "../kinds";
 import { PanelShell } from "../panels";
 import { Chips, Note, Section, Toggle } from "../ui";
 
-type Tab = "looks" | "photos" | "colours" | "background" | "border" | "letters" | "more";
+type Tab = "looks" | "photos" | "colours" | "background" | "border" | "letters" | "music" | "more";
 const TABS: { key: Tab; label: string }[] = [
   { key: "looks", label: "Looks" }, { key: "photos", label: "Photos" }, { key: "colours", label: "Colours" },
-  { key: "background", label: "Background" }, { key: "border", label: "Border" }, { key: "letters", label: "Letters" }, { key: "more", label: "More" },
+  { key: "background", label: "Background" }, { key: "border", label: "Border" }, { key: "letters", label: "Letters" },
+  { key: "music", label: "Music" }, { key: "more", label: "More" },
 ];
 
 export function LookPanel() {
@@ -36,7 +39,7 @@ export function LookPanel() {
       <div className="b2-tabs" ref={tabs}>
         <Chips label="Which part" small value={tab} options={TABS} onChange={(t) => t && setTab(t)} />
       </div>
-      {tab !== "looks" && (
+      {tab !== "looks" && tab !== "music" && (
         <div className="b2-stage" style={{ padding: 0 }}>
           <div className="b2-float b2-mini" style={{ animation: "none" }}><EventView data={toViewData(d)} view="card" now={now} thumb /></div>
         </div>
@@ -47,6 +50,7 @@ export function LookPanel() {
       {tab === "background" && <Backgrounds />}
       {tab === "border" && <Borders />}
       {tab === "letters" && <Letters />}
+      {tab === "music" && <Music />}
       {tab === "more" && <More />}
     </PanelShell>
   );
@@ -333,3 +337,60 @@ function More() {
   );
 }
 
+
+// Music once a guest opens the invitation, and the envelope they tap to open
+// it (owner, 19 Nov 2026). Phones only allow sound after a tap, so the
+// envelope is what starts the music; without it, guests get a Play button.
+function Music() {
+  const { d, update, say } = useB2();
+  const [seeing, setSeeing] = useState(false);
+  useStopOnLeave();
+  const sensitive = !!eventType(d.eventType)?.sensitive;
+  const tracks = musicFor(d.eventType);
+  const data = toViewData(d);
+  const choose = (key: string | undefined) => {
+    update((x) => ({ ...x, music: key, envelope: key && x.envelope === undefined ? true : x.envelope }));
+    if (key && d.envelope === undefined) say("Music on, with an envelope for guests to tap.");
+  };
+  return (
+    <>
+      <Section icon="music" title="Music" line="Plays softly once a guest opens the invitation, round and round. Guests can turn it off.">
+        {sensitive && <Note>For a memorial, quiet is usually kinder.</Note>}
+        <div className="b2-tracks" role="radiogroup" aria-label="Music">
+          <button type="button" role="radio" aria-checked={!d.music} className="b2-row b2-track" onClick={() => choose(undefined)}>
+            <span className="b2-grow"><strong>No music</strong><small>Quiet</small></span>
+            {!d.music && <span className="b2-tick" aria-hidden="true">✓</span>}
+          </button>
+          {tracks.map((t) => <TrackRow key={t.key} track={t} on={d.music === t.key} suggested={t.kinds.includes(d.eventType ?? "")} onChoose={() => choose(t.key)} />)}
+        </div>
+        <p className="b2-small">Free-to-use music from Pixabay. More tunes are coming; you can&apos;t add your own song yet, because songs need a licence to be played to guests.</p>
+      </Section>
+      <Section icon="envelope" title="Envelope">
+        <Toggle label="Open with an envelope" checked={!!d.envelope} onChange={(v) => update((x) => ({ ...x, envelope: v }))}
+          line="Guests first see a sealed envelope with your event's name on it (or their own name, from their personal link), and tap to open it. That tap also starts the music." />
+        {!d.envelope && d.music && <Note>Without the envelope, guests see a small “Play music” button instead: phones don&apos;t allow music until the guest taps.</Note>}
+        <button type="button" className="b2-btn b2-secondary" onClick={() => setSeeing(true)}>
+          <Icon name="envelope" className="" />See the envelope
+        </button>
+        {seeing && <Opening data={{ ...data, envelope: true }} title={data.copy.card_headline || data.title || "Your event"} id="preview" preview={() => setSeeing(false)} />}
+      </Section>
+    </>
+  );
+}
+
+function TrackRow({ track, on, suggested, onChoose }: { track: ReturnType<typeof musicFor>[number]; on: boolean; suggested: boolean; onChoose: () => void }) {
+  const m = useMusic(track.key);
+  const playing = m.state === "on" || m.state === "loading";
+  const mins = `${Math.floor(track.seconds / 60)}:${String(track.seconds % 60).padStart(2, "0")}`;
+  return (
+    <div className="b2-row b2-track" data-on={on ? "" : undefined}>
+      <button type="button" role="radio" aria-checked={on} className="b2-grow b2-trackpick" onClick={onChoose}>
+        <strong>{track.name}{on ? " ✓" : ""}</strong>
+        <small>{track.line} · {mins}{suggested ? " · suggested" : ""}</small>
+      </button>
+      <button type="button" className="b2-round b2-round-sm" onClick={m.toggle} aria-label={playing ? `Stop ${track.name}` : `Listen to ${track.name}`}>
+        <Icon name={playing ? "stop" : "play"} className="" />
+      </button>
+    </div>
+  );
+}
