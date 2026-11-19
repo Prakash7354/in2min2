@@ -22,6 +22,7 @@ import { Peek } from "./peek";
 import { MilestonePicker, TitleLine } from "./pickers";
 import { AccountButton } from "./sheets";
 import { GuestDemo } from "./demo";
+import { YourEventsRow } from "./events";
 import { BottomBar, Chips, Hint, markHint, Pop, TopBar, spring } from "./ui";
 import { Welcome } from "./welcome";
 
@@ -93,6 +94,7 @@ function WhatScreen() {
     <section className="b2-screen">
       <h1 className="b2-h1">What are you celebrating?</h1>
       <p className="b2-lead">Tap one. Everything else is set up for you. <Link className="b2-link" href="/new/guide">See how it works</Link></p>
+      {!d.eventType && <YourEventsRow />}
       <div className="b2-choices">
         {keys.map((k, i) => {
           const et = eventType(k);

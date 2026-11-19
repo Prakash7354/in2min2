@@ -22,6 +22,7 @@ import { MISSING_PANEL, useB2, type B2 } from "./context";
 import type { Panel } from "./nav";
 import { dateLine } from "./kinds";
 import { previewAt } from "./panels/preview";
+import { EventsBody } from "./events";
 import { Chips, RoundButton, Sheet, Toggle, useTheme } from "./ui";
 import { CAPTCHA_FAILED, useCaptcha } from "@/components/captcha";
 
@@ -40,6 +41,7 @@ export function Sheets({ signInWhy, onSignedIn }: { signInWhy: string; onSignedI
       <Sheet open={s === "account"} title="You" onClose={close}><AccountBody /></Sheet>
       <Sheet open={s === "signin"} title="Sign in" onClose={close}><SignInBody why={signInWhy} onDone={onSignedIn} /></Sheet>
       <Sheet open={s === "preview"} title="Preview" onClose={close}><PreviewBody /></Sheet>
+      <Sheet open={s === "events"} title="Your events" onClose={close}><EventsBody /></Sheet>
     </>
   );
 }
@@ -376,7 +378,6 @@ function BellBody() {
 function AccountBody() {
   const b = useB2();
   const [theme, toggleTheme] = useTheme();
-  const [confirm, setConfirm] = useState(false);
   const email = b.session?.user.email ?? "";
   const t = eventType(b.d.eventType);
   return (
@@ -403,20 +404,17 @@ function AccountBody() {
 
       <Toggle icon="moon" label="Dark look" line="Easier on the eyes at night. Turn off for the light look." checked={theme === "dark"} onChange={() => toggleTheme()} />
 
-      {t && (!confirm ? (
-        <button type="button" className="b2-row" onClick={() => setConfirm(true)}>
+      <button type="button" className="b2-row" onClick={() => void b.back().then(() => b.openSheet("events"))}>
+        <span className="b2-ico" style={{ background: "linear-gradient(135deg, #8b7cff, #5e35b1)", color: "#fff" }} aria-hidden="true"><Icon name="list" className="" /></span>
+        <span className="b2-grow"><strong>Your events</strong><small>Every event you’ve made, on any phone or computer</small></span>
+        <Icon name="next" className="size-5" />
+      </button>
+      {t && (
+        <button type="button" className="b2-row" onClick={() => void b.back().then(b.startAgain)}>
           <span className="b2-ico b2-ico-soft" aria-hidden="true"><Icon name="plus" className="" /></span>
-          <span className="b2-grow"><strong>Start a new event</strong><small>This one is cleared from this phone</small></span>
+          <span className="b2-grow"><strong>Start a new event</strong><small>“{b.d.title || t.label}” stays in Your events</small></span>
         </button>
-      ) : (
-        <div className="b2-note" data-tone="warn" style={{ display: "grid", gap: 10 }}>
-          <span>Clear “{b.d.title || t.label}” from this phone and start a new event?{b.d.eventId ? " Its published page stays online." : ""}</span>
-          <span style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button type="button" className="b2-chip b2-chip-sm b2-chip-strong" onClick={() => { setConfirm(false); void b.back().then(b.startAgain); }}>Yes, start new</button>
-            <button type="button" className="b2-chip b2-chip-sm" onClick={() => setConfirm(false)}>Keep it</button>
-          </span>
-        </div>
-      ))}
+      )}
 
       <Link className="b2-row" href="/new/guide">
         <span className="b2-ico b2-ico-soft" aria-hidden="true"><Icon name="book" className="" /></span>

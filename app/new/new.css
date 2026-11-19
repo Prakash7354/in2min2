@@ -968,7 +968,7 @@ a.b2-row { color: var(--b2-text); }
 .b2-watch-env span { position: relative; z-index: 1; display: grid; place-items: center; width: 20px; height: 20px; margin-top: 10px; border-radius: 999px; background: #c8102e; color: #fff; font-size: 11px; font-weight: 800; }
 .b2-watch-play { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; background: rgba(255, 255, 255, 0.22); }
 .b2-watch-play svg { width: 22px; height: 22px; }
-.b2-watch .b2-hint { right: 4px; top: -30px; }
+.b2-watch .b2-hint { right: 8px; top: -4px; }
 
 /* What guests get: the envelope, then the invitation, with music */
 .b2-demo { position: fixed; inset: 0; z-index: 80; overflow-y: auto; background: #0e0c1c; overscroll-behavior: contain; }
@@ -984,4 +984,54 @@ a.b2-row { color: var(--b2-text); }
   .b2-hint .b2-hint-hand, .b2-hint .b2-hint-ripple { animation: none !important; }
   .b2-wstep, .b2-wstep .b2-hint { animation: none; }
   .b2-wstep:first-child { box-shadow: 0 0 0 3px var(--b2-accent), var(--b2-shadow); }
+}
+
+/* Your events (19 Nov 2026) */
+.b2-events { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.b2-eventrow { min-height: 76px; }
+.b2-eventrow[data-open] { box-shadow: 0 0 0 3px var(--b2-accent), var(--b2-edge); }
+.b2-eventrow[disabled] { cursor: progress; }
+.b2-eventrow strong { overflow-wrap: anywhere; }
+.b2-eventpic {
+  position: relative; display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 15px; overflow: hidden; color: #fff;
+  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.6);
+}
+.b2-eventpic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.b2-eventpic svg { width: 26px; height: 26px; }
+.b2-eventtags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.b2-eventtag { padding: 2px 9px; border-radius: 999px; background: var(--b2-s3); color: var(--b2-text); font-size: 12.5px; font-weight: 800; }
+.b2-eventtag[data-tone="live"] { background: color-mix(in srgb, var(--b2-ok) 26%, transparent); }
+.b2-eventtag[data-tone="draft"] { background: color-mix(in srgb, var(--b2-accent) 30%, transparent); }
+.b2-eventtag[data-tone="local"] { background: color-mix(in srgb, var(--b2-info) 26%, transparent); }
+.b2-eventtag[data-tone="open"] { background: var(--b2-accent); color: var(--b2-on-accent); }
+
+/* Laptops and big screens (19 Nov 2026): the builder on the left, the live
+   preview on the right; the bottom bar lines up with the builder's column. */
+.b2-side { display: none; }
+@media (min-width: 1100px) {
+  .b2[data-side] .b2-desk { display: grid; grid-template-columns: 560px 380px; gap: 48px; justify-content: center; align-items: start; }
+  .b2[data-side="home"] .b2-desk { grid-template-columns: 640px 380px; }
+  .b2[data-side] .b2-shell { max-width: none; margin: 0; }
+  .b2[data-side] .b2-bottom { left: calc(50vw - 494px); right: auto; width: 560px; }
+  .b2[data-side="home"] .b2-bottom { left: calc(50vw - 534px); width: 640px; }
+  .b2[data-side] .b2-bottom > div { max-width: none; }
+  .b2[data-side] .b2-bottom > div[data-aside] { grid-template-columns: minmax(0, 1fr); }
+  .b2[data-side] .b2-peek { display: none; }
+  .b2[data-side] .b2-bento { grid-template-columns: 1fr 1fr; }
+  .b2[data-side] .b2-side {
+    display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 12px;
+    position: sticky; top: 16px; height: calc(100dvh - 32px); padding-top: 8px;
+  }
+  .b2-sidehead { display: grid; gap: 10px; }
+  .b2-sidephone {
+    overflow-y: auto; border-radius: 34px; background: var(--b2-s1);
+    box-shadow: 0 0 0 10px var(--b2-s2), 0 0 0 11px var(--b2-s3), var(--b2-shadow);
+    margin: 11px; scrollbar-width: thin;
+  }
+  .b2-side .b2-btn { justify-self: center; }
+}
+@media (min-width: 1100px) {
+  /* The live preview is beside it, so Home's card doesn't show the invitation twice. */
+  .b2[data-side] .b2-hero { grid-template-columns: minmax(0, 1fr); }
+  .b2[data-side] .b2-hero > .b2-stage { display: none; }
 }

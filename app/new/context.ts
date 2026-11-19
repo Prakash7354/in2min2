@@ -8,6 +8,7 @@ import { createContext, useContext } from "react";
 import type { Session } from "@supabase/supabase-js";
 import type { Adjustment, CopyKey } from "@/lib/ai/copy";
 import type { Draft } from "@/lib/draft";
+import type { MyEvent, Shelved } from "@/lib/my-events";
 import type { PhotosState } from "../builder/photos";
 import type { RepliesState } from "../builder/replies";
 import type { Nav, Panel, SheetKey } from "./nav";
@@ -37,6 +38,10 @@ export type B2 = {
   replies: RepliesState;
   photos: PhotosState;
   startAgain: () => void;
+  // Your events: the account's (null until signed in and loaded), the ones
+  // kept only on this phone, which one is opening, and opening one.
+  mine: { list: MyEvent[] | null; error: string | null; shelf: Shelved[]; opening: string | null; refresh: () => Promise<void> };
+  openEvent: (key: string, fromAccount: boolean) => Promise<void>;
 };
 
 export const B2Context = createContext<B2 | null>(null);

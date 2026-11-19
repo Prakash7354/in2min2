@@ -15,6 +15,7 @@ import { totals } from "../builder/replies";
 import { MISSING_PANEL, useB2 } from "./context";
 import { TYPE_ART } from "./kinds";
 import type { Panel } from "./nav";
+import { YourEventsChip } from "./events";
 import { TopButtons } from "./sheets";
 import { BottomBar, Hint, markHint, PANEL_HUE, spring } from "./ui";
 
@@ -47,6 +48,7 @@ export function Home() {
         <TopButtons />
       </header>
       <main className="b2-screen" style={{ gap: 18 }}>
+        <YourEventsChip />
         <motion.section className="b2-card b2-hero" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring}>
           <div style={{ display: "grid", gap: 10, alignContent: "start", minWidth: 0 }}>
             <span className="b2-status" data-state={!live ? "draft" : changed ? "changed" : "live"}>

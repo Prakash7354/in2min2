@@ -12,6 +12,7 @@ import { TapHand } from "@/components/tap-hand";
 import { toViewData } from "@/lib/draft";
 import { useB2 } from "./context";
 import { GuestDemo, sampleWedding } from "./demo";
+import { YourEventsRow } from "./events";
 import { AccountButton } from "./sheets";
 import { BottomBar, Hint, markHint, ThemeButton } from "./ui";
 
@@ -38,6 +39,7 @@ export function Welcome() {
         <p className="b2-kicker">Welcome</p>
         <h1 className="b2-h1">Invitations people love to open</h1>
         <p className="b2-lead">Make yours in about two minutes, on your phone. Free to start.</p>
+        <YourEventsRow />
 
         <button type="button" className="b2-watch" onClick={() => { markHint("welcome-watch"); setWatching(true); }}>
           <span className="b2-watch-env" aria-hidden="true"><span>M</span></span>

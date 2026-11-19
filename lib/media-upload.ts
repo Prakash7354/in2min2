@@ -11,7 +11,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Draft } from "@/lib/draft";
 import { toViewData } from "@/lib/draft";
 import { formatDate, formatTime, monogram, type EventViewData } from "@/lib/event-view";
-import { MEDIA_BUCKET } from "@/lib/media";
+import { MEDIA_BUCKET, mediaUrl } from "@/lib/media";
 
 function djb2(s: string): string {
   let h = 5381;
@@ -30,6 +30,9 @@ function fontOf(selector: string, fallback: string): string {
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((ok, fail) => {
     const img = new Image();
+    // A stored photo (an event opened on another device) comes from Supabase
+    // Storage: ask for it with CORS, or the drawing can't be saved.
+    if (/^https?:/.test(src)) img.crossOrigin = "anonymous";
     img.onload = () => ok(img);
     img.onerror = () => fail(new Error("image"));
     img.src = src;
@@ -144,10 +147,22 @@ export type MediaResult =
   | { ok: true; coverKey: string | null; shareKey: string | null; mediaHash: string; heroKeys: string[]; heroHash: string; heroNote: string | null }
   | { ok: false; message: string };
 
-export async function saveMedia(sb: SupabaseClient, d: Draft, eventId: string): Promise<MediaResult> {
+// What the preview picture shows, and the showcase photos, as short
+// fingerprints: unchanged means nothing is sent again. Also used when an event
+// is opened from the account on another device (lib/my-events.ts).
+export function mediaFingerprint(d: Draft): string {
   const v = toViewData(d);
   const coverHash = d.cover ? djb2(d.cover) : "none";
-  const shows = djb2(JSON.stringify([coverHash, v.coverFit, v.title, v.copy.card_headline, v.date, v.startTime, v.venueName, d.palette, d.customColor, d.textStyle, v.typeLabel, v.scale]));
+  return djb2(JSON.stringify([coverHash, v.coverFit, v.title, v.copy.card_headline, v.date, v.startTime, v.venueName, d.palette, d.customColor, d.textStyle, v.typeLabel, v.scale]));
+}
+export function heroFingerprint(d: Draft): string {
+  const more = d.cover ? (d.moreCovers ?? []).slice(0, 4) : [];
+  return djb2(JSON.stringify([more.map((u) => djb2(u)), d.heroMotion ?? "zoomin"]));
+}
+
+export async function saveMedia(sb: SupabaseClient, d: Draft, eventId: string): Promise<MediaResult> {
+  const coverHash = d.cover ? djb2(d.cover) : "none";
+  const shows = mediaFingerprint(d);
   const store = sb.storage.from(MEDIA_BUCKET);
   if (d.mediaHash === shows && d.shareKey && d.shareKey.startsWith(eventId)) {
     const hero = await saveShowcase(sb, d, eventId, d.coverKey ?? null);
@@ -157,8 +172,9 @@ export async function saveMedia(sb: SupabaseClient, d: Draft, eventId: string): 
   const old = [d.coverKey, d.shareKey].filter((k): k is string => !!k && k.startsWith(eventId));
   let coverKey: string | null = d.coverKey && d.coverKey.startsWith(eventId) ? d.coverKey : null;
 
-  // 1. The main photo, if it changed.
-  const coverChanged = !coverKey || !coverKey.includes(`/cover-${coverHash.slice(0, 6)}`);
+  // 1. The main photo, if it changed. (Opened on another device, the photo
+  // is the stored one's web address: that's unchanged too.)
+  const coverChanged = !coverKey || (!coverKey.includes(`/cover-${coverHash.slice(0, 6)}`) && d.cover !== mediaUrl(coverKey));
   if (!d.cover) coverKey = null;
   else if (coverChanged) {
     const blob = await (await fetch(d.cover)).blob();
@@ -169,7 +185,7 @@ export async function saveMedia(sb: SupabaseClient, d: Draft, eventId: string): 
   }
 
   // 2. The preview picture.
-  const pic = await drawShareImage({ ...v, cover: d.cover });
+  const pic = await drawShareImage({ ...toViewData(d), cover: d.cover });
   if (!pic) return { ok: false, message: "This browser couldn't draw the preview picture." };
   const shareKey = `${eventId}/share-${rand()}${rand()}.jpg`;
   const up = await store.upload(shareKey, pic, { contentType: "image/jpeg", cacheControl: "31536000", upsert: false });
@@ -191,14 +207,14 @@ export async function saveMedia(sb: SupabaseClient, d: Draft, eventId: string): 
 async function saveShowcase(sb: SupabaseClient, d: Draft, eventId: string, coverKey: string | null): Promise<{ heroKeys: string[]; heroHash: string; heroNote: string | null }> {
   const more = d.cover ? (d.moreCovers ?? []).slice(0, 4) : [];
   const hashes = more.map((u) => djb2(u));
-  const heroHash = djb2(JSON.stringify([hashes, d.heroMotion ?? "zoomin"]));
+  const heroHash = heroFingerprint(d);
   const had = (d.heroKeys ?? []).filter((k) => k.startsWith(eventId));
   if (d.heroHash === heroHash) return { heroKeys: had, heroHash, heroNote: null };
 
   const store = sb.storage.from(MEDIA_BUCKET);
   const keys: string[] = [];
   for (let i = 0; i < more.length; i++) {
-    const same = had.find((k) => k.includes(`/cover-${hashes[i].slice(0, 6)}`) && !keys.includes(k));
+    const same = had.find((k) => (k.includes(`/cover-${hashes[i].slice(0, 6)}`) || more[i] === mediaUrl(k)) && !keys.includes(k));
     if (same) { keys.push(same); continue; }
     const blob = await (await fetch(more[i])).blob();
     const key = `${eventId}/cover-${hashes[i].slice(0, 6)}${rand()}.jpg`;

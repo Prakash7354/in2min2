@@ -13,8 +13,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { COPY_KEYS, type Adjustment, type CopyKey } from "@/lib/ai/copy";
 import { eventType } from "@/lib/catalog";
-import { applyType, clearDraft, fingerprint, loadDraft, markBoxes, newDraft, saveDraft, type Draft } from "@/lib/draft";
+import { applyType, clearDraft, fingerprint, loadDraft, markBoxes, newDraft, saveDraft, unpublishedChanges, type Draft } from "@/lib/draft";
 import { saveMedia } from "@/lib/media-upload";
+import { listMyEvents, loadEvent, readShelf, shelfKey, shelve, takeFromShelf, worthKeeping, type MyEvent, type Shelved } from "@/lib/my-events";
 import { publishDraft } from "@/lib/publish";
 import { supabase } from "@/lib/supabase/client";
 import { useSession } from "../builder/account";
@@ -28,6 +29,7 @@ import { useNav, type Nav, type Screen } from "./nav";
 import { PanelView } from "./panels";
 import { QuickScreen, quickSteps } from "./quick";
 import { Sheets } from "./sheets";
+import { SidePreview } from "./side";
 import { hintDone, spring, useToast } from "./ui";
 import { WELCOMED } from "./welcome";
 
@@ -129,6 +131,15 @@ export default function Builder2() {
   }, [go]);
   const openSheet = useCallback((sheet: NonNullable<Nav["sheet"]>) => go({ sheet }), [go]);
   const placeKey = nav.panel ? `p:${nav.panel}` : `s:${nav.screen}`;
+  // Laptops: the live preview beside the builder, once there's an event to
+  // show (not on the welcome or the first question, nor beside the full
+  // preview). #b2 carries it, so the bottom bar (portalled there) can line up.
+  const side = !!draft.eventType && !["welcome", "what"].includes(nav.screen) && nav.panel !== "preview";
+  useEffect(() => {
+    const root = document.getElementById("b2");
+    if (!root) return;
+    if (side) root.dataset.side = placeKey === "s:home" ? "home" : "panel"; else delete root.dataset.side;
+  }, [side, placeKey]);
   const scrollTo = useRef(0);
   useEffect(() => { scrollTo.current = placeKey === "s:home" && dir < 0 ? homeY.current : 0; }, [placeKey, dir]);
 
@@ -269,31 +280,97 @@ export default function Builder2() {
   }, [askSignIn, update, say, back, go, replace]);
   useEffect(() => { publishRef.current = publish; }, [publish]);
 
-  const startAgain = useCallback(() => {
-    clearDraft();
-    setDraft(newDraft());
-    autoWrote.current = false;
+  // ── Your events: switch between events, on any device ──
+  const [mine, setMine] = useState<{ list: MyEvent[] | null; error: string | null }>({ list: null, error: null });
+  const [shelf, setShelf] = useState<Shelved[]>(() => readShelf());
+  const [opening, setOpening] = useState<string | null>(null);
+  const userId = session?.user.id ?? null;
+  const refreshMine = useCallback(async () => {
+    setShelf(readShelf());
+    if (!userId) { setMine({ list: null, error: null }); return; }
+    const r = await listMyEvents(supabase(), userId);
+    setMine(r.ok ? { list: r.events, error: null } : { list: null, error: r.message });
+  }, [userId]);
+  useEffect(() => { const t = window.setTimeout(() => void refreshMine(), 0); return () => window.clearTimeout(t); }, [refreshMine]);
+  // After publishing, the list shows the new or changed event.
+  useEffect(() => {
+    if (!pub.done) return;
+    const t = window.setTimeout(() => void refreshMine(), 0);
+    return () => window.clearTimeout(t);
+  }, [pub.done, refreshMine]);
+
+  // Puts a draft on screen, fresh: its own Home (or where its Quick start got to).
+  const show = useCallback((d: Draft) => {
+    saveDraft(d);
+    setDraft(d);
+    autoWrote.current = !!d.eventId;
     setAi({ busy: null, error: null, trimmed: false, done: false });
     setPub({ busy: false, error: null, note: null, done: false });
-    replace({ screen: hintDone(WELCOMED) ? "what" : "welcome", panel: null, sheet: null });
+    replace({ ...startPlace(d), panel: null, sheet: null });
   }, [replace]);
+
+  // The event open now is kept on this phone's shelf if it has work that
+  // isn't in the account yet, so switching never loses anything. Returns
+  // false (and says why) if the phone's storage is too full to keep it.
+  const keepCurrent = useCallback((): boolean => {
+    const cur = latest.current;
+    if (!worthKeeping(cur)) return true;
+    const kept = shelve(cur);
+    if (kept === false) {
+      say(`This phone's storage is full, so “${cur.title || "this event"}” couldn't be kept. Publish it first, then try again.`);
+      return false;
+    }
+    if (kept === "no-photos") say(`“${cur.title || "Your event"}” is kept on this phone, but without its new photos: the phone's storage is full.`);
+    return true;
+  }, [say]);
+
+  const openEvent = useCallback(async (key: string, fromAccount: boolean) => {
+    if (shelfKey(latest.current) === key) { await back(); return; }
+    // A copy on this phone with changes not yet live wins over the account's.
+    let next = readShelf().find((x) => x.key === key)?.draft ?? null;
+    if (!next && fromAccount) {
+      setOpening(key);
+      const r = await loadEvent(supabase(), key);
+      setOpening(null);
+      if (!r.ok) { say(`That event couldn't be opened. Check your signal and try again. (Details for Claude Code: ${r.message})`); return; }
+      next = r.draft;
+    }
+    if (!next || !keepCurrent()) return;
+    takeFromShelf(key);
+    setShelf(readShelf());
+    show(next);
+    say(next.eventId && unpublishedChanges(next) ? `Opened “${next.title}”, with your changes that aren't live yet.` : `Opened “${next.title || "your event"}”.`);
+  }, [back, keepCurrent, say, show]);
+
+  const startAgain = useCallback(() => {
+    if (!keepCurrent()) return;
+    setShelf(readShelf());
+    clearDraft();
+    show(newDraft());
+    replace({ screen: hintDone(WELCOMED) ? "what" : "welcome", panel: null, sheet: null });
+  }, [keepCurrent, show, replace]);
 
   const ctx = useMemo<B2>(() => ({
     d: draft, update, now, saved, session, say, nav, go, back, open, openSheet, askSignIn,
     ai, writeAll, writeOne, pub, publish, replies, photos, startAgain,
-  }), [draft, update, now, saved, session, say, nav, go, back, open, openSheet, askSignIn, ai, writeAll, writeOne, pub, publish, replies, photos, startAgain]);
+    mine: { ...mine, shelf, opening, refresh: refreshMine }, openEvent,
+  }), [draft, update, now, saved, session, say, nav, go, back, open, openSheet, askSignIn, ai, writeAll, writeOne, pub, publish, replies, photos, startAgain,
+    mine, shelf, opening, refreshMine, openEvent]);
 
   return (
     <B2Context.Provider value={ctx}>
       <MotionConfig reducedMotion="user">
-        <div className="b2-shell" data-wide={placeKey === "s:home" ? "" : undefined}>
-          <AnimatePresence mode="wait" custom={dir} initial={false} onExitComplete={() => window.scrollTo(0, scrollTo.current)}>
-            <motion.div key={placeKey} custom={dir} variants={slide} initial="enter" animate="centre" exit="exit" transition={spring}>
-              {nav.panel ? <PanelView panel={nav.panel} /> : nav.screen === "home" ? <Home /> : <QuickScreen screen={nav.screen} />}
-            </motion.div>
-          </AnimatePresence>
-          <Sheets signInWhy={signIn.why} onSignedIn={() => void signedIn()} />
-          {toast}
+        <div className="b2-desk">
+          <div className="b2-shell" data-wide={placeKey === "s:home" ? "" : undefined}>
+            <AnimatePresence mode="wait" custom={dir} initial={false} onExitComplete={() => window.scrollTo(0, scrollTo.current)}>
+              <motion.div key={placeKey} custom={dir} variants={slide} initial="enter" animate="centre" exit="exit" transition={spring}>
+                {nav.panel ? <PanelView panel={nav.panel} /> : nav.screen === "home" ? <Home /> : <QuickScreen screen={nav.screen} />}
+              </motion.div>
+            </AnimatePresence>
+            <Sheets signInWhy={signIn.why} onSignedIn={() => void signedIn()} />
+            {toast}
+          </div>
+          {side && <SidePreview />}
         </div>
       </MotionConfig>
     </B2Context.Provider>

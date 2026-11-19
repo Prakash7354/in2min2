@@ -58,7 +58,11 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 **Next, Claude Code (in this order; each builds on the one before):**
 1. [x] **Safety before real guests (built 19 Nov; switch it on with step 4 below):** nightly backup and a practice-restore tool, error emails, an hourly database check that also keeps the free Supabase plan awake, and the anti-spam check on sign-in.
-2. **Your events on every device:** a "Your events" list from your account, so the same event opens on your phone and your laptop. Builder 2.0 also gets a wider layout for laptops.
+2. [x] **Your events on every device (built 19 Nov, late):**
+   - **Your events** (a button at the top of Home, in **You**, and on the first screens) lists every event in your account, coming up first, then past ones. Tap one to open it on this phone or laptop.
+   - Opening another event never loses work: one not yet published, or with changes not yet live, is kept on that phone and shows as "Only on this phone" or "Changes not live yet".
+   - Events you co-host show too, marked **Co-host**.
+   - **On a laptop** (a wide screen), the builder sits on the left and a live preview of the invitation or page on the right, changing as you type.
 3. **Edit, save and remove beside the invitation** on Home (remove asks first, and can be undone for 30 days).
 4. **Co-hosts** (a mum and son building together): invite by link. The database already has co-hosts; this adds the screens.
 5. **Link pictures:** each event's own picture when its link is shared on WhatsApp or Facebook, and a share-as-image button for Instagram.

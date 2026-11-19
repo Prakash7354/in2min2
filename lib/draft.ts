@@ -76,6 +76,9 @@ export type Draft = {
   // suggestions, or the host), and a milestone such as "50th" for the title.
   quickAt?: string;
   quickDone?: boolean;
+  // An event not yet published, kept on this phone's shelf while another is
+  // open (lib/my-events.ts): its name there.
+  localId?: string;
   wordsBy?: "ai" | "suggested" | "host";
   // And box by box, so each one can say who wrote it (owner, 19 Nov 2026).
   copyBy?: Partial<Record<CopyKey, BoxBy>>;
@@ -269,7 +272,7 @@ export function slugOk(slug: string): boolean {
 // say "you have changes that aren't live yet". The photo isn't sent yet
 // (photo storage comes later), so it's left out.
 const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "shortPath", "offerClaimed", "publishedHash", "cover", "offerCode",
-  "coverKey", "shareKey", "mediaHash", "moreCovers", "heroKeys", "heroHash", "quickAt", "quickDone", "wordsBy", "copyBy", "milestone", "inviteWay"] as const;
+  "coverKey", "shareKey", "mediaHash", "moreCovers", "heroKeys", "heroHash", "quickAt", "quickDone", "wordsBy", "copyBy", "milestone", "inviteWay", "localId"] as const;
 export function fingerprint(d: Draft): string {
   const rest: Record<string, unknown> = { ...d };
   for (const k of LOCAL_ONLY) delete rest[k];

@@ -29,6 +29,15 @@ export function defaultCredit(x: { scale: string; sensitive: boolean; organiserN
   return { label: x.sensitive ? "With love from" : "Hosted by", name: fam.names.trim() };
 }
 
+// The host's credit line as published (lib/publish.ts): { label, name }, or
+// { hidden: true }; anything else means "made from the organiser or family".
+export function creditChoice(v: unknown): CreditChoice {
+  if (!v || typeof v !== "object") return undefined;
+  const c = v as { hidden?: unknown; label?: unknown; name?: unknown };
+  if (c.hidden === true) return null;
+  return typeof c.label === "string" && typeof c.name === "string" ? { label: c.label, name: c.name } : undefined;
+}
+
 export function creditFor(choice: CreditChoice, made: Credit | null): Credit | null {
   if (choice === null) return null;
   if (choice && choice.name.trim()) return { label: choice.label.trim().slice(0, 30) || "Hosted by", name: choice.name.trim().slice(0, 80) };

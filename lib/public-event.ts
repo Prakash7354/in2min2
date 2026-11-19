@@ -5,7 +5,7 @@
 import { cache } from "react";
 import type { EventCopy } from "@/lib/ai/copy";
 import { backdropOf, eventType, heroMotionOf, musicOf, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type CoverFit, type EffectKey, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
-import { creditFor, defaultCredit, type CreditChoice, type EventStageView, type EventViewData } from "@/lib/event-view";
+import { creditChoice, creditFor, defaultCredit, type EventStageView, type EventViewData } from "@/lib/event-view";
 import { mediaUrl } from "@/lib/media";
 import { rpc } from "@/lib/supabase/rest";
 import { utcToZoned } from "@/lib/time";
@@ -54,15 +54,6 @@ const copy = (c: Partial<EventCopy> | undefined): EventCopy => ({
 });
 
 // One database call per request, shared by the page and its title.
-// The host's credit line as published (lib/publish.ts): { label, name }, or
-// { hidden: true }; anything else means "made from the organiser or family".
-function creditChoice(v: unknown): CreditChoice {
-  if (!v || typeof v !== "object") return undefined;
-  const c = v as { hidden?: unknown; label?: unknown; name?: unknown };
-  if (c.hidden === true) return null;
-  return typeof c.label === "string" && typeof c.name === "string" ? { label: c.label, name: c.name } : undefined;
-}
-
 export const getPublicEvent = cache(async (type: string, slug: string, token?: string): Promise<PublicPage> => {
   const r = await rpc<PublicEvent | null>("public_event", { p_type: type, p_slug: slug, p_token: token ?? null });
   if (!r.ok || !r.data) return { kind: "missing" };
