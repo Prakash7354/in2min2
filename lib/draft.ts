@@ -5,6 +5,7 @@
 
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
 import {
+  backdropOf,
   eventType, heroMotionOf, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
   type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
@@ -83,6 +84,8 @@ export type Draft = {
   // "॥ श्री गणेशाय नमः ॥" (owner, 16 Nov 2026). Published in
   // feature_toggles.settings.topline.
   topLine?: string;
+  // A painted background (catalog BACKDROPS), in feature_toggles.settings.backdrop.
+  backdrop?: string;
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;
@@ -252,6 +255,9 @@ export function missingForPublish(d: Draft): { text: string; step: number }[] {
   if (community && d.forProfit === null) missing.push({ text: "Whether anyone makes a profit", step: 1 });
   if (!d.date) missing.push({ text: "The date", step: 2 });
   if (!d.startTime) missing.push({ text: "The start time", step: 2 });
+  // A guest seeing "where" or the words missing thinks it's half done (owner, 19 Nov 2026).
+  if (!d.venueName.trim()) missing.push({ text: "Where it is", step: 2 });
+  if (!d.copy.card_headline.trim() || !d.copy.card_invite_body.trim()) missing.push({ text: "The invitation words", step: 3 });
   if (!slugOk(slug)) missing.push({ text: "A web address", step: 6 });
   return missing;
 }
@@ -301,5 +307,6 @@ export function toViewData(d: Draft): EventViewData {
     hideBranding: plan(d.plan).hideBranding,
     credit: creditFor(d.credit, defaultCredit({ scale: d.scale, sensitive: t?.sensitive ?? false, organiserName: d.organiserName, family: d.family })),
     topLine: (d.topLine ?? "").trim().slice(0, 40),
+    backdrop: backdropOf(d.backdrop)?.key ?? null,
   };
 }

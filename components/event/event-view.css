@@ -42,6 +42,10 @@
 .ev-root[data-border="watercolour_roses"] { --bt: 0.1; --bb: 0.1; --side: 9cqi; }
 .ev-root[data-border="gold_crown"] { --bt: 0.08; --bb: 0.08; --side: 5cqi; }
 .ev-root[data-border="golden_leaves"] { --bt: 0.11; --bb: 0.1; --side: 6cqi; }
+.ev-root[data-border="christmas_greenery"] { --bt: 0.15; --bb: 0.14; --side: 10cqi; }
+.ev-root[data-border="golden_roses"] { --bt: 0.12; --bb: 0.12; --side: 8cqi; }
+.ev-root[data-border="ornate_flowers"] { --bt: 0.11; --bb: 0.11; --side: 8cqi; }
+.ev-root[data-border="wedding_lines"] { --bt: 0.1; --bb: 0.1; --side: 7cqi; }
 .ev-root[data-border="art_deco"] { --bt: 0.08; --bb: 0.08; --side: 4cqi; }
 .ev-root[data-border="laurel"] { --bt: 0.05; --bb: 0.2; --side: 2cqi; }
 .ev-root[data-border="floral"] { --bt: 0.07; --bb: 0.07; --side: 2cqi; }
@@ -1522,7 +1526,8 @@ button.ev-btn { cursor: pointer; }
   font-weight: 800;
   cursor: pointer;
 }
-.ev-loveBtn span { font-size: 1.25em; line-height: 1; }
+.ev-loveBtn span { font-size: 1.25em; line-height: 1; color: #e0245e; }
+.ev-loveBtn[data-on] span { color: #fff; }
 .ev-loveBtn[data-on] { background: #e0245e; border-color: #e0245e; }
 .ev-loveBtn[data-on] span { animation: ev-heartPop 0.45s ease-out; }
 @keyframes ev-heartPop {
@@ -2074,13 +2079,46 @@ button.ev-btn { cursor: pointer; }
 .ev-b04-tl { width: 30cqi; aspect-ratio: 460 / 484; top: 0.6cqi; left: 0.6cqi; -webkit-mask-image: url(/art/borders/b04-golden-leaves-tl.png); mask-image: url(/art/borders/b04-golden-leaves-tl.png); }
 .ev-b04-br { width: 30cqi; aspect-ratio: 460 / 497; bottom: 0.6cqi; right: 0.6cqi; -webkit-mask-image: url(/art/borders/b04-golden-leaves-br.png); mask-image: url(/art/borders/b04-golden-leaves-br.png); }
 /* Section dividers: a small crown line on every third section (B3); fine diamonds for B4 */
-.ev-root:is([data-border="gold_crown"], [data-border="golden_leaves"]) .ev-section { position: relative; border-top-color: transparent; }
-.ev-root:is([data-border="gold_crown"], [data-border="golden_leaves"]) .ev-section::before {
+.ev-root:is([data-border="gold_crown"], [data-border="golden_leaves"], [data-border="christmas_greenery"], [data-border="golden_roses"], [data-border="ornate_flowers"], [data-border="wedding_lines"]) .ev-section { position: relative; border-top-color: transparent; }
+.ev-root:is([data-border="gold_crown"], [data-border="golden_leaves"], [data-border="christmas_greenery"], [data-border="golden_roses"], [data-border="ornate_flowers"], [data-border="wedding_lines"]) .ev-section::before {
   content: ""; position: absolute; top: 0; left: 50%; width: min(52%, 260px); height: 14px; transform: translate(-50%, -50%);
   background: var(--ev-accent); pointer-events: none;
   -webkit-mask: var(--divider) center / contain no-repeat; mask: var(--divider) center / contain no-repeat;
 }
-.ev-root[data-border="gold_crown"], .ev-root[data-border="golden_leaves"] { --divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24'%3E%3Cpath d='M30 12 H132 M168 12 H270' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M150 6 L156 12 L150 18 L144 12Z'/%3E%3C/svg%3E"); }
+.ev-root:is([data-border="gold_crown"], [data-border="golden_leaves"], [data-border="christmas_greenery"], [data-border="golden_roses"], [data-border="ornate_flowers"], [data-border="wedding_lines"]) { --divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 24'%3E%3Cpath d='M30 12 H132 M168 12 H270' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M150 6 L156 12 L150 18 L144 12Z'/%3E%3C/svg%3E"); }
 .ev-root[data-border="gold_crown"] .ev-section:nth-of-type(3n+2)::before {
   width: min(58%, 290px); height: 20px; -webkit-mask: url(/art/borders/b03-gold-crown-divider.png) center / contain no-repeat; mask: url(/art/borders/b03-gold-crown-divider.png) center / contain no-repeat;
 }
+
+/* Until the first comment, the photos sit in the middle of the sky; once
+   comments start, the space under them is theirs (owner, 19 Nov 2026). */
+.ev-wheelHold[data-quiet] .ev-wheelCard { top: 28%; }
+
+/* Whole frames B5–B8: top half pinned to the top, bottom half to the bottom */
+.ev-frame2 {
+  position: absolute; left: 0; right: 0; height: 50%; pointer-events: none;
+  background: linear-gradient(135deg, var(--ev-accent) 0%, color-mix(in srgb, var(--ev-accent) 62%, #3a2a00) 45%, var(--ev-accent) 70%, color-mix(in srgb, var(--ev-accent) 70%, #fff) 100%);
+  -webkit-mask: var(--frame) center top / 100% auto no-repeat; mask: var(--frame) center top / 100% auto no-repeat;
+}
+.ev-frame2Top { top: 0; }
+.ev-frame2Bottom { bottom: 0; -webkit-mask-position: center bottom; mask-position: center bottom; }
+/* B5 has holly and snowflakes drifting inwards: keep only the outer band, so none sit on the words */
+@supports (mask-composite: intersect) {
+  .ev-root[data-border="christmas_greenery"] .ev-frame2 {
+    mask-image: var(--frame), linear-gradient(90deg, #000 15%, transparent 23%, transparent 77%, #000 85%), linear-gradient(180deg, #000 17%, transparent 30%);
+    mask-size: 100% auto, 100% 100%, 100% 100%; mask-repeat: no-repeat; mask-position: center top, 0 0, 0 0;
+    mask-composite: intersect, add;
+  }
+  .ev-root[data-border="christmas_greenery"] .ev-frame2Bottom {
+    mask-image: var(--frame), linear-gradient(90deg, #000 15%, transparent 23%, transparent 77%, #000 85%), linear-gradient(0deg, #000 17%, transparent 30%);
+    mask-position: center bottom, 0 0, 0 0;
+  }
+}
+
+/* Painted backgrounds (catalog BACKDROPS) behind the card and the top of the page */
+.ev-root[data-backdrop] :is(.ev-card, .ev-hero) {
+  background: radial-gradient(ellipse 72% 58% at 50% 55%, rgb(0 0 0 / var(--ev-shade, 0)), transparent), var(--ev-backdrop) center / cover no-repeat, var(--ev-bg);
+}
+.ev-root[data-backdrop] .ev-heroBand { background: transparent; --ev-on-main: var(--ev-ink); }
+.ev-root[data-backdrop="dark"] .ev-cardInner, .ev-root[data-backdrop="dark"] .ev-heroBody { text-shadow: 0 1px 10px rgba(0, 0, 0, 0.45); }
+.ev-root[data-backdrop="light"] .ev-cardInner, .ev-root[data-backdrop="light"] .ev-heroBody { text-shadow: 0 1px 8px rgba(255, 255, 255, 0.6); }

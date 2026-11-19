@@ -5,7 +5,7 @@
 // when), and the account (sign in and out, light or dark, a new event).
 // Each opens as a sheet from the bottom, over whatever screen is open.
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import EventView from "@/components/event/event-view";
 import { Icon, type IconName } from "@/components/icons";
@@ -490,10 +490,11 @@ function SignInBody({ why, onDone }: { why: string; onDone: () => void }) {
         </form>
       ) : (
         <form style={{ display: "grid", gap: 12 }} onSubmit={(e) => { e.preventDefault(); void checkCode(); }}>
-          <p className="b2-small">Sent to <strong style={{ color: "var(--b2-text)" }}>{email}</strong>. It can take a minute; check your junk folder too.</p>
+          <p className="b2-small">Sent to <strong style={{ color: "var(--b2-text)" }}>{email}</strong> from codes@in2min2.com. It can take a minute. Not there? Check <strong style={{ color: "var(--b2-text)" }}>Junk</strong> or <strong style={{ color: "var(--b2-text)" }}>Promotions</strong>, and mark it “Not junk”.</p>
           <input className="b2-input b2-code" inputMode="numeric" autoComplete="one-time-code" maxLength={8} aria-label="The 6-digit code"
             value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} placeholder="123456" />
           <button type="submit" className="b2-btn b2-primary b2-block" disabled={busy || code.length < 6}>{busy ? "Checking…" : "Sign in"}</button>
+          <ResendCode onSend={sendCode} busy={busy} />
           <button type="button" className="b2-btn b2-quiet" onClick={() => { setStage("email"); setCode(""); setError(null); }}>Use another email</button>
         </form>
       )}
@@ -501,6 +502,21 @@ function SignInBody({ why, onDone }: { why: string; onDone: () => void }) {
       {error?.detail && <p className="b2-small">Details for Claude Code: {error.detail}</p>}
       <p className="b2-small">Free. Your event is kept safe in your account, and you can sign in on any phone.</p>
     </div>
+  );
+}
+
+// "Send the code again", after a one-minute wait (so it can't flood anyone's inbox).
+function ResendCode({ onSend, busy }: { onSend: () => Promise<void>; busy: boolean }) {
+  const [wait, setWait] = useState(60);
+  useEffect(() => {
+    if (wait <= 0) return;
+    const t = window.setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => window.clearTimeout(t);
+  }, [wait]);
+  return (
+    <button type="button" className="b2-btn b2-quiet" disabled={busy || wait > 0} onClick={() => { setWait(60); void onSend(); }}>
+      {wait > 0 ? `Send the code again in ${wait}s` : "Send the code again"}
+    </button>
   );
 }
 

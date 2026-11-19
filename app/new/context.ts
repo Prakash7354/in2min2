@@ -47,4 +47,4 @@ export function useB2(): B2 {
 }
 
 // Where each thing still needed for publishing is filled in.
-export const MISSING_PANEL: Record<number, Panel> = { 0: "settings", 1: "people", 2: "details", 6: "publish" };
+export const MISSING_PANEL: Record<number, Panel> = { 0: "settings", 1: "people", 2: "details", 3: "words", 6: "publish" };

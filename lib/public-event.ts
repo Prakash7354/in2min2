@@ -4,7 +4,7 @@
 
 import { cache } from "react";
 import type { EventCopy } from "@/lib/ai/copy";
-import { eventType, heroMotionOf, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type CoverFit, type EffectKey, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
+import { backdropOf, eventType, heroMotionOf, ORGANISER_TYPES, paletteFor, TOGGLE_DEFAULTS, type CoverFit, type EffectKey, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
 import { creditFor, defaultCredit, type CreditChoice, type EventStageView, type EventViewData } from "@/lib/event-view";
 import { mediaUrl } from "@/lib/media";
 import { rpc } from "@/lib/supabase/rest";
@@ -32,7 +32,7 @@ type PublicEvent = {
     hero_keys?: string[]; hero_motion?: string;
   };
   people?: { role: "star" | "honour"; relation: string | null; names: string; names_local: string | null }[];
-  features?: Partial<Record<ToggleKey, boolean>> & { settings?: { photo_wall?: { early?: boolean }; credit?: unknown; topline?: unknown } };
+  features?: Partial<Record<ToggleKey, boolean>> & { settings?: { photo_wall?: { early?: boolean }; credit?: unknown; topline?: unknown; backdrop?: unknown } };
   sub_events?: {
     title: string; kind: string; starts_at: string; venue_name: string | null; description: string | null;
     menu?: { course?: string; dish?: string }[] | null;
@@ -127,6 +127,7 @@ export const getPublicEvent = cache(async (type: string, slug: string, token?: s
       defaultCredit({ scale: e.scale, sensitive: t?.sensitive ?? false, organiserName: e.organiser_name ?? "",
         family: people.filter((x) => x.role === "honour").map((x) => ({ relation: x.relation ?? "", names: x.names })) })),
     topLine: typeof features.settings?.topline === "string" ? features.settings.topline.trim().slice(0, 40) : "",
+    backdrop: backdropOf(typeof features.settings?.backdrop === "string" ? features.settings.backdrop : null)?.key ?? null,
   };
   const view: EventStageView = p.stage === "live" ? "live" : p.stage === "post" ? "after" : "page";
   return {

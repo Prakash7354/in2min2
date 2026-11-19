@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import EventView from "@/components/event/event-view";
 import { Icon } from "@/components/icons";
 import {
-  BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, PHOTO_STYLES, TEMPLATES, TEXT_STYLES,
+  BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, PHOTO_STYLES, TEMPLATES, TEXT_STYLES,
   eventType, language, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle,
 } from "@/lib/catalog";
 import { toViewData } from "@/lib/draft";
@@ -18,10 +18,10 @@ import { applyLook, currentLook, looksFor } from "../kinds";
 import { PanelShell } from "../panels";
 import { Chips, Note, Section, Toggle } from "../ui";
 
-type Tab = "looks" | "photos" | "colours" | "border" | "letters" | "more";
+type Tab = "looks" | "photos" | "colours" | "background" | "border" | "letters" | "more";
 const TABS: { key: Tab; label: string }[] = [
   { key: "looks", label: "Looks" }, { key: "photos", label: "Photos" }, { key: "colours", label: "Colours" },
-  { key: "border", label: "Border" }, { key: "letters", label: "Letters" }, { key: "more", label: "More" },
+  { key: "background", label: "Background" }, { key: "border", label: "Border" }, { key: "letters", label: "Letters" }, { key: "more", label: "More" },
 ];
 
 export function LookPanel() {
@@ -44,6 +44,7 @@ export function LookPanel() {
       {tab === "looks" && <Looks />}
       {tab === "photos" && <Photos />}
       {tab === "colours" && <Colours />}
+      {tab === "background" && <Backgrounds />}
       {tab === "border" && <Borders />}
       {tab === "letters" && <Letters />}
       {tab === "more" && <More />}
@@ -218,6 +219,38 @@ function Colours() {
           onChange={(e) => update((x) => ({ ...x, customColor: e.target.value, palette: "custom" }))} onClick={() => update((x) => ({ ...x, palette: "custom" }))} />
       </label>
       <button type="button" className="b2-btn b2-quiet" onClick={() => setAll((v) => !v)}>{all ? "Show only the suggestions" : `Show all ${PALETTES.length} colour sets`}</button>
+    </Section>
+  );
+}
+
+// Painted backgrounds (owner, 19 Nov 2026). Picking one also picks letter
+// colours that read well on it; the three with a frame painted in drop the
+// border so the two don't clash.
+function Backgrounds() {
+  const { d, update, now, say } = useB2();
+  const data = toViewData(d);
+  const sensitive = !!eventType(d.eventType)?.sensitive;
+  return (
+    <Section icon="image" title="Background" line="A painted background behind your words. The colours change to suit it; you can still change them after.">
+      {sensitive && <Note>These are bright and festive. For a memorial, a plain background is usually kinder.</Note>}
+      <div className="b2-cardgrid" role="radiogroup" aria-label="Background">
+        <button type="button" role="radio" aria-checked={!d.backdrop} className="b2-cardpick" onClick={() => update((x) => ({ ...x, backdrop: undefined }))}>
+          <span className="b2-cardpick-view" aria-hidden="true"><EventView data={{ ...data, backdrop: null }} view="card" now={now} thumb /></span>
+          <span>None</span>
+        </button>
+        {BACKDROPS.map((b) => (
+          <button key={b.key} type="button" role="radio" aria-checked={d.backdrop === b.key} className="b2-cardpick"
+            onClick={() => {
+              update((x) => ({ ...x, backdrop: b.key, palette: b.palette, border: b.frame ? "none" : x.border }));
+              if (b.frame && d.border !== "none") say("This one has its own frame, so the border is off.");
+            }}>
+            <span className="b2-cardpick-view" aria-hidden="true">
+              <EventView data={{ ...data, backdrop: b.key, palette: toViewData({ ...d, palette: b.palette }).palette, border: b.frame ? "none" : data.border }} view="card" now={now} thumb />
+            </span>
+            <span>{b.name}</span>
+          </button>
+        ))}
+      </div>
     </Section>
   );
 }

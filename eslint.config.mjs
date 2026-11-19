@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     ".open-next/**",
     ".wrangler/**",
     "cloudflare-env.d.ts",
+    // The owner's design working folder (raw images and his own conversion script)
+    "images/**",
   ]),
 ]);
 

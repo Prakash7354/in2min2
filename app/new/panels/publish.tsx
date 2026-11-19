@@ -8,6 +8,7 @@
 import { Icon } from "@/components/icons";
 import { eventType, formatPence, plan } from "@/lib/catalog";
 import { missingForPublish, slugOk, unpublishedChanges } from "@/lib/draft";
+import { defaultCredit } from "@/lib/event-view";
 import { MISSING_PANEL, useB2 } from "../context";
 import { suggestedSlug } from "../kinds";
 import { PanelShell } from "../panels";
@@ -27,6 +28,8 @@ export function PublishPanel() {
   const link = eventLink(d);
   const p = plan(d.plan);
 
+  // The host's own line at the bottom ("Hosted by …"), or the family names if given.
+  const host = d.credit === null ? "" : d.credit?.name ?? defaultCredit({ scale: d.scale, sensitive: !!t?.sensitive, organiserName: d.organiserName, family: d.family })?.name ?? "";
   const footer = (
     <>
       {pub.error && <p className="b2-note" data-tone="warn" style={{ marginBottom: 6 }}>{pub.error}</p>}
@@ -58,6 +61,12 @@ export function PublishPanel() {
             ))}
           </div>
         ) : <Note tone="ok">Everything needed is filled in.</Note>}
+        {!community && (
+          <Field label="Hosted by (shown at the bottom of the page)" hint="So guests know who it's from. Leave empty if you like.">
+            <input className="b2-input b2-input-sm" value={host} maxLength={80} placeholder="e.g. The Gurung family"
+              onChange={(e) => update((x) => ({ ...x, credit: e.target.value ? { label: x.credit?.label ?? "Hosted by", name: e.target.value } : undefined }))} />
+          </Field>
+        )}
         <Row icon="eye" label="See it as guests will" line="The invitation, the page, on the day, and after" onClick={() => b.open("preview")} />
         <Toggle icon="check" label="I've checked it" line="The names, date, place and numbers, and every word in every language." checked={d.checked}
           onChange={(v) => update((x) => ({ ...x, checked: v }))} />

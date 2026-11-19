@@ -56,15 +56,15 @@ export type EventType = {
 
 export const EVENT_TYPES: EventType[] = [
   { key: "birthday", tag: "popular", label: "Birthday", scale: "personal", theme: "modern", toggles: {}, repeatsYearly: true, sensitive: false,
-    line: "Any age, any size", starLabel: "The birthday person", palette: "confetti_brights", textStyle: "playful", borders: ["balloons", "confetti", "bunting", "stars", "floral", "royal", "watercolour_roses", "golden_leaves"], photoStyle: "polaroid", tone: "Fun and playful" },
+    line: "Any age, any size", starLabel: "The birthday person", palette: "confetti_brights", textStyle: "playful", borders: ["balloons", "confetti", "bunting", "stars", "floral", "golden_roses", "royal", "watercolour_roses", "golden_leaves"], photoStyle: "polaroid", tone: "Fun and playful" },
   { key: "pasni", tag: "popular", label: "Pasni (rice feeding)", scale: "personal", theme: "festive", toggles: { gift_registry: true }, repeatsYearly: false, sensitive: false,
-    line: "Baby's first rice", starLabel: "The child", palette: "marigold_indigo", textStyle: "heritage", borders: ["marigold", "royal", "mandala", "floral", "balloons"], photoStyle: "arch", tone: "Warm and welcoming" },
+    line: "Baby's first rice", starLabel: "The child", palette: "marigold_indigo", textStyle: "heritage", borders: ["marigold", "royal", "ornate_flowers", "mandala", "floral", "balloons"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "party", label: "Party", scale: "personal", theme: "modern", toggles: {}, repeatsYearly: false, sensitive: false,
     line: "House-warming, get-together", starLabel: "Who it's for", palette: "citrus", textStyle: "playful", borders: ["confetti", "bunting", "balloons", "stars", "sunburst"], photoStyle: "hero", tone: "Fun and playful" },
   { key: "ceremony", label: "Family ceremony", scale: "personal", theme: "festive", toggles: { gift_registry: true }, repeatsYearly: false, sensitive: false,
     line: "Puja, naming, blessing", starLabel: "Who it's for", palette: "saffron", textStyle: "heritage", borders: ["marigold", "mandala", "royal", "dhaka", "ornate"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "wedding", tag: "popular", label: "Wedding", scale: "celebration", theme: "classic", toggles: { gift_registry: true, guestbook: true }, repeatsYearly: true, sensitive: false,
-    line: "Mehndi, ceremony, reception", starLabel: "The couple", palette: "red_gold", textStyle: "calligraphy", borders: ["royal", "red_roses", "gold_crown", "ornate", "watercolour_roses", "floral", "marigold", "golden_leaves", "art_deco", "mandala", "fine_line"], photoStyle: "arch", tone: "Formal and elegant" },
+    line: "Mehndi, ceremony, reception", starLabel: "The couple", palette: "red_gold", textStyle: "calligraphy", borders: ["royal", "golden_roses", "red_roses", "wedding_lines", "gold_crown", "ornate_flowers", "ornate", "watercolour_roses", "floral", "marigold", "golden_leaves", "art_deco", "mandala", "fine_line"], photoStyle: "arch", tone: "Formal and elegant" },
   { key: "engagement", label: "Engagement", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: false, sensitive: false,
     line: "Tika, ring ceremony", starLabel: "The couple", palette: "burgundy_gold", textStyle: "elegant", borders: ["floral", "royal", "red_roses", "watercolour_roses", "golden_leaves", "ornate", "art_deco", "stars"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "anniversary", label: "Wedding anniversary", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: true, sensitive: false,
@@ -89,7 +89,7 @@ export const EVENT_TYPES: EventType[] = [
     line: "Funeral, prayers, remembrance", starLabel: "In memory of", palette: "calm", textStyle: "formal", borders: ["fine_line", "laurel", "golden_leaves", "khukuri", "vines", "none"], photoStyle: "arch", tone: "Gentle and respectful" },
   // Festive season (owner, 14 Nov 2026: seasonal designs to show off the festive launch; 0004)
   { key: "christmas", tag: "new", label: "Christmas party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,
-    line: "Family, friends or work", starLabel: "Who it's for", palette: "christmas", textStyle: "classic", borders: ["snowflakes", "stars", "floral", "bunting"], photoStyle: "hero", tone: "Festive and joyful", effect: "snow" },
+    line: "Family, friends or work", starLabel: "Who it's for", palette: "christmas", textStyle: "classic", borders: ["christmas_greenery", "snowflakes", "stars", "floral", "bunting"], photoStyle: "hero", tone: "Festive and joyful", effect: "snow" },
   { key: "new-year", tag: "new", label: "New Year’s Eve party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,
     line: "Countdown to midnight", starLabel: "Who it's for", palette: "midnight_gold", textStyle: "contemporary", borders: ["fireworks", "stars", "art_deco", "confetti"], photoStyle: "hero", tone: "Festive and joyful", effect: "fireworks" },
   { key: "lhosar", tag: "new", label: "Lhosar celebration", scale: "community", theme: "festive", toggles: { tickets: true, sponsors: true }, repeatsYearly: true, sensitive: false,
@@ -482,7 +482,8 @@ export type BorderKey =
   | "none" | "fine_line" | "ornate" | "art_deco" | "laurel" | "floral" | "vines" | "marigold" | "dhaka" | "mandala"
   | "balloons" | "confetti" | "bunting" | "stars" | "sunburst" | "rainbow" | "stripes" | "pitch"
   | "snowflakes" | "fireworks" | "prayer_flags" | "royal" | "khukuri"
-  | "red_roses" | "watercolour_roses" | "gold_crown" | "golden_leaves";
+  | "red_roses" | "watercolour_roses" | "gold_crown" | "golden_leaves"
+  | "christmas_greenery" | "golden_roses" | "ornate_flowers" | "wedding_lines";
 
 export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[] = [
   { key: "none", name: "Plain", line: "No border: let the words speak" },
@@ -496,6 +497,11 @@ export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[
   { key: "watercolour_roses", tag: "new", name: "B2 Watercolour roses", line: "Soft painted roses; best on light colours" },
   { key: "gold_crown", tag: "new", name: "B3 Gold crown", line: "Gold scroll corners and a crown line; takes your colours" },
   { key: "golden_leaves", tag: "new", name: "B4 Golden leaves", line: "A fine frame with leafy sprays; takes your colours" },
+  // Whole frames traced from the owner's designs (19 Nov 2026; public/art/frames), in the accent colour
+  { key: "christmas_greenery", tag: "new", name: "B5 Christmas greenery", line: "Holly, pine and snowflakes all round; takes your colours" },
+  { key: "golden_roses", tag: "new", name: "B6 Golden roses", line: "Fine drawn roses in the corners; takes your colours" },
+  { key: "ornate_flowers", tag: "new", name: "B7 Ornate flowers", line: "Rich flower corners with a crest; takes your colours" },
+  { key: "wedding_lines", tag: "new", name: "B8 Wedding lines", line: "Elegant fine lines and corner sprays; takes your colours" },
   { key: "laurel", name: "Laurel", line: "A laurel wreath: regiments, awards, remembrance" },
   { key: "floral", tag: "popular", name: "Flowers", line: "Flower sprays in the corners" },
   { key: "vines", name: "Leafy vine", line: "A vine of many-coloured leaves" },
@@ -514,6 +520,25 @@ export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[
   { key: "fireworks", tag: "new", name: "Fireworks", line: "Bursts of colour: New Year and Diwali" },
   { key: "prayer_flags", tag: "new", name: "Prayer flags", line: "Five-colour flags: Lhosar and Buddhist festivals" },
 ];
+
+// Painted backgrounds behind the words (owner, 19 Nov 2026; public/art/backgrounds).
+// Each comes with colours for the letters that read well on it; three have
+// their own frame painted in, so they go without a border. Kept in
+// feature_toggles.settings.backdrop (no database change). `shade` darkens
+// the middle a little where a bright centre makes the words hard to read.
+export type Backdrop = { key: string; name: string; file: string; dark: boolean; palette: string; frame?: boolean; shade?: number };
+export const BACKDROPS: Backdrop[] = [
+  { key: "ivory_frame", name: "Ivory and gold", file: "/art/backgrounds/minimalist-ivory-elegant-bg.webp", dark: false, palette: "navy_gold", frame: true },
+  { key: "rose_frame", name: "Rose blush", file: "/art/backgrounds/rose-pink-whimsical-bg.webp", dark: false, palette: "lali_gurans", frame: true },
+  { key: "red_gold_frame", name: "Red and gold frame", file: "/art/backgrounds/red-gold-frame-bg.jpg", dark: true, palette: "sindoor", frame: true },
+  { key: "luminous_red", name: "Glowing red", file: "/art/backgrounds/luminous-red-gradient-bg.webp", dark: true, palette: "sindoor" },
+  { key: "luminous_blue", name: "Glowing blue", file: "/art/backgrounds/luminous-blue-gradient-bg.webp", dark: true, palette: "midnight_gold", shade: 0.25 },
+  { key: "luminous_green", name: "Glowing green", file: "/art/backgrounds/luminous-green-gradient-bg.webp", dark: true, palette: "black_gold" },
+  { key: "luminous_teal", name: "Glowing teal", file: "/art/backgrounds/luminous-teal-gradient-bg.webp", dark: true, palette: "black_gold", shade: 0.5 },
+  { key: "fireworks_blue", name: "Fireworks", file: "/art/backgrounds/royal-blue-celebration-bg.webp", dark: true, palette: "midnight_gold" },
+  { key: "festive_teal", name: "Festive baubles", file: "/art/backgrounds/scarlet-festive-party-bg.webp", dark: true, palette: "black_gold" },
+];
+export const backdropOf = (key: string | null | undefined) => BACKDROPS.find((b) => b.key === key) ?? null;
 
 // A gentle moving effect over the page (0004, events.effect). Only when
 // Motion is on, never on the builder's small copies, and never for people who

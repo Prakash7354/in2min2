@@ -48,6 +48,8 @@ export type EventViewData = {
   credit: Credit | null;
   // A blessing line at the very top, e.g. "॥ श्री गणेशाय नमः ॥", or "".
   topLine: string;
+  // A painted background behind the words (BACKDROPS key), or null.
+  backdrop: string | null;
   date: string;        // YYYY-MM-DD in the event's own time zone
   startTime: string;   // HH:MM
   endTime: string;     // HH:MM or ""

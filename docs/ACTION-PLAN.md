@@ -22,6 +22,39 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
+### Your list of 19 Nov, put in order
+
+**Done (19 Nov), live after the next deploy:**
+- [x] Publishing now also needs **where it is** and **the invitation words** (as well as the date and time). Publish lists what's missing; tapping it takes you there.
+- [x] Many events with the same title: each gets its own address automatically (…-birthday, …-birthday-2, …-birthday-3).
+- [x] **Hosted by** box on the Publish screen, shown at the bottom of the page (e.g. "Hosted by the Gurung family").
+- [x] Love heart in red; the phone wheel sits in the middle until comments arrive.
+- [x] Sign-in: **Send the code again** (after 60 seconds), and a hint to check Junk for codes@in2min2.com.
+- [x] Your border designs as **B5 Christmas greenery, B6 Golden roses, B7 Ornate flowers, B8 Wedding lines**. Each takes the event's colours.
+- [x] **Look › Background**: 9 of your painted backgrounds. Choosing one also picks letter colours that read well on it.
+
+**Next, Claude Code (in this order; each builds on the one before):**
+1. **Safety before real guests:** nightly backup with a practice restore, error alerts, the anti-spam check (Turnstile), and a daily "keep awake" call so the free Supabase plan doesn't pause.
+2. **Your events on every device:** a "Your events" list from your account, so the same event opens on your phone and your laptop. Builder 2.0 also gets a wider layout for laptops.
+3. **Edit, save and remove beside the invitation** on Home (remove asks first, and can be undone for 30 days).
+4. **Co-hosts** (a mum and son building together): invite by link. The database already has co-hosts; this adds the screens.
+5. **Link pictures:** each event's own picture when its link is shared on WhatsApp or Facebook, and a share-as-image button for Instagram.
+6. **Install on the phone:** "Add to Home Screen" with the In2Min2 icon. No app store needed.
+7. **Music on the invitation** (once you decide, below).
+8. **Marketing website** with the animated "how it works", then the ads and the quiz.
+9. After the tests: AI quick-fill from one sentence, an "Other" event type, "show the thank-you page now", and "What's new" notes for hosts.
+
+**Waiting for your answer** (Claude Code's recommendation in brackets):
+- Music: our own library of licensed tracks, played after the guest's first tap, looping until they switch it off (yes).
+- 3D-style icons from Microsoft's free Fluent Emoji set (yes, they're free for business use).
+- Marketing site and animated hero: build after the real-event test (yes).
+- Ads and quiz: after the marketing site, when there is something to sell (yes).
+
+**You:**
+- Ask testers to mark the code email **Not junk**.
+- Nothing to do for the email records: checked on 19 Nov, in2min2.com already has all three (DKIM, SPF and DMARC). Codes landing in Junk is normal for a new address; it gets better as people mark it Not junk.
+- Keep collecting notes and screenshots from testers.
+- New designs: see "Making designs" at the end of this file.
 
 ### [ ] 1. Try Builder 2.0 on your phone, then test it with 5 people (about 40 minutes in all)
 
@@ -99,6 +132,12 @@ When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Dr
 
 ## Before the January pilot, or before sharing links widely
 
+**Claude Code will remind you when we reach testing with real people (owner, 17 Nov):**
+- [ ] Register with the ICO (data protection fee) and add a business address for the privacy page.
+- [ ] Turn on Google AI (Gemini) billing, so guests' details are covered by the paid terms.
+- [ ] Approve the legal drafts.
+- [ ] Then watch Supabase and Cloudflare R2 use against user numbers, and move to paid plans only when the numbers say so.
+
 - [ ] **4. A virtual business address for GoChuchuro.** For now your home address is on the drafts, as you chose. When you have a virtual address, send it to Claude Code and it's swapped in everywhere. It also keeps your home off the ICO's public register.
 - [ ] **5. Pay the ICO fee (15 minutes).** ico.org.uk › search *"pay the data protection fee"* › **Tier 1**, £47 by Direct Debit. Use the virtual address. Send Claude Code the registration number; it goes on the privacy page.
 - [ ] **6. Ask your accountant:** do you need to register with HMRC as self-employed, and at what income is a limited company worth it?
@@ -139,3 +178,11 @@ At the end of each phase you get:
 - exactly what was tested and how;
 - what wasn't tested;
 - a short test to try on your own phone.
+
+## Making designs (for you)
+
+**Borders:** a PNG at least 1,500 pixels wide, on a see-through background, one design per file, named B9, B10… Keep the middle empty: decorations only in the outer band (about a sixth of the width on each side). Claude Code turns them into single-colour drawings that take each event's colours. Fine lines work best; solid filled shapes and shading don't survive the conversion (that's why "elegant blue-gold" and "ornate gold frame" couldn't be used as borders).
+
+**Backgrounds:** WebP or JPG, 1,200 × 1,800 pixels (portrait), under 300 KB each, with a calmer middle where the words go. If it has its own frame painted in, say so in the file name (e.g. "…-frame-bg.webp").
+
+**Rights:** only images you made yourself, or with a licence that allows business use. Keep a note of where each came from.

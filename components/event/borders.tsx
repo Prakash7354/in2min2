@@ -236,6 +236,20 @@ function GoldenLeaves() {
   return <><span className="ev-picFrame ev-b04-frame" /><Pic id="b04" corners={["tl", "br"]} /></>;
 }
 
+// Whole frames (B5–B8, owner's designs traced to single-colour SVG): the top
+// half of the frame is pinned to the top of the card and the bottom half to
+// the bottom, so corners never stretch, however tall the card. In the accent
+// colour, with a soft shine.
+function Frame({ file }: { file: string }) {
+  const style = { ["--frame" as string]: `url(/art/frames/${file})` };
+  return (
+    <>
+      <span className="ev-frame2 ev-frame2Top" style={style} />
+      <span className="ev-frame2 ev-frame2Bottom" style={style} />
+    </>
+  );
+}
+
 function ArtDeco() {
   const rays = Array.from({ length: 9 }, (_, i) => {
     const a = (i * 90) / 8 * (Math.PI / 180);
@@ -712,6 +726,10 @@ const ART: Record<BorderKey, () => ReactNode> = {
   watercolour_roses: WatercolourRoses,
   gold_crown: GoldCrown,
   golden_leaves: GoldenLeaves,
+  christmas_greenery: () => <Frame file="christmas-greenery.svg" />,
+  golden_roses: () => <Frame file="golden-roses.svg" />,
+  ornate_flowers: () => <Frame file="ornate-flowers.svg" />,
+  wedding_lines: () => <Frame file="wedding-lines.svg" />,
   laurel: Laurel,
   floral: Floral,
   vines: Vines,

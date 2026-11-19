@@ -7,7 +7,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
-import { partyColours, skyFor, textStyle, type HeroMotion, type Palette } from "@/lib/catalog";
+import { partyColours, skyFor, textStyle, type HeroMotion, type Palette, backdropOf } from "@/lib/catalog";
 import {
   daysUntil, directionsUrl, formatDate, formatTime, monogram, runningOrder,
   type EventStageView, type EventViewData, type MenuItem,
@@ -47,7 +47,8 @@ export function eventVars(p: Palette, textStyleKey: string): CSSProperties {
 
 export default function EventView({ data, view, now, thumb = false, anchors = false, reply, photos, notice }: Props) {
   const p = data.palette;
-  const vars = eventVars(p, data.textStyle);
+  const bd = backdropOf(data.backdrop);
+  const vars = bd ? { ...eventVars(p, data.textStyle), ["--ev-backdrop" as string]: `url(${bd.file})`, ["--ev-shade" as string]: String(bd.shade ?? 0) } : eventVars(p, data.textStyle);
 
   return (
     <div className={s.frame}>
@@ -61,6 +62,7 @@ export default function EventView({ data, view, now, thumb = false, anchors = fa
         data-border={data.border}
         data-gradient={p.gradient ? "on" : "off"}
         data-thumb={thumb ? "" : undefined}
+        data-backdrop={bd ? (bd.dark ? "dark" : "light") : undefined}
       >
         {data.demo && <span className={s.demo}>Demo</span>}
         {!thumb && data.motion && !data.sensitive && <Effect kind={data.effect} />}

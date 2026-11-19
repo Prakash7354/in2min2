@@ -86,9 +86,15 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
   const row = eventRow(d, slug);
 
   // 1. The event itself
-  const saved = d.eventId
+  let saved = d.eventId
     ? await sb.from("events").update(row).eq("id", d.eventId).select("id, event_type, slug, short_code").single()
     : await sb.from("events").insert(row).select("id, event_type, slug, short_code").single();
+  // Another event already has this web address (two "Sita's 50th birthday"s):
+  // add -2, -3… so both pages live side by side (owner, 19 Nov 2026).
+  for (let n = 2; !d.eventId && saved.error?.code === "23505" && n <= 12; n++) {
+    const next = n <= 9 ? `${slug.slice(0, 57)}-${n}` : `${slug.slice(0, 54)}-${Math.random().toString(36).slice(2, 6)}`;
+    saved = await sb.from("events").insert({ ...row, slug: next }).select("id, event_type, slug, short_code").single();
+  }
   if (saved.error) return explain(saved.error);
   const ev = saved.data as { id: string; event_type: string; slug: string; short_code: string };
 
@@ -128,6 +134,7 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
   const cur = await sb.from("feature_toggles").select("settings").eq("event_id", ev.id).maybeSingle();
   const settings: Record<string, unknown> = { ...((cur.data?.settings as Record<string, unknown> | null) ?? {}) };
   if (d.topLine?.trim()) settings.topline = d.topLine.trim().slice(0, 40); else delete settings.topline;
+  if (d.backdrop) settings.backdrop = d.backdrop; else delete settings.backdrop;
   if (d.credit === undefined) delete settings.credit;
   else settings.credit = d.credit === null ? { hidden: true } : { label: d.credit.label.trim().slice(0, 30), name: d.credit.name.trim().slice(0, 80) };
   const t = await sb.from("feature_toggles").update({ ...toggles, settings }).eq("event_id", ev.id);

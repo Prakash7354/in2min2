@@ -58,7 +58,7 @@ ok("every switch in a type's defaults exists", cat.EVENT_TYPES.every((t) => Obje
 const shape = /^[a-z][a-z_]{2,29}$/;
 ok("the database accepts any well-formed text style and border", /text_style\s+text not null default 'classic' check \(text_style ~ '\^\[a-z\]\[a-z_\]\{2,29\}\$'\)/.test(sql) && /border\s+text not null default 'none' check \(border ~/.test(sql));
 ok("every text style name fits the database check", cat.TEXT_STYLES.every((t) => shape.test(t.key)) && cat.TEXT_STYLES.length === 10);
-ok("every border name fits the database check", cat.BORDERS.every((b) => shape.test(b.key)) && cat.BORDERS.length === 27);
+ok("every border name fits the database check", cat.BORDERS.every((b) => shape.test(b.key)) && cat.BORDERS.length === 31);
 const dbEffects = later.match(/effect in \(([^)]+)\)/)?.[1].replace(/'|\s/g, "").split(",");
 ok("moving effects match (0004)", JSON.stringify(dbEffects) === JSON.stringify(cat.EFFECTS.map((f) => f.key)), JSON.stringify(dbEffects));
 ok("every palette name fits the database check", cat.PALETTES.every((p) => shape.test(p.key)));

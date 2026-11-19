@@ -232,7 +232,7 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true, n
       {notices && <Notices list={lv.announcements} />}
       <CheerFloats floats={lv.floats} fixed />
       {wheelPhotos.length >= 3 && (
-        <div className={s("wheelHold")}>
+        <div className={s("wheelHold")} data-quiet={lv.cheers.some((c) => c.body) ? undefined : ""}>
           <PhotoWheel eventId={ev.id} photos={wheelPhotos} stars={featured.map((p) => p.id)} arrivals={arrivals} motion={motion}
             celebrate={motion && !sensitive} onLove={(id) => void love(id)} sky={sky}
             onOpen={(id) => { const i = wheelPhotos.findIndex((p) => p.id === id); if (i >= 0) setOpen({ from: "wheel", i }); }} />
