@@ -204,7 +204,7 @@ function PhotoBox({ d, className }: { d: EventViewData; className: string }) {
   );
   const vars = { "--cycle": `${n * SHOW_SECONDS[d.heroMotion]}s`, "--base": `ev-${d.heroMotion}base-${n}` } as CSSProperties;
   return (
-    <div className={`${s.photo} ${className}`} data-fit={d.cover ? d.coverFit : undefined}
+    <div className={`${s.photo} ${className}`} data-fit={d.cover ? d.coverFit : undefined} data-empty={d.cover ? undefined : ""}
       data-show={n > 1 ? d.heroMotion : undefined} style={n > 1 ? vars : undefined}>
       {d.cover ? (
         <>

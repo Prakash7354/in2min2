@@ -20,6 +20,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { Icon, type IconName } from "@/components/icons";
+import { TapHand } from "@/components/tap-hand";
 import { backdropImage, backdropOf } from "@/lib/catalog";
 import { envelopeFrom, envelopeTo, formatDate, openedKey, type EventViewData } from "@/lib/event-view";
 import { eventVars } from "./event-view";
@@ -148,11 +149,7 @@ export function Opening({ data, title, to, id, preview }: Props) {
           </span>
           <span className="op-hand">
             <span className="op-ripple" />
-            <svg viewBox="0 0 48 48">
-              <path d="M19 7a3.5 3.5 0 0 1 7 0v14.5l1.2-.1V18a3.2 3.2 0 0 1 6.4 0v3.8l.5-.05a3.2 3.2 0 0 1 6.2 1.3v1.6a3.1 3.1 0 0 1 4.7 2.7V34c0 6.4-4.8 11-11 11h-5.2c-3.6 0-6.7-1.7-8.8-4.7L11.9 30.2a3.3 3.3 0 0 1 5-4.3L19 28.3V7z"
-                fill="#FFFFFF" stroke="#1C1A2E" strokeWidth="2.2" strokeLinejoin="round" />
-              <path d="M26 21.5V29M33.6 21.8V29M40 25v4" fill="none" stroke="#1C1A2E" strokeWidth="1.8" strokeLinecap="round" opacity="0.55" />
-            </svg>
+            <TapHand />
           </span>
         </span>
         <span className="op-hint" aria-hidden="true">

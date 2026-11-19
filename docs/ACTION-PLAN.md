@@ -42,6 +42,18 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
   - **Shared:** one link to pass round. The envelope says "To Our family and friends" (or your choice).
   - **Open:** for anyone: "To Everyone, all welcome", "Teams, stalls and sponsors", or your own words.
   - **From** is on every envelope, made from the names you've given (e.g. "Ram & Gita Gurung"), or your own words.
+- [x] **Clearer builder (19 Nov, evening):**
+  - **Each part has its own job colour.** Boxes you type in are light, like paper. Quick choices are tinted buttons, and the one you picked turns gold.
+  - **Each word box says who wrote it:** a violet edge for the AI, green for your own words, grey for ready-made.
+  - **Each area has its own colour**, the same on its Home tile and its screen: Words gold, Who's invited postbox red, When and where teal, Look purple.
+- [x] **Moving guidance (19 Nov, evening):**
+  - A first-time **welcome** with **See what your guests get**: the real envelope with a guest's name, then the invitation, with music.
+  - A **tapping hand** on the first screens (Tap one, Swipe for more, Watch, Publish when you're happy). Each one goes once it's been done.
+  - **See what your guests get** on "Your invitation is ready" too, with your own event.
+- [x] **Every kind starts complete (19 Nov, evening):**
+  - Family and celebration events start with the **envelope on**.
+  - **Music** starts on where the tune plainly fits: Happy Birthday for a birthday, the Christmas tune for Christmas, Wedding vows for weddings, engagements and anniversaries. Memorials and public events start quiet.
+  - With no photo yet, the photo space shows the **initials as a monogram** in the event's own colours, instead of an empty grey box.
 
 **Next, Claude Code (in this order; each builds on the one before):**
 1. [x] **Safety before real guests (built 19 Nov; switch it on with step 4 below):** nightly backup and a practice-restore tool, error emails, an hourly database check that also keeps the free Supabase plan awake, and the anti-spam check on sign-in.
@@ -66,7 +78,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 **in2min2.com/new** is now the real builder in the new look. It's hidden (not linked anywhere) and works on the same event as the classic builder, so your test event may open straight on its Home.
 
 **Try it yourself first (15 minutes):**
-1. Open **in2min2.com/new** on your phone. To start fresh, tap **You** (the round person button, top right) › **Start a new event** › **Yes, start new**.
+1. Open **in2min2.com/new** on your phone. To start fresh, tap **You** (the round person button, top right) › **Start a new event** › **Yes, start new**. You'll see the new **welcome** first; it shows until someone taps **Let's start** on that phone.
 2. Tap **Birthday**, type a name and tap **50th**. Then tap **Another age** and use **−** or **+** (or type a number) to make it, say, an 11th. Tap **Change** beside "On the invitation" to word it your own way.
    - Watch the little card at the bottom left: it changes as you type. Tap it to see the **Preview**, then **Carry on**.
    - On each screen, tap the quick choices (**This Saturday**, **2pm**, **Community hall**). Swipe to choose a look, and add a photo.

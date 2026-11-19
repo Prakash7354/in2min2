@@ -39,7 +39,7 @@ export function RepliesPanel() {
   const link = eventLink(d);
   if (!d.eventId) {
     return (
-      <PanelShell icon="envelope" title="Replies" line="Guests say yes, no or maybe on your page, and how many are coming.">
+      <PanelShell icon="message" title="Replies" line="Guests say yes, no or maybe on your page, and how many are coming.">
         <Note>Once your page is published, every reply appears here, with its message, and on the bell.</Note>
         <button type="button" className="b2-btn b2-secondary b2-block" onClick={() => b.open("publish")}>Check and publish</button>
       </PanelShell>
@@ -47,7 +47,7 @@ export function RepliesPanel() {
   }
   if (!b.session) {
     return (
-      <PanelShell icon="envelope" title="Replies">
+      <PanelShell icon="message" title="Replies">
         <Note>Sign in to see who has replied.</Note>
         <button type="button" className="b2-btn b2-secondary b2-block" onClick={() => b.askSignIn("Sign in to see your guests' replies.")}>Sign in</button>
       </PanelShell>
@@ -65,7 +65,7 @@ export function RepliesPanel() {
   const reminder = `Reminder: ${title}${d.date ? ` is on ${formatDate(d.date)}` : ""}. If you haven't replied yet, please tap the link and let us know:`;
 
   return (
-    <PanelShell icon="envelope" title="Replies" line={d.toggles.rsvp ? "Every reply, with its message. New ones also show on the bell." : "Replies are switched off in Settings, so guests can't reply."}>
+    <PanelShell icon="message" title="Replies" line={d.toggles.rsvp ? "Every reply, with its message. New ones also show on the bell." : "Replies are switched off in Settings, so guests can't reply."}>
       {state.error && <Note tone="warn">{state.error}</Note>}
       <div className="b2-stats">
         {([["Coming", t.coming, "people"], ["Maybe", t.maybe, "people"], ["Can't come", t.cant, t.cant === 1 ? "reply" : "replies"], ["Waiting", t.waiting, "people"]] as const).map(([k, n, unit]) => (

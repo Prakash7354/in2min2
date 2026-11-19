@@ -3,10 +3,11 @@
 // it is saved to the database instead (events, event_people, sub_events,
 // feature_toggles). Field names follow the database columns.
 
-import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
+import { COPY_KEYS, type CopyKey, type EventCopy } from "@/lib/ai/copy";
 import {
   backdropOf,
   musicOf,
+  STARTING_MUSIC,
   eventType, heroMotionOf, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
   type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
@@ -76,6 +77,8 @@ export type Draft = {
   quickAt?: string;
   quickDone?: boolean;
   wordsBy?: "ai" | "suggested" | "host";
+  // And box by box, so each one can say who wrote it (owner, 19 Nov 2026).
+  copyBy?: Partial<Record<CopyKey, BoxBy>>;
   milestone?: string;
   // The line at the bottom left of the page (lib/event-view.ts creditFor):
   // left out = made from the organiser or family; null = hidden. Published
@@ -151,14 +154,32 @@ export function newDraft(): Draft {
   };
 }
 
+// The envelope and music each kind starts with (owner, 19 Nov 2026: every
+// kind should start as a complete, working page). Family and celebration
+// events open with an envelope, with music where a tune plainly fits
+// (catalog STARTING_MUSIC); public events and memorials start plain and quiet.
+export function startingEnvelope(key: string | null): boolean {
+  const t = eventType(key);
+  return !!t && t.scale !== "community" && !t.sensitive;
+}
+export function startingMusic(key: string | null): string {
+  return (key && STARTING_MUSIC[key]) || "";
+}
+
 // Choosing what you're celebrating fills in sensible starting choices.
-// Anything the host has already typed (names, date, words) is kept.
+// Anything the host has already typed (names, date, words) is kept, and so is
+// an envelope or music they chose themselves; ones that came with the old
+// kind follow the new one ("" is "no music", chosen).
 export function applyType(d: Draft, key: string): Draft {
   const t = eventType(key);
   if (!t) return d;
   const scale = t.scale;
+  const music = d.music === undefined || d.music === startingMusic(d.eventType) ? startingMusic(key) : d.music;
+  const envelope = d.envelope === undefined || d.envelope === startingEnvelope(d.eventType) ? startingEnvelope(key) : d.envelope;
   return {
     ...d,
+    music,
+    envelope,
     eventType: key,
     scale,
     stars: { ...d.stars, relation: t.starLabel },
@@ -173,6 +194,19 @@ export function applyType(d: Draft, key: string): Draft {
     toggles: togglesFor(key),
     plan: scale === "community" ? "community" : d.plan === "community" ? "popup" : d.plan,
   };
+}
+
+// Who wrote each box of words: the AI, the host, or ready-made.
+export type BoxBy = "ai" | "host" | "ready";
+export function boxBy(d: Draft, k: CopyKey): BoxBy {
+  if (!d.wordsBy || d.wordsBy === "suggested") return "ready";
+  return d.copyBy?.[k] ?? (d.wordsBy === "ai" ? "ai" : "host");
+}
+// Marks some boxes; the rest keep who wrote them (all ready-made, if until now
+// the words were following the facts).
+export function markBoxes(d: Draft, keys: CopyKey[], by: BoxBy): Partial<Record<CopyKey, BoxBy>> {
+  const was = !d.wordsBy || d.wordsBy === "suggested" ? Object.fromEntries(COPY_KEYS.map((k) => [k, "ready" as BoxBy])) : d.copyBy ?? {};
+  return { ...was, ...Object.fromEntries(keys.map((k) => [k, by])) };
 }
 
 export function applyScale(d: Draft, scale: Scale): Draft {
@@ -235,7 +269,7 @@ export function slugOk(slug: string): boolean {
 // say "you have changes that aren't live yet". The photo isn't sent yet
 // (photo storage comes later), so it's left out.
 const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "shortPath", "offerClaimed", "publishedHash", "cover", "offerCode",
-  "coverKey", "shareKey", "mediaHash", "moreCovers", "heroKeys", "heroHash", "quickAt", "quickDone", "wordsBy", "milestone", "inviteWay"] as const;
+  "coverKey", "shareKey", "mediaHash", "moreCovers", "heroKeys", "heroHash", "quickAt", "quickDone", "wordsBy", "copyBy", "milestone", "inviteWay"] as const;
 export function fingerprint(d: Draft): string {
   const rest: Record<string, unknown> = { ...d };
   for (const k of LOCAL_ONLY) delete rest[k];

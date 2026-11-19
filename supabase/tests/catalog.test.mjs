@@ -102,6 +102,8 @@ console.log("Music:");
   ok(`every one of the ${cat.MUSIC.length} tunes has its file, a sensible loop and kinds of event`, bad.length === 0, bad.map((m) => m.key).join(", "));
   ok("tunes have different keys and files", new Set(cat.MUSIC.map((m) => m.key)).size === cat.MUSIC.length && new Set(cat.MUSIC.map((m) => m.file)).size === cat.MUSIC.length);
   ok("a birthday suggests the birthday tune first", cat.musicFor("birthday")[0].key === "happy_birthday");
+  const wrong = Object.entries(cat.STARTING_MUSIC).filter(([k, m]) => !cat.eventType(k) || !cat.musicOf(m)?.kinds.includes(k) || cat.eventType(k).sensitive || cat.eventType(k).scale === "community");
+  ok("each kind's starting tune exists, suits it, and memorials and public events start quiet", wrong.length === 0, wrong.map(([k]) => k).join(", "));
   const notes = fs.readFileSync(new URL("../../docs/reference/music.md", import.meta.url), "utf8");
   ok("each tune's source is written down (docs/reference/music.md)", cat.MUSIC.every((m) => notes.includes(m.file.split("/").pop())));
 }

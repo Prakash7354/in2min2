@@ -4,7 +4,7 @@
 // heading, the choices, and one button at the bottom. Every change is saved
 // as it's made, so "Done" just goes back.
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { IconName } from "@/components/icons";
 import { useB2 } from "./context";
 import type { Panel } from "./nav";
@@ -21,7 +21,7 @@ import { RepliesPanel } from "./panels/replies";
 import { SettingsPanel } from "./panels/settings";
 import { WordsPanel } from "./panels/words";
 import { Peek } from "./peek";
-import { BottomBar, PanelHead, TopBar } from "./ui";
+import { BottomBar, PANEL_HUE, PanelHead, TopBar } from "./ui";
 
 export function PanelView({ panel }: { panel: Panel }) {
   switch (panel) {
@@ -48,7 +48,7 @@ export function PanelShell({ icon, title, line, children, footer, wide, peek }: 
   return (
     <>
       <TopBar title={b.d.title || undefined} onBack={() => void b.back()} right={<span />} />
-      <main className="b2-screen" data-wide={wide ? "" : undefined}>
+      <main className="b2-screen" data-wide={wide ? "" : undefined} style={{ "--b2-hue": b.nav.panel ? PANEL_HUE[b.nav.panel] : undefined } as CSSProperties}>
         <PanelHead icon={icon} title={title} line={line} />
         {children}
       </main>

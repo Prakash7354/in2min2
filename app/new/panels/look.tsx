@@ -350,8 +350,9 @@ function Music() {
   const tracks = musicFor(d.eventType);
   const data = toViewData(d);
   const choose = (key: string | undefined) => {
-    update((x) => ({ ...x, music: key, envelope: key && x.envelope === undefined ? true : x.envelope }));
-    if (key && d.envelope === undefined) say("Music on, with an envelope for guests to tap.");
+    // "" is "no music", chosen (so changing the kind of event leaves it quiet).
+    update((x) => ({ ...x, music: key ?? "", envelope: key && !x.envelope ? true : x.envelope }));
+    if (key && !d.envelope) say("Music on, with an envelope for guests to tap.");
   };
   return (
     <>

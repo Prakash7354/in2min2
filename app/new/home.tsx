@@ -4,7 +4,7 @@
 // state it's in; then big tiles with live numbers, each opening one simple
 // panel. One bright button at the bottom: Publish, Update or Share.
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { motion } from "motion/react";
 import EventView from "@/components/event/event-view";
 import { Icon, type IconName } from "@/components/icons";
@@ -16,7 +16,7 @@ import { MISSING_PANEL, useB2 } from "./context";
 import { TYPE_ART } from "./kinds";
 import type { Panel } from "./nav";
 import { TopButtons } from "./sheets";
-import { BottomBar, spring } from "./ui";
+import { BottomBar, Hint, markHint, PANEL_HUE, spring } from "./ui";
 
 export function Home() {
   const b = useB2();
@@ -75,53 +75,57 @@ export function Home() {
         )}
 
         <div className="b2-bento">
-          <Tile span icon="pen" colour="#ffb627" label="Invitation words" delay={0.04} panel="words"
+          <Tile span icon="pen" label="Invitation words" delay={0.04} panel="words"
             line={b.ai.busy === "all" ? "The AI is writing…" : d.wordsBy === "ai" ? "Written by the AI. Tap to read and change." : d.wordsBy === "host" ? "Your own words. Tap to change." : "Ready-made words. Let the AI write better ones."}>
             {d.wordsBy !== "ai" && d.wordsBy !== "host" && <span className="b2-tagline"><Icon name="sparkle" className="" />AI writer</span>}
           </Tile>
-          <Tile icon="envelope" colour="#7c6bff" label="Replies" delay={0.08} panel="replies"
+          <Tile icon="message" label="Replies" delay={0.08} panel="replies"
             big={r ? String(r.coming) : undefined} tag={b.replies.fresh ? `+${b.replies.fresh} new` : undefined}
             line={!d.toggles.rsvp ? "Switched off" : r ? `coming · ${r.maybe} maybe` : live ? (b.session ? "Loading…" : "Sign in to see") : "Open once published"} />
-          <Tile icon="images" colour="#ff4f8b" label="Photos" delay={0.12} panel="photos"
+          <Tile icon="images" label="Photos" delay={0.12} panel="photos"
             big={onWall !== null ? String(onWall) : undefined} tag={b.photos.needsYou ? `${b.photos.needsYou} need you` : undefined}
             line={!d.toggles.photo_wall ? "Switched off" : onWall !== null ? "on the wall" : live ? (b.session ? "Loading…" : "Sign in to see") : "Try the photo wheel now"} />
-          <Tile span icon="user" colour="#e0a100" label="Who's invited" delay={0.1} panel="guests"
+          <Tile span icon="envelope" label="Who's invited" delay={0.1} panel="guests"
             line={(d.inviteWay ?? (d.scale === "community" ? "open" : "personal")) === "personal" ? "Personal invitations: each guest's name on their envelope"
               : d.inviteWay === "shared" ? "One shared link for family and friends" : "An open invitation for anyone"} />
-          <Tile span icon="calendar" colour="#22b8cf" label="When and where" delay={0.16} panel="details"
+          <Tile span icon="calendar" label="When and where" delay={0.16} panel="details"
             line={[when || "Add the date", d.venueName || "Add the place"].join(" · ")} />
-          <Tile span icon="megaphone" colour="#ff7a59" label="Announce" delay={0.18} panel="announce"
+          <Tile span icon="megaphone" label="Announce" delay={0.18} panel="announce"
             line={live ? "Tell guests news: running late, car park full, a weather plan" : "Short updates for guests, once your page is published"} />
-          <Tile icon="clock" colour="#45c486" label={d.scale === "community" ? "Programme" : "Day plan"} delay={0.2} panel="plan"
+          <Tile icon="clock" label={d.scale === "community" ? "Programme" : "Day plan"} delay={0.2} panel="plan"
             big={plan.length ? String(plan.length) : undefined}
             line={plan.length ? `first: ${plan[0].title}` : "Add what happens when"} />
-          <Tile icon="palette" colour="#a99dff" label="Look" delay={0.24} panel="look">
+          <Tile icon="palette" label="Look" delay={0.24} panel="look">
             <span style={{ display: "flex", gap: 6 }} aria-hidden="true">
               {[p.main, p.accent, p.soft].map((c, i) => <i key={i} className="b2-swatch" style={{ background: c }} />)}
             </span>
           </Tile>
-          <Tile icon="people" colour="#f08a5d" label={d.scale === "community" ? "Organiser" : "People"} delay={0.28} panel="people"
+          <Tile icon="people" label={d.scale === "community" ? "Organiser" : "People"} delay={0.28} panel="people"
             line={d.scale === "community" ? (d.organiserName || "Who's organising") : people ? `${people} ${people === 1 ? "name" : "names"} on the page` : "Names and family"} />
-          <Tile icon="switches" colour="#8d8ab5" label="Settings" delay={0.32} panel="settings"
+          <Tile icon="switches" label="Settings" delay={0.32} panel="settings"
             line={`${on} switched on · ${d.isPrivate ? "private" : "public"}`} />
         </div>
       </main>
       <BottomBar>
-        <button type="button" className="b2-btn b2-primary b2-block" onClick={primary.run} disabled={b.pub.busy}>
+        <button type="button" className="b2-btn b2-primary b2-block" onClick={() => { markHint("home-publish"); primary.run(); }} disabled={b.pub.busy}
+          style={{ position: "relative" }}>
           <Icon name={primary.icon} className="" />{primary.label}
+          {!live && <Hint id="home-publish" label="When you’re happy" style={{ right: 18, bottom: 6 }} />}
         </button>
       </BottomBar>
     </>
   );
 }
 
-function Tile({ icon, colour, label, big, line, tag, span, panel, delay, children }: {
-  icon: IconName; colour: string; label: string; big?: string; line?: string; tag?: string; span?: boolean;
+function Tile({ icon, label, big, line, tag, span, panel, delay, children }: {
+  icon: IconName; label: string; big?: string; line?: string; tag?: string; span?: boolean;
   panel: Panel; delay: number; children?: ReactNode;
 }) {
   const b = useB2();
+  const colour = PANEL_HUE[panel];
   return (
     <motion.button type="button" className="b2-tile" data-span={span ? "2" : undefined} onClick={() => b.open(panel)}
+      style={{ "--b2-hue": colour } as CSSProperties}
       initial={{ y: 22, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ ...spring, delay }} whileTap={{ scale: 0.97 }}>
       {tag && <span className="b2-tag">{tag}</span>}
       <span className="b2-ico" style={{ background: `linear-gradient(135deg, ${colour}, color-mix(in srgb, ${colour} 55%, #000))` }} aria-hidden="true">

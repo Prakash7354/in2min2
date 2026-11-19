@@ -599,6 +599,12 @@ export const MUSIC: Track[] = [
     kinds: ["wedding", "engagement", "anniversary", "ceremony", "bratabandha"] },
 ];
 export const musicOf = (key: string | null | undefined) => MUSIC.find((m) => m.key === key) ?? null;
+// The tune a new event starts with, only where it plainly fits (a birthday
+// gets Happy Birthday; a house-warming or New Year's Eve starts quiet). The
+// host can choose any tune, or none, in Look › Envelope & music.
+export const STARTING_MUSIC: Record<string, string> = {
+  birthday: "happy_birthday", christmas: "merry_christmas", wedding: "wedding_vows", engagement: "wedding_vows", anniversary: "wedding_vows",
+};
 // This kind's own tunes first.
 export const musicFor = (eventType: string | null | undefined) =>
   [...MUSIC].sort((a, b) => Number(b.kinds.includes(eventType ?? "")) - Number(a.kinds.includes(eventType ?? "")));

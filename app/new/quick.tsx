@@ -21,7 +21,9 @@ import type { Screen } from "./nav";
 import { Peek } from "./peek";
 import { MilestonePicker, TitleLine } from "./pickers";
 import { AccountButton } from "./sheets";
-import { BottomBar, Chips, Pop, TopBar, spring } from "./ui";
+import { GuestDemo } from "./demo";
+import { BottomBar, Chips, Hint, markHint, Pop, TopBar, spring } from "./ui";
+import { Welcome } from "./welcome";
 
 export function quickSteps(d: Draft): Screen[] {
   return d.scale === "community"
@@ -61,6 +63,7 @@ function useQuick() {
 
 export function QuickScreen({ screen }: { screen: Screen }) {
   const { steps, back } = useQuick();
+  if (screen === "welcome") return <Welcome />;
   const i = steps.indexOf(screen);
   const body: Record<string, ReactNode> = {
     what: <WhatScreen />, who: <WhoScreen />, organiser: <OrganiserScreen />, profit: <ProfitScreen />, when: <WhenScreen />,
@@ -82,6 +85,7 @@ function WhatScreen() {
   const keys = more ? [...FIRST_TYPES, ...MORE_TYPES] : FIRST_TYPES;
   const t = eventType(d.eventType);
   const pick = (k: string) => {
+    markHint("what-tap");
     update((x) => applyType(x, k));
     window.setTimeout(() => next("what"), 220);
   };
@@ -90,12 +94,13 @@ function WhatScreen() {
       <h1 className="b2-h1">What are you celebrating?</h1>
       <p className="b2-lead">Tap one. Everything else is set up for you. <Link className="b2-link" href="/new/guide">See how it works</Link></p>
       <div className="b2-choices">
-        {keys.map((k) => {
+        {keys.map((k, i) => {
           const et = eventType(k);
           const art = TYPE_ART[k];
           if (!et || !art) return null;
           return (
             <button key={k} type="button" className="b2-choice" aria-pressed={d.eventType === k} onClick={() => pick(k)}>
+              {i === 0 && !d.eventType && <Hint id="what-tap" label="Tap one" style={{ right: 12, top: 10 }} />}
               <span className="b2-art" style={{ background: `linear-gradient(135deg, ${art.from}, ${art.to})` }} aria-hidden="true">
                 <Icon name={art.icon} className="" />
               </span>
@@ -341,14 +346,18 @@ function LookScreen() {
     const card = el?.firstElementChild as HTMLElement | null;
     if (!el) return;
     const w = card ? card.offsetWidth + 16 : el.clientWidth;
-    setActive(Math.max(0, Math.min(looks.length - 1, Math.round(el.scrollLeft / w))));
+    const at = Math.max(0, Math.min(looks.length - 1, Math.round(el.scrollLeft / w)));
+    if (at !== active) markHint("look-swipe");
+    setActive(at);
   };
   const jump = (i: number) => (deck.current?.children[i] as HTMLElement | undefined)?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-  const use = (i: number) => { update((x) => applyLook(x, looks[i])); next("look"); };
+  const use = (i: number) => { markHint("look-swipe"); update((x) => applyLook(x, looks[i])); next("look"); };
   return (
     <section className="b2-screen">
       <h1 className="b2-h1">Pick a look</h1>
       <p className="b2-lead">Swipe to see more. Colours, border and letters come together; fine-tune them later.</p>
+      <div style={{ position: "relative" }}>
+      {looks.length > 1 && <Hint id="look-swipe" kind="swipe" label="Swipe for more" style={{ left: "50%", top: "24%", translate: "-50% 0" }} />}
       <div className="b2-deck" ref={deck} onScroll={onScroll}>
         {looks.map((l, i) => (
           <button key={l.key} type="button" className="b2-look" data-active={i === active ? "" : undefined}
@@ -357,6 +366,7 @@ function LookScreen() {
             <p>{l.name}</p>
           </button>
         ))}
+      </div>
       </div>
       <div className="b2-dots" aria-hidden="true">{looks.map((l, i) => <i key={l.key} data-on={i === active ? "" : undefined} />)}</div>
       <BottomBar>
@@ -423,6 +433,8 @@ function ReadyScreen() {
   const t = eventType(d.eventType);
   const sensitive = !!t?.sensitive;
   const writing = ai.busy === "all";
+  const [watching, setWatching] = useState(false);
+  const data = toViewData(d);
   return (
     <section className="b2-screen" style={{ position: "relative" }}>
       <p className="b2-kicker">Ready</p>
@@ -435,6 +447,17 @@ function ReadyScreen() {
         </button>
       </motion.div>
       {!sensitive && <Pop />}
+
+      <button type="button" className="b2-watch" onClick={() => { markHint("ready-watch"); setWatching(true); }}>
+        <span className="b2-watch-env" aria-hidden="true"><span>{(d.stars.names || d.title || "♥").trim().slice(0, 1).toUpperCase()}</span></span>
+        <span>
+          <strong>See what your guests get</strong>
+          <small>{d.envelope ? `The envelope${d.music ? " and music" : ""}, then your page, as a guest sees it` : "Your page, as a guest sees it from the link"}</small>
+        </span>
+        <span className="b2-watch-play" aria-hidden="true"><Icon name="play" className="" /></span>
+        <Hint id="ready-watch" label="Watch" />
+      </button>
+      {watching && <GuestDemo data={data} title={data.copy.card_headline || data.title || "Your event"} now={now} onClose={() => setWatching(false)} />}
 
       {d.wordsBy === "ai" && !writing ? (
         <p className="b2-note" data-tone="ok"><Icon name="sparkle" className="b2-inline" /> Written by the AI. Read it, and change anything from your event home.</p>

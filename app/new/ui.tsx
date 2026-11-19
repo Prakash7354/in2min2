@@ -5,12 +5,58 @@
 // Motion (motion.dev, MIT; approved by the owner 15 Nov 2026) gives the
 // springy movement; it follows the phone's "reduce motion" setting.
 
-import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useDragControls } from "motion/react";
 import { Icon, type IconName } from "@/components/icons";
+import { TapHand } from "@/components/tap-hand";
+import type { Panel } from "./nav";
 
 export const spring = { type: "spring", stiffness: 420, damping: 38, mass: 0.9 } as const;
+
+// Each area has its own colour (owner, 19 Nov 2026: more colour, and easier
+// to tell which is which): its tile on Home, its panel's icons and the soft
+// wash on its sections. Red for Who's invited, like a postbox.
+export const PANEL_HUE: Record<Panel, string> = {
+  words: "#ffb627", guests: "#e5484d", replies: "#7c6bff", photos: "#ff4f8b", details: "#22b8cf", announce: "#ff7a59",
+  plan: "#45c486", look: "#c56cf0", people: "#f08a5d", settings: "#8d8ab5", publish: "#2fbf71", preview: "#4d9fff",
+};
+
+// ── Hints: a hand showing where to tap or swipe, until it's been done once ──
+// Kept on this phone (localStorage), so each hint shows only to newcomers.
+const HINTS_KEY = "in2min2.hints";
+const HINTS_EVENT = "b2-hints";
+function hintsDone(): string {
+  try { return window.localStorage.getItem(HINTS_KEY) ?? ""; } catch { return ""; }
+}
+export function hintDone(id: string): boolean {
+  return hintsDone().split(",").includes(id);
+}
+export function markHint(id: string) {
+  const done = hintsDone().split(",").filter(Boolean);
+  if (done.includes(id)) return;
+  try { window.localStorage.setItem(HINTS_KEY, [...done, id].join(",")); } catch { /* private mode: it shows again next time */ }
+  window.dispatchEvent(new Event(HINTS_EVENT));
+}
+export function useHint(id: string): boolean {
+  const done = useSyncExternalStore(
+    (fn) => { window.addEventListener(HINTS_EVENT, fn); return () => window.removeEventListener(HINTS_EVENT, fn); },
+    hintsDone, () => id,   // the server never shows hints
+  );
+  return !done.split(",").includes(id);
+}
+// Put it inside the thing to tap (which needs position: relative), and call
+// markHint(id) when it's tapped. `kind="swipe"` moves side to side.
+export function Hint({ id, label, kind = "tap", style }: { id: string; label: string; kind?: "tap" | "swipe"; style?: CSSProperties }) {
+  const show = useHint(id);
+  if (!show) return null;
+  return (
+    <span className="b2-hint" data-kind={kind} style={style} aria-hidden="true">
+      <span className="b2-hint-label">{label}</span>
+      <span className="b2-hint-hand"><span className="b2-hint-ripple" /><TapHand /></span>
+    </span>
+  );
+}
 
 // ── Light or dark ──
 type Theme = "dark" | "light";

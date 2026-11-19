@@ -287,10 +287,34 @@
   opacity: 0.55;
   letter-spacing: 0.04em;
 }
+/* No photo yet (owner, 19 Nov 2026: a new event should look finished, not
+   like a picture that didn't load): the initials as a monogram on the
+   event's own colour, with a fine inner frame, like a printed card's crest. */
+.ev-photo[data-empty] {
+  background:
+    radial-gradient(circle at 28% 22%, color-mix(in srgb, var(--ev-on-main) 16%, transparent), transparent 55%),
+    radial-gradient(circle at 85% 95%, color-mix(in srgb, var(--ev-accent) 40%, transparent), transparent 60%),
+    linear-gradient(155deg, var(--ev-main), color-mix(in srgb, var(--ev-main) 72%, #000));
+}
+.ev-photo[data-empty]::after {
+  content: "";
+  position: absolute;
+  inset: min(calc(var(--u) * 2.2), 11px);
+  border: 1px solid color-mix(in srgb, var(--ev-on-main) 45%, transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.ev-photo[data-empty] .ev-mono {
+  color: var(--ev-on-main);
+  opacity: 1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+}
 .ev-photoHero {
   width: 100%;
   aspect-ratio: 16 / 10;
 }
+/* Without a photo, the big picture at the top is a slimmer band. */
+.ev-photoHero[data-empty] { aspect-ratio: 16 / 7; }
 .ev-cardInner .ev-photoHero {
   border-radius: 2.4cqi;
 }
@@ -363,6 +387,9 @@
   aspect-ratio: 16 / 10;
   max-height: 460px;
 }
+.ev-hero > .ev-photoHero[data-empty] { aspect-ratio: 16 / 7; max-height: 260px; }
+/* Edge to edge, so no inner frame. */
+.ev-hero > .ev-photoHero[data-empty]::after { display: none; }
 .ev-heroBody {
   position: relative;
   display: grid;

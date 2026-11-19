@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { COPY_KEYS, type Adjustment, type CopyKey } from "@/lib/ai/copy";
 import { eventType } from "@/lib/catalog";
-import { applyType, clearDraft, fingerprint, loadDraft, newDraft, saveDraft, type Draft } from "@/lib/draft";
+import { applyType, clearDraft, fingerprint, loadDraft, markBoxes, newDraft, saveDraft, type Draft } from "@/lib/draft";
 import { saveMedia } from "@/lib/media-upload";
 import { publishDraft } from "@/lib/publish";
 import { supabase } from "@/lib/supabase/client";
@@ -28,7 +28,8 @@ import { useNav, type Nav, type Screen } from "./nav";
 import { PanelView } from "./panels";
 import { QuickScreen, quickSteps } from "./quick";
 import { Sheets } from "./sheets";
-import { spring, useToast } from "./ui";
+import { hintDone, spring, useToast } from "./ui";
+import { WELCOMED } from "./welcome";
 
 // Screens slide in from the side you're going towards. The old screen
 // leaves quickly, so the next one is there in a moment.
@@ -49,7 +50,7 @@ function firstDraft(): Draft {
 function startPlace(d: Draft): Omit<Nav, "n"> {
   const base = { panel: null, sheet: null };
   if (d.quickDone || d.eventId || (d.eventType && d.title.trim() && d.date)) return { ...base, screen: "home" };
-  if (!d.eventType) return { ...base, screen: "what" };
+  if (!d.eventType) return { ...base, screen: hintDone(WELCOMED) ? "what" : "welcome" };
   const at = d.quickAt as Screen | undefined;
   return { ...base, screen: at && (quickSteps(d).includes(at) || at === "ready") ? at : "who" };
 }
@@ -164,7 +165,7 @@ export default function Builder2() {
       return;
     }
     update((x) => ({
-      ...x, wordsBy: "ai", copy: { ...x.copy, ...r.copy },
+      ...x, wordsBy: "ai", copy: { ...x.copy, ...r.copy }, copyBy: markBoxes(x, COPY_KEYS.filter((k) => r.copy[k]), "ai"),
       translation: r.translation ? { ...x.translation, ...r.translation } : x.translation,
     }));
     setAi({ busy: null, error: null, trimmed: r.trimmed, done: true });
@@ -185,7 +186,7 @@ export default function Builder2() {
     const text = r.copy[key];
     const tr = r.translation?.[key];
     update((x) => ({
-      ...x, wordsBy: "ai", copy: text ? { ...x.copy, [key]: text } : x.copy,
+      ...x, wordsBy: "ai", copy: text ? { ...x.copy, [key]: text } : x.copy, copyBy: text ? markBoxes(x, [key], "ai") : x.copyBy,
       translation: tr ? { ...x.translation, [key]: tr } : x.translation,
     }));
     setAi((a) => ({ ...a, busy: null, trimmed: r.trimmed }));
@@ -251,7 +252,7 @@ export default function Builder2() {
     autoWrote.current = false;
     setAi({ busy: null, error: null, trimmed: false, done: false });
     setPub({ busy: false, error: null, note: null, done: false });
-    replace({ screen: "what", panel: null, sheet: null });
+    replace({ screen: hintDone(WELCOMED) ? "what" : "welcome", panel: null, sheet: null });
   }, [replace]);
 
   const ctx = useMemo<B2>(() => ({

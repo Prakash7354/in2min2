@@ -10,7 +10,7 @@ import { useState } from "react";
 import { ADJUSTMENTS, COPY_FIELDS, COPY_KEYS, charCount, type Adjustment, type CopyKey } from "@/lib/ai/copy";
 import { Icon } from "@/components/icons";
 import { LANGUAGES, TONES, language } from "@/lib/catalog";
-import { EMPTY_COPY, type Draft } from "@/lib/draft";
+import { boxBy, EMPTY_COPY, markBoxes, type Draft } from "@/lib/draft";
 import { useB2 } from "../context";
 import { PanelShell } from "../panels";
 import { Chips, Note, Section } from "../ui";
@@ -83,14 +83,14 @@ export function WordsPanel() {
 
       <Section icon="pen" title="Your words" line="Type your own, or change what was written for you."
         action={d.wordsBy !== "suggested" && !confirmReset ? (
-          <button type="button" className="b2-chip b2-chip-sm" onClick={() => setConfirmReset(true)}>Ready-made</button>
+          <button type="button" className="b2-chip b2-chip-sm" onClick={() => setConfirmReset(true)}>Use ready-made</button>
         ) : undefined}>
         {confirmReset && (
           <div className="b2-note" data-tone="warn" style={{ display: "grid", gap: 10 }}>
             <span>Put back the ready-made words? This replaces the words below{second ? `, and clears the ${second}` : ""}.</span>
             <span className="b2-chips">
               <button type="button" className="b2-chip b2-chip-sm b2-chip-strong" onClick={() => {
-                update((x) => ({ ...x, wordsBy: "suggested", translation: { ...EMPTY_COPY } }));
+                update((x) => ({ ...x, wordsBy: "suggested", copyBy: undefined, translation: { ...EMPTY_COPY } }));
                 setConfirmReset(false);
                 b.say("Ready-made words put back.");
               }}>Yes, put them back</button>
@@ -98,6 +98,11 @@ export function WordsPanel() {
             </span>
           </div>
         )}
+        <p className="b2-key" aria-hidden="true">
+          <span><i style={{ background: "var(--b2-ai-edge)" }} />The AI wrote it</span>
+          <span><i style={{ background: "var(--b2-mine-edge)" }} />You wrote it</span>
+          <span><i style={{ background: "var(--b2-ready-edge)" }} />Ready-made</span>
+        </p>
         {COPY_KEYS.map((key) => <WordBox key={key} k={key} d={d} second={second?.name} secondCode={second?.code} />)}
       </Section>
 
@@ -121,18 +126,23 @@ function WordBox({ k, d, second, secondCode }: { k: CopyKey; d: Draft; second?: 
   const busy = b.ai.busy === k || b.ai.busy === "all";
   const clip = (v: string) => Array.from(v).slice(0, f.max).join("");
   const set = (which: "copy" | "translation", v: string) =>
-    b.update((x) => ({ ...x, wordsBy: "host", [which]: { ...x[which], [k]: clip(v) } }));
+    b.update((x) => ({ ...x, wordsBy: "host", copyBy: markBoxes(x, [k], "host"), [which]: { ...x[which], [k]: clip(v) } }));
+  const by = boxBy(d, k);
   const box = (which: "copy" | "translation", lang?: string, label?: string) => {
     const value = d[which][k];
     const props = { className: `b2-input ${long ? "b2-textarea" : "b2-input-sm"}`, value, lang, "aria-label": label ?? f.label, onChange: (e: { target: { value: string } }) => set(which, e.target.value) };
     return long ? <textarea rows={k === "landing_page_story" ? 9 : k === "guest_note_box" ? 3 : 5} {...props} /> : <input {...props} />;
   };
   return (
-    <div className="b2-wordbox" data-busy={busy ? "" : undefined}>
-      <p className="b2-label" style={{ display: "flex", justifyContent: "space-between", gap: 10, margin: 0 }}>
-        <span>{f.label}</span><span style={{ fontVariantNumeric: "tabular-nums", fontWeight: 600 }}>{charCount(d.copy[k])}/{f.max}</span>
-      </p>
+    <div className="b2-wordbox" data-busy={busy ? "" : undefined} data-by={by}>
+      <p className="b2-label" style={{ margin: 0 }}>{f.label}</p>
       {box("copy", d.languages[0])}
+      <p className="b2-byline">
+        <span className="b2-by" data-by={by}>
+          {by === "ai" ? <><Icon name="sparkle" className="" />The AI wrote this</> : by === "host" ? <><Icon name="pen" className="" />You wrote this</> : "Ready-made"}
+        </span>
+        <span>{charCount(d.copy[k])}/{f.max}</span>
+      </p>
       {second && (
         <>
           <p className="b2-small" style={{ margin: 0 }}>In {second} · {charCount(d.translation[k])}/{f.max}</p>
