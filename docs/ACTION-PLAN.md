@@ -33,19 +33,26 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 - [x] Your border designs as **B5 Christmas greenery, B6 Golden roses, B7 Ornate flowers, B8 Wedding lines**. Each takes the event's colours.
 - [x] **Look › Background**: 9 of your painted backgrounds. Choosing one also picks letter colours that read well on it.
 - [x] **More backgrounds (19 Nov):** emerald, royal blue, rani pink and indigo, each glowing and as a gold lattice (jali), plus four soft modern ones.
-- [x] **Music and the envelope (19 Nov):** Look › **Music**. Your three tunes (Happy Birthday, We Wish You a Merry Christmas, Wedding vows); this kind of event's tune comes first. Guests see a sealed envelope in the event's colours, with a wax seal of the initials and the event's name (or their own name, once personal links are built). One tap breaks the seal, the card slides out, and the music fades in and loops. A button at the bottom left turns it off. Without the envelope, guests get a "Play music" button. Where each tune came from: [music.md](reference/music.md).
+- [x] **Music and the envelope (19 Nov):** Look › **Envelope & music**. Your three tunes (Happy Birthday, We Wish You a Merry Christmas, Wedding vows); this kind of event's tune comes first. Where each tune came from: [music.md](reference/music.md).
+  - Guests first see the envelope's **front, like real post**: the event's title above it, **From** top left (like a return address), a stamp and postmark with the date, and **To** in the middle.
+  - A hand shows where to tap, but **a tap anywhere** opens it. It turns over, the wax seal with the initials breaks, the flap lifts, the card slides out, and the music fades in and repeats. A button at the bottom left turns it off.
+  - Without the envelope, guests get a "Play music" button. Phones set to reduce movement get a quick fade.
+- [x] **Who's invited (19 Nov):** a new tile on Home, also under Share › Personal invitations. Three ways to invite:
+  - **Personal:** type each guest's name (or paste a list: "Maya & family, 4"); each gets their own link that can't be guessed. Their name is on the envelope, their reply is linked to them, and only these links open a private event. Send each by WhatsApp or copy it; the list shows who's been sent and who's replied.
+  - **Shared:** one link to pass round. The envelope says "To Our family and friends" (or your choice).
+  - **Open:** for anyone: "To Everyone, all welcome", "Teams, stalls and sponsors", or your own words.
+  - **From** is on every envelope, made from the names you've given (e.g. "Ram & Gita Gurung"), or your own words.
 
 **Next, Claude Code (in this order; each builds on the one before):**
 1. [x] **Safety before real guests (built 19 Nov; switch it on with step 4 below):** nightly backup and a practice-restore tool, error emails, an hourly database check that also keeps the free Supabase plan awake, and the anti-spam check on sign-in.
 2. **Your events on every device:** a "Your events" list from your account, so the same event opens on your phone and your laptop. Builder 2.0 also gets a wider layout for laptops.
 3. **Edit, save and remove beside the invitation** on Home (remove asks first, and can be undone for 30 days).
 4. **Co-hosts** (a mum and son building together): invite by link. The database already has co-hosts; this adds the screens.
-5. **Personal links for each guest** (already in the plan): type your guests' names and get one link each, so the envelope says "For Maya & family" and their reply is already filled in. The database already supports these links.
-6. **Link pictures:** each event's own picture when its link is shared on WhatsApp or Facebook, and a share-as-image button for Instagram.
-7. **Install on the phone:** "Add to Home Screen" with the In2Min2 icon. No app store needed.
-8. **3D-style icons** from Microsoft's free Fluent Emoji set.
-9. After the real-event test: the **marketing website** with the animated "how it works", then the ads and the quiz.
-10. After the tests: AI quick-fill from one sentence, an "Other" event type, "show the thank-you page now", and "What's new" notes for hosts.
+5. **Link pictures:** each event's own picture when its link is shared on WhatsApp or Facebook, and a share-as-image button for Instagram.
+6. **Install on the phone:** "Add to Home Screen" with the In2Min2 icon. No app store needed.
+7. **3D-style icons** from Microsoft's free Fluent Emoji set.
+8. After the real-event test: the **marketing website** with the animated "how it works", then the ads and the quiz.
+9. After the tests: AI quick-fill from one sentence, an "Other" event type, "show the thank-you page now", and "What's new" notes for hosts.
 
 **You:**
 - Ask testers to mark the code email **Not junk**.
@@ -128,25 +135,25 @@ Everything you decided is now in them, and the yellow boxes are gone. The ICO nu
 
 When you're happy, tell Claude Code **"approve the drafts"**. It removes the "Draft" label and links them from the bottom of every page and from sign-in.
 
-### [ ] 4. Switch on the safety net (15 minutes)
+### [x] 4. Switch on the safety net (done 19 Nov; only E is left, for Claude Code)
 
 **A. ✓ Done 19 Nov.** Run the database file [0012_backup.sql](../supabase/migrations/0012_backup.sql)
 1. Open the file on your Mac, select everything (Cmd+A) and copy (Cmd+C).
 2. Supabase › your project › **SQL Editor** › **New query** › paste › **Run**.
 3. You should see "Success. No rows returned." Tell Claude Code.
 
-**B. Give the Worker the database's secret key** (for the nightly backup)
+**B. ✓ Done 19 Nov.** Give the Worker the database's secret key (for the nightly backup)
 1. Supabase › **Project Settings** (the cog) › **API Keys** › **Secret keys**. Copy the key that starts `sb_secret_`. If there isn't one, tap **Add new secret key** and name it `worker-backup`.
 2. Cloudflare dashboard › **Workers & Pages** › **in2min2** › **Settings** › **Variables and Secrets** › **+ Add**.
 3. Type: **Secret**. Variable name: `SUPABASE_SECRET_KEY`. Value: paste the key. Tap **Deploy**.
 4. Never paste this key into a chat or a file.
 
-**C. Say where alerts go**
+**C. ✓ Done 19 Nov.** Say where alerts go
 1. Cloudflare dashboard › **in2min2.com** › **Email** › **Email Routing** › **Destination addresses**. Check your own email address shows **Verified**.
 2. **Workers & Pages** › **in2min2** › **Settings** › **Variables and Secrets** › **+ Add**. Type: **Secret**. Name: `ALERT_EMAIL`. Value: that same email address. Tap **Deploy**.
 3. From then on you get an email only if something breaks, plus a short "All well" every Monday morning. Forward any alert to Claude Code.
 
-**D. The anti-spam check on sign-in (Turnstile)**
+**D. ✓ Done 19 Nov** (live in the sign-in since the push that afternoon). The anti-spam check on sign-in (Turnstile)
 1. Cloudflare dashboard › **Turnstile** › **Add widget**. Name: `In2Min2 sign-in`. Hostnames: `in2min2.com`, `www.in2min2.com`, `in2min2.pksgrg.workers.dev`. Mode: **Managed**. Tap **Create**.
 2. ✓ Site key received 19 Nov and built into the sign-in. Keep the **Secret key** to yourself (never in a chat).
 3. Only after Claude Code says the site key is live: Supabase › **Authentication** › **Attack Protection** › turn on **Captcha protection** › provider **Turnstile** › paste the **Secret key** › **Save**. (Doing this first would stop everyone signing in.)

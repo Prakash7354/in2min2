@@ -1,22 +1,27 @@
 "use client";
 
-// The sealed envelope guests tap to open the invitation (owner, 19 Nov 2026),
-// and the music button. The envelope carries the guest's own name when they
-// came by their personal link ("For Maya & family"), otherwise the event's
-// title, and a wax seal with the stars' initials, all in the event's colours.
-// The tap breaks the seal, the flap lifts, the card slides out, and the
-// music (if the host chose some) fades in: phones only allow sound after a
-// tap, so the envelope is also what makes the music possible.
+// The envelope guests tap to open the invitation (owner, 19 Nov 2026).
 //
-// Shown once per visit: if the guest comes back to the page in the same tab,
-// it opens straight away (page.tsx hides it before the page appears) and the
-// music waits for a tap on the music button. Phones set to reduce motion get
-// a simple fade. Without JavaScript the page shows as normal.
+// First they see its FRONT, like real post: who it's from (top left, like a
+// return address), a stamp and postmark with the date, and who it's to: the
+// guest's own name from their personal link, or the host's line for a shared
+// or open invitation ("Our family and friends", "Teams, stalls and sponsors").
+// The event's title sits above it, so it's plain who and what it's about.
+// A hand shows where to tap, but a tap anywhere opens it (people act before
+// they read). Then it turns over, the wax seal with the initials breaks, the
+// flap lifts, the card slides out, and the music (if any) fades in: phones
+// only allow sound after a tap, so this tap is also what starts the music.
+//
+// Shown once per visit: if the guest comes back in the same tab, the page
+// opens straight away (page.tsx hides the envelope before it appears) and the
+// music waits for the music button. Phones set to reduce motion get a simple
+// fade. Without JavaScript the page shows as normal.
 
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
+import { Icon, type IconName } from "@/components/icons";
 import { backdropImage, backdropOf } from "@/lib/catalog";
-import { formatDate, openedKey, type EventViewData } from "@/lib/event-view";
+import { envelopeFrom, envelopeTo, formatDate, openedKey, type EventViewData } from "@/lib/event-view";
 import { eventVars } from "./event-view";
 import { eventFontVariables } from "./fonts";
 import { useMusic } from "./music";
@@ -41,6 +46,14 @@ export function initials(d: EventViewData, title: string): string {
   if (names.length >= 2) return `${first(names[0])} & ${first(names[1])}`;
   return first(names[0] ?? "") || first(title) || "♥";
 }
+
+// The picture on the stamp.
+const STAMP: Record<string, IconName> = {
+  birthday: "cake", wedding: "rings", engagement: "rings", anniversary: "rings", christmas: "tree", "new-year": "star",
+  memorial: "flower", pasni: "bowl", lhosar: "sun", party: "balloon", ceremony: "flower", bratabandha: "flower",
+  reunion: "flag", corporate: "briefcase", sport: "trophy",
+};
+const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
 type Props = {
   data: EventViewData;
@@ -75,7 +88,7 @@ export function Opening({ data, title, to, id, preview }: Props) {
       if (!preview) { try { sessionStorage.setItem(openedKey(id), "1"); } catch { /* fine */ } }
       setPhase(preview ? "closed" : "gone");
       preview?.();
-    }, quick ? 450 : 2300);
+    }, quick ? 450 : 2800);
   }
 
   const p = data.palette;
@@ -89,37 +102,61 @@ export function Opening({ data, title, to, id, preview }: Props) {
     "--op-wax": p.dark ? p.bg : p.accent,
     "--op-wax-text": p.dark ? p.main : p.onAccent,
   } as CSSProperties;
-  const name = to?.trim();
-  const words = name || title;
-  const long = Array.from(words).length > 28;
+  const guest = to?.trim() || null;
+  const toLine = envelopeTo(data, guest);
+  const fromLine = envelopeFrom(data);
   const seal = initials(data, title);
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(data.date);
+  const postmark = m ? [`${Number(m[3])} ${MONTHS[Number(m[2]) - 1]}`, m[1]] : null;
 
   const envelope = showEnvelope ? (
     <div className={`op ${eventFontVariables}`} data-op={preview ? "preview" : id} data-phase={phase} style={vars}
       role="dialog" aria-modal="true" aria-label="Your invitation">
       <div className="op-sky" aria-hidden="true">{!data.sensitive && <span className="op-glints" />}</div>
+      {/* The whole screen is the button: a tap anywhere opens it. */}
       <button ref={button} type="button" className="op-tap" onClick={open}
-        aria-label={`Open the invitation${name ? ` for ${name}` : ""}${data.music ? ", with music" : ""}`}>
-        <span className="op-kicker" aria-hidden="true">{data.sensitive ? "Please open" : "You’re invited"}</span>
+        aria-label={`Open the invitation${guest ? ` for ${guest}` : ""}${fromLine ? ` from ${fromLine}` : ""}${data.music ? ", with music" : ""}`}>
+        <span className="op-head" aria-hidden="true">
+          <span className="op-kicker">{data.sensitive ? "Please open" : "You’re invited"}</span>
+          <span className="op-title" data-long={Array.from(title).length > 34 ? "" : undefined}>{title}</span>
+        </span>
         <span className="op-env" aria-hidden="true">
-          <span className="op-back" />
-          <span className="op-card">
-            <span className="op-card-kicker">{data.sensitive ? "Please join us" : "You’re invited"}</span>
-            <span className="op-card-title">{title}</span>
-            {data.date && <span className="op-card-date">{formatDate(data.date)}</span>}
+          {/* The back: what opens */}
+          <span className="op-backside">
+            <span className="op-back" />
+            <span className="op-card">
+              <span className="op-card-kicker">{data.sensitive ? "Please join us" : "You’re invited"}</span>
+              <span className="op-card-title">{title}</span>
+              {data.date && <span className="op-card-date">{formatDate(data.date)}</span>}
+            </span>
+            <span className="op-pocket op-pocket-l" />
+            <span className="op-pocket op-pocket-r" />
+            <span className="op-pocket op-pocket-b" />
+            <span className="op-flap"><span className="op-flap-out" /><span className="op-flap-in" /></span>
+            <span className="op-seal"><span data-two={seal.length > 2 ? "" : undefined}>{seal}</span></span>
           </span>
-          <span className="op-pocket op-pocket-l" />
-          <span className="op-pocket op-pocket-r" />
-          <span className="op-pocket op-pocket-b" />
-          <span className="op-to" data-long={long ? "" : undefined}>
-            {name && <small>For</small>}
-            <span>{words}</span>
+          {/* The front: what's seen first */}
+          <span className="op-front">
+            {fromLine && <span className="op-from"><small>From</small><span>{fromLine}</span></span>}
+            <span className="op-stamp"><span className="op-stamp-art"><Icon name={STAMP[data.typeKey] ?? "heart"} className="" /></span></span>
+            {postmark && <span className="op-postmark"><span>{postmark[0]}</span><span>{postmark[1]}</span></span>}
+            <span className="op-waves" />
+            <span className="op-address" data-long={Array.from(toLine).length > 24 ? "" : undefined}>
+              <small>To</small>
+              <span>{toLine}</span>
+            </span>
           </span>
-          <span className="op-flap"><span className="op-flap-out" /><span className="op-flap-in" /></span>
-          <span className="op-seal"><span data-two={seal.length > 2 ? "" : undefined}>{seal}</span></span>
+          <span className="op-hand">
+            <span className="op-ripple" />
+            <svg viewBox="0 0 48 48">
+              <path d="M19 7a3.5 3.5 0 0 1 7 0v14.5l1.2-.1V18a3.2 3.2 0 0 1 6.4 0v3.8l.5-.05a3.2 3.2 0 0 1 6.2 1.3v1.6a3.1 3.1 0 0 1 4.7 2.7V34c0 6.4-4.8 11-11 11h-5.2c-3.6 0-6.7-1.7-8.8-4.7L11.9 30.2a3.3 3.3 0 0 1 5-4.3L19 28.3V7z"
+                fill="#FFFFFF" stroke="#1C1A2E" strokeWidth="2.2" strokeLinejoin="round" />
+              <path d="M26 21.5V29M33.6 21.8V29M40 25v4" fill="none" stroke="#1C1A2E" strokeWidth="1.8" strokeLinecap="round" opacity="0.55" />
+            </svg>
+          </span>
         </span>
         <span className="op-hint" aria-hidden="true">
-          <span className="op-hint-dot" />Tap to open{data.music ? <span className="op-hint-music"> · with music ♪</span> : null}
+          Tap anywhere to open{data.music ? <span className="op-hint-music"> · with music ♪</span> : null}
         </span>
       </button>
     </div>

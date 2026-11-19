@@ -167,6 +167,7 @@ function ShareLinks({ d, link, say }: { d: Draft; link: string; say: (m: string)
           <button type="button" className="b2-chip b2-chip-sm" onClick={() => void share(link, invite.text)}><Icon name="share" className="" />More ways</button>
           <button type="button" className="b2-chip b2-chip-sm" onClick={() => void copy(`${invite.text}\n${link}`, "Invitation")}><Icon name="copy" className="" />Copy</button>
           <button type="button" className="b2-chip b2-chip-sm" aria-expanded={qr} onClick={() => setQr(!qr)}><Icon name="qr" className="" />QR code</button>
+          {!community && <button type="button" className="b2-chip b2-chip-sm" onClick={() => void fromSheet("guests")}><Icon name="user" className="" />Personal invitations</button>}
         </div>
         {qr && (
           <div className="b2-qr">

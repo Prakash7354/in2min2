@@ -53,7 +53,7 @@ const w = plan.width ?? 390, h = plan.height ?? 844;
 await send("Page.enable");
 await send("Runtime.enable");
 await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 2, mobile: w < 700 });
-await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: plan.dark === false ? "light" : "dark" }] });
+await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-color-scheme", value: plan.dark === false ? "light" : "dark" }, { name: "prefers-reduced-motion", value: plan.reduced ? "reduce" : "no-preference" }] });
 
 for (const s of plan.steps) {
   if (s.goto) { await send("Page.navigate", { url: s.goto }); await sleep(s.wait ?? 2500); continue; }

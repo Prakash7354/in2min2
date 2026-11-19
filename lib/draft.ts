@@ -10,7 +10,7 @@ import {
   eventType, heroMotionOf, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
   type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
-import { creditFor, defaultCredit, type CreditChoice, type EventViewData, type ViewFunction, type ViewPerson } from "@/lib/event-view";
+import { creditFor, defaultCredit, type CreditChoice, type EventViewData, type InviteWay, type ViewFunction, type ViewPerson } from "@/lib/event-view";
 
 export type Draft = {
   v: 1;
@@ -91,6 +91,12 @@ export type Draft = {
   // feature_toggles.settings.music and .envelope.
   music?: string;
   envelope?: boolean;
+  // What the envelope says (lib/event-view.ts envelopeFrom/envelopeTo), in
+  // feature_toggles.settings.envelope_from and .envelope_to; and, on this
+  // phone only, which of the three ways the host is inviting.
+  envFrom?: string;
+  envTo?: string;
+  inviteWay?: InviteWay;
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;
@@ -229,7 +235,7 @@ export function slugOk(slug: string): boolean {
 // say "you have changes that aren't live yet". The photo isn't sent yet
 // (photo storage comes later), so it's left out.
 const LOCAL_ONLY = ["step", "checked", "eventId", "publishedPath", "shortPath", "offerClaimed", "publishedHash", "cover", "offerCode",
-  "coverKey", "shareKey", "mediaHash", "moreCovers", "heroKeys", "heroHash", "quickAt", "quickDone", "wordsBy", "milestone"] as const;
+  "coverKey", "shareKey", "mediaHash", "moreCovers", "heroKeys", "heroHash", "quickAt", "quickDone", "wordsBy", "milestone", "inviteWay"] as const;
 export function fingerprint(d: Draft): string {
   const rest: Record<string, unknown> = { ...d };
   for (const k of LOCAL_ONLY) delete rest[k];
@@ -315,5 +321,7 @@ export function toViewData(d: Draft): EventViewData {
     backdrop: backdropOf(d.backdrop)?.key ?? null,
     music: musicOf(d.music)?.key ?? null,
     envelope: !!d.envelope,
+    envFrom: (d.envFrom ?? "").trim().slice(0, 60),
+    envTo: (d.envTo ?? "").trim().slice(0, 60),
   };
 }

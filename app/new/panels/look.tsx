@@ -14,17 +14,18 @@ import {
   eventType, language, musicFor, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle,
 } from "@/lib/catalog";
 import { toViewData } from "@/lib/draft";
+import { envelopeFrom, envelopeTo } from "@/lib/event-view";
 import { resizePhoto } from "@/lib/image";
 import { useB2 } from "../context";
 import { applyLook, currentLook, looksFor } from "../kinds";
 import { PanelShell } from "../panels";
-import { Chips, Note, Section, Toggle } from "../ui";
+import { Chips, Note, Row, Section, Toggle } from "../ui";
 
-type Tab = "looks" | "photos" | "colours" | "background" | "border" | "letters" | "music" | "more";
+type Tab = "looks" | "photos" | "colours" | "background" | "border" | "letters" | "envelope" | "more";
 const TABS: { key: Tab; label: string }[] = [
   { key: "looks", label: "Looks" }, { key: "photos", label: "Photos" }, { key: "colours", label: "Colours" },
   { key: "background", label: "Background" }, { key: "border", label: "Border" }, { key: "letters", label: "Letters" },
-  { key: "music", label: "Music" }, { key: "more", label: "More" },
+  { key: "envelope", label: "Envelope & music" }, { key: "more", label: "More" },
 ];
 
 export function LookPanel() {
@@ -39,7 +40,7 @@ export function LookPanel() {
       <div className="b2-tabs" ref={tabs}>
         <Chips label="Which part" small value={tab} options={TABS} onChange={(t) => t && setTab(t)} />
       </div>
-      {tab !== "looks" && tab !== "music" && (
+      {tab !== "looks" && tab !== "envelope" && (
         <div className="b2-stage" style={{ padding: 0 }}>
           <div className="b2-float b2-mini" style={{ animation: "none" }}><EventView data={toViewData(d)} view="card" now={now} thumb /></div>
         </div>
@@ -50,7 +51,7 @@ export function LookPanel() {
       {tab === "background" && <Backgrounds />}
       {tab === "border" && <Borders />}
       {tab === "letters" && <Letters />}
-      {tab === "music" && <Music />}
+      {tab === "envelope" && <Music />}
       {tab === "more" && <More />}
     </PanelShell>
   );
@@ -342,7 +343,7 @@ function More() {
 // it (owner, 19 Nov 2026). Phones only allow sound after a tap, so the
 // envelope is what starts the music; without it, guests get a Play button.
 function Music() {
-  const { d, update, say } = useB2();
+  const { d, update, say, open } = useB2();
   const [seeing, setSeeing] = useState(false);
   useStopOnLeave();
   const sensitive = !!eventType(d.eventType)?.sensitive;
@@ -354,6 +355,19 @@ function Music() {
   };
   return (
     <>
+      <Section icon="envelope" title="Envelope">
+        <Toggle label="Open with an envelope" checked={!!d.envelope} onChange={(v) => update((x) => ({ ...x, envelope: v }))}
+          line="Guests first see an envelope addressed to them, like real post, and tap anywhere to open it. That tap also starts the music." />
+        {d.envelope && (
+          <Row icon="pen" label={`From ${envelopeFrom(data) || "(add your names)"}`} line={`To ${envelopeTo(data)}${(d.inviteWay ?? "personal") === "personal" && d.scale !== "community" ? ", or each guest's own name with a personal link" : ""}`}
+            onClick={() => open("guests")} />
+        )}
+        {!d.envelope && d.music && <Note>Without the envelope, guests see a small “Play music” button instead: phones don&apos;t allow music until the guest taps.</Note>}
+        <button type="button" className="b2-btn b2-secondary" onClick={() => setSeeing(true)}>
+          <Icon name="eye" className="" />See the envelope
+        </button>
+        {seeing && <Opening data={{ ...data, envelope: true }} title={data.copy.card_headline || data.title || "Your event"} id="preview" preview={() => setSeeing(false)} />}
+      </Section>
       <Section icon="music" title="Music" line="Plays softly once a guest opens the invitation, round and round. Guests can turn it off.">
         {sensitive && <Note>For a memorial, quiet is usually kinder.</Note>}
         <div className="b2-tracks" role="radiogroup" aria-label="Music">
@@ -364,15 +378,6 @@ function Music() {
           {tracks.map((t) => <TrackRow key={t.key} track={t} on={d.music === t.key} suggested={t.kinds.includes(d.eventType ?? "")} onChoose={() => choose(t.key)} />)}
         </div>
         <p className="b2-small">Free-to-use music from Pixabay. More tunes are coming; you can&apos;t add your own song yet, because songs need a licence to be played to guests.</p>
-      </Section>
-      <Section icon="envelope" title="Envelope">
-        <Toggle label="Open with an envelope" checked={!!d.envelope} onChange={(v) => update((x) => ({ ...x, envelope: v }))}
-          line="Guests first see a sealed envelope with your event's name on it (or their own name, from their personal link), and tap to open it. That tap also starts the music." />
-        {!d.envelope && d.music && <Note>Without the envelope, guests see a small “Play music” button instead: phones don&apos;t allow music until the guest taps.</Note>}
-        <button type="button" className="b2-btn b2-secondary" onClick={() => setSeeing(true)}>
-          <Icon name="envelope" className="" />See the envelope
-        </button>
-        {seeing && <Opening data={{ ...data, envelope: true }} title={data.copy.card_headline || data.title || "Your event"} id="preview" preview={() => setSeeing(false)} />}
       </Section>
     </>
   );

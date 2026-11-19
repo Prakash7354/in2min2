@@ -1,10 +1,10 @@
 /* The envelope guests tap to open (components/event/opening.tsx), drawn in
-   CSS in the event's own colours: no pictures to load. */
+   CSS in the event's own colours: no pictures to load.
+   Order of events: front (From, stamp, To) → tap anywhere → it turns over
+   → the seal breaks → the flap lifts → the card slides out → the page. */
 
 .op {
   position: fixed; inset: 0; z-index: 90;
-  display: grid; place-items: center;
-  padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
   color: var(--op-text);
   font-family: var(--ev-body);
   -webkit-tap-highlight-color: transparent;
@@ -12,34 +12,97 @@
 .op-sky { position: absolute; inset: 0; background: var(--op-sky) center / cover no-repeat, var(--ev-bg); }
 .op-sky::after { /* a soft pool of light behind the envelope */
   content: ""; position: absolute; inset: 0;
-  background: radial-gradient(ellipse 60% 38% at 50% 50%, rgb(255 255 255 / 0.16), transparent 70%);
+  background: radial-gradient(ellipse 60% 38% at 50% 52%, rgb(255 255 255 / 0.16), transparent 70%);
 }
 
+/* The whole screen is one button. */
 .op-tap {
-  position: relative; display: grid; justify-items: center; gap: 22px;
-  width: 100%; max-width: 420px; padding: 8px 0;
+  position: absolute; inset: 0;
+  display: grid; align-content: center; justify-items: center; gap: 22px;
+  padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
   background: none; border: 0; color: inherit; font: inherit; cursor: pointer;
 }
 .op-tap:focus-visible { outline: none; }
 .op-tap:focus-visible .op-env { outline: 3px solid var(--ev-accent); outline-offset: 10px; border-radius: 12px; }
 
-.op-kicker {
-  font-size: 13px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.85;
+.op-head { display: grid; justify-items: center; gap: 8px; max-width: 360px; text-align: center; }
+.op-kicker { font-size: 13px; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.85; }
+.op-title {
+  font-family: var(--ev-display); font-size: clamp(24px, 7vw, 32px); line-height: 1.12; text-wrap: balance;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  padding: 0 0.35em; /* room for script letters' flourishes */
 }
+.op-title[data-long] { font-size: clamp(20px, 5.6vw, 25px); }
 
-/* ── The envelope: back, card, pocket (three folds), flap, seal ── */
+/* ── The envelope ── */
 .op-env {
   --w: min(86vw, 370px);
-  position: relative; display: block; width: var(--w); aspect-ratio: 1.36;
-  perspective: 1100px;
+  position: relative; display: block; width: var(--w); aspect-ratio: 1.42;
   filter: drop-shadow(0 22px 26px rgb(0 0 0 / 0.28)) drop-shadow(0 4px 6px rgb(0 0 0 / 0.16));
   animation: op-float 4.5s ease-in-out infinite;
 }
+.op-backside, .op-front { position: absolute; inset: 0; display: block; border-radius: 10px; }
+.op-backside { perspective: 1100px; transform: scaleX(0); visibility: hidden; }
 .op-back, .op-pocket, .op-flap-out, .op-flap-in, .op-card { position: absolute; display: block; }
-.op-back {
-  inset: 0; border-radius: 10px;
-  background: color-mix(in srgb, var(--ev-main) 72%, black);
+
+/* The front: plain paper, like real post. */
+.op-front {
+  z-index: 8; overflow: hidden;
+  background:
+    radial-gradient(ellipse 120% 80% at 30% 0%, color-mix(in srgb, var(--ev-main) 82%, white), transparent 60%),
+    linear-gradient(170deg, var(--ev-main), color-mix(in srgb, var(--ev-main) 90%, black));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ev-on-main) 18%, transparent);
+  color: var(--ev-on-main);
 }
+.op-from { position: absolute; left: 6%; top: 8%; width: 46%; display: grid; gap: 1px; text-align: left; }
+.op-from small, .op-address small { font-size: 9px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; opacity: 0.75; }
+.op-from > span {
+  font-family: var(--ev-display); font-size: clamp(13px, 3.8vw, 16px); line-height: 1.15; padding-right: 0.3em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* A stamp with a perforated edge, and its postmark. */
+.op-stamp {
+  position: absolute; right: 6%; top: 8%; width: 17%; aspect-ratio: 0.84; display: block;
+  background: radial-gradient(circle, transparent 2.4px, #FFFCF5 2.6px) -3.5px -3.5px / 7px 7px;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25));
+  transform: rotate(3deg);
+}
+.op-stamp-art {
+  position: absolute; inset: 4px; display: grid; place-items: center;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--op-wax) 85%, white), var(--op-wax));
+  color: var(--op-wax-text);
+}
+.op-stamp-art svg { width: 58%; height: 58%; }
+.op-postmark {
+  position: absolute; right: 24%; top: 19%; width: 15%; aspect-ratio: 1; display: grid; place-content: center; gap: 0;
+  border-radius: 50%; border: 1.5px solid currentColor; opacity: 0.5;
+  font: 700 clamp(7px, 2vw, 8.5px)/1.15 var(--f-inter, system-ui), system-ui, sans-serif; letter-spacing: 0.04em; text-align: center;
+  transform: rotate(-12deg);
+}
+.op-waves { /* the cancellation lines beside the postmark */
+  position: absolute; right: 40%; top: 22%; width: 14%; height: 7%; display: block; opacity: 0.4;
+  background: repeating-linear-gradient(180deg, currentColor 0 1.5px, transparent 1.5px 5px);
+  -webkit-mask: radial-gradient(ellipse at 100% 50%, #000 30%, transparent 100%);
+  mask: radial-gradient(ellipse at 100% 50%, #000 30%, transparent 100%);
+}
+.op-address {
+  position: absolute; left: 14%; right: 10%; top: 50%; bottom: 10%;
+  display: grid; align-content: center; justify-items: start; gap: 2px; text-align: left;
+  border-top: 0; padding-left: 4%;
+}
+.op-address > span {
+  font-family: var(--ev-display); font-size: clamp(21px, 6.4vw, 28px); line-height: 1.12; padding-right: 0.3em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+}
+.op-address[data-long] > span { font-size: clamp(17px, 4.8vw, 21px); }
+.op-address::after { /* a written line under the name */
+  content: ""; display: block; width: 92%; height: 1px; margin-top: 6px; background: currentColor; opacity: 0.3;
+}
+
+/* The back: inside, card, pocket (three folds), flap, seal. */
+.op-back { inset: 0; border-radius: 10px; background: color-mix(in srgb, var(--ev-main) 72%, black); }
 .op-card {
   left: 6%; right: 6%; top: 5%; height: 90%; z-index: 2;
   display: grid; align-content: center; justify-items: center; gap: 6px; padding: 10% 8%;
@@ -50,8 +113,6 @@
 .op-card-kicker { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ev-muted); }
 .op-card-title { font-family: var(--ev-display); font-size: clamp(18px, 5.4vw, 24px); line-height: 1.15; color: var(--ev-main); }
 .op-card-date { font-size: 12px; color: var(--ev-muted); }
-
-/* The folds, each a little lighter or darker, like real paper. */
 .op-pocket { inset: 0; z-index: 3; }
 .op-pocket-l { clip-path: polygon(0 0, 50% 52%, 0 100%); background: linear-gradient(100deg, color-mix(in srgb, var(--ev-main) 92%, black), var(--ev-main)); border-radius: 10px 0 0 10px; }
 .op-pocket-r { clip-path: polygon(100% 0, 50% 52%, 100% 100%); background: linear-gradient(260deg, color-mix(in srgb, var(--ev-main) 92%, black), var(--ev-main)); border-radius: 0 10px 10px 0; }
@@ -60,22 +121,6 @@
   background: linear-gradient(0deg, var(--ev-main), color-mix(in srgb, var(--ev-main) 86%, white));
   border-radius: 0 0 10px 10px;
 }
-
-/* Who it's for, written on the envelope under the seal. */
-.op-to {
-  position: absolute; z-index: 4; left: 10%; right: 10%; top: 67%; bottom: 6%;
-  display: grid; align-content: center; justify-items: center; gap: 2px;
-  color: var(--ev-on-main); text-align: center; pointer-events: none;
-}
-.op-to small { font-size: 10px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; opacity: 0.8; }
-.op-to > span {
-  font-family: var(--ev-display); font-size: clamp(19px, 5.8vw, 26px); line-height: 1.1;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  text-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
-}
-.op-to[data-long] > span { font-size: clamp(15px, 4.4vw, 19px); }
-
-/* The flap: two faces, the outside and the patterned lining. */
 .op-flap {
   position: absolute; left: 0; right: 0; top: 0; height: 54%; z-index: 5; display: block;
   transform-origin: 50% 0; transform-style: preserve-3d;
@@ -93,8 +138,6 @@
     radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--op-wax-text) 22%, transparent) 1.4px, transparent 1.8px) 0 0 / 12px 12px,
     linear-gradient(0deg, var(--op-wax), color-mix(in srgb, var(--op-wax) 78%, white));
 }
-
-/* The wax seal at the flap's point. */
 .op-seal {
   position: absolute; z-index: 6; left: 50%; top: 54%;
   width: clamp(58px, 17vw, 72px); aspect-ratio: 1; translate: -50% -50%;
@@ -111,11 +154,6 @@
   content: ""; position: absolute; inset: 14%; border-radius: 50%;
   box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--op-wax-text) 35%, transparent), inset 1px 2px 3px rgb(0 0 0 / 0.25);
 }
-.op-seal::after { /* a gleam that passes now and then */
-  content: ""; position: absolute; inset: 0; border-radius: 50%;
-  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 0.45) 50%, transparent 65%) -150% 0 / 250% 100% no-repeat;
-  animation: op-gleam 3.6s ease-in-out 1s infinite;
-}
 /* Engraved capitals, like a real wax stamp, whatever the letters style
    (Nepali and other scripts fall back to the event's own letters). */
 .op-seal > span {
@@ -125,16 +163,41 @@
 }
 .op-seal > span[data-two] { font-size: clamp(14px, 4vw, 17px); letter-spacing: 0.02em; }
 
+/* ── Where to tap: a hand that taps the envelope, with a ripple ── */
+.op-hand {
+  position: absolute; z-index: 12; left: 80%; top: 74%; width: clamp(48px, 14vw, 58px); display: block; translate: -47% -5%;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.35));
+  animation: op-tapme 2.4s ease-in-out 0.6s infinite both;
+}
+.op-hand svg { display: block; width: 100%; height: auto; }
+.op-ripple { /* at the fingertip */
+  position: absolute; left: 47%; top: 6%; width: 18px; height: 18px; translate: -50% -50%; display: block;
+  border-radius: 50%; border: 2.5px solid #fff; box-shadow: 0 0 0 1px rgb(0 0 0 / 0.2);
+  opacity: 0; animation: op-ripple 2.4s ease-out 0.6s infinite;
+}
+@keyframes op-tapme {
+  0% { transform: translate(18px, 26px); opacity: 0; }
+  14% { transform: translate(0, 0); opacity: 1; }
+  24% { transform: translate(0, 4px) scale(0.92); }
+  32% { transform: translate(0, 0) scale(1); }
+  72% { transform: translate(0, 0); opacity: 1; }
+  88%, 100% { transform: translate(14px, 22px); opacity: 0; }
+}
+@keyframes op-ripple {
+  0%, 22% { opacity: 0; transform: scale(0.6); }
+  26% { opacity: 1; }
+  52%, 100% { opacity: 0; transform: scale(3.4); }
+}
+
 .op-hint {
-  display: inline-flex; align-items: center; gap: 10px;
+  display: inline-flex; align-items: center; gap: 4px;
   min-height: 44px; padding: 10px 20px; border-radius: 999px;
   background: color-mix(in srgb, var(--ev-main) 88%, transparent); color: var(--ev-on-main);
   font-size: 16px; font-weight: 700;
   box-shadow: 0 8px 20px -8px rgb(0 0 0 / 0.45);
 }
 .op-hint-music { font-weight: 600; opacity: 0.9; }
-.op-hint-dot { position: relative; width: 10px; height: 10px; border-radius: 50%; background: var(--op-wax); box-shadow: 0 0 0 2px color-mix(in srgb, var(--ev-on-main) 25%, transparent); }
-.op-hint-dot::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--op-wax); animation: op-ping 1.8s ease-out infinite; }
 
 /* A few soft glints that twinkle around the envelope (not for memorials). */
 .op-glints {
@@ -161,21 +224,20 @@
   animation: op-twinkle 2.6s ease-in-out 1.3s infinite alternate-reverse;
 }
 @keyframes op-twinkle { from { opacity: 0.25; } to { opacity: 1; } }
-
 @keyframes op-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-@keyframes op-gleam { 0%, 60% { background-position: -150% 0; } 100% { background-position: 150% 0; } }
-@keyframes op-ping { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(2.8); opacity: 0; } }
 
-/* ── Opening ── */
-.op[data-phase="opening"] .op-env { animation: op-lift 2.3s ease-in-out forwards; }
-.op[data-phase="opening"] .op-seal { animation: op-seal 0.5s ease-in forwards; }
-.op[data-phase="opening"] .op-seal::after { animation: none; }
-.op[data-phase="opening"] .op-flap { animation: op-flap 0.75s cubic-bezier(0.5, 0, 0.3, 1) 0.3s forwards; }
-.op[data-phase="opening"] .op-card { animation: op-card 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0.95s forwards; }
-.op[data-phase="opening"] .op-to { animation: op-fade 0.3s ease-out forwards; }
-.op[data-phase="opening"] .op-hint, .op[data-phase="opening"] .op-kicker { animation: op-fade 0.35s ease-out forwards; }
-.op[data-phase="opening"] { animation: op-out 0.55s ease-in 1.75s forwards; }
+/* ── Opening (2.8 s in all) ── */
+.op[data-phase="opening"] .op-env { animation: op-lift 2.8s ease-in-out forwards; }
+.op[data-phase="opening"] .op-hand, .op[data-phase="opening"] .op-hint, .op[data-phase="opening"] .op-head { animation: op-fade 0.25s ease-out forwards; }
+.op[data-phase="opening"] .op-front { animation: op-turn-away 0.3s ease-in forwards; }
+.op[data-phase="opening"] .op-backside { visibility: visible; animation: op-turn-to 0.3s ease-out 0.3s forwards; }
+.op[data-phase="opening"] .op-seal { animation: op-seal 0.45s ease-in 0.7s forwards; }
+.op[data-phase="opening"] .op-flap { animation: op-flap 0.7s cubic-bezier(0.5, 0, 0.3, 1) 0.95s forwards; }
+.op[data-phase="opening"] .op-card { animation: op-card 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) 1.55s forwards; }
+.op[data-phase="opening"] { animation: op-out 0.5s ease-in 2.3s forwards; }
 
+@keyframes op-turn-away { to { transform: scaleX(0); } }
+@keyframes op-turn-to { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes op-seal { 30% { transform: scale(1.12); } 100% { transform: scale(0.4) rotate(-25deg); opacity: 0; } }
 @keyframes op-flap {
   0% { transform: rotateX(0deg); z-index: 5; }
@@ -184,14 +246,15 @@
   100% { transform: rotateX(180deg); z-index: 1; }
 }
 @keyframes op-card { to { transform: translateY(-58%); } }
-@keyframes op-lift { 0%, 40% { transform: translateY(0) scale(1); } 100% { transform: translateY(14%) scale(1.06); } }
+@keyframes op-lift { 0%, 50% { transform: translateY(0) scale(1); } 100% { transform: translateY(12%) scale(1.06); } }
 @keyframes op-fade { to { opacity: 0; } }
 @keyframes op-out { to { opacity: 0; visibility: hidden; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .op-env, .op-seal::after, .op-hint-dot::after, .op-glints, .op-glints::after { animation: none; }
-  .op[data-phase="opening"] .op-env, .op[data-phase="opening"] .op-seal, .op[data-phase="opening"] .op-flap,
-  .op[data-phase="opening"] .op-card, .op[data-phase="opening"] .op-to { animation: none; }
+  .op-env, .op-glints, .op-glints::after, .op-ripple { animation: none; }
+  .op-hand { animation: none; opacity: 1; }
+  .op[data-phase="opening"] .op-env, .op[data-phase="opening"] .op-front, .op[data-phase="opening"] .op-backside,
+  .op[data-phase="opening"] .op-seal, .op[data-phase="opening"] .op-flap, .op[data-phase="opening"] .op-card { animation: none; }
   .op[data-phase="opening"] { animation: op-out 0.4s ease-out forwards; }
 }
 

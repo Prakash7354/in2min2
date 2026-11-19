@@ -10,6 +10,7 @@ import { useB2 } from "./context";
 import type { Panel } from "./nav";
 import { AnnouncePanel } from "./panels/announce";
 import { DetailsPanel } from "./panels/details";
+import { GuestsPanel } from "./panels/guests";
 import { LookPanel } from "./panels/look";
 import { PeoplePanel } from "./panels/people";
 import { PhotosPanel } from "./panels/photos";
@@ -35,6 +36,7 @@ export function PanelView({ panel }: { panel: Panel }) {
     case "replies": return <RepliesPanel />;
     case "photos": return <PhotosPanel />;
     case "announce": return <AnnouncePanel />;
+    case "guests": return <GuestsPanel />;
   }
 }
 

@@ -137,6 +137,8 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
   if (d.backdrop) settings.backdrop = d.backdrop; else delete settings.backdrop;
   if (musicOf(d.music)) settings.music = d.music; else delete settings.music;
   if (d.envelope) settings.envelope = true; else delete settings.envelope;
+  if (d.envFrom?.trim()) settings.envelope_from = d.envFrom.trim().slice(0, 60); else delete settings.envelope_from;
+  if (d.envTo?.trim()) settings.envelope_to = d.envTo.trim().slice(0, 60); else delete settings.envelope_to;
   if (d.credit === undefined) delete settings.credit;
   else settings.credit = d.credit === null ? { hidden: true } : { label: d.credit.label.trim().slice(0, 30), name: d.credit.name.trim().slice(0, 80) };
   const t = await sb.from("feature_toggles").update({ ...toggles, settings }).eq("event_id", ev.id);

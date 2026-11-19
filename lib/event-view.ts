@@ -54,6 +54,10 @@ export type EventViewData = {
   // sealed envelope to tap (components/event/opening.tsx).
   music: string | null;
   envelope: boolean;
+  // What the envelope says (envelopeFrom / envelopeTo below): the host's own
+  // words, or "" to have them made from the names already given.
+  envFrom: string;
+  envTo: string;
   date: string;       // YYYY-MM-DD in the event's own time zone
   startTime: string;   // HH:MM
   endTime: string;     // HH:MM or ""
@@ -168,3 +172,28 @@ export function monogram(text: string): string {
 // Remembers, for this tab only, that a guest has opened an event's envelope
 // (components/event/opening.tsx and the guest page's early check).
 export const openedKey = (id: string) => `in2min2:opened:${id}`;
+
+// ── The envelope's "From" and "To" (owner, 19 Nov 2026: like a real
+// envelope, so the invitation is personal and plainly not spam) ──
+
+// From: the host's own words, else the credit line's name ("Hosted by the
+// Gurung family"), else the stars' names, else the organiser.
+export function envelopeFrom(d: Pick<EventViewData, "envFrom" | "credit" | "stars" | "organiser">): string {
+  return d.envFrom.trim() || d.credit?.name.trim() || d.stars?.names.trim() || d.organiser?.name.trim() || "";
+}
+
+// Three ways to invite (owner, 19 Nov 2026), and what the envelope says:
+// personal links carry each guest's own name; one shared link and an open
+// invitation say the host's "To" line.
+export type InviteWay = "personal" | "shared" | "open";
+export const TO_LINES: Record<Exclude<InviteWay, "personal">, string[]> = {
+  shared: ["Our family and friends", "Family and friends", "Our dear friends", "You and your family"],
+  open: ["Everyone, all welcome", "Teams, stalls and sponsors", "Our whole community", "Friends old and new"],
+};
+export function defaultTo(d: Pick<EventViewData, "scale" | "sensitive">): string {
+  return d.scale === "community" ? "Everyone, all welcome" : d.sensitive ? "Family and friends" : "Our family and friends";
+}
+// To: the guest's own name from their personal link, else the host's line.
+export function envelopeTo(d: Pick<EventViewData, "envTo" | "scale" | "sensitive">, guestName?: string | null): string {
+  return guestName?.trim() || d.envTo.trim() || defaultTo(d);
+}

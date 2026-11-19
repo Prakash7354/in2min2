@@ -85,6 +85,9 @@ export function Home() {
           <Tile icon="images" colour="#ff4f8b" label="Photos" delay={0.12} panel="photos"
             big={onWall !== null ? String(onWall) : undefined} tag={b.photos.needsYou ? `${b.photos.needsYou} need you` : undefined}
             line={!d.toggles.photo_wall ? "Switched off" : onWall !== null ? "on the wall" : live ? (b.session ? "Loading…" : "Sign in to see") : "Try the photo wheel now"} />
+          <Tile span icon="user" colour="#e0a100" label="Who's invited" delay={0.1} panel="guests"
+            line={(d.inviteWay ?? (d.scale === "community" ? "open" : "personal")) === "personal" ? "Personal invitations: each guest's name on their envelope"
+              : d.inviteWay === "shared" ? "One shared link for family and friends" : "An open invitation for anyone"} />
           <Tile span icon="calendar" colour="#22b8cf" label="When and where" delay={0.16} panel="details"
             line={[when || "Add the date", d.venueName || "Add the place"].join(" · ")} />
           <Tile span icon="megaphone" colour="#ff7a59" label="Announce" delay={0.18} panel="announce"

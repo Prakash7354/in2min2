@@ -840,3 +840,13 @@ a.b2-row { color: var(--b2-text); }
 .b2-trackpick { display: grid; gap: 2px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .b2-trackpick small { color: var(--b2-text-2); font-size: 14px; }
 .b2-tick { font-weight: 800; color: var(--b2-accent); }
+
+/* Who's invited (19 Nov 2026) */
+.b2-ways { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.b2-ways .b2-choice { min-height: 0; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; padding: 14px 16px; border-radius: 20px; }
+.b2-ways .b2-choice[aria-checked="true"] { box-shadow: 0 0 0 3px var(--b2-accent), 0 14px 34px -12px var(--b2-glow); }
+.b2-ways .b2-choice strong { font-size: 18px; }
+.b2-guests { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.b2-guest { min-height: 0; padding: 10px 12px; cursor: default; }
+.b2-guest strong { overflow-wrap: anywhere; }
+.b2-round.b2-wa { background: #25d366; color: #073b1c; }
