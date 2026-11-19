@@ -12,7 +12,8 @@ import type { PhotosState } from "../builder/photos";
 import type { RepliesState } from "../builder/replies";
 import type { Nav, Panel, SheetKey } from "./nav";
 
-export type AiState = { busy: CopyKey | "all" | null; error: string | null; trimmed: boolean; done: boolean };
+// `at`: which box the error belongs to ("all": the whole write), so it shows beside it.
+export type AiState = { busy: CopyKey | "all" | null; error: string | null; at?: CopyKey | "all"; trimmed: boolean; done: boolean };
 export type PubState = { busy: boolean; error: string | null; note: string | null; done: boolean };
 
 export type B2 = {

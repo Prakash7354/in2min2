@@ -50,6 +50,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
   - A first-time **welcome** with **See what your guests get**: the real envelope with a guest's name, then the invitation, with music.
   - A **tapping hand** on the first screens (Tap one, Swipe for more, Watch, Publish when you're happy). Each one goes once it's been done.
   - **See what your guests get** on "Your invitation is ready" too, with your own event.
+- [x] **Faster AI writer (19 Nov, late):** the AI now writes without "thinking" first, and the words appear in the boxes as they're written (a violet glow while it writes), instead of all at the end. If it goes quiet for 20 seconds it stops and says so; if it stops part-way, your earlier words come back.
 - [x] **Every kind starts complete (19 Nov, evening):**
   - Family and celebration events start with the **envelope on**.
   - **Music** starts on where the tune plainly fits: Happy Birthday for a birthday, the Christmas tune for Christmas, Wedding vows for weddings, engagements and anniversaries. Memorials and public events start quiet.

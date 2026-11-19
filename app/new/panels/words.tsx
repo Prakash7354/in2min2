@@ -76,7 +76,7 @@ export function WordsPanel() {
           {busyAll ? "Writing your words…" : !b.session ? "Sign in and write it for me" : d.wordsBy === "ai" ? "Write it all again" : "Write it for me"}
         </button>
         <p className="b2-small">{b.session ? "Free, up to 20 times a day. About ten seconds." : "Signing in is free and takes a minute."}</p>
-        {ai.error && <Note tone="warn">{ai.error}</Note>}
+        {ai.error && ai.at !== undefined && ai.at !== "all" ? null : ai.error && <Note tone="warn">{ai.error}</Note>}
         {ai.done && !ai.error && !busyAll && <Note tone="ok">Done! Read every word below and change anything you like.</Note>}
         {ai.trimmed && <Note>Some boxes were a little long, so they were shortened to fit. Check them below.</Note>}
       </section>
@@ -130,7 +130,8 @@ function WordBox({ k, d, second, secondCode }: { k: CopyKey; d: Draft; second?: 
   const by = boxBy(d, k);
   const box = (which: "copy" | "translation", lang?: string, label?: string) => {
     const value = d[which][k];
-    const props = { className: `b2-input ${long ? "b2-textarea" : "b2-input-sm"}`, value, lang, "aria-label": label ?? f.label, onChange: (e: { target: { value: string } }) => set(which, e.target.value) };
+    // While the AI writes into it, the box is read-only, so typing can't fight the words arriving.
+    const props = { className: `b2-input ${long ? "b2-textarea" : "b2-input-sm"}`, value, lang, readOnly: busy, "aria-busy": busy, "aria-label": label ?? f.label, onChange: (e: { target: { value: string } }) => set(which, e.target.value) };
     return long ? <textarea rows={k === "landing_page_story" ? 9 : k === "guest_note_box" ? 3 : 5} {...props} /> : <input {...props} />;
   };
   return (
@@ -157,6 +158,7 @@ function WordBox({ k, d, second, secondCode }: { k: CopyKey; d: Draft; second?: 
         ))}
       </div>
       {busy && <span className="b2-writing" style={{ position: "static" }}><Icon name="sparkle" className="" />Writing…</span>}
+      {!busy && b.ai.error && b.ai.at === k && <Note tone="warn">{b.ai.error}</Note>}
     </div>
   );
 }

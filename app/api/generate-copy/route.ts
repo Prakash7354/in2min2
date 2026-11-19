@@ -16,8 +16,19 @@
 // Only a signed-in host may call it, and each person gets 20 AI writes a day:
 // the route asks the database's take_ai_write() (migration 0002) with the
 // host's own sign-in token before calling Gemini.
+//
+// Speed (owner, 19 Nov 2026: "too slow, or it hangs saying Writing"): Gemini 3
+// thinks before it writes unless told not to, which only adds waiting for a
+// few short boxes, and the thinking counts against the output allowance, so a
+// long two-language reply could be cut off. So thinking is set to minimal
+// (asked again without the setting if a model refuses it), and the allowance
+// is generous. With "Accept: application/x-ndjson" (Builder 2.0) the words are
+// sent on as they're written, one JSON line per piece ({"t": text}), then
+// {"done": boxes, "trimmed": [...]} or {"error": message}, so the host sees
+// them appear at once. Without it (the classic builder) the reply is one
+// JSON object, as before.
 
-import { ApiError, GoogleGenAI, Type, type Schema } from "@google/genai/web";
+import { ApiError, GoogleGenAI, ThinkingLevel, Type, type GenerateContentConfig, type Schema } from "@google/genai/web";
 import { ADJUSTMENTS, COPY_FIELDS, COPY_KEYS, DEFAULT_MODEL, clampText, type Adjustment, type CopyKey, type CopyRequest, type CopyResponse, type EventCopy } from "@/lib/ai/copy";
 import { rpc } from "@/lib/supabase/rest";
 import { recordError } from "@/lib/ops";
@@ -165,42 +176,110 @@ export async function POST(request: Request) {
     return Response.json({ error: "You've used today's 20 AI writes. They come back tomorrow; you can still type or edit the words yourself." }, { status: 429 });
   }
 
-  const ai = new GoogleGenAI({ apiKey, httpOptions: { timeout: 25_000 } });
+  // GEMINI_BASE_URL is for local tests with a stand-in Gemini; never used live.
+  const testUrl = process.env.NODE_ENV === "development" ? process.env.GEMINI_BASE_URL : undefined;
+  const ai = new GoogleGenAI({ apiKey, httpOptions: { timeout: 30_000, ...(testUrl ? { baseUrl: testUrl } : {}) } });
   const model = process.env.GEMINI_MODEL || DEFAULT_MODEL;
-
-  let text: string | undefined;
-  try {
-    const response = await ai.models.generateContent({
-      model,
-      contents: buildPrompt(input),
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: responseSchema(input.secondLanguage, input.only as CopyKey | undefined),
-        temperature: 0.8,
-        maxOutputTokens: input.only ? 768 : input.secondLanguage ? 2048 : 1024,
-      },
-    });
-    text = response.text;
-  } catch (err) {
+  const contents = buildPrompt(input);
+  const plain: GenerateContentConfig = {
+    systemInstruction: SYSTEM_INSTRUCTION,
+    responseMimeType: "application/json",
+    responseSchema: responseSchema(input.secondLanguage, input.only as CopyKey | undefined),
+    temperature: 0.8,
+    // A ceiling, not a cost: only the words written are paid for.
+    maxOutputTokens: input.secondLanguage ? 8192 : 4096,
+  };
+  const quick: GenerateContentConfig = { ...plain, thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL } };
+  // Minimal thinking first; if this model doesn't take that setting, ask again without it.
+  async function ask<T>(run: (config: GenerateContentConfig) => Promise<T>): Promise<T> {
+    try {
+      return await run(quick);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 400) return run(plain);
+      throw err;
+    }
+  }
+  const failed = async (err: unknown) => {
     const status = err instanceof ApiError ? err.status : undefined;
     console.error("generate-copy: Gemini call failed", { model, status, message: (err as Error)?.message });
     await recordError("AI writer: Gemini", `${status ?? ""} ${(err as Error)?.message ?? err}`, { model });
-    if (status === 429) {
-      return Response.json({ error: "The AI is busy. Please try again in a minute." }, { status: 429 });
+    return status === 429
+      ? Response.json({ error: "The AI is busy. Please try again in a minute." }, { status: 429 })
+      : Response.json({ error: "The AI could not write the text this time. Please try again." }, { status: 502 });
+  };
+
+  // Builder 2.0: send the words on as they come.
+  if (request.headers.get("accept")?.includes("application/x-ndjson")) {
+    let stream: AsyncGenerator<{ text?: string }>;
+    try {
+      stream = await ask((config) => ai.models.generateContentStream({ model, contents, config }));
+    } catch (err) {
+      return failed(err);
     }
-    return Response.json({ error: "The AI could not write the text this time. Please try again." }, { status: 502 });
+    const encoder = new TextEncoder();
+    // If the phone goes away part-way (closed, or lost signal), stop quietly.
+    let open = true;
+    const body = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const send = (o: unknown) => {
+          if (!open) return;
+          try { controller.enqueue(encoder.encode(JSON.stringify(o) + "\n")); } catch { open = false; }
+        };
+        let all = "";
+        try {
+          for await (const chunk of stream) {
+            if (!open) break;
+            const t = chunk.text;
+            if (t) { all += t; send({ t }); }
+          }
+          if (!open) return;
+          const result = finish(all, input);
+          if (typeof result === "string") {
+            console.error("generate-copy: reply was not JSON", { model, text: all.slice(0, 200) });
+            send({ error: result });
+          } else {
+            send({ done: result.copy, trimmed: result.trimmed });
+          }
+        } catch (err) {
+          if (!open) return;
+          console.error("generate-copy: stream broke", { model, message: (err as Error)?.message });
+          await recordError("AI writer: Gemini stream", String((err as Error)?.message ?? err), { model });
+          send({ error: "The AI stopped part-way. Please try again." });
+        }
+        try { controller.close(); } catch { /* already closed */ }
+      },
+      cancel() { open = false; },
+    });
+    return new Response(body, { headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-store" } });
   }
 
-  // Parse, then hold every field to its limit even if the model overran.
+  let text: string | undefined;
+  try {
+    text = (await ask((config) => ai.models.generateContent({ model, contents, config }))).text;
+  } catch (err) {
+    return failed(err);
+  }
+  const result = finish(text ?? "", input);
+  if (typeof result === "string") {
+    console.error("generate-copy: reply was not JSON", { model, text: text?.slice(0, 200) });
+    return Response.json({ error: result }, { status: 502 });
+  }
+
+  // The body is the five fields (plus "translation" when asked for). Anything
+  // shortened is listed in a header, so the body stays a clean map onto React state.
+  const headers = new Headers({ "Cache-Control": "no-store" });
+  if (result.trimmed.length) headers.set("X-Copy-Trimmed", result.trimmed.join(","));
+  return Response.json(result.copy, { headers });
+}
+
+// Parse the reply, then hold every field to its limit even if the model overran.
+function finish(text: string, input: CopyRequest): { copy: CopyResponse; trimmed: string[] } | string {
   let parsed: Record<string, unknown>;
   try {
-    parsed = JSON.parse(text ?? "");
+    parsed = JSON.parse(text);
   } catch {
-    console.error("generate-copy: reply was not JSON", { model, text: text?.slice(0, 200) });
-    return Response.json({ error: "The AI reply was not in the expected format. Please try again." }, { status: 502 });
+    return "The AI reply was not in the expected format. Please try again.";
   }
-
   const trimmed: string[] = [];
   const keys = input.only ? [input.only as CopyKey] : COPY_KEYS;
   const boxes = (source: Record<string, unknown>, prefix = ""): EventCopy => {
@@ -217,10 +296,5 @@ export async function POST(request: Request) {
   if (input.secondLanguage && parsed.translation && typeof parsed.translation === "object") {
     copy.translation = boxes(parsed.translation as Record<string, unknown>, "translation.");
   }
-
-  // The body is the five fields (plus "translation" when asked for). Anything
-  // shortened is listed in a header, so the body stays a clean map onto React state.
-  const headers = new Headers({ "Cache-Control": "no-store" });
-  if (trimmed.length) headers.set("X-Copy-Trimmed", trimmed.join(","));
-  return Response.json(copy, { headers });
+  return { copy, trimmed };
 }

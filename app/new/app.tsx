@@ -152,15 +152,36 @@ export default function Builder2() {
   const aiBusy = useRef(false);
   const autoWrote = useRef(false);
   const writeAllRef = useRef<() => Promise<void>>(async () => {});
+  // The words go into the boxes as they're written, so the host sees them
+  // appear. If the writing then fails, the words from before come back.
+  const live = useCallback((keys: CopyKey[]) => {
+    const { copy, translation, wordsBy, copyBy } = latest.current;
+    let touched = false;
+    const filled = (b?: Partial<Record<CopyKey, string>>) => Object.fromEntries(Object.entries(b ?? {}).filter(([, v]) => v)) as Partial<Record<CopyKey, string>>;
+    const onPartial = (c: Partial<Record<CopyKey, string>>, tr?: Partial<Record<CopyKey, string>>) => {
+      const got = keys.filter((k) => c[k]);
+      if (!got.length) return;
+      touched = true;
+      update((x) => ({
+        ...x, wordsBy: "ai", copy: { ...x.copy, ...filled(c) }, copyBy: markBoxes(x, got, "ai"),
+        translation: tr ? { ...x.translation, ...filled(tr) } : x.translation,
+      }));
+    };
+    const undo = () => { if (touched) update((x) => ({ ...x, copy, translation, wordsBy, copyBy })); };
+    return { onPartial, undo };
+  }, [update]);
+
   const writeAll = useCallback(async () => {
     if (aiBusy.current) return;
     aiBusy.current = true;
     autoWrote.current = true;
     setAi({ busy: "all", error: null, trimmed: false, done: false });
-    const r = await aiWrite(latest.current);
+    const w = live([...COPY_KEYS]);
+    const r = await aiWrite(latest.current, undefined, w.onPartial);
     aiBusy.current = false;
     if (!r.ok) {
-      setAi({ busy: null, error: r.signIn ? null : r.message, trimmed: false, done: false });
+      w.undo();
+      setAi({ busy: null, error: r.signIn ? null : r.message, at: "all", trimmed: false, done: false });
       if (r.signIn) askSignIn("Sign in (free) and the AI writes your words straight away, in up to two languages.", () => void writeAllRef.current());
       return;
     }
@@ -169,17 +190,19 @@ export default function Builder2() {
       translation: r.translation ? { ...x.translation, ...r.translation } : x.translation,
     }));
     setAi({ busy: null, error: null, trimmed: r.trimmed, done: true });
-  }, [askSignIn, update]);
+  }, [askSignIn, update, live]);
   useEffect(() => { writeAllRef.current = writeAll; }, [writeAll]);
 
   const writeOne = useCallback(async (key: CopyKey, adjust: Adjustment) => {
     if (aiBusy.current) return;
     aiBusy.current = true;
     setAi((a) => ({ ...a, busy: key, error: null }));
-    const r = await aiWrite(latest.current, { key, adjust });
+    const w = live([key]);
+    const r = await aiWrite(latest.current, { key, adjust }, w.onPartial);
     aiBusy.current = false;
     if (!r.ok) {
-      setAi((a) => ({ ...a, busy: null, error: r.signIn ? null : r.message }));
+      w.undo();
+      setAi((a) => ({ ...a, busy: null, error: r.signIn ? null : r.message, at: key }));
       if (r.signIn) askSignIn("Sign in (free) to let the AI change your words.");
       return;
     }
@@ -190,7 +213,7 @@ export default function Builder2() {
       translation: tr ? { ...x.translation, [key]: tr } : x.translation,
     }));
     setAi((a) => ({ ...a, busy: null, trimmed: r.trimmed }));
-  }, [askSignIn, update]);
+  }, [askSignIn, update, live]);
 
   // Once the facts are in and the host is signed in, the AI writes the words
   // in the background while they choose a look and a photo (once per visit).
