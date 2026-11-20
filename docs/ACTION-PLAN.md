@@ -56,6 +56,17 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
   - **Music** starts on where the tune plainly fits: Happy Birthday for a birthday, the Christmas tune for Christmas, Wedding vows for weddings, engagements and anniversaries. Memorials and public events start quiet.
   - With no photo yet, the photo space shows the **initials as a monogram** in the event's own colours, instead of an empty grey box.
 
+**Done (20 Nov), from your phone, wife's and son's tests:**
+- [x] **Photos page on a phone:** bigger photos on the wheel; a heart on every photo (tap it to love it), "♡ Love" under the wheel, and double-tap a photo when it's open full-size. The comment box stays short until someone starts typing.
+- [x] **TV page on a phone or tablet:** the comments column only appears once there are comments (until then the photos use the whole width); on a phone or upright tablet comments run along the bottom; the photos sit below the title; a smaller QR card. "From the hosts" with a small t.
+- [x] **The hand is gold** in the builder (it was white like the words), and it now guides the whole way: Check your words → Let the AI write → When you're happy (Publish) → Turn on "I've checked it" → All set: publish! → Send it.
+- [x] **Anything missing glows red** with "Needed to publish", and Publish takes you straight to it.
+- [x] **You're live!** after publishing: which plan you're on and for how long, "one step left: send your invitation", and "Enjoy your amazing day!"
+- [x] **Moving touches around the photo** (Look › Photos › Around the photo): Glow, Ripples, Bubbles or Sparkles, in the event's colours, for the arch, heart and polaroid shapes. Weddings and anniversaries start with Glow, engagements Ripples, birthdays Bubbles, Pasni and Bratabandha Sparkles.
+- [x] **Safety job:** the first night's backup didn't arrive. The job now tries again every hour until one works, and notes what happened, so Claude Code can see why. (Step 4E waits for the first backup.)
+
+**Waiting for your decision (20 Nov):** see Claude Code's message of 20 Nov: how long free pages stay up, the festive 90 days, and which kinds of event to build for first.
+
 **Next, Claude Code (in this order; each builds on the one before):**
 1. [x] **Safety before real guests (built 19 Nov; switch it on with step 4 below):** nightly backup and a practice-restore tool, error emails, an hourly database check that also keeps the free Supabase plan awake, and the anti-spam check on sign-in.
 2. [x] **Your events on every device (built 19 Nov, late):**

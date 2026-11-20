@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { QrCode } from "@/components/qr-code";
-import { photoUrl, publicRpc, type PublicWall, type WallPhoto } from "@/lib/photos";
+import { fromLine, photoUrl, publicRpc, type PublicWall, type WallPhoto } from "@/lib/photos";
 
 const SHOW_MS = 8000;
 const CHECK_MS = 15000;
@@ -100,7 +100,7 @@ export function Slideshow({ type, slug, token, eventId, title, joinUrl, joinText
           {(current.p.by || current.fresh) && (
             <div className="absolute bottom-[4vh] left-[3vw] flex items-center gap-3 rounded-full bg-black/55 px-[1.6vw] py-[0.8vh] text-[clamp(16px,2.2vw,34px)] font-semibold">
               {current.fresh && <span className="rounded-full px-3 py-0.5 text-[0.7em] font-extrabold uppercase tracking-wider" style={{ background: accent, color: "#1C1A3A" }}>New</span>}
-              {current.p.by ? `From ${current.p.by}` : "Just added"}
+              {current.p.by ? fromLine(current.p.by) : "Just added"}
             </div>
           )}
         </div>
@@ -112,7 +112,7 @@ export function Slideshow({ type, slug, token, eventId, title, joinUrl, joinText
       </div>
 
       {/* How to join, bottom right */}
-      <div className="absolute bottom-[3vh] right-[2.5vw] grid w-[clamp(150px,16vw,280px)] justify-items-center gap-2 rounded-[1.4vw] p-[1vw] text-center shadow-2xl"
+      <div className="ev-slideQr absolute bottom-[3vh] right-[2.5vw] grid w-[clamp(150px,16vw,280px)] justify-items-center gap-2 rounded-[1.4vw] p-[1vw] text-center shadow-2xl"
         style={{ background: main, color: onMain }}>
         <div className="w-full rounded-[0.8vw] bg-white p-[0.4vw]"><QrCode text={joinUrl} className="block w-full" label="Scan to add your photos" /></div>
         <p className="m-0 text-[clamp(14px,1.5vw,26px)] font-extrabold leading-tight">Add your photos</p>

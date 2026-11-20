@@ -10,8 +10,7 @@ import { useMusic, useStopOnLeave } from "@/components/event/music";
 import { Opening } from "@/components/event/opening";
 import { Icon } from "@/components/icons";
 import {
-  BACKDROP_GROUPS, BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, PHOTO_STYLES, TEMPLATES, TEXT_STYLES,
-  eventType, language, musicFor, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle,
+  BACKDROP_GROUPS, BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, PHOTO_STYLES, TEMPLATES, TEXT_STYLES, eventType, language, musicFor, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle, PHOTO_RINGS, photoRingOf, RING_SHAPES,
 } from "@/lib/catalog";
 import { toViewData } from "@/lib/draft";
 import { envelopeFrom, envelopeTo } from "@/lib/event-view";
@@ -185,6 +184,13 @@ function Photos() {
         <Chips label="Photo style" small value={d.photoStyle} options={PHOTO_STYLES.map((p) => ({ key: p.key, label: p.name }))}
           onChange={(k) => k && update((x) => ({ ...x, photoStyle: k as PhotoStyle }))} />
         <p className="b2-small">{PHOTO_STYLES.find((p) => p.key === d.photoStyle)?.line}</p>
+      </Section>
+      <Section icon="sparkle" title="Around the photo" line="A gentle moving touch, in your event's colours.">
+        <Chips label="Around the photo" small value={photoRingOf(d.photoRing) ?? ""}
+          options={[{ key: "", label: "None" }, ...PHOTO_RINGS.map((r) => ({ key: r.key, label: r.name }))]}
+          onChange={(k) => update((x) => ({ ...x, photoRing: k ?? "", photoStyle: k && !RING_SHAPES.includes(x.photoStyle) ? "arch" : x.photoStyle }))} />
+        <p className="b2-small">{PHOTO_RINGS.find((r) => r.key === photoRingOf(d.photoRing))?.line ?? "Nothing round the photo."}
+          {photoRingOf(d.photoRing) && !RING_SHAPES.includes(d.photoStyle) ? "" : " Works with the arch, heart and polaroid shapes."}</p>
       </Section>
     </>
   );

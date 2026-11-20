@@ -30,6 +30,10 @@ export type PublicWall = {
 
 export const photoUrl = (eventId: string, id: string, size: "p" | "t") => `/m/${eventId}/${size}/${id}.jpg`;
 
+// "From Sita"; the hosts' own photos are saved as "The hosts" / "The family"
+// / "The organisers", which read better mid-sentence: "From the hosts".
+export const fromLine = (by: string) => `From ${by.replace(/^The (hosts|family|organisers)$/, "the $1")}`;
+
 // The photos page, and the TV slideshow. A private event's links carry its
 // photo key (k), which opens the photos only.
 export function wallPath(type: string, slug: string, key?: string | null, page: "photos" | "tv" | "print" = "photos", style?: "wheel") {

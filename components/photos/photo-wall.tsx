@@ -289,13 +289,19 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true, n
       {visible.length > 0 ? (
         <div className={s("photoGrid")}>
           {visible.map((p, i) => (
-            <button key={p.id} type="button" className={s("photoTile")} onClick={() => setOpen({ from: "grid", i })}
-              aria-label={`Open photo ${i + 1}${p.by ? ` by ${p.by}` : ""}${p.loves ? `, ${p.loves} loves` : ""}`}>
-              {/* eslint-disable-next-line @next/next/no-img-element -- R2 photos, already sized on the guest's phone */}
-              <img src={photoUrl(ev.id, p.id, "t")} alt="" loading="lazy" decoding="async"
-                onError={() => setBroken((b) => new Set(b).add(p.id))} />
-              {(!!p.loves || p.fav) && <span className={s("tileLoves")} aria-hidden="true">{p.fav ? "★ " : ""}{p.loves ? `♥ ${p.loves}` : ""}</span>}
-            </button>
+            <div key={p.id} className={s("photoCell")}>
+              <button type="button" className={s("photoTile")} onClick={() => setOpen({ from: "grid", i })}
+                aria-label={`Open photo ${i + 1}${p.by ? ` by ${p.by}` : ""}`}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- R2 photos, already sized on the guest's phone */}
+                <img src={photoUrl(ev.id, p.id, "t")} alt="" loading="lazy" decoding="async"
+                  onError={() => setBroken((b) => new Set(b).add(p.id))} />
+                {p.fav && <span className={s("tileFav")} aria-hidden="true">★</span>}
+              </button>
+              <button type="button" className={s("tileHeart")} data-on={p.mine ? "" : undefined} aria-pressed={!!p.mine} onClick={() => void love(p.id)}
+                aria-label={`${p.mine ? "Take back your love for" : "Love"} photo ${i + 1}${p.loves ? `, ${p.loves} loves` : ""}`}>
+                <span aria-hidden="true">{p.mine ? "♥" : "♡"}</span>{p.loves ? p.loves : ""}
+              </button>
+            </div>
           ))}
         </div>
       ) : (
@@ -333,6 +339,18 @@ function Viewer({ photos, index, eventId, onIndex, onClose, onRemoved, onLove, a
   const [note, setNote] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
   const startX = useRef<number | null>(null);
+  // Double-tap the photo to love it, as on Instagram (owner, 20 Nov 2026:
+  // "where to press to like it?"); a big heart shows it worked.
+  const lastTap = useRef(0);
+  const [heart, setHeart] = useState(0);
+  const tapPhoto = () => {
+    const t = Date.now();
+    if (t - lastTap.current < 320) {
+      lastTap.current = 0;
+      if (!p.mine) onLove(p.id);
+      setHeart((n) => n + 1);
+    } else lastTap.current = t;
+  };
   const go = useCallback((d: number) => { setAsking(false); setMsg(null); onIndex((index + d + photos.length) % photos.length); }, [index, photos.length, onIndex]);
 
   useEffect(() => {
@@ -366,7 +384,8 @@ function Viewer({ photos, index, eventId, onIndex, onClose, onRemoved, onLove, a
       </div>
       <div className="relative flex min-h-0 flex-1 items-center justify-center">
         {/* eslint-disable-next-line @next/next/no-img-element -- R2 photo */}
-        <img src={url} alt={p.by ? `Photo by ${p.by}` : "A guest's photo"} className="max-h-full max-w-full object-contain" />
+        <img src={url} alt={p.by ? `Photo by ${p.by}` : "A guest's photo"} className="max-h-full max-w-full object-contain" onClick={tapPhoto} />
+        {heart > 0 && <span key={heart} className="ev-bigHeart" aria-hidden="true">♥</span>}
         {photos.length > 1 && (
           <>
             <button type="button" onClick={() => go(-1)} aria-label="Previous photo" className="absolute left-2 top-1/2 grid size-12 -translate-y-1/2 place-items-center rounded-full bg-black/45 hover:bg-black/70">
@@ -384,9 +403,10 @@ function Viewer({ photos, index, eventId, onIndex, onClose, onRemoved, onLove, a
           <button type="button" onClick={() => onLove(p.id)} aria-pressed={!!p.mine}
             aria-label={`${p.mine ? "Take back your love for" : "Love"} this photo${p.loves ? `, ${p.loves} loves` : ""}`}
             className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 font-extrabold ${p.mine ? "bg-[#e0245e] text-white" : "bg-white/10 text-white ring-1 ring-white/50"}`}>
-            <span aria-hidden="true" className="text-xl leading-none">{p.mine ? "♥" : "♡"}</span>{p.loves ? p.loves : "Love"}
+            <span aria-hidden="true" className="text-xl leading-none">{p.mine ? "♥" : "♡"}</span>{p.mine ? "Loved" : "Love"}{p.loves ? ` · ${p.loves}` : ""}
           </button>
         </div>
+        {!p.mine && <p className="m-0 text-[13px] text-white/60">Tip: double-tap the photo to love it.</p>}
         {asking ? (
           <div className="grid gap-2 rounded-2xl bg-white/10 p-3">
             <p className="m-0 font-semibold">Ask the host to remove this photo? It comes down straight away while they look.</p>

@@ -13,7 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import { COPY_KEYS, type Adjustment, type CopyKey } from "@/lib/ai/copy";
 import { eventType } from "@/lib/catalog";
-import { applyType, clearDraft, fingerprint, loadDraft, markBoxes, newDraft, saveDraft, unpublishedChanges, type Draft } from "@/lib/draft";
+import { applyType, clearDraft, fingerprint, loadDraft, markBoxes, missingForPublish, newDraft, saveDraft, unpublishedChanges, type Draft } from "@/lib/draft";
 import { saveMedia } from "@/lib/media-upload";
 import { listMyEvents, loadEvent, readShelf, shelfKey, shelve, takeFromShelf, worthKeeping, type MyEvent, type Shelved } from "@/lib/my-events";
 import { publishDraft } from "@/lib/publish";
@@ -22,7 +22,7 @@ import { useSession } from "../builder/account";
 import { usePhotos } from "../builder/photos";
 import { useReplies } from "../builder/replies";
 import { aiWrite } from "./ai";
-import { B2Context, type AiState, type B2, type PubState } from "./context";
+import { B2Context, MISSING_PANEL, type AiState, type B2, type PubState } from "./context";
 import { Home } from "./home";
 import { suggestedSlug, suggestedWords, titleFor } from "./kinds";
 import { useNav, type Nav, type Screen } from "./nav";
@@ -269,7 +269,7 @@ export default function Builder2() {
     const photoNote = !m.ok
       ? `Your page is published, but the photo and the WhatsApp picture couldn't be saved yet. Press "Update my page" to try again. (Details for Claude Code: ${m.message})`
       : m.heroNote ? `Your page is published, but the extra photos at the top couldn't be saved yet. Press "Update my page" to try again. (Details for Claude Code: ${m.heroNote})` : null;
-    setPub({ busy: false, error: null, note: [r.offer?.message, photoNote].filter(Boolean).join(" ") || null, done: true });
+    setPub({ busy: false, error: null, note: [r.offer?.message, photoNote].filter(Boolean).join(" ") || null, done: true, first: !d0.eventId });
     say(d0.eventId ? "Your page is updated." : "Published! Now share it.");
     // The first time: close this panel, land on the event Home, and open Share.
     if (!d0.eventId) {
@@ -279,6 +279,14 @@ export default function Builder2() {
     }
   }, [askSignIn, update, say, back, go, replace]);
   useEffect(() => { publishRef.current = publish; }, [publish]);
+
+  // ── Something missing before publishing: show where, in red ──
+  const [flagMissing, setFlagMissing] = useState(false);
+  const goToMissing = useCallback((step?: number) => {
+    setFlagMissing(true);
+    const at = step ?? missingForPublish(latest.current)[0]?.step;
+    if (at !== undefined) open(MISSING_PANEL[at] ?? "publish");
+  }, [open]);
 
   // ── Your events: switch between events, on any device ──
   const [mine, setMine] = useState<{ list: MyEvent[] | null; error: string | null }>({ list: null, error: null });
@@ -353,9 +361,9 @@ export default function Builder2() {
   const ctx = useMemo<B2>(() => ({
     d: draft, update, now, saved, session, say, nav, go, back, open, openSheet, askSignIn,
     ai, writeAll, writeOne, pub, publish, replies, photos, startAgain,
-    mine: { ...mine, shelf, opening, refresh: refreshMine }, openEvent,
+    mine: { ...mine, shelf, opening, refresh: refreshMine }, openEvent, flagMissing, goToMissing,
   }), [draft, update, now, saved, session, say, nav, go, back, open, openSheet, askSignIn, ai, writeAll, writeOne, pub, publish, replies, photos, startAgain,
-    mine, shelf, opening, refreshMine, openEvent]);
+    mine, shelf, opening, refreshMine, openEvent, flagMissing, goToMissing]);
 
   return (
     <B2Context.Provider value={ctx}>

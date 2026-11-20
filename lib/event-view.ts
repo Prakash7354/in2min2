@@ -67,6 +67,7 @@ export type EventViewData = {
   // words, or "" to have them made from the names already given.
   envFrom: string;
   envTo: string;
+  photoRing?: string | null;   // a moving decoration round the photo (catalog PHOTO_RINGS)
   date: string;       // YYYY-MM-DD in the event's own time zone
   startTime: string;   // HH:MM
   endTime: string;     // HH:MM or ""

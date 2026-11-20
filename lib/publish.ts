@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { COPY_KEYS } from "@/lib/ai/copy";
-import { language, musicOf, paletteFor, TOGGLE_DEFAULTS, type ToggleKey } from "@/lib/catalog";
+import { language, musicOf, paletteFor, photoRingOf, TOGGLE_DEFAULTS, type ToggleKey } from "@/lib/catalog";
 import { slugify, type Draft } from "@/lib/draft";
 import { addDays, zonedToUtcIso } from "@/lib/time";
 
@@ -137,6 +137,7 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
   if (d.backdrop) settings.backdrop = d.backdrop; else delete settings.backdrop;
   if (musicOf(d.music)) settings.music = d.music; else delete settings.music;
   if (d.envelope) settings.envelope = true; else delete settings.envelope;
+  if (photoRingOf(d.photoRing)) settings.photo_ring = d.photoRing; else delete settings.photo_ring;
   if (d.envFrom?.trim()) settings.envelope_from = d.envFrom.trim().slice(0, 60); else delete settings.envelope_from;
   if (d.envTo?.trim()) settings.envelope_to = d.envTo.trim().slice(0, 60); else delete settings.envelope_to;
   if (d.credit === undefined) delete settings.credit;

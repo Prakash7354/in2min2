@@ -7,7 +7,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
-import { partyColours, skyFor, textStyle, type HeroMotion, type Palette, backdropImage, backdropOf } from "@/lib/catalog";
+import { partyColours, photoRingOf, RING_SHAPES, skyFor, textStyle, type HeroMotion, type Palette, backdropImage, backdropOf } from "@/lib/catalog";
 import {
   daysUntil, directionsUrl, formatDate, formatTime, monogram, runningOrder,
   type EventStageView, type EventViewData, type MenuItem,
@@ -232,7 +232,27 @@ function Still({ src }: { src?: string }) {
   );
 }
 
+// A moving decoration round the photo (catalog PHOTO_RINGS), for the arch,
+// heart and polaroid shapes. Bubbles and sparkles are a few small dots.
+function Ring({ d, children }: { d: EventViewData; children: ReactNode }) {
+  const ring = photoRingOf(d.photoRing);
+  if (!ring || !RING_SHAPES.includes(d.photoStyle)) return <>{children}</>;
+  const dots = ring === "bubbles" ? 14 : ring === "sparkle" ? 10 : ring === "ripple" ? 3 : 0;
+  return (
+    <div className={s.ring} data-ring={ring} data-shape={d.photoStyle}>
+      <span className={s.ringFx} aria-hidden="true">
+        {Array.from({ length: dots }, (_, i) => <i key={i} style={{ "--i": i } as CSSProperties}>{ring === "sparkle" ? "✦" : null}</i>)}
+      </span>
+      {children}
+    </div>
+  );
+}
+
 function Photo({ d }: { d: EventViewData }) {
+  return <Ring d={d}><PhotoShape d={d} /></Ring>;
+}
+
+function PhotoShape({ d }: { d: EventViewData }) {
   switch (d.photoStyle) {
     case "arch":
       return <PhotoBox d={d} className={s.photoArch} />;

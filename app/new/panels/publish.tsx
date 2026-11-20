@@ -9,11 +9,12 @@ import { Icon } from "@/components/icons";
 import { eventType, formatPence, plan } from "@/lib/catalog";
 import { missingForPublish, slugOk, unpublishedChanges } from "@/lib/draft";
 import { defaultCredit } from "@/lib/event-view";
-import { MISSING_PANEL, useB2 } from "../context";
+import { useB2 } from "../context";
 import { suggestedSlug } from "../kinds";
 import { PanelShell } from "../panels";
 import { eventLink } from "../sheets";
-import { Field, Note, Row, Section, Toggle } from "../ui";
+import { useState } from "react";
+import { Field, Hint, markHint, Note, Row, Section, Toggle } from "../ui";
 
 export function PublishPanel() {
   const b = useB2();
@@ -27,15 +28,23 @@ export function PublishPanel() {
   const ready = missing.length === 0 && d.checked;
   const link = eventLink(d);
   const p = plan(d.plan);
+  const [nudge, setNudge] = useState(false);
 
   // The host's own line at the bottom ("Hosted by …"), or the family names if given.
   const host = d.credit === null ? "" : d.credit?.name ?? defaultCredit({ scale: d.scale, sensitive: !!t?.sensitive, organiserName: d.organiserName, family: d.family })?.name ?? "";
   const footer = (
     <>
       {pub.error && <p className="b2-note" data-tone="warn" style={{ marginBottom: 6 }}>{pub.error}</p>}
-      <button type="button" className="b2-btn b2-primary b2-block" disabled={!ready || pub.busy || (live && !changed)} onClick={() => void b.publish()}>
+      <button type="button" className="b2-btn b2-primary b2-block" disabled={pub.busy || (live && !changed)} style={{ position: "relative" }}
+        onClick={() => {
+          if (missing.length) { b.goToMissing(); return; }
+          if (!d.checked) { setNudge(true); document.getElementById("b2-checked")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+          markHint("publish-go");
+          void b.publish();
+        }}>
         <Icon name="check" className="" />
         {pub.busy ? (live ? "Updating…" : "Publishing…") : live ? (changed ? "Update my page" : "Up to date") : b.session ? "Publish" : "Sign in and publish"}
+        {ready && !live && <Hint id="publish-go" label="All set: publish!" style={{ right: 18, bottom: 6 }} />}
       </button>
       {!ready && !pub.busy && <p className="b2-small" style={{ textAlign: "center" }}>{missing.length ? "Fill in what's still needed, then turn on “I've checked it”." : "Turn on “I've checked it” above to publish."}</p>}
     </>
@@ -55,7 +64,7 @@ export function PublishPanel() {
         {missing.length > 0 ? (
           <div style={{ display: "grid", gap: 10 }}>
             {missing.map((m) => (
-              <button key={m.text} type="button" className="b2-note b2-notebtn" data-tone="warn" onClick={() => b.open(MISSING_PANEL[m.step] ?? "publish")}>
+              <button key={m.text} type="button" className="b2-note b2-notebtn" data-tone="warn" onClick={() => b.goToMissing(m.step)}>
                 <span>Still needed: <strong>{m.text.toLowerCase()}</strong></span><Icon name="next" className="size-5" />
               </button>
             ))}
@@ -68,8 +77,12 @@ export function PublishPanel() {
           </Field>
         )}
         <Row icon="eye" label="See it as guests will" line="The invitation, the page, on the day, and after" onClick={() => b.open("preview")} />
-        <Toggle icon="check" label="I've checked it" line="The names, date, place and numbers, and every word in every language." checked={d.checked}
-          onChange={(v) => update((x) => ({ ...x, checked: v }))} />
+        <div id="b2-checked">
+          <Toggle icon="check" label="I've checked it" line="The names, date, place and numbers, and every word in every language." checked={d.checked}
+            missing={(b.flagMissing || nudge) && !d.checked && !missing.length}
+            hint={!d.checked && !missing.length ? <Hint id="publish-checked" label="Turn on when it's right" style={{ right: 10, top: -30 }} /> : undefined}
+            onChange={(v) => { markHint("publish-checked"); setNudge(false); update((x) => ({ ...x, checked: v })); }} />
+        </div>
       </Section>
 
       <Section icon="link" title="Web address" line={live ? "Fixed once published, so links already shared keep working." : "Small letters, numbers and hyphens. It can't change once shared, so check it now."}>

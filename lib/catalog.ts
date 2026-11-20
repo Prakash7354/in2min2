@@ -602,6 +602,25 @@ export const musicOf = (key: string | null | undefined) => MUSIC.find((m) => m.k
 // The tune a new event starts with, only where it plainly fits (a birthday
 // gets Happy Birthday; a house-warming or New Year's Eve starts quiet). The
 // host can choose any tune, or none, in Look › Envelope & music.
+// Moving decorations around the photo (owner, 20 Nov 2026: "a subtle wave
+// splashing out or a bubbly ring, for some templates, so their photo feels
+// special"). Drawn in CSS in the event's own colours (event-view.css
+// .ev-ring); for the arch, heart and polaroid shapes. Still when the phone
+// asks for less motion. In feature_toggles.settings.photo_ring.
+export type PhotoRing = "glow" | "ripple" | "bubbles" | "sparkle";
+export const PHOTO_RINGS: { key: PhotoRing; name: string; line: string }[] = [
+  { key: "glow", name: "Glow", line: "A soft halo in the event's colours, slowly turning" },
+  { key: "ripple", name: "Ripples", line: "Gentle waves spreading out from the photo" },
+  { key: "bubbles", name: "Bubbles", line: "Little bubbles drifting up around it" },
+  { key: "sparkle", name: "Sparkles", line: "Tiny stars twinkling round the edge" },
+];
+export const photoRingOf = (key: unknown): PhotoRing | null => PHOTO_RINGS.find((r) => r.key === key)?.key ?? null;
+export const RING_SHAPES: PhotoStyle[] = ["arch", "heart", "polaroid"];
+// The decoration a new event starts with, where one suits it.
+export const STARTING_RING: Record<string, PhotoRing> = {
+  wedding: "glow", engagement: "ripple", anniversary: "glow", birthday: "bubbles", pasni: "sparkle", bratabandha: "sparkle",
+};
+
 export const STARTING_MUSIC: Record<string, string> = {
   birthday: "happy_birthday", christmas: "merry_christmas", wedding: "wedding_vows", engagement: "wedding_vows", anniversary: "wedding_vows",
 };

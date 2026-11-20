@@ -4,7 +4,7 @@
 // heading, the choices, and one button at the bottom. Every change is saved
 // as it's made, so "Done" just goes back.
 
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 import type { IconName } from "@/components/icons";
 import { useB2 } from "./context";
 import type { Panel } from "./nav";
@@ -45,6 +45,16 @@ export function PanelShell({ icon, title, line, children, footer, wide, peek }: 
   icon: IconName; title: string; line?: ReactNode; children: ReactNode; footer?: ReactNode; wide?: boolean; peek?: boolean;
 }) {
   const b = useB2();
+  // Opened to fix something missing: bring the first red box into view.
+  useEffect(() => {
+    if (!b.flagMissing) return;
+    const t = window.setTimeout(() => {
+      const el = document.querySelector<HTMLElement>("[data-missing]");
+      el?.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) el.focus({ preventScroll: true });
+    }, 450);
+    return () => window.clearTimeout(t);
+  }, [b.flagMissing]);
   return (
     <>
       <TopBar title={b.d.title || undefined} onBack={() => void b.back()} right={<span />} />

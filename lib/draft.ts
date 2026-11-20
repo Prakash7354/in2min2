@@ -7,7 +7,9 @@ import { COPY_KEYS, type CopyKey, type EventCopy } from "@/lib/ai/copy";
 import {
   backdropOf,
   musicOf,
+  photoRingOf,
   STARTING_MUSIC,
+  STARTING_RING,
   eventType, heroMotionOf, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
   type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
@@ -102,6 +104,9 @@ export type Draft = {
   // phone only, which of the three ways the host is inviting.
   envFrom?: string;
   envTo?: string;
+  // A moving decoration round the photo (catalog PHOTO_RINGS), in
+  // feature_toggles.settings.photo_ring; "" is none, chosen.
+  photoRing?: string;
   inviteWay?: InviteWay;
 };
 
@@ -179,10 +184,13 @@ export function applyType(d: Draft, key: string): Draft {
   const scale = t.scale;
   const music = d.music === undefined || d.music === startingMusic(d.eventType) ? startingMusic(key) : d.music;
   const envelope = d.envelope === undefined || d.envelope === startingEnvelope(d.eventType) ? startingEnvelope(key) : d.envelope;
+  const ring = (k: string | null) => (k && STARTING_RING[k]) || "";
+  const photoRing = d.photoRing === undefined || d.photoRing === ring(d.eventType) ? ring(key) : d.photoRing;
   return {
     ...d,
     music,
     envelope,
+    photoRing,
     eventType: key,
     scale,
     stars: { ...d.stars, relation: t.starLabel },
@@ -358,6 +366,7 @@ export function toViewData(d: Draft): EventViewData {
     backdrop: backdropOf(d.backdrop)?.key ?? null,
     music: musicOf(d.music)?.key ?? null,
     envelope: !!d.envelope,
+    photoRing: photoRingOf(d.photoRing),
     envFrom: (d.envFrom ?? "").trim().slice(0, 60),
     envTo: (d.envTo ?? "").trim().slice(0, 60),
   };

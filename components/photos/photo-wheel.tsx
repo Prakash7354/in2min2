@@ -24,7 +24,7 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import type { Sky } from "@/lib/catalog";
-import { photoUrl, type WallPhoto } from "@/lib/photos";
+import { fromLine, photoUrl, type WallPhoto } from "@/lib/photos";
 
 const SLOTS = 10;
 const STEP = (Math.PI * 2) / SLOTS;
@@ -88,11 +88,11 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
   const ring = useCallback(() => {
     const el = stage.current;
     const W = el?.clientWidth ?? 360;
-    if (!tv) return Math.min(W * 0.5, 460);
+    if (!tv) return Math.min(W * 0.66, 520);
     const H = el?.clientHeight ?? 600;
     const z = sized.current;
     if (el && (z.w !== W || z.h !== H)) {
-      const cw = Math.max(80, Math.min(W * 0.2, H * 0.34));
+      const cw = Math.max(80, Math.min(W * (W < H ? 0.34 : 0.2), H * 0.34));
       z.w = W; z.h = H; z.R = cw * 2.05;
       el.style.setProperty("--tvcw", `${cw.toFixed(0)}px`);
       el.style.perspective = `${(z.R * 5.6).toFixed(0)}px`;
@@ -224,12 +224,12 @@ export function PhotoWheel({ eventId, photos, stars, arrivals, onOpen, onLove, m
         {bursts.map((k) => <Burst key={k} />)}
       </div>
       <div className={s("wheelCaption")}>
-        <span>{frontPhoto?.pg ? `Photo: ${frontPhoto.pg}` : frontPhoto?.by ? `From ${frontPhoto.by}` : "\u00a0"}</span>
+        <span>{frontPhoto?.pg ? `Photo: ${frontPhoto.pg}` : frontPhoto?.by ? fromLine(frontPhoto.by) : "\u00a0"}</span>
         {frontPhoto && onLove && (
           <button type="button" className={s("loveBtn")} data-on={frontPhoto.mine ? "" : undefined} aria-pressed={!!frontPhoto.mine}
             aria-label={`${frontPhoto.mine ? "Take back your love for" : "Love"} this photo${frontPhoto.loves ? `, ${frontPhoto.loves} loves` : ""}`}
             onClick={() => onLove(frontPhoto.id)}>
-            <span aria-hidden="true">{frontPhoto.mine ? "♥" : "♡"}</span> {frontPhoto.loves ? frontPhoto.loves : "Love"}
+            <span aria-hidden="true">{frontPhoto.mine ? "♥" : "♡"}</span> {frontPhoto.mine ? "Loved" : "Love"}{frontPhoto.loves ? ` · ${frontPhoto.loves}` : ""}
           </button>
         )}
         {frontPhoto && !onLove && !!frontPhoto.loves && <span>♥ {frontPhoto.loves}</span>}

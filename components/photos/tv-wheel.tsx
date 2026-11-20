@@ -13,7 +13,7 @@
 // cheers float up the screen; a new announcement shows at the top for an
 // hour. The wheel sits in the middle of the space that's left.
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, useSyncExternalStore } from "react";
 import { QrCode } from "@/components/qr-code";
 import type { Sky } from "@/lib/catalog";
 import { CheerFloats, MegaphoneIcon, TvCheers } from "@/components/live/cheers";
@@ -31,7 +31,14 @@ export function TvWheel({ type, slug, token, eventId, title, joinUrl, joinText, 
   const lv = useLive(type, slug, token, 6_000);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const t = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(t); }, []);
-  const mode = lv.rules?.on ? comments ?? lv.rules.tv : "off";
+  const chosen = lv.rules?.on ? comments ?? lv.rules.tv : "off";
+  // The comments column takes room only once there are comments (owner,
+  // 20 Nov 2026: a big empty box beside small photos); until then the QR
+  // card sits in the corner. On a phone or an upright tablet there's no room
+  // for a column, so comments run along the bottom instead.
+  const upright = useUpright();
+  const words = lv.cheers.some((c) => c.body);
+  const mode = chosen === "off" ? "off" : !words ? "corner" : upright && chosen === "right" ? "bottom" : chosen;
   const notice = lv.announcements.find((a) => now - new Date(a.at).getTime() < 60 * 60_000) ?? null;
   const [photos, setPhotos] = useState<WallPhoto[]>([]);
   const [featured, setFeatured] = useState<WallPhoto[]>([]);
@@ -88,13 +95,13 @@ export function TvWheel({ type, slug, token, eventId, title, joinUrl, joinText, 
   const qr = (
     <div className="ev-tvQr" style={{ background: "var(--ev-main)", color: "var(--ev-on-main)" }}>
       <div className="ev-tvQrCode"><QrCode text={joinUrl} className="block w-full" label="Scan to add your photos" /></div>
-      <p className="ev-tvQrTitle">{mode === "off" ? "Add your photos" : "Add photos and comments"}</p>
+      <p className="ev-tvQrTitle">{chosen === "off" ? "Add your photos" : "Add photos and comments"}</p>
       <p className="ev-tvQrLine">{joinText}</p>
     </div>
   );
   return (
     <div className="ev-frame fixed inset-0" style={{ cursor: idle ? "none" : "auto" }}>
-      <div className="ev-root ev-tv" style={vars} data-motion={motion ? "on" : "off"} data-cheers={mode}>
+      <div className="ev-root ev-tv" style={vars} data-motion={motion ? "on" : "off"} data-cheers={mode === "corner" ? "off" : mode}>
         {wheelPhotos.length >= 3 ? (
           <PhotoWheel size="tv" eventId={eventId} photos={wheelPhotos} stars={featured.map((p) => p.id)} arrivals={arrivals}
             motion={motion} celebrate={celebrate} sky={sky} />
@@ -134,5 +141,15 @@ export function TvWheel({ type, slug, token, eventId, title, joinUrl, joinText, 
         )}
       </div>
     </div>
+  );
+}
+
+// A phone, or a tablet held upright: taller than wide, or narrow.
+const UPRIGHT = "(orientation: portrait), (max-width: 899px)";
+function useUpright(): boolean {
+  return useSyncExternalStore(
+    (fn) => { const m = window.matchMedia(UPRIGHT); m.addEventListener("change", fn); return () => m.removeEventListener("change", fn); },
+    () => window.matchMedia(UPRIGHT).matches,
+    () => false,
   );
 }

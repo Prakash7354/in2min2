@@ -13,7 +13,7 @@ import { LANGUAGES, TONES, language } from "@/lib/catalog";
 import { boxBy, EMPTY_COPY, markBoxes, type Draft } from "@/lib/draft";
 import { useB2 } from "../context";
 import { PanelShell } from "../panels";
-import { Chips, Note, Section } from "../ui";
+import { Chips, Hint, markHint, Needed, Note, Section } from "../ui";
 
 const TONE_SHORT: Record<string, string> = {
   "Warm and welcoming": "Warm", "Formal and elegant": "Formal", "Fun and playful": "Fun",
@@ -71,7 +71,9 @@ export function WordsPanel() {
         {[main, second].some((l) => l && !l.ready) && (
           <p className="b2-small">Beta language: the AI writes it well, but please ask a native speaker to read it before you publish.</p>
         )}
-        <button type="button" className="b2-btn b2-primary b2-block" disabled={!!ai.busy} onClick={() => void b.writeAll()}>
+        <button type="button" className="b2-btn b2-primary b2-block" disabled={!!ai.busy} style={{ position: "relative" }}
+          onClick={() => { markHint("words-ai"); void b.writeAll(); }}>
+          {d.wordsBy !== "ai" && !ai.busy && <Hint id="words-ai" label="Let the AI write" style={{ right: 16, bottom: 4 }} />}
           <Icon name="sparkle" className="" />
           {busyAll ? "Writing your words…" : !b.session ? "Sign in and write it for me" : d.wordsBy === "ai" ? "Write it all again" : "Write it for me"}
         </button>
@@ -131,7 +133,9 @@ function WordBox({ k, d, second, secondCode }: { k: CopyKey; d: Draft; second?: 
   const box = (which: "copy" | "translation", lang?: string, label?: string) => {
     const value = d[which][k];
     // While the AI writes into it, the box is read-only, so typing can't fight the words arriving.
-    const props = { className: `b2-input ${long ? "b2-textarea" : "b2-input-sm"}`, value, lang, readOnly: busy, "aria-busy": busy, "aria-label": label ?? f.label, onChange: (e: { target: { value: string } }) => set(which, e.target.value) };
+    const needed = b.flagMissing && which === "copy" && (k === "card_headline" || k === "card_invite_body") && !value.trim();
+    const props = { className: `b2-input ${long ? "b2-textarea" : "b2-input-sm"}`, value, lang, readOnly: busy, "aria-busy": busy, "aria-label": label ?? f.label,
+      ...(needed ? { "data-missing": "" } : {}), onChange: (e: { target: { value: string } }) => set(which, e.target.value) };
     return long ? <textarea rows={k === "landing_page_story" ? 9 : k === "guest_note_box" ? 3 : 5} {...props} /> : <input {...props} />;
   };
   return (
@@ -159,6 +163,7 @@ function WordBox({ k, d, second, secondCode }: { k: CopyKey; d: Draft; second?: 
       </div>
       {busy && <span className="b2-writing" style={{ position: "static" }}><Icon name="sparkle" className="" />Writing…</span>}
       {!busy && b.ai.error && b.ai.at === k && <Note tone="warn">{b.ai.error}</Note>}
+      <Needed show={b.flagMissing && (k === "card_headline" || k === "card_invite_body") && !d.copy[k].trim()} />
     </div>
   );
 }

@@ -15,7 +15,8 @@ import type { Nav, Panel, SheetKey } from "./nav";
 
 // `at`: which box the error belongs to ("all": the whole write), so it shows beside it.
 export type AiState = { busy: CopyKey | "all" | null; error: string | null; at?: CopyKey | "all"; trimmed: boolean; done: boolean };
-export type PubState = { busy: boolean; error: string | null; note: string | null; done: boolean };
+// `first`: this visit's publish was the event's first (Share then celebrates).
+export type PubState = { busy: boolean; error: string | null; note: string | null; done: boolean; first?: boolean };
 
 export type B2 = {
   d: Draft;
@@ -42,6 +43,11 @@ export type B2 = {
   // kept only on this phone, which one is opening, and opening one.
   mine: { list: MyEvent[] | null; error: string | null; shelf: Shelved[]; opening: string | null; refresh: () => Promise<void> };
   openEvent: (key: string, fromAccount: boolean) => Promise<void>;
+  // After the host tries to publish with something missing, each empty box
+  // that's needed glows red (owner, 20 Nov 2026). `goToMissing` turns that on
+  // and opens where the first missing thing is.
+  flagMissing: boolean;
+  goToMissing: (step?: number) => void;
 };
 
 export const B2Context = createContext<B2 | null>(null);

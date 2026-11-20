@@ -13,12 +13,13 @@ import { kindOf, MEMORIAL_KINDS, titleFor } from "../kinds";
 import { PanelShell } from "../panels";
 import { MilestonePicker } from "../pickers";
 import { ORGANISER_ICON } from "../quick";
-import { AddChips, Chips, Field, Section } from "../ui";
+import { AddChips, Chips, Field, Needed, Section, useNeed } from "../ui";
 
 const FAMILY = ["Parents", "Grandparents", "Mother", "Father", "Brothers and sisters", "Uncles and aunts", "The family"];
 
 export function PeoplePanel() {
-  const { d, update } = useB2();
+  const { d, update, flagMissing } = useB2();
+  const need = useNeed(flagMissing);
   const t = eventType(d.eventType);
   const k = kindOf(d.eventType);
   const community = d.scale === "community";
@@ -34,9 +35,10 @@ export function PeoplePanel() {
       line={community ? "Shown on the page so people know who they're dealing with." : "The stars of the day come first on the card and the page."}>
       <Section icon="star" title="The event's name" line="The big line on the page.">
         <Field label="Name" aside={`${charCount(d.title)}/120`}>
-          <input className="b2-input b2-input-sm" value={d.title} maxLength={120} placeholder={`e.g. ${k.example}`}
+          <input className="b2-input b2-input-sm" value={d.title} maxLength={120} placeholder={`e.g. ${k.example}`} {...need(!d.title.trim())}
             onChange={(e) => update((x) => ({ ...x, title: e.target.value }))} />
         </Field>
+        <Needed show={flagMissing && !d.title.trim()} />
         {titleIdeas.length > 0 && (
           <Chips label="Ideas for the name" small value={null} options={titleIdeas.map((x) => ({ key: x, label: x }))}
             onChange={(v) => v && update((x) => ({ ...x, title: v }))} />
@@ -97,23 +99,27 @@ export function PeoplePanel() {
 }
 
 function OrganiserSection() {
-  const { d, update } = useB2();
+  const { d, update, flagMissing } = useB2();
+  const need = useNeed(flagMissing);
   return (
         <Section icon="flag" title="The organiser" line="Needed before a public event can be published.">
           <Field label="Organiser's name" aside={`${charCount(d.organiserName)}/120`}>
             <input className="b2-input b2-input-sm" value={d.organiserName} maxLength={120} placeholder="e.g. Riverside Community Association"
-              onChange={(e) => update((x) => ({ ...x, organiserName: e.target.value }))} />
+              {...need(!d.organiserName.trim())} onChange={(e) => update((x) => ({ ...x, organiserName: e.target.value }))} />
           </Field>
+          <Needed show={flagMissing && !d.organiserName.trim()} />
           <div className="b2-field">
             <span className="b2-label">What kind of organiser?</span>
             <Chips label="What kind of organiser?" small value={d.organiserType || null} options={ORGANISER_TYPES.map((o) => ({ key: o.key, label: o.label, icon: ORGANISER_ICON[o.key] }))}
               onChange={(v) => update((x) => ({ ...x, organiserType: v ?? "" }))} />
+            <Needed show={flagMissing && !d.organiserType} />
           </div>
           <div className="b2-field">
             <span className="b2-label">Is anyone making a profit from this event?</span>
             <Chips label="Is anyone making a profit?" small value={d.forProfit === null ? null : d.forProfit ? "yes" : "no"}
               options={[{ key: "no", label: "No: it covers costs or a cause" }, { key: "yes", label: "Yes: a business or person profits" }]}
               onChange={(v) => update((x) => ({ ...x, forProfit: v === null ? null : v === "yes" }))} />
+            <Needed show={flagMissing && d.forProfit === null} />
           </div>
           {d.organiserType === "charity" && (
             <Field label="Charity number (if registered)" hint="Small charities don't have to register; leave it empty if you haven't one.">

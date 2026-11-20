@@ -23,6 +23,7 @@ export const PANEL_HUE: Record<Panel, string> = {
 };
 
 // ── Hints: a hand showing where to tap or swipe, until it's been done once ──
+export const HAND = "#FFC94A";   // the builder's hand: gold, so it isn't mistaken for words
 // Kept on this phone (localStorage), so each hint shows only to newcomers.
 const HINTS_KEY = "in2min2.hints";
 const HINTS_EVENT = "b2-hints";
@@ -53,7 +54,7 @@ export function Hint({ id, label, kind = "tap", style }: { id: string; label: st
   return (
     <span className="b2-hint" data-kind={kind} style={style} aria-hidden="true">
       <span className="b2-hint-label">{label}</span>
-      <span className="b2-hint-hand"><span className="b2-hint-ripple" /><TapHand /></span>
+      <span className="b2-hint-hand"><span className="b2-hint-ripple" /><TapHand fill={HAND} /></span>
     </span>
   );
 }
@@ -294,12 +295,13 @@ export function AddChips({ label, items, onAdd }: { label: string; items: string
   );
 }
 
-export function Toggle({ label, line, checked, onChange, icon, badge }: {
-  label: string; line?: ReactNode; checked: boolean; onChange: (v: boolean) => void; icon?: IconName; badge?: ReactNode;
+export function Toggle({ label, line, checked, onChange, icon, badge, missing, hint }: {
+  label: string; line?: ReactNode; checked: boolean; onChange: (v: boolean) => void; icon?: IconName; badge?: ReactNode; missing?: boolean; hint?: ReactNode;
 }) {
   const id = useId();
   return (
-    <div className="b2-row b2-switchrow">
+    <div className="b2-row b2-switchrow" data-missing={missing ? "" : undefined} style={hint ? { position: "relative" } : undefined}>
+      {hint}
       {icon && <span className="b2-ico b2-ico-soft" aria-hidden="true"><Icon name={icon} className="" /></span>}
       <span className="b2-grow">
         <label htmlFor={id} style={{ cursor: "pointer" }}><strong>{label}</strong>{badge}</label>
@@ -310,6 +312,15 @@ export function Toggle({ label, line, checked, onChange, icon, badge }: {
       </button>
     </div>
   );
+}
+
+// After a try at publishing with things missing (B2 flagMissing): props that
+// make an empty, needed box glow red, and the words under it.
+export function useNeed(flag: boolean) {
+  return (empty: boolean) => (flag && empty ? { "data-missing": "" } : {});
+}
+export function Needed({ show }: { show: boolean }) {
+  return show ? <p className="b2-needed" role="alert"><Icon name="close" className="" />Needed to publish</p> : null;
 }
 
 export function Note({ tone = "info", children }: { tone?: "info" | "warn" | "ok"; children: ReactNode }) {

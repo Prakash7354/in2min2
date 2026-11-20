@@ -104,6 +104,8 @@ console.log("Music:");
   ok("a birthday suggests the birthday tune first", cat.musicFor("birthday")[0].key === "happy_birthday");
   const wrong = Object.entries(cat.STARTING_MUSIC).filter(([k, m]) => !cat.eventType(k) || !cat.musicOf(m)?.kinds.includes(k) || cat.eventType(k).sensitive || cat.eventType(k).scale === "community");
   ok("each kind's starting tune exists, suits it, and memorials and public events start quiet", wrong.length === 0, wrong.map(([k]) => k).join(", "));
+  const badRing = Object.entries(cat.STARTING_RING).filter(([k, r]) => !cat.eventType(k) || !cat.photoRingOf(r) || cat.eventType(k).sensitive);
+  ok("each kind's starting photo decoration exists, and memorials start without one", badRing.length === 0, badRing.map(([k]) => k).join(", "));
   const notes = fs.readFileSync(new URL("../../docs/reference/music.md", import.meta.url), "utf8");
   ok("each tune's source is written down (docs/reference/music.md)", cat.MUSIC.every((m) => notes.includes(m.file.split("/").pop())));
 }

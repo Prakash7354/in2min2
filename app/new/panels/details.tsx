@@ -12,13 +12,14 @@ import { useB2 } from "../context";
 import { addMinutes, dateChips, dateLine, kindOf } from "../kinds";
 import { PanelShell } from "../panels";
 import { time12, venueValue } from "../quick";
-import { Chips, Field, Note, Section } from "../ui";
+import { Chips, Field, Needed, Note, Section, useNeed } from "../ui";
 
 const HEADCOUNTS = { personal: [20, 50, 100, 150, 200], celebration: [50, 100, 200, 300, 500], community: [100, 250, 500, 1000, 2000] } as const;
 const num = (v: string) => (v ? Math.min(100000, Math.max(0, Math.floor(+v))) : null);
 
 export function DetailsPanel() {
-  const { d, update } = useB2();
+  const { d, update, flagMissing } = useB2();
+  const need = useNeed(flagMissing);
   const k = kindOf(d.eventType);
   const [today] = useState(() => new Date());
   const dates = dateChips(d.eventType, today);
@@ -33,13 +34,15 @@ export function DetailsPanel() {
           <span className="b2-label">The day</span>
           <Chips label="Quick dates" small value={dates.find((x) => x.date === d.date)?.date ?? null}
             options={dates.map((x) => ({ key: x.date, label: x.label, line: dateLine(x.label, x.date) }))} onChange={(v) => v && update((x) => ({ ...x, date: v }))} />
-          <input className="b2-input b2-input-sm" type="date" aria-label="The date" value={d.date} onChange={(e) => update((x) => ({ ...x, date: e.target.value }))} />
+          <input className="b2-input b2-input-sm" type="date" aria-label="The date" {...need(!d.date)} value={d.date} onChange={(e) => update((x) => ({ ...x, date: e.target.value }))} />
+          <Needed show={flagMissing && !d.date} />
         </div>
         <div className="b2-field">
           <span className="b2-label">Starts</span>
           <Chips label="Usual start times" small value={k.times.includes(d.startTime) ? d.startTime : null}
             options={k.times.map((v) => ({ key: v, label: time12(v) }))} onChange={(v) => v && update((x) => ({ ...x, startTime: v }))} />
-          <input className="b2-input b2-input-sm" type="time" aria-label="Start time" value={d.startTime} onChange={(e) => update((x) => ({ ...x, startTime: e.target.value }))} />
+          <input className="b2-input b2-input-sm" type="time" aria-label="Start time" {...need(!d.startTime)} value={d.startTime} onChange={(e) => update((x) => ({ ...x, startTime: e.target.value }))} />
+          <Needed show={flagMissing && !d.startTime} />
         </div>
         <div className="b2-field">
           <span className="b2-label">Ends <span style={{ fontWeight: 500 }}>(if you like)</span></span>
@@ -57,8 +60,9 @@ export function DetailsPanel() {
           <span className="b2-label">The place</span>
           <Chips label="Popular places" small value={k.venues.map(venueValue).includes(d.venueName) ? d.venueName : null}
             options={k.venues.map((v) => ({ key: venueValue(v), label: v }))} onChange={(v) => v && update((x) => ({ ...x, venueName: v }))} />
-          <input className="b2-input b2-input-sm" value={d.venueName} maxLength={120} placeholder="The place's name" aria-label="The place's name"
+          <input className="b2-input b2-input-sm" {...need(!d.venueName.trim())} value={d.venueName} maxLength={120} placeholder="The place's name" aria-label="The place's name"
             onChange={(e) => update((x) => ({ ...x, venueName: e.target.value }))} />
+          <Needed show={flagMissing && !d.venueName.trim()} />
         </div>
         <Field label="Address and postcode" hint="Guests get a Directions button that opens maps on their phone.">
           <textarea className="b2-input b2-textarea" rows={2} value={d.venueAddress} maxLength={300} placeholder="Street, town and postcode"

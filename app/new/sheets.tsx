@@ -10,7 +10,7 @@ import Link from "next/link";
 import EventView from "@/components/event/event-view";
 import { Icon, type IconName } from "@/components/icons";
 import { QrCode } from "@/components/qr-code";
-import { eventType } from "@/lib/catalog";
+import { eventType, plan } from "@/lib/catalog";
 import { missingForPublish, toViewData, unpublishedChanges, type Draft } from "@/lib/draft";
 import { formatDate } from "@/lib/event-view";
 import { wallPath } from "@/lib/photos";
@@ -23,7 +23,7 @@ import type { Panel } from "./nav";
 import { dateLine } from "./kinds";
 import { previewAt } from "./panels/preview";
 import { EventsBody } from "./events";
-import { Chips, RoundButton, Sheet, Toggle, useTheme } from "./ui";
+import { Chips, Hint, markHint, RoundButton, Sheet, Toggle, useTheme } from "./ui";
 import { CAPTCHA_FAILED, useCaptcha } from "@/components/captcha";
 
 export function eventLink(d: Draft): string | null {
@@ -155,15 +155,33 @@ function ShareLinks({ d, link, say }: { d: Draft; link: string; say: (m: string)
         what: "Ready once the event is over: your page turns into the thank-you page, with the thank-you message and everyone's photos.",
         locked: { why: "Not ready to send yet.", label: "Preview the thank-you page", run: () => { previewAt("after"); void fromSheet("preview"); } } });
 
+  // Straight after the first publish (owner, 20 Nov 2026): you're live, on
+  // which plan for how long, one step left, and enjoy the day.
+  const pl = plan(d.plan);
+  const planLine = community ? "Free to set up, and your page is online now."
+    : d.offerClaimed ? "Your code worked: you're on Keepsake, online for 12 months."
+    : `You're on the free ${pl.name} plan: your page stays online until ${pl.duration} after the event.`;
   return (
     <div style={{ display: "grid", gap: 16 }}>
+      {b.pub.first && (
+        <section className="b2-live" role="status">
+          <span className="b2-live-pop" aria-hidden="true">🎉</span>
+          <div style={{ display: "grid", gap: 4 }}>
+            <strong className="b2-h3">You’re live!</strong>
+            <span className="b2-small">{planLine}</span>
+            <span className="b2-small"><strong style={{ color: "var(--b2-text)" }}>One step left:</strong> send your invitation to your guests, below.{sensitive ? "" : " Enjoy your amazing day!"}</span>
+          </div>
+        </section>
+      )}
       <section className="b2-invite">
         <p className="b2-kicker">Send this first</p>
         <h3 className="b2-h3">{community ? "Your event page" : sensitive ? "The details, for family and friends" : "Your invitation"}</h3>
         <p className="b2-small">{d.toggles.rsvp ? (sensitive ? "Guests open it and let the family know if they can come." : "Guests open the invitation and reply on it: yes, no or maybe.") : "Guests open it for all the details."}</p>
         <p className="b2-msgtext">{invite.text}<br /><span>{bare(link)}</span></p>
-        <a className="b2-btn b2-primary b2-block b2-wa" href={whatsappUrl(link, invite.text)} target="_blank" rel="noreferrer">
+        <a className="b2-btn b2-primary b2-block b2-wa" href={whatsappUrl(link, invite.text)} target="_blank" rel="noreferrer"
+          style={{ position: "relative" }} onClick={() => markHint("share-send")}>
           <Icon name="message" className="" />Send on WhatsApp
+          {b.pub.first && <Hint id="share-send" label="Send it" style={{ right: 18, bottom: 4 }} />}
         </a>
         <div className="b2-chips">
           <button type="button" className="b2-chip b2-chip-sm" onClick={() => void share(link, invite.text)}><Icon name="share" className="" />More ways</button>

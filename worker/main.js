@@ -7,7 +7,7 @@
 //     project from pausing, and emails the owner if it stops answering;
 //   - emails the owner one list of any errors noted since the last hour
 //     (lib/ops.ts), then clears them.
-// Every night (the 02:07 UTC run):
+// Every night (the 02:07 UTC run, or the next hour's if that one fails):
 //   - saves a copy of every table (0012 backup_snapshot) and of the sign-in
 //     accounts to the private R2 bucket in2min2-backups (EU), as
 //     db/YYYY-MM-DD.json and auth/YYYY-MM-DD.json, and deletes copies older
@@ -60,11 +60,17 @@ async function hourly(env, at) {
     state.dbAlertAt = null;
   }
 
-  // 2. The nightly backup.
+  // 2. The nightly backup: from 02:07 UTC, and every hour after until one
+  // works that day (20 Nov 2026: the first night's didn't arrive). A
+  // failure is emailed once a day, not every hour.
   let backupNote = null;
-  if (at.getUTCHours() === 2) {
+  const day = at.toISOString().slice(0, 10);
+  if (at.getUTCHours() >= 2 && state.backupDay !== day) {
     backupNote = await backup(env, at).catch((e) => `Nightly backup FAILED: ${e?.message ?? e}`);
-    if (backupNote.includes("FAILED") || backupNote.includes("skipped")) lines.push(backupNote);
+    const bad = backupNote.includes("FAILED") || backupNote.includes("skipped");
+    state.lastBackup = { at: at.toISOString(), note: backupNote };
+    if (!bad) state.backupDay = day;
+    else if (state.backupAlertDay !== day) { lines.push(backupNote); state.backupAlertDay = day; }
   }
 
   // 3. Errors noted since the last run.
@@ -87,10 +93,15 @@ async function hourly(env, at) {
       : lines.some((l) => l.includes("answering again")) ? "In2Min2: database answering again"
       : weekly ? "In2Min2: weekly check" : "In2Min2: backup problem";
     const sent = await email(env, subject, `${lines.join("\n\n")}\n\nSent by the In2Min2 Worker's hourly check. Give this email to Claude Code if anything needs fixing.\n`);
+    state.lastEmail = { at: at.toISOString(), subject, sent: sent === true, ...(sent === true ? {} : { why: sent || "not set up" }) };
     // Clear the reported errors only once the email has gone.
-    if (sent && errors.length) await env.BACKUPS.delete(errors.map((e) => e.key));
-    if (!sent) console.log("alert (no email set up):", lines.join(" | "));
+    if (sent === true && errors.length) await env.BACKUPS.delete(errors.map((e) => e.key));
+    if (sent !== true) console.log("alert (email not sent):", lines.join(" | "));
   }
+  // What the job last did, readable with wrangler (ops/state.json), so a
+  // problem can be found without the dashboard. Only yes/no for the secrets.
+  state.lastRun = at.toISOString();
+  state.setup = { secretKey: !!env.SUPABASE_SECRET_KEY, alertEmail: !!env.ALERT_EMAIL, emailBinding: !!env.ALERTS, backups: !!env.BACKUPS };
   await writeState(env, state);
 }
 
@@ -132,8 +143,9 @@ async function listErrors(env) {
   return list?.objects ?? [];
 }
 
+// true when sent; otherwise why not (kept in ops/state.json).
 async function email(env, subject, text) {
-  if (!env.ALERTS || !env.ALERT_EMAIL) return false;
+  if (!env.ALERTS || !env.ALERT_EMAIL) return "not set up";
   const raw = [
     `From: In2Min2 alerts <${FROM}>`,
     `To: <${env.ALERT_EMAIL}>`,
@@ -151,7 +163,7 @@ async function email(env, subject, text) {
     return true;
   } catch (e) {
     console.log("alert email failed:", e?.message ?? e);
-    return false;
+    return String(e?.message ?? e).slice(0, 200);
   }
 }
 

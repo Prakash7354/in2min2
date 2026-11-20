@@ -12,12 +12,12 @@ import { eventType, paletteFor, TOGGLES } from "@/lib/catalog";
 import { missingForPublish, toViewData, unpublishedChanges } from "@/lib/draft";
 import { formatDate, formatTime } from "@/lib/event-view";
 import { totals } from "../builder/replies";
-import { MISSING_PANEL, useB2 } from "./context";
+import { useB2 } from "./context";
 import { TYPE_ART } from "./kinds";
 import type { Panel } from "./nav";
 import { YourEventsChip } from "./events";
 import { TopButtons } from "./sheets";
-import { BottomBar, Hint, markHint, PANEL_HUE, spring } from "./ui";
+import { BottomBar, Hint, markHint, PANEL_HUE, spring, useHint } from "./ui";
 
 export function Home() {
   const b = useB2();
@@ -34,6 +34,8 @@ export function Home() {
   const plan = [...d.functions].filter((f) => f.title.trim()).sort((a, c) => `${a.date || d.date}${a.time}`.localeCompare(`${c.date || d.date}${c.time}`));
   const on = TOGGLES.filter((x) => x.scales.includes(d.scale) && d.toggles[x.key]).length;
   const people = [d.stars.names, ...d.family.map((f) => f.names)].filter((x) => x.trim()).length;
+  // One hand at a time: the words first, then Publish.
+  const wordsSeen = !useHint("home-words");
 
   const primary = !live
     ? { label: "Publish", icon: "check" as IconName, run: () => b.open("publish") }
@@ -70,14 +72,14 @@ export function Home() {
 
         {b.pub.note && <p className="b2-note">{b.pub.note}</p>}
         {!live && missing.length > 0 && (
-          <button type="button" className="b2-note b2-notebtn" data-tone="warn" onClick={() => b.open(MISSING_PANEL[missing[0].step] ?? "publish")}>
+          <button type="button" className="b2-note b2-notebtn" data-tone="warn" onClick={() => b.goToMissing()}>
             <span><strong>Still needed to publish:</strong> {missing.map((m) => m.text.toLowerCase()).join(", ")}.</span>
             <Icon name="next" className="size-5" />
           </button>
         )}
 
         <div className="b2-bento">
-          <Tile span icon="pen" label="Invitation words" delay={0.04} panel="words"
+          <Tile span icon="pen" label="Invitation words" delay={0.04} panel="words" hint={!live ? { id: "home-words", label: "Check your words" } : undefined}
             line={b.ai.busy === "all" ? "The AI is writing…" : d.wordsBy === "ai" ? "Written by the AI. Tap to read and change." : d.wordsBy === "host" ? "Your own words. Tap to change." : "Ready-made words. Let the AI write better ones."}>
             {d.wordsBy !== "ai" && d.wordsBy !== "host" && <span className="b2-tagline"><Icon name="sparkle" className="" />AI writer</span>}
           </Tile>
@@ -112,24 +114,25 @@ export function Home() {
         <button type="button" className="b2-btn b2-primary b2-block" onClick={() => { markHint("home-publish"); primary.run(); }} disabled={b.pub.busy}
           style={{ position: "relative" }}>
           <Icon name={primary.icon} className="" />{primary.label}
-          {!live && <Hint id="home-publish" label="When you’re happy" style={{ right: 18, bottom: 6 }} />}
+          {!live && wordsSeen && <Hint id="home-publish" label="When you’re happy" style={{ right: 18, bottom: 6 }} />}
         </button>
       </BottomBar>
     </>
   );
 }
 
-function Tile({ icon, label, big, line, tag, span, panel, delay, children }: {
+function Tile({ icon, label, big, line, tag, span, panel, delay, children, hint }: {
   icon: IconName; label: string; big?: string; line?: string; tag?: string; span?: boolean;
-  panel: Panel; delay: number; children?: ReactNode;
+  panel: Panel; delay: number; children?: ReactNode; hint?: { id: string; label: string };
 }) {
   const b = useB2();
   const colour = PANEL_HUE[panel];
   return (
-    <motion.button type="button" className="b2-tile" data-span={span ? "2" : undefined} onClick={() => b.open(panel)}
+    <motion.button type="button" className="b2-tile" data-span={span ? "2" : undefined} onClick={() => { if (hint) markHint(hint.id); b.open(panel); }}
       style={{ "--b2-hue": colour } as CSSProperties}
       initial={{ y: 22, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ ...spring, delay }} whileTap={{ scale: 0.97 }}>
       {tag && <span className="b2-tag">{tag}</span>}
+      {hint && <Hint id={hint.id} label={hint.label} style={{ right: 16, top: 12 }} />}
       <span className="b2-ico" style={{ background: `linear-gradient(135deg, ${colour}, color-mix(in srgb, ${colour} 55%, #000))` }} aria-hidden="true">
         <Icon name={icon} className="" />
       </span>

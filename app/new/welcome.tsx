@@ -14,7 +14,7 @@ import { useB2 } from "./context";
 import { GuestDemo, sampleWedding } from "./demo";
 import { YourEventsRow } from "./events";
 import { AccountButton } from "./sheets";
-import { BottomBar, Hint, markHint, ThemeButton } from "./ui";
+import { BottomBar, HAND, Hint, markHint, ThemeButton } from "./ui";
 
 export const WELCOMED = "welcome";
 
@@ -56,7 +56,7 @@ export function Welcome() {
             <li key={s.title} className="b2-wstep" style={{ "--i": i } as CSSProperties}>
               <span className="b2-art" style={{ background: `linear-gradient(135deg, ${s.from}, ${s.to})` }} aria-hidden="true"><Icon name={s.icon} className="" /></span>
               <span><strong>{i + 1}. {s.title}</strong><small>{s.line}</small></span>
-              <span className="b2-hint" data-kind="tap" aria-hidden="true"><span className="b2-hint-hand"><span className="b2-hint-ripple" /><TapHand /></span></span>
+              <span className="b2-hint" data-kind="tap" aria-hidden="true"><span className="b2-hint-hand"><span className="b2-hint-ripple" /><TapHand fill={HAND} /></span></span>
             </li>
           ))}
         </ol>

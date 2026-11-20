@@ -1035,3 +1035,34 @@ a.b2-row { color: var(--b2-text); }
   .b2[data-side] .b2-hero { grid-template-columns: minmax(0, 1fr); }
   .b2[data-side] .b2-hero > .b2-stage { display: none; }
 }
+
+/* Needed before publishing (owner, 20 Nov 2026: "flash the place in red so
+   they know where things are missing"): the empty box glows red and pulses
+   three times, with "Needed to publish" under it. */
+.b2 { --b2-need: #ff4d5e; }
+.b2[data-theme="light"] { --b2-need: #d7263d; }
+.b2-input[data-missing], .b2-switchrow[data-missing] {
+  box-shadow: 0 0 0 3px var(--b2-need), 0 0 26px -6px var(--b2-need);
+  animation: b2-need 0.9s ease-in-out 3;
+}
+@keyframes b2-need {
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--b2-need) 45%, transparent), 0 0 34px -2px var(--b2-need); }
+}
+.b2-input[data-missing]::placeholder { color: var(--b2-need); opacity: 0.8; }
+.b2-needed {
+  display: inline-flex; align-items: center; gap: 6px; margin: 0; justify-self: start;
+  padding: 4px 10px 4px 8px; border-radius: 999px; background: color-mix(in srgb, var(--b2-need) 20%, transparent);
+  color: var(--b2-text); font-size: 13.5px; font-weight: 800;
+}
+.b2-needed svg { width: 14px; height: 14px; padding: 2px; border-radius: 999px; background: var(--b2-need); color: #fff; }
+@media (prefers-reduced-motion: reduce) { .b2-input[data-missing], .b2-switchrow[data-missing] { animation: none; } }
+
+/* You're live! (straight after the first publish) */
+.b2-live {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; padding: 16px; border-radius: 22px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--b2-ok) 30%, var(--b2-s1)), color-mix(in srgb, var(--b2-accent) 22%, var(--b2-s1)));
+  box-shadow: var(--b2-edge), var(--b2-shadow);
+}
+.b2-live-pop { font-size: 38px; line-height: 1; animation: b2-live-pop 0.8s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+@keyframes b2-live-pop { from { transform: scale(0.2) rotate(-30deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .b2-live-pop { animation: none; } }

@@ -51,7 +51,7 @@ function Bubble({ c, now }: { c: Cheer; now?: number }) {
 // sky under the photos, as on a live video (owner, 16 Nov 2026: comments
 // "next to the photo display or underneath").
 export function LiveOverlay({ cheers }: { cheers: Cheer[] }) {
-  const list = cheers.filter((c) => c.body).slice(0, 3).reverse();
+  const list = cheers.filter((c) => c.body).slice(0, 2).reverse();
   if (!list.length) return null;
   return (
     <ul className={s("liveOverlay")} aria-hidden="true">
@@ -71,6 +71,10 @@ export function CheerBar({ type, slug, token, device, name, sensitive, rules, co
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
+  // Short until a guest starts: emojis and one line to type in. Ready-made
+  // words and the small print open when they tap the box (owner, 20 Nov
+  // 2026: the comment box took the photos' space).
+  const [writing, setWriting] = useState(false);
   if (!rules?.on) return null;
   const order = sensitive ? GENTLE_ORDER : CHEER_ORDER;
 
@@ -108,16 +112,22 @@ export function CheerBar({ type, slug, token, device, name, sensitive, rules, co
           </div>
           <form className={s("cheerForm")} onSubmit={(e) => { e.preventDefault(); if (text.trim()) void send(null, text); }}>
             <input className={s("input")} value={text} maxLength={140} placeholder={sensitive ? "Share a few words…" : "Say something nice…"}
-              aria-label="Your comment" enterKeyHint="send" onChange={(e) => setText(e.target.value)} />
+              aria-label="Your comment" enterKeyHint="send" onChange={(e) => setText(e.target.value)} onFocus={() => setWriting(true)} />
             <button type="submit" className={`${s("btn")} ${s("btnAccent")}`} disabled={busy || !text.trim()}>Send</button>
           </form>
-          <div className={s("phraseRow")} role="group" aria-label="Ready-made words">
-            {cheerPhrases(sensitive, type).map((p) => (
-              <button key={p} type="button" className={s("phrase")} disabled={busy} onClick={() => void send(null, p)}>{p}</button>
-            ))}
-          </div>
+          {writing ? (
+            <>
+              <div className={s("phraseRow")} role="group" aria-label="Ready-made words">
+                {cheerPhrases(sensitive, type).map((p) => (
+                  <button key={p} type="button" className={s("phrase")} disabled={busy} onClick={() => void send(null, p)}>{p}</button>
+                ))}
+              </div>
+              <p className={s("muted")}>{name.trim() ? `Shown as ${name.trim()}.` : "Add your name below, if you like."}{rules.approve_first ? " The host checks words before they show." : ""}</p>
+            </>
+          ) : (
+            <button type="button" className={s("phraseMore")} onClick={() => setWriting(true)}>Or tap ready-made words</button>
+          )}
           {note && <p className={note.tone === "error" ? s("replyError") : s("photoNote")} role="status">{note.text}</p>}
-          <p className={s("muted")}>{name.trim() ? `Shown as ${name.trim()}.` : "Add your name below, if you like."}{rules.approve_first ? " The host checks words before they show." : ""}</p>
         </>
       ) : (
         <p className={s("muted")}>Comments open with the photos, on the day.</p>
