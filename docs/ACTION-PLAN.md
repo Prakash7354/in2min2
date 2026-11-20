@@ -32,7 +32,7 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 - [x] Privacy, Terms and Prices links are wired into the home page footer and sign-in; they appear the moment the drafts are approved.
 
 **You (in this order):**
-1. [ ] **Run the database file [0013_festive_launch.sql](../supabase/migrations/0013_festive_launch.sql):** open it on your Mac, select everything (Cmd+A), copy (Cmd+C). Supabase › your project › **SQL Editor** › **New query** › paste › **Run**. You should see "Success. No rows returned." Tell Claude Code.
+1. [x] **✓ Done 20 Nov (checked live: the festive plan is there, until 1 February).** Run the database file [0013_festive_launch.sql](../supabase/migrations/0013_festive_launch.sql): open it on your Mac, select everything (Cmd+A), copy (Cmd+C). Supabase › your project › **SQL Editor** › **New query** › paste › **Run**. You should see "Success. No rows returned." Tell Claude Code.
 2. [ ] **Backups:** search your email (and Junk) for "In2Min2: backup problem" from alerts@in2min2.com and forward it to Claude Code if it's there.
 3. [ ] **Approve the three drafts** ([Privacy](https://in2min2.com/privacy), [Terms](https://in2min2.com/terms), [Prices](https://in2min2.com/pricing)): read them, then tell Claude Code "approve the drafts".
 4. [ ] **ICO:** pay the data protection fee (ico.org.uk › "pay the data protection fee" › Tier 1, £47) and send Claude Code the registration number.
