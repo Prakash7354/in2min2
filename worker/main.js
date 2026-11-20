@@ -100,6 +100,10 @@ async function hourly(env, at) {
   }
   // What the job last did, readable with wrangler (ops/state.json), so a
   // problem can be found without the dashboard. Only yes/no for the secrets.
+  // The newest few errors too, in case the email can't go.
+  if (errors.length) {
+    state.recentErrors = errors.slice(-5).map((e) => ({ at: e.key.slice(7, 26), where: e.customMetadata?.where ?? "?", message: String(e.customMetadata?.message ?? "").slice(0, 300) }));
+  }
   state.lastRun = at.toISOString();
   state.setup = { secretKey: !!env.SUPABASE_SECRET_KEY, alertEmail: !!env.ALERT_EMAIL, emailBinding: !!env.ALERTS, backups: !!env.BACKUPS };
   await writeState(env, state);
