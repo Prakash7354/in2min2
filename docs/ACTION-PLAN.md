@@ -33,8 +33,14 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 **You (in this order):**
 1. [x] **✓ Done 20 Nov (checked live: the festive plan is there, until 1 February).** Run the database file [0013_festive_launch.sql](../supabase/migrations/0013_festive_launch.sql): open it on your Mac, select everything (Cmd+A), copy (Cmd+C). Supabase › your project › **SQL Editor** › **New query** › paste › **Run**. You should see "Success. No rows returned." Tell Claude Code.
-2. [ ] **Backups:** search your email (and Junk) for "In2Min2: backup problem" from alerts@in2min2.com and forward it to Claude Code if it's there.
-3. [ ] **Approve the three drafts** ([Privacy](https://in2min2.com/privacy), [Terms](https://in2min2.com/terms), [Prices](https://in2min2.com/pricing)): read them, then tell Claude Code "approve the drafts".
+2. [ ] **Backups and alert emails (found 20 Nov: the Worker can't see its two secrets, so no backup has run and no alert could be sent).** Add them again, as *runtime* secrets:
+   1. Cloudflare dashboard › **Workers & Pages** › **in2min2** › **Settings**.
+   2. Find the section called **Variables and Secrets** (not "Build" › "Variables and secrets", which is a different place used only while building).
+   3. If `SUPABASE_SECRET_KEY` or `ALERT_EMAIL` is listed there as **Text**, delete it.
+   4. **+ Add** › Type: **Secret** › Name: `SUPABASE_SECRET_KEY` › Value: the key starting `sb_secret_` (Supabase › Project Settings › API Keys › Secret keys) › **Deploy**.
+   5. **+ Add** › Type: **Secret** › Name: `ALERT_EMAIL` › Value: your own email address (the one verified under in2min2.com › Email › Email Routing › Destination addresses) › **Deploy**.
+   6. Tell Claude Code. Within the hour it can see whether the backup worked (ops/state.json), and you'll get an email only if something breaks. (alerts@in2min2.com is only the sender's name; it needs no mailbox.)
+3. [x] **Approved 20 Nov, subject to the ICO number and address.** Approve the three drafts ([Privacy](https://in2min2.com/privacy), [Terms](https://in2min2.com/terms), [Prices](https://in2min2.com/pricing)): read them, then tell Claude Code "approve the drafts".
 4. [ ] **ICO:** pay the data protection fee (ico.org.uk › "pay the data protection fee" › Tier 1, £47) and send Claude Code the registration number.
 5. [ ] **Business address:** send Claude Code the address to show (a virtual address keeps your home off the public register).
 6. [ ] **Gemini paid tier:** Google AI Studio › your project › **Billing** › set up billing, so guests' details are covered by Google's paid terms (the free tier may use what's sent to improve their models).
