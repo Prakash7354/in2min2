@@ -13,7 +13,7 @@ export const metadata: Metadata = legalMetadata("Prices and fair fees", "In2Min2
 const mail = <a href={`mailto:${CONTACT}`}>{CONTACT}</a>;
 
 export default function Fees() {
-  const family = PLANS.filter((p) => p.key !== "community");
+  const family = PLANS.filter((p) => p.key !== "community" && p.key !== "festive");
   const community = plan("community");
   const pack = formatPence(family[0].packPence ?? 0);
   const bookingFee = `${community.bookingFeeBps / 100}% + ${community.bookingFeePence}p`;

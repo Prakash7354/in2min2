@@ -80,7 +80,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
       cal={{ title: page.title, date: d.date, startTime: d.startTime, endTime: d.endTime, timezone: d.timezone, venue: [d.venueName, d.venueAddress].filter(Boolean).join(", ") }} />
   ) : undefined;
   const photos = d.toggles.photo_wall && (page.view !== "page" || page.photosEarly) ? (
-    <PhotoWall type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} sensitive={d.sensitive} live={page.view === "live"} motion={d.motion} />
+    <PhotoWall type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} sensitive={d.sensitive} live={page.view === "live"} motion={d.motion} compact />
   ) : undefined;
   return (
     <main className={`${eventFontVariables} min-h-dvh sm:py-8`} style={{ background: p.gradient ? `linear-gradient(${p.soft}e6, ${p.soft}e6), ${p.gradient}` : p.soft }}>

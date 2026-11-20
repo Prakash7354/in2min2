@@ -559,14 +559,28 @@ function shortDate(date: string): string {
   return `${dow.slice(0, 3)} ${day} ${month.slice(0, 3)}`;
 }
 
+// On the day (owner, 20 Nov 2026: "the page didn't come up fully, just the
+// photos"): the whole page, in the order a guest needs it on the day. Quick
+// buttons first (photos, directions, what's on), then what's happening now,
+// the photos, the welcome, the people, where it is and the note.
 function Live({ d, now, a, photos, thumb }: { d: EventViewData; now: number; a: boolean; photos?: ReactNode; thumb: boolean }) {
+  const { main, second, secondLang } = words(d);
+  const story = main.landing_page_story.split(/\n\s*\n/).filter((x) => x.trim());
+  const order = d.toggles.schedule && d.functions.length > 0;
+  const maps = d.toggles.map_directions && (d.venueName || d.venueAddress) ? directionsUrl(d) : null;
   return (
     <>
       <div className={s.banner}>{d.sensitive ? "Today" : "Happening today"}</div>
       <Hero d={d}>
         <p className={s.when}>{whenLine(d)}</p>
+        {d.venueName && <p className={s.where}>{d.venueName}</p>}
+        <div className={s.dayLinks}>
+          {d.toggles.photo_wall && <a className={`${s.btn} ${s.btnAccent}`} href={a ? "#photos" : undefined}><Icon name="camera" className="" />{d.sensitive ? "Photos" : "Photos and comments"}</a>}
+          {maps && <a className={`${s.btn} ${s.btnGhost}`} href={a ? maps : undefined} target="_blank" rel="noreferrer"><Icon name="pin" className="" />Directions</a>}
+          {order && <a className={`${s.btn} ${s.btnGhost}`} href={a ? "#running-order" : undefined}><Icon name="clock" className="" />What’s on</a>}
+        </div>
       </Hero>
-      {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} live a={a} />}
+      {order && <RunningOrder d={d} now={now} live a={a} />}
       {d.toggles.photo_wall && photos && (
         <section className={s.section} id={a ? "photos" : undefined}>
           <Title icon="camera">{d.sensitive ? "Photos and memories" : "Photos from today"}</Title>
@@ -582,12 +596,33 @@ function Live({ d, now, a, photos, thumb }: { d: EventViewData; now: number; a: 
           <p className={s.muted}>Preview: guests&apos; photos turn on this wheel, with their comments. Drawn pictures stand in until then, and the button works on the day.</p>
         </section>
       )}
+      {(story.length > 0 || main.card_invite_body) && (
+        <section className={`${s.section} ${s.story}`}>
+          {story.length ? story.map((para, i) => <p key={i}>{para}</p>) : <p>{main.card_invite_body}</p>}
+          {second?.landing_page_story?.trim() && (
+            <div className={s.storySecond} lang={secondLang}>
+              {second.landing_page_story.split(/\n\s*\n/).filter((x) => x.trim()).map((para, i) => <p key={i}>{para}</p>)}
+            </div>
+          )}
+        </section>
+      )}
+      <People d={d} />
       <WhenWhere d={d} a={a} />
+      {main.guest_note_box && (
+        <section className={s.section}>
+          <p className={s.note}>
+            <span className={s.noteIcon} aria-hidden="true">i</span>
+            <span>{main.guest_note_box}<Second text={second?.guest_note_box} lang={secondLang} /></span>
+          </p>
+        </section>
+      )}
       <Footer d={d} />
     </>
   );
 }
 
+// Afterwards: the thank-you, when and where it was, the gallery, guests'
+// messages and the people, so the page still tells the whole story.
 function After({ d, a, photos, thumb }: { d: EventViewData; a: boolean; photos?: ReactNode; thumb: boolean }) {
   const { main, second, secondLang } = words(d);
   return (
@@ -597,6 +632,7 @@ function After({ d, a, photos, thumb }: { d: EventViewData; a: boolean; photos?:
           {main.post_event_thank_you}
           <Second text={second?.post_event_thank_you} lang={secondLang} />
         </p>
+        <p className={s.where}>{[d.date && formatDate(d.date), d.venueName].filter(Boolean).join(" · ")}</p>
       </Hero>
       {d.toggles.photo_wall && photos && (
         <section className={s.section} id={a ? "photos" : undefined}>
@@ -617,14 +653,11 @@ function After({ d, a, photos, thumb }: { d: EventViewData; a: boolean; photos?:
           <p className={s.muted}>{d.sensitive ? "Messages for the family" : "Messages from guests"} will appear here.</p>
         </section>
       )}
+      <People d={d} />
       <Footer d={d} />
     </>
   );
 }
-
-// Who's behind the event on the left ("Organised by …", "Hosted by …"), with
-// a public event's details under it; a quiet "Made with In2Min2" on the right
-// (owner, 16 Nov 2026: the old badge was "too obvious").
 function Footer({ d }: { d: EventViewData }) {
   const o = d.organiser;
   const details = o ? [o.typeLabel, o.charityNumber && `Charity ${o.charityNumber}`,

@@ -34,7 +34,7 @@ export function FestiveLaunch() {
       <ul className="grid gap-3 sm:grid-cols-3">
         {TILES.map((t) => (
           <li key={t.type}>
-            <Link href={`/builder?type=${t.type}`} className="grid min-h-28 content-between gap-3 rounded-2xl bg-card p-2 text-ink ring-1 ring-white/20 transition hover:-translate-y-0.5">
+            <Link href={`/new?type=${t.type}`} className="grid min-h-28 content-between gap-3 rounded-2xl bg-card p-2 text-ink ring-1 ring-white/20 transition hover:-translate-y-0.5">
               <span className="grid h-20 place-items-center rounded-xl text-4xl" style={{ background: t.bg, color: t.fg }} aria-hidden="true">{t.icon}</span>
               <span className="grid gap-0.5 px-2 pb-1">
                 <span className="font-display text-lg font-extrabold">{t.name}</span>

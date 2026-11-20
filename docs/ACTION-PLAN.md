@@ -22,6 +22,25 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
+## Launch checklist (20 Nov 2026): what's left before sharing with real families
+
+**Ready (Claude Code, 20 Nov):**
+- [x] The website's **Start free** and the festive designs open the new builder (in2min2.com/new). The classic builder still works at /builder but isn't linked.
+- [x] Search engines may list the builder and How it works (not the style page).
+- [x] The festive launch, as you decided on 15 Nov: free family pages made before 31 January stay online **90 days** after the event, for up to **300 people and 300 photos**. Needs the database file below.
+- [x] On the day, and after: the full page again (not just the photos), with quick buttons for Photos, Directions and What's on.
+- [x] Privacy, Terms and Prices links are wired into the home page footer and sign-in; they appear the moment the drafts are approved.
+
+**You (in this order):**
+1. [ ] **Run the database file [0013_festive_launch.sql](../supabase/migrations/0013_festive_launch.sql):** open it on your Mac, select everything (Cmd+A), copy (Cmd+C). Supabase › your project › **SQL Editor** › **New query** › paste › **Run**. You should see "Success. No rows returned." Tell Claude Code.
+2. [ ] **Backups:** search your email (and Junk) for "In2Min2: backup problem" from alerts@in2min2.com and forward it to Claude Code if it's there.
+3. [ ] **Approve the three drafts** ([Privacy](https://in2min2.com/privacy), [Terms](https://in2min2.com/terms), [Prices](https://in2min2.com/pricing)): read them, then tell Claude Code "approve the drafts".
+4. [ ] **ICO:** pay the data protection fee (ico.org.uk › "pay the data protection fee" › Tier 1, £47) and send Claude Code the registration number.
+5. [ ] **Business address:** send Claude Code the address to show (a virtual address keeps your home off the public register).
+6. [ ] **Gemini paid tier:** Google AI Studio › your project › **Billing** › set up billing, so guests' details are covered by Google's paid terms (the free tier may use what's sent to improve their models).
+7. [ ] Then Claude Code removes "Draft", puts in the ICO number and address, and the site is ready to share.
+
+
 ### Your list of 19 Nov, put in order
 
 **Done (19 Nov), live after the next deploy:**

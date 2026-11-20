@@ -10,7 +10,7 @@ import Link from "next/link";
 import EventView from "@/components/event/event-view";
 import { Icon, type IconName } from "@/components/icons";
 import { QrCode } from "@/components/qr-code";
-import { eventType, plan } from "@/lib/catalog";
+import { eventType, plan, freePlanAt } from "@/lib/catalog";
 import { missingForPublish, toViewData, unpublishedChanges, type Draft } from "@/lib/draft";
 import { formatDate } from "@/lib/event-view";
 import { wallPath } from "@/lib/photos";
@@ -22,6 +22,7 @@ import { MISSING_PANEL, useB2, type B2 } from "./context";
 import type { Panel } from "./nav";
 import { dateLine } from "./kinds";
 import { previewAt } from "./panels/preview";
+import { DRAFT } from "@/components/legal/legal-page";
 import { EventsBody } from "./events";
 import { Chips, Hint, markHint, RoundButton, Sheet, Toggle, useTheme } from "./ui";
 import { CAPTCHA_FAILED, useCaptcha } from "@/components/captcha";
@@ -157,9 +158,10 @@ function ShareLinks({ d, link, say }: { d: Draft; link: string; say: (m: string)
 
   // Straight after the first publish (owner, 20 Nov 2026): you're live, on
   // which plan for how long, one step left, and enjoy the day.
-  const pl = plan(d.plan);
+  const pl = plan(freePlanAt(d.plan, d.scale, b.now));
   const planLine = community ? "Free to set up, and your page is online now."
     : d.offerClaimed ? "Your code worked: you're on Keepsake, online for 12 months."
+    : pl.key === "festive" ? "Free in our festive launch: your page stays online until 90 days after the event."
     : `You're on the free ${pl.name} plan: your page stays online until ${pl.duration} after the event.`;
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -524,7 +526,8 @@ function SignInBody({ why, onDone }: { why: string; onDone: () => void }) {
       <div ref={captchaBox} />
       {error && <p className="b2-note" data-tone="warn">{error.text}</p>}
       {error?.detail && <p className="b2-small">Details for Claude Code: {error.detail}</p>}
-      <p className="b2-small">Free. Your event is kept safe in your account, and you can sign in on any phone.</p>
+      <p className="b2-small">Free. Your event is kept safe in your account, and you can sign in on any phone.
+        {!DRAFT && <> By signing in you agree to the <Link className="b2-link" href="/terms" target="_blank">terms</Link>; here’s our <Link className="b2-link" href="/privacy" target="_blank">privacy notice</Link>.</>}</p>
     </div>
   );
 }

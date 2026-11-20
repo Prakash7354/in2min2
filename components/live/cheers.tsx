@@ -64,9 +64,9 @@ export function LiveOverlay({ cheers }: { cheers: Cheer[] }) {
 
 // Right under the wheel: love it, comment, share. One-tap emojis, ready-made
 // words or their own, and a Share button for the photos page.
-export function CheerBar({ type, slug, token, device, name, sensitive, rules, count, title, onSent }: {
+export function CheerBar({ type, slug, token, device, name, sensitive, rules, count, title, onSent, live = true }: {
   type: string; slug: string; token: string | null; device: () => string; name: string; sensitive: boolean;
-  rules: CheerRules | null; count: number; title: string; onSent: () => void;
+  rules: CheerRules | null; count: number; title: string; onSent: () => void; live?: boolean;
 }) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -98,7 +98,7 @@ export function CheerBar({ type, slug, token, device, name, sensitive, rules, co
     <section className={s("cheers")} aria-label="Comments">
       <div className={s("cheersHead")}>
         <span className={s("liveDot")} aria-hidden="true" />
-        <span>{sensitive ? "Messages" : "Live"}{count ? ` · ${count} ${count === 1 ? "comment" : "comments"}` : ""}</span>
+        <span>{sensitive ? "Messages" : live ? "Live" : "Comments"}{count ? ` · ${count} ${count === 1 ? "comment" : "comments"}` : ""}</span>
         <button type="button" className={s("shareMini")} onClick={() => void share()}><ShareIcon />Share</button>
       </div>
       {rules.open ? (
@@ -137,18 +137,18 @@ export function CheerBar({ type, slug, token, device, name, sensitive, rules, co
 }
 
 // Every comment, newest first, to read during and after the event.
-export function CheerList({ cheers, sensitive }: { cheers: Cheer[]; sensitive: boolean }) {
+export function CheerList({ cheers, sensitive, max = 6 }: { cheers: Cheer[]; sensitive: boolean; max?: number }) {
   const [all, setAll] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const t = window.setInterval(() => setNow(Date.now()), 30_000); return () => window.clearInterval(t); }, []);
   const words = cheers.filter((c) => c.body);
   if (!words.length) return null;
-  const shown = all ? words : words.slice(0, 6);
+  const shown = all ? words : words.slice(0, max);
   return (
     <section className={s("cheerAll")} aria-label="All comments">
       <p className={s("cheersHead")}>{sensitive ? "Messages for the family" : "Comments"}</p>
       <ul className={s("cheerList")}>{shown.map((c) => <Bubble key={c.id} c={c} now={now} />)}</ul>
-      {words.length > 6 && (
+      {words.length > max && (
         <div><button type="button" className={`${s("btn")} ${s("btnGhost")} ${s("btnSmall")}`} onClick={() => setAll(!all)}>
           {all ? "Show fewer" : `Show all ${words.length}`}
         </button></div>

@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/wordmark";
+import { LegalLinks } from "@/components/legal/legal-page";
 import { FestiveLaunch } from "./festive";
 
-// Holding page for the preview address. The full website (top menu, How it
-// works, pricing, communities, contact) comes in phase 2 (docs/CONCEPT.md 18b).
+// The home page. "Start free" opens the builder (Builder 2.0 at /new, the
+// real builder since 20 Nov 2026). The full website (top menu, How it works,
+// pricing, communities, contact) comes in phase 2 (docs/CONCEPT.md 18b).
 
 const STEPS = [
   { title: "Choose what you’re celebrating", line: "A birthday, a Pasni, a wedding, a reunion, a tournament or a memorial." },
@@ -16,7 +18,7 @@ export default function Home() {
     <div className="flex min-h-dvh flex-col">
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4">
         <Wordmark className="text-[28px]" />
-        <Link href="/builder" className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 font-bold text-white hover:bg-brand-deep">
+        <Link href="/new" className="inline-flex min-h-11 items-center rounded-full bg-brand px-5 font-bold text-white hover:bg-brand-deep">
           Start free
         </Link>
       </header>
@@ -33,12 +35,12 @@ export default function Home() {
             invitation to memory book.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
-            <Link href="/builder" className="inline-flex min-h-12 items-center rounded-full bg-brand px-7 text-lg font-bold text-white hover:bg-brand-deep">
+            <Link href="/new" className="inline-flex min-h-12 items-center rounded-full bg-brand px-7 text-lg font-bold text-white hover:bg-brand-deep">
               Start free
             </Link>
-            <a href="#how" className="inline-flex min-h-12 items-center rounded-full px-7 text-lg font-bold text-brand ring-2 ring-inset ring-brand hover:bg-brand/5">
+            <Link href="/new/guide" className="inline-flex min-h-12 items-center rounded-full px-7 text-lg font-bold text-brand ring-2 ring-inset ring-brand hover:bg-brand/5">
               See how it works
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -59,9 +61,10 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-line">
-        <p className="mx-auto w-full max-w-5xl px-4 py-6 text-sm text-muted">
-          Preview while In2Min2 is being built · A GoChuchuro product
-        </p>
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-6 text-sm text-muted">
+          <p className="m-0">A GoChuchuro product · <a href="mailto:hello@in2min2.com" className="underline underline-offset-2">hello@in2min2.com</a></p>
+          <LegalLinks className="flex flex-wrap gap-4" />
+        </div>
       </footer>
     </div>
   );

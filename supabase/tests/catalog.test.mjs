@@ -17,12 +17,12 @@ console.log("Builder catalogue matches the database:");
 // Plans
 const planRe = /\('([a-z_]+)',\s*'([^']+)',\s*(\d+),\s*(\d+),\s*(null|\d+),\s*(null|\d+),\s*(\d+),\s*(\d+),\s*(true|false),\s*(true|false),\s*(\d+),\s*(\d+),\s*'\{([a-z,]+)\}',\s*(null|\d+),\s*(null|\d+),\s*(\d+)\)/g;
 const num = (v) => (v === "null" ? null : Number(v));
-const dbPlans = [...sql.matchAll(planRe)].map((m) => ({
+const dbPlans = [...(sql + later).matchAll(planRe)].map((m) => ({
   key: m[1], name: m[2], pricePence: +m[3], daysAfter: +m[4], guestLimit: num(m[5]), photoLimit: num(m[6]),
   photosPerGuest: +m[7], aiWrites: +m[8], fullResDownload: m[9] === "true", hideBranding: m[10] === "true",
   bookingFeeBps: +m[11], bookingFeePence: +m[12], scales: m[13].split(","), packSize: num(m[14]), packPence: num(m[15]), sortOrder: +m[16],
 }));
-ok("found the 5 plans in the database file", dbPlans.length === 5, String(dbPlans.length));
+ok("found the 6 plans in the database files (5, and the festive launch's)", dbPlans.length === 6, String(dbPlans.length));
 for (const d of dbPlans) {
   const t = cat.PLANS.find((p) => p.key === d.key);
   const same = t && Object.keys(d).every((k) => JSON.stringify(d[k]) === JSON.stringify(t[k]));

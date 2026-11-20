@@ -1,7 +1,8 @@
 // /new: Design 2.0 (owner's decision, 15 Nov 2026; CONCEPT 7e). Builder 2.0,
-// the real builder in the new look, and the style page. Hidden until it
-// replaces the classic builder: not linked anywhere, and search engines are
-// told to ignore it. It uses the same draft, sign-in and database as /builder.
+// the real builder in the new look, and the style page. Since 20 Nov 2026 it
+// is the builder the home page opens (search engines may list it; the style
+// page stays hidden). It uses the same draft, sign-in and database as the
+// classic /builder, which stays reachable but isn't linked from the site.
 //
 // It draws real event pages, so it carries every event font (each is
 // downloaded only when a letter style uses it); without them, Handwritten,
@@ -16,8 +17,8 @@ import { eventFontVariables } from "@/components/event/fonts";
 import "./new.css";
 
 export const metadata: Metadata = {
-  title: "In2Min2 · Make your event",
-  robots: { index: false, follow: false },
+  title: "In2Min2 · Make your invitation in two minutes",
+  description: "Beautiful invitations and event pages in two minutes, free to start: replies, photos and comments on the day, and a thank-you page after.",
 };
 
 export const viewport: Viewport = { themeColor: "#0e0c1c" };

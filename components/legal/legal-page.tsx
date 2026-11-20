@@ -18,6 +18,19 @@ export const CONTACT = "hello@in2min2.com";
 // The address is his home for now; swap in the virtual business address when he has one.
 export const OWNER = "Prakash Gurung";
 export const ADDRESS = "1 Rake Way, Andover SP11 6FX";
+// The ICO registration number, once the fee is paid (ico.org.uk); empty until then.
+export const ICO_NUMBER = "";
+
+// Links to the three documents, for footers and sign-in. Shown only once the
+// owner has approved them (DRAFT false), so turning DRAFT off is all it takes.
+export function LegalLinks({ className }: { className?: string }) {
+  if (DRAFT) return null;
+  return (
+    <nav aria-label="In2Min2 documents" className={className}>
+      {PAGES.map((p) => <Link key={p.href} href={p.href} className="underline underline-offset-2">{p.label}</Link>)}
+    </nav>
+  );
+}
 
 const PAGES = [
   { href: "/privacy", label: "Privacy" },

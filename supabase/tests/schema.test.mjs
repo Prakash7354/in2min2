@@ -52,6 +52,10 @@ await db.exec(`
 console.log("Migration:");
 await db.exec(migration);
 await db.exec(`grant execute on all functions in schema extensions to anon, authenticated;`);
+// The festive launch (0013) is checked at the end; until then the tests run
+// as if it had ended, so the normal plans are what's tested.
+const festiveUntil = (when) => db.exec(`reset role; create or replace function public.festive_until() returns timestamptz language sql stable as $$ select timestamptz '${when}' $$;`);
+await festiveUntil("2000-01-01 00:00+00");
 ok("migration ran without error", true);
 
 const A = "aaaaaaaa-0000-0000-0000-000000000001", B = "bbbbbbbb-0000-0000-0000-000000000002", C = "cccccccc-0000-0000-0000-000000000003";
@@ -356,7 +360,7 @@ ok("a family event needs no organiser to publish (wedding above)", true);
 
 console.log("Rights on a strict Supabase (0002) and the AI writes cap:");
 await as(null);
-ok("the public can read plans and event types (pricing page)", (await q(`select key from plans`)).length === 5 && (await q(`select key from event_types`)).length === 18);
+ok("the public can read plans (5, and the festive launch's) and event types (pricing page)", (await q(`select key from plans`)).length === 6 && (await q(`select key from event_types`)).length === 18);
 await expectError("the public cannot read the AI usage table", `select * from ai_usage`, /permission denied/);
 ok("the public gets no AI writes", (await q(`select take_ai_write() as ok`).catch(() => [{ ok: "refused" }]))[0].ok !== true);
 await as(B);
@@ -943,6 +947,28 @@ const allTables = (await q(`select tablename from pg_tables where schemaname = '
 ok("the server's backup has every table", allTables.length > 10 && allTables.every((t) => Array.isArray(snap.tables[t])),
   allTables.filter((t) => !Array.isArray(snap.tables[t])).join(", "));
 ok("…with every row in it", snap.tables.events.length === (await q(`select count(*)::int n from events`))[0].n && typeof snap.taken_at === "string");
+console.log("The festive launch (0013):");
+await festiveUntil("2999-01-01 00:00+00");
+await as(A);
+const [fst] = await q(`insert into events (event_type, slug, title, starts_at, ends_at, status) values ('birthday','festive-party','Festive party', '2027-01-09 14:00+00', '2027-01-09 20:00+00', 'published') returning id, plan, hosting_until`);
+ok("a family page made during the launch is on the festive plan", fst.plan === "festive", fst.plan);
+ok("…and stays up 90 days after the event", new Date(fst.hosting_until).toISOString() === "2027-04-09T20:00:00.000Z", fst.hosting_until);
+ok("…with the Season limits: 300 people", (await q(`select event_usage($1) as u`, [fst.id]))[0].u.guest_limit === 300);
+const [fstc] = await q(`insert into events (event_type, slug, title, starts_at, organiser_name, organiser_type, for_profit) values ('mela','festive-mela','Festive mela', '2027-01-10 11:00+00', 'Riverside', 'community_group', false) returning plan`);
+ok("a public event keeps the Community plan", fstc.plan === "community", fstc.plan);
+await festiveUntil("2000-01-01 00:00+00");
+await q(`update events set title = 'Festive party!' where id = $1`, [fst.id]);
+ok("after the launch ends, an edited festive page keeps its plan and its 90 days",
+  (await q(`select plan, hosting_until from events where id = $1`, [fst.id]))[0].plan === "festive");
+const [fstl] = await q(`insert into events (event_type, slug, title, starts_at) values ('birthday','after-launch','After the launch', '2027-03-06 14:00+00') returning plan`);
+ok("…and a new page is Pop-Up again", fstl.plan === "popup", fstl.plan);
+await db.exec(`reset role; insert into offers (code, label, plan, max_claims) values ('FESTIVETEST', 'Test', 'keepsake', 5)`);
+await as(A);
+const [fsto] = await q(`select claim_offer($1, 'FESTIVETEST') as r`, [fst.id]);
+ok("a launch code still works on a festive page", fsto.r.ok === true && fsto.r.plan === "keepsake", JSON.stringify(fsto.r));
+await as(B);
+await expectError("a host still can't set the plan themselves", `update events set plan = 'festive' where id = '${fst.id}'`, /permission denied/);
+
 // For practising a restore without real data: BACKUP_SAMPLE=/path/file.json npm run test:db
 if (process.env.BACKUP_SAMPLE) fs.writeFileSync(process.env.BACKUP_SAMPLE, JSON.stringify(snap));
 

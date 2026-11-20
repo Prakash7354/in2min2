@@ -18,7 +18,7 @@ import { CheerBar, CheerFloats, CheerList, LiveOverlay, Notices } from "@/compon
 import { useLive } from "@/lib/live";
 import { PhotoWheel } from "./photo-wheel";
 import {
-  PHOTO_MESSAGES, RETRY_REASONS, bookingHref, deviceId, loadWall, lovePhoto, photoUrl, publicRpc,
+  PHOTO_MESSAGES, RETRY_REASONS, bookingHref, deviceId, loadWall, lovePhoto, photoUrl, publicRpc, wallPath,
   type PublicWall, type WallPhoto,
 } from "@/lib/photos";
 
@@ -28,7 +28,10 @@ const s = (k: string) => `ev-${k}`;
 // photos arrive with confetti). Off, the wheel stays still but can be swiped.
 // notices: show the hosts' announcements at the top (the photos page; the
 // event page shows them itself).
-type Props = { type: string; slug: string; token: string | null; sensitive: boolean; live: boolean; motion?: boolean; notices?: boolean };
+// compact: on the event page, the latest 9 photos and 3 comments, then a
+// link to the photos page with all of them (owner, 20 Nov 2026: the photos
+// took over the whole page on the day).
+type Props = { type: string; slug: string; token: string | null; sensitive: boolean; live: boolean; motion?: boolean; notices?: boolean; compact?: boolean };
 type Sending = { total: number; done: number; waitingForSignal: number; message: string | null; tone: "info" | "error" };
 
 function ago(iso: string): string {
@@ -49,7 +52,7 @@ function savedName(type: string, slug: string): string {
   } catch { return ""; }
 }
 
-export function PhotoWall({ type, slug, token, sensitive, live, motion = true, notices = false }: Props) {
+export function PhotoWall({ type, slug, token, sensitive, live, motion = true, notices = false, compact = false }: Props) {
   // Announcements and live comments (0011): every 10 seconds on the day.
   const lv = useLive(type, slug, token, live ? 10_000 : 30_000);
   const wallId = `${type}/${slug}`;
@@ -240,7 +243,7 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true, n
         </div>
       )}
       <CheerBar type={type} slug={slug} token={token} device={() => device.current} name={name} sensitive={sensitive}
-        rules={lv.rules} count={lv.cheers.filter((c) => c.body).length} title={ev.headline || ev.title} onSent={lv.mine} />
+        rules={lv.rules} count={lv.cheers.filter((c) => c.body).length} title={ev.headline || ev.title} onSent={lv.mine} live={wall.stage === "live"} />
       {(wall.photographers ?? []).map((g) => {
         const href = bookingHref(g.link);
         return (
@@ -284,11 +287,11 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true, n
         <p className={s("muted")}>From midnight on the day, guests can add their photos here.</p>
       )}
 
-      <CheerList cheers={lv.cheers} sensitive={sensitive} />
+      <CheerList cheers={lv.cheers} sensitive={sensitive} max={compact ? 3 : 6} />
 
       {visible.length > 0 ? (
         <div className={s("photoGrid")}>
-          {visible.map((p, i) => (
+          {(compact ? visible.slice(0, 9) : visible).map((p, i) => (
             <div key={p.id} className={s("photoCell")}>
               <button type="button" className={s("photoTile")} onClick={() => setOpen({ from: "grid", i })}
                 aria-label={`Open photo ${i + 1}${p.by ? ` by ${p.by}` : ""}`}>
@@ -307,7 +310,12 @@ export function PhotoWall({ type, slug, token, sensitive, live, motion = true, n
       ) : (
         r.open && <p className={s("muted")}>{sensitive ? "Photos and memories shared by guests will appear here." : "Be the first to add a photo!"}</p>
       )}
-      {visible.length > 0 && wall.shown !== undefined && photos.length < wall.shown && (
+      {compact && (visible.length > 9 || lv.cheers.filter((c) => c.body).length > 3) && (
+        <a className={`${s("btn")} ${s("btnGhost")}`} href={wallPath(type, slug, token)} style={{ justifySelf: "center", textDecoration: "none" }}>
+          See all {Math.max(wall.shown ?? 0, visible.length)} photos and comments
+        </a>
+      )}
+      {!compact && visible.length > 0 && wall.shown !== undefined && photos.length < wall.shown && (
         <div><button type="button" className={`${s("btn")} ${s("btnGhost")} ${s("btnSmall")}`} onClick={() => void loadMore()} disabled={more}>
           {more ? "Loading…" : "Show more photos"}
         </button></div>

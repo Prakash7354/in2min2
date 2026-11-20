@@ -4,7 +4,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ADDRESS, CONTACT, Items, LegalPage, OWNER, legalMetadata } from "@/components/legal/legal-page";
+import { ADDRESS, CONTACT, Items, LegalPage, OWNER, legalMetadata, ICO_NUMBER } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = legalMetadata("Privacy notice", "What In2Min2 collects, why, where it's kept, and for how long.");
 
@@ -32,7 +32,7 @@ export default function Privacy() {
       <ul>
         <li>Email: {mail}</li>
         <li>Post: {ADDRESS}</li>
-        <li>ICO registration number: to be provided at launch</li>
+        <li>ICO registration number: {ICO_NUMBER || "to be provided at launch"}</li>
       </ul>
 
       <h2 id="what">2. What we collect, and why</h2>

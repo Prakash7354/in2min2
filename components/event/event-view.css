@@ -2297,3 +2297,8 @@ button.ev-btn { cursor: pointer; }
   .ev-ring[data-ring="bubbles"] .ev-ringFx i { opacity: 0.8; bottom: calc(6% + var(--i) * 5.5%); }
   .ev-ring[data-ring="sparkle"] .ev-ringFx i { opacity: 0.85; }
 }
+
+/* On the day: quick buttons under the title (photos, directions, what's on) */
+.ev-dayLinks { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5em; margin-top: 0.4em; }
+.ev-dayLinks .ev-btn { min-height: 44px; padding: 0.55em 1.05em; font-size: 0.92em; text-decoration: none; }
+.ev-dayLinks .ev-btn svg { width: 1.1em; height: 1.1em; }

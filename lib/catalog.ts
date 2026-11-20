@@ -11,7 +11,7 @@ export type Template = "classic" | "modern" | "festive" | "sport";
 export type TextStyle = "classic" | "formal" | "elegant" | "calligraphy" | "heritage" | "contemporary" | "clean" | "bold" | "playful" | "handwritten";
 export type PhotoStyle = "hero" | "arch" | "polaroid" | "split" | "heart";
 export type Parking = "unknown" | "none" | "free" | "paid" | "street";
-export type PlanKey = "popup" | "season" | "half_year" | "keepsake" | "community";
+export type PlanKey = "popup" | "season" | "half_year" | "keepsake" | "community" | "festive";
 
 // A small label on a tile, so the choice feels like browsing a shop.
 export type Tag = "popular" | "new" | "soon";
@@ -143,7 +143,21 @@ export const PLANS: Plan[] = [
   { key: "community", name: "Community", pricePence: 0, daysAfter: 90, guestLimit: null, photoLimit: 2000, photosPerGuest: 20, aiWrites: 30,
     fullResDownload: false, hideBranding: false, bookingFeeBps: 400, bookingFeePence: 30, scales: ["community"],
     packSize: null, packPence: null, sortOrder: 5, duration: "90 days", bestFor: "Melas, tournaments, fundraisers" },
+  // The festive launch (0013): free with the Season limits until 31 January
+  // 2027; never sold, so not on the prices page.
+  { key: "festive", name: "Festive launch", pricePence: 0, daysAfter: 90, guestLimit: 300, photoLimit: 300, photosPerGuest: 20, aiWrites: 30,
+    fullResDownload: false, hideBranding: false, bookingFeeBps: 0, bookingFeePence: 0, scales: ["personal", "celebration"],
+    packSize: 100, packPence: 300, sortOrder: 0, duration: "90 days", bestFor: "Every family event until 31 January 2027" },
 ];
+// When the festive launch ends (0013 public.festive_until()).
+export const FESTIVE_UNTIL = Date.parse("2027-02-01T00:00:00Z");
+// The plan a family page is on once published: a paid one as chosen, else
+// the festive launch's while it lasts, else Pop-Up.
+export function freePlanAt(key: PlanKey, scale: string, now: number): PlanKey {
+  if (scale === "community") return "community";
+  if (key !== "popup" && key !== "festive") return key;
+  return key === "festive" || now < FESTIVE_UNTIL ? "festive" : "popup";
+}
 
 export function plan(key: PlanKey): Plan {
   const p = PLANS.find((x) => x.key === key);
