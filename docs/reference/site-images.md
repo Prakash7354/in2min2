@@ -39,8 +39,11 @@ for the navy top bar, `public/brand/logo-light.png`, is made from it by
 `scripts/art/dark-to-light.swift` (navy turns cream; the dial and stars stay). Favicon and app
 icons (`app/icon.png`, `app/apple-icon.png`) from “in2min2-favicon-281126- Background Removed.png”
 (owner, 21 Nov 2026), trimmed so the ticket fills the icon, by `scripts/art/icons.swift`.
-The sharing picture `app/opengraph-image.jpg` says "Free until 31 January":
-**change it in February** (made from an HTML page with headless Chrome).
+The sharing picture `public/share/in2min2-festive.jpg` (what WhatsApp, Viber and
+Facebook show for in2min2.com) is the owner's banner with "Your event online in two
+minutes" and "Free until 31 January", made from `scripts/art/share-image.html` (how,
+at the top of that file). Its title and words are in `lib/site-share.ts`.
+**Change both in February**, and give the new picture a new file name.
 
 **Banner** (owner's design, stopwatch and people): `public/brand/logo-banner.png` from
 in2min2-banner-211126.jpeg (only 512 px wide; a bigger copy would be sharper), white

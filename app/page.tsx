@@ -8,6 +8,7 @@ import { WheelDemo } from "@/components/site/wheel-demo";
 import { TapHand } from "@/components/tap-hand";
 import { formatPence, PLANS } from "@/lib/catalog";
 import { heroSample, kindSample, wordsSample } from "@/lib/site-samples";
+import { SHARE_DESCRIPTION, SHARE_IMAGE, SHARE_TITLE } from "@/lib/site-share";
 import "./site.css";
 
 // in2min2.com: the website (owner, 21 Nov 2026). What In2Min2 does, shown
@@ -18,7 +19,11 @@ import "./site.css";
 
 export const metadata: Metadata = {
   title: "in2min2 · Create, invite, celebrate. Your event online in two minutes",
-  description: "Make a beautiful invitation and event page on your phone, free. Guests reply, share photos and leave messages on one link. English, Nepali and more.",
+  description: "Make a beautiful invitation and event page on your phone in two minutes, free. Guests reply, share photos and messages on one link. English, Nepali and more.",
+  alternates: { canonical: "/" },
+  // What WhatsApp, Viber and Facebook show (lib/site-share.ts).
+  openGraph: { type: "website", siteName: "in2min2", locale: "en_GB", url: "/", title: SHARE_TITLE, description: SHARE_DESCRIPTION, images: [SHARE_IMAGE] },
+  twitter: { card: "summary_large_image", title: SHARE_TITLE, description: SHARE_DESCRIPTION, images: [SHARE_IMAGE.url] },
 };
 
 const FAMILY = [

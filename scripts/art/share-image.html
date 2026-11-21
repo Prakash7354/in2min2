@@ -1,0 +1,68 @@
+<!doctype html>
+<!--
+  The picture WhatsApp, Viber and Facebook show when someone shares
+  in2min2.com (owner, 21 Nov 2026: "that banner carries a powerful message").
+  1200 x 630. Everything that matters sits in the middle 630 x 630, because
+  small previews cut a square from the middle; the sides only have confetti.
+
+  To remake it (for example in February, when "Free until 31 January" ends):
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+      --allow-file-access-from-files --hide-scrollbars --virtual-time-budget=6000 \
+      --window-size=1200,630 --screenshot=/tmp/share.png "file://$PWD/scripts/art/share-image.html"
+    sips -s format jpeg -s formatOptions 82 /tmp/share.png --out public/share/in2min2-<new name>.jpg
+  then change SHARE_IMAGE in lib/site-share.ts to the new name (a new name,
+  so WhatsApp and Facebook fetch it again rather than keep the old one).
+-->
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Mukta:wght@500;700&display=block" rel="stylesheet">
+<style>
+  :root { --navy: #0f2a4f; --teal: #19a9a8; --orange: #f47c20; --gold: #e3b341; --cream: #fff9ef; }
+  html, body { margin: 0; }
+  body {
+    width: 1200px; height: 630px; overflow: hidden; position: relative;
+    background:
+      radial-gradient(520px 420px at 6% 8%, rgba(25, 169, 168, 0.20), transparent 70%),
+      radial-gradient(520px 420px at 96% 96%, rgba(244, 124, 32, 0.20), transparent 70%),
+      radial-gradient(420px 320px at 50% 46%, #ffffff, transparent 75%),
+      var(--cream);
+    font-family: "Mukta", sans-serif; color: var(--navy);
+  }
+  .middle { position: absolute; left: 285px; top: 0; width: 630px; height: 630px; display: grid; place-content: center; justify-items: center; text-align: center; }
+  .banner { display: block; width: 520px; height: auto; }
+  h1 { margin: 8px 0 0; font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 60px; line-height: 1.02; letter-spacing: -0.02em; }
+  h1 span { color: #0b7576; }
+  .pill { margin-top: 22px; padding: 10px 30px 12px; border-radius: 999px; background: var(--orange); color: var(--navy); font-weight: 700; font-size: 30px; line-height: 1; box-shadow: 0 14px 28px -14px rgba(244, 124, 32, 0.9); }
+  /* Confetti on the two sides only */
+  .bits i { position: absolute; display: block; border-radius: 3px; }
+  .bits b { position: absolute; color: var(--gold); font-size: 34px; line-height: 1; }
+</style>
+</head>
+<body>
+  <div class="bits" aria-hidden="true">
+    <i style="left:60px;top:70px;width:16px;height:34px;background:#19a9a8;transform:rotate(28deg)"></i>
+    <i style="left:170px;top:150px;width:14px;height:14px;border-radius:99px;background:#f47c20"></i>
+    <i style="left:96px;top:260px;width:30px;height:12px;background:#e3b341;transform:rotate(-20deg)"></i>
+    <i style="left:205px;top:360px;width:14px;height:30px;background:#0f2a4f;transform:rotate(14deg)"></i>
+    <i style="left:56px;top:430px;width:18px;height:18px;border-radius:99px;background:#19a9a8"></i>
+    <i style="left:150px;top:540px;width:30px;height:12px;background:#f47c20;transform:rotate(35deg)"></i>
+    <i style="left:240px;top:60px;width:10px;height:10px;border-radius:99px;background:#0f2a4f"></i>
+    <b style="left:120px;top:190px">★</b><b style="left:226px;top:470px;font-size:24px">★</b>
+    <i style="right:70px;top:80px;width:30px;height:12px;background:#f47c20;transform:rotate(-30deg)"></i>
+    <i style="right:190px;top:170px;width:16px;height:16px;border-radius:99px;background:#19a9a8"></i>
+    <i style="right:96px;top:290px;width:14px;height:32px;background:#0f2a4f;transform:rotate(-18deg)"></i>
+    <i style="right:220px;top:390px;width:28px;height:12px;background:#e3b341;transform:rotate(22deg)"></i>
+    <i style="right:60px;top:470px;width:14px;height:14px;border-radius:99px;background:#f47c20"></i>
+    <i style="right:170px;top:555px;width:16px;height:32px;background:#19a9a8;transform:rotate(40deg)"></i>
+    <i style="right:250px;top:50px;width:10px;height:10px;border-radius:99px;background:#e3b341"></i>
+    <b style="right:130px;top:200px">★</b><b style="right:240px;top:490px;font-size:24px">★</b>
+  </div>
+  <div class="middle">
+    <img class="banner" src="../../public/brand/logo-banner.png" alt="">
+    <h1>Your event online<br><span>in two minutes</span></h1>
+    <div class="pill">Free until 31 January</div>
+  </div>
+</body>
+</html>
