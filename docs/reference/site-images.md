@@ -37,7 +37,8 @@ JPEGs in future: the SVGs were too big to read in a chat message.
 with the white taken off by `scripts/art/white-to-alpha.swift`. The light logo
 for the navy top bar, `public/brand/logo-light.png`, is made from it by
 `scripts/art/dark-to-light.swift` (navy turns cream; the dial and stars stay). Favicon and app
-icons (`app/icon.png`, `app/apple-icon.png`) from in2min2-favicon-211126-transparent.png.
+icons (`app/icon.png`, `app/apple-icon.png`) from “in2min2-favicon-281126- Background Removed.png”
+(owner, 21 Nov 2026), trimmed so the ticket fills the icon, by `scripts/art/icons.swift`.
 The sharing picture `app/opengraph-image.jpg` says "Free until 31 January":
 **change it in February** (made from an HTML page with headless Chrome).
 
