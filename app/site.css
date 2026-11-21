@@ -63,21 +63,23 @@
 .s-btnrow { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
 .s-play { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 999px; background: var(--s-orange); color: var(--s-navy); font-size: 11px; padding-left: 2px; }
 
-/* Header */
-.s-header { position: sticky; top: 0; z-index: 40; background: rgba(255, 249, 239, 0.92); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(234, 223, 203, 0.8); }
-.s-headrow { display: flex; align-items: center; gap: 16px; min-height: 68px; }
+/* Header: a bold navy bar (owner, 21 Nov 2026) with the light logo and a
+   thin teal-to-orange line underneath, like the dial in the logo. */
+.s-header { position: sticky; top: 0; z-index: 40; background: rgba(15, 42, 79, 0.97); color: #fff; box-shadow: 0 10px 24px -18px rgba(15, 42, 79, 0.9); }
+.s-header::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, var(--s-teal), var(--s-gold) 55%, var(--s-orange)); }
+.s-headrow { display: flex; align-items: center; gap: 16px; min-height: 70px; }
 .s-logo { display: block; flex: none; }
 .s-logo img { display: block; width: auto; height: 48px; }
 .s-nav { display: none; gap: 4px; margin: 0 auto; }
-.s-nav a { padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none; color: var(--s-navy); }
-.s-nav a:hover { background: var(--s-mint); }
+.s-nav a { padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 16px; text-decoration: none; color: #fff; }
+.s-nav a:hover { background: rgba(255, 255, 255, 0.12); }
 .s-headbtns { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-.s-signin { display: none; padding: 8px 12px; font-weight: 700; font-size: 16px; text-decoration: none; color: var(--s-navy); }
-.s-menubtn { display: grid; gap: 4px; place-content: center; width: 46px; height: 46px; border: 0; border-radius: 12px; background: var(--s-mint); cursor: pointer; }
-.s-menubtn span { display: block; width: 20px; height: 2.5px; border-radius: 2px; background: var(--s-navy); }
-.s-menu { display: none; padding: 6px 20px 16px; border-top: 1px solid var(--s-line); }
+.s-signin { display: none; padding: 8px 12px; font-weight: 700; font-size: 16px; text-decoration: none; color: #fff; }
+.s-menubtn { display: grid; gap: 4px; place-content: center; width: 46px; height: 46px; border: 0; border-radius: 12px; background: rgba(255, 255, 255, 0.12); cursor: pointer; }
+.s-menubtn span { display: block; width: 20px; height: 2.5px; border-radius: 2px; background: #fff; }
+.s-menu { display: none; padding: 6px 20px 16px; border-top: 1px solid rgba(255, 255, 255, 0.14); }
 .s-menu[data-open] { display: grid; }
-.s-menu a { padding: 13px 4px; font-weight: 700; font-size: 18px; text-decoration: none; color: var(--s-navy); border-bottom: 1px solid var(--s-line); }
+.s-menu a { padding: 13px 4px; font-weight: 700; font-size: 18px; text-decoration: none; color: #fff; border-bottom: 1px solid rgba(255, 255, 255, 0.14); }
 @media (min-width: 900px) {
   .s-nav, .s-signin { display: flex; }
   .s-menubtn, .s-menu, .s-menu[data-open] { display: none; }

@@ -1,7 +1,7 @@
 "use client";
 
-// The website's top bar: the logo, the menu and Start free. On a phone the
-// menu folds into a button; on a laptop the links sit in a row.
+// The website's top bar, in navy: the logo, the menu and Start free. On a
+// phone the menu folds into a button; on a laptop the links sit in a row.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -25,8 +25,9 @@ export function SiteHeader() {
     <header className="s-header">
       <div className="s-wrap s-headrow">
         <Link href="/" className="s-logo" aria-label="in2min2 home">
+          {/* The light logo, for the navy bar (scripts/art/dark-to-light.swift). */}
           {/* eslint-disable-next-line @next/next/no-img-element -- the logo, already sized */}
-          <img src="/brand/logo.png" alt="in2min2: Create, Invite, Celebrate" width={640} height={330} />
+          <img src="/brand/logo-light.png" alt="in2min2: Create, Invite, Celebrate" width={640} height={330} />
         </Link>
         <nav className="s-nav" aria-label="Main">
           {LINKS.map((l) => <a key={l.href} href={l.href}>{l.label}</a>)}

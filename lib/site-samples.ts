@@ -22,15 +22,18 @@ function sample(kind: string, o: Partial<Draft>, weeks = 3): EventViewData {
 
 export function heroSample(): EventViewData {
   return sample("birthday", {
-    title: "Sita’s 50th birthday", stars: { relation: "The birthday star", names: "Sita" }, milestone: "50th",
+    // 23, as on the balloons in the photo (owner, 21 Nov 2026).
+    title: "Sita’s 23rd birthday", stars: { relation: "The birthday star", names: "Sita" }, milestone: "23rd",
     venueName: "Riverside Hall", cover: "/site/birthday-s.jpg", coverFit: "fill",
   });
 }
 
-// The two-language example for "Your words, your way".
+// The two-language example for "Your words, your way": a rich red wedding
+// card with the gold Royal frame, as weddings matter most (owner, 21 Nov 2026).
 export function wordsSample(): EventViewData {
   return sample("wedding", {
     title: "Meenu & Jose", stars: { relation: "The couple", names: "Meenu & Jose" }, venueName: "The Grand Hall", startTime: "11:00",
+    cover: "/site/petals-s.jpg", palette: "sindoor", backdrop: "luminous_red", border: "royal",
     languages: ["en", "ne"],
     copy: { card_headline: "Meenu & Jose are getting married", card_invite_body: "With joy in our hearts, we invite you to celebrate our wedding with us.",
       landing_page_story: "", guest_note_box: "", post_event_thank_you: "" },
@@ -39,14 +42,24 @@ export function wordsSample(): EventViewData {
   }, 6);
 }
 
-// Kinds without a photo on the site: shown as their own invitation.
+// Kinds shown as their own invitation, each in a look the builder offers
+// (owner's choices, 21 Nov 2026): Pasni in ritual red with a gold frame,
+// the anniversary with painted roses, the memorial dark green with fine gold
+// lines and no one's name, so it suits any memorial.
+const MEMORIAL_WORDS = "Family and friends are warmly invited to remember a much-loved life, share memories and support one another.";
 export function kindSample(kind: string): EventViewData {
   switch (kind) {
-    case "pasni": return sample("pasni", { stars: { relation: "", names: "Aarav" }, title: "Aarav’s Pasni", startTime: "10:00" });
-    case "lhosar": return sample("lhosar", { title: "Tamu Lhosar 2026", organiserName: "Gurung community", organiserType: "community_group", forProfit: false, startTime: "11:00" }, 5);
-    case "memorial": return sample("memorial", { stars: { relation: "", names: "Ram Bahadur Gurung" }, title: "Remembering Ram Bahadur Gurung", venueName: "St Mary’s Church", startTime: "14:00" });
+    case "pasni": return sample("pasni", { stars: { relation: "", names: "Jeena" }, title: "Jeena’s Pasni", startTime: "10:00",
+      cover: "/site/jeena-s.jpg", palette: "sindoor", backdrop: "red_gold_frame", border: "none" });
+    case "lhosar": return sample("lhosar", { title: "Tamu Lhosar 2026", organiserName: "Gurung community", organiserType: "community_group", forProfit: false, startTime: "11:00",
+      cover: "/site/lhosar-s.jpg" }, 5);
+    case "memorial": return sample("memorial", { stars: { relation: "", names: "" }, title: "Remembering with love", venueName: "Community hall", startTime: "14:00",
+      cover: "/site/memorial-s.jpg", palette: "emerald_gold", border: "fine_line",
+      copy: { card_headline: "Remembering with love", card_invite_body: MEMORIAL_WORDS, landing_page_story: MEMORIAL_WORDS, guest_note_box: "",
+        post_event_thank_you: "Thank you for being with us, and for your kind words and support." } });
     case "reunion": return sample("reunion", { title: "Gurkha reunion 2027", venueName: "The Regimental Club", startTime: "12:00" }, 8);
-    case "anniversary": return sample("anniversary", { stars: { relation: "", names: "Hari & Sita" }, title: "Hari & Sita’s anniversary", startTime: "19:00" });
+    case "anniversary": return sample("anniversary", { stars: { relation: "", names: "Hari & Sita" }, title: "Hari & Sita’s anniversary", startTime: "19:00",
+      cover: "/site/harisita-s.jpg", palette: "lali_gurans", backdrop: "rose_frame", border: "none" });
     default: return sample("bratabandha", { stars: { relation: "", names: "Rohan" }, title: "Rohan’s Bratabandha", startTime: "08:00" });
   }
 }

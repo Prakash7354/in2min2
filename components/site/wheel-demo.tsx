@@ -1,7 +1,11 @@
 "use client";
 
 // The photo wheel on the website, turning with real-looking photos and a few
-// guests' comments drifting over it, as on the day.
+// guests' comments drifting over it, as on the day. It belongs to the wedding
+// example (Meenu & Jose), so these are wedding photos, upright and wide, as
+// guests take them on their phones (owner, 21 Nov 2026: "show the real
+// reflection, vertical and horizontal"). Files in public/site, sources in
+// docs/reference/site-images.md.
 
 import { useEffect, useState } from "react";
 import { CheerFloats, LiveOverlay } from "@/components/live/cheers";
@@ -10,10 +14,11 @@ import type { Cheer, Float } from "@/lib/live";
 import type { WallPhoto } from "@/lib/photos";
 
 const PICS: [string, number, number, string][] = [
-  ["hero-birthday-s", 560, 376, "Asha"], ["joyful-s", 256, 256, "Hari"], ["marquee-s", 600, 400, "Gita"], ["wedding-s", 600, 403, "Bikash"],
-  ["party-s", 480, 719, "Maya"], ["christmas-s", 600, 400, "Kamala"], ["birthday-s", 600, 452, "Ram"], ["newyear-s", 600, 431, "Suman"], ["festival-s", 600, 335, "Anita"],
+  ["w-ceremony-s", 600, 400, "Asha"], ["w-heart-s", 480, 640, "Hari"], ["petals-s", 600, 393, "Gita"], ["harisita-s", 600, 900, "Bikash"],
+  ["w-family-s", 600, 422, "Maya"], ["w-bouquet-s", 480, 640, "Kamala"], ["w-table-s", 600, 399, "Ram"], ["w-mist-s", 480, 640, "Suman"],
+  ["w-bride-s", 600, 400, "Anita"], ["w-beach-s", 480, 640, "Dipak"], ["w-sunset-s", 600, 399, "Sarita"],
 ];
-const PHOTOS: WallPhoto[] = PICS.map(([id, w, h, by], i) => ({ id, w, h, by, at: "", loves: [24, 9, 15, 31, 6, 12, 8, 19, 4][i], fav: i === 3 }));
+const PHOTOS: WallPhoto[] = PICS.map(([id, w, h, by], i) => ({ id, w, h, by, at: "", loves: [24, 9, 15, 31, 6, 12, 8, 19, 4, 11, 7][i], fav: i === 3 }));
 const CHEERS: Cheer[] = [
   { id: "c1", name: "Asha", body: "What a beautiful evening! 😍", emoji: null, at: "" },
   { id: "c2", name: "Hari", body: "Congratulations from all of us", emoji: "love", at: "" },
