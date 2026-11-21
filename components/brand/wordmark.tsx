@@ -1,22 +1,16 @@
-// The In2Min2 logo is the name itself (owner's choice, 14 Nov 2026: idea C,
-// "Timer 2s"): each 2 sits in a small marigold stopwatch face, so the logo
-// says "two minutes" without words. Styles: .in2-wm in app/globals.css.
+// The in2min2 logo (owner's design, 21 Nov 2026): the ticket with the
+// teal-to-orange dial and "Create • Invite • Celebrate". It replaces the
+// earlier lettered wordmark everywhere it's used (the not-found and ended
+// pages, the photos page, the legal pages, the classic builder). Its height
+// follows the font size where it sits, so `text-2xl` gives a 2xl-sized logo.
+// The file is public/brand/logo.png, made from the owner's image with
+// scripts/art/white-to-alpha.swift so it sits on any light colour.
 
 export function Wordmark({ className = "" }: { className?: string }) {
   return (
-    <span className={`in2-wm ${className}`}>
-      <span className="sr-only">In2Min2</span>
-      <span aria-hidden="true">
-        In<Timer />Min<Timer />
-      </span>
-    </span>
-  );
-}
-
-function Timer() {
-  return (
-    <span className="in2-timer">
-      <span>2</span>
+    <span className={`inline-block align-middle ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- the logo, already sized */}
+      <img src="/brand/logo.png" alt="in2min2" width={640} height={330} style={{ display: "block", height: "2.4em", width: "auto" }} />
     </span>
   );
 }

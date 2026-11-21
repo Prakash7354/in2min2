@@ -31,6 +31,8 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 - [x] On the day, and after: the full page again (not just the photos), with quick buttons for Photos, Directions and What's on.
 - [x] Privacy, Terms and Prices links are wired into the home page footer and sign-in; they appear the moment the drafts are approved.
 
+- [x] **The new website (21 Nov):** your logo, favicon and photos; a menu and footer; the four steps as a moving phone; every kind of event with a photo or a real invitation; "See what your guests get" (the envelope, then the page, with music); the photo wheel turning with comments; prices with the festive offer; questions and answers. Mobile first, and laid out for laptops. Words in simple British English. Where each photo came from: [site-images.md](reference/site-images.md) (please add the links).
+
 **You (in this order):**
 1. [x] **✓ Done 20 Nov (checked live: the festive plan is there, until 1 February).** Run the database file [0013_festive_launch.sql](../supabase/migrations/0013_festive_launch.sql): open it on your Mac, select everything (Cmd+A), copy (Cmd+C). Supabase › your project › **SQL Editor** › **New query** › paste › **Run**. You should see "Success. No rows returned." Tell Claude Code.
 2. [ ] **Backups and alert emails (found 20 Nov: the Worker can't see its two secrets, so no backup has run and no alert could be sent).** Add them again, as *runtime* secrets:
