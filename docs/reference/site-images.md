@@ -19,18 +19,14 @@ as with the music in [music.md](music.md), so the source can always be shown.
 | `festival` | musical-event-221126.webp | Melas and festivals | (add) |
 | `marquee` | birthday-celebration copy.jpg | Afterwards | (add) |
 | `jeena` | Jeena-wenning-221126.svg (the photo inside it) | Jeena’s Pasni card | (add) |
-| `harisita` | hari-sita-anniversary.svg (the photo inside it) | Hari & Sita’s anniversary card, the photo wheel | (add) |
+| `harisita` | hari-sita-anniversary.svg (the photo inside it) | Hari & Sita’s anniversary card (heart), the photo wheel | (add) |
 | `memorial` | memorial-candle-24-1126.svg (the photo inside it) | The memorial card | (add) |
 | `lhosar-s` | tamu-lhosar-celebration-251126.jpeg | Tamu Lhosar card (only 547 px wide: a bigger copy would be sharper) | (add) |
-| `petals` | wedding-241126.jpg | “Your words, your way” wedding card, the photo wheel | (add) |
-| `w-ceremony-s` | traditional-indian-wedding.jpg | The photo wheel | (add) |
-| `w-family-s` | surprising-women-wedding.jpg | The photo wheel | (add) |
-| `w-table-s` | beach-scene-251126.jpg | The photo wheel | (add) |
-| `w-bride-s` | bride-and-groom-221126.jpg | The photo wheel | (add) |
-| `w-sunset-s` | wedding-sunset-221126.jpg | The photo wheel | (add) |
-| `w-heart-s` | wedding-heart-212226.jpg, cut upright | The photo wheel | (add) |
-| `w-bouquet-s` | valentines-day-background-261126.jpg, cut upright | The photo wheel | (add) |
-| `w-beach-s` | marriage-beach-front-201126.jpg, cut upright | The photo wheel | (add) |
+| `petals` | wedding-241126.jpg | “Your words, your way” wedding card (top of the stack) | (add) |
+| `w-ceremony-s` | traditional-indian-wedding.jpg | The photo wheel, the wedding card’s stack | (add) |
+| `reunion-s` | reunion-group-211126.jpg (the owner’s group photo, 21 Nov) | 25th Year Reunion card, the photo wheel | owner’s own |
+| `w-cake-s` | date-of-birth-221126.jpg, cut upright | The photo wheel | (add) |
+| `w-heart-s` | wedding-heart-212226.jpg, cut upright | The photo wheel, the wedding card’s stack | (add) |
 | `w-mist-s` | newlyweds-in-the-mist2231126.jpg, cut upright | The photo wheel | (add) |
 
 The owner's Jeena, Hari & Sita and memorial files are SVGs with one big photo
@@ -44,6 +40,10 @@ for the navy top bar, `public/brand/logo-light.png`, is made from it by
 icons (`app/icon.png`, `app/apple-icon.png`) from in2min2-favicon-211126-transparent.png.
 The sharing picture `app/opengraph-image.jpg` says "Free until 31 January":
 **change it in February** (made from an HTML page with headless Chrome).
+
+**Banner** (owner's design, stopwatch and people): `public/brand/logo-banner.png` from
+in2min2-banner-211126.jpeg (only 512 px wide; a bigger copy would be sharper), white
+taken off as above. Shown in “Why we made in2min2” with what the logo means.
 
 `in2min2-log-human-211126.jpeg` isn't used: its "transparent" background is a
 grey-and-white checkerboard printed into the JPEG.

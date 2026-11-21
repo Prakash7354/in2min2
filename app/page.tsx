@@ -36,7 +36,7 @@ const COMMUNITY = [
   { type: "mela", title: "Melas and festivals", line: "Music, food and stalls, with the programme for the day.", photo: "festival" },
   { type: "sport", title: "Tournaments", line: "Teams, supporters and the day’s fixtures, with live updates.", photo: "sport" },
   { type: "corporate", title: "Work and office parties", line: "Christmas parties, team dinners and away days.", photo: "office" },
-  { type: "reunion", title: "Reunions and regimental days", line: "Old friends, one link, and a day to remember.", card: "reunion" },
+  { type: "reunion", title: "Reunions and regimental days", line: "A 25th year, a regiment or a school: old friends, one link, a day to remember.", card: "reunion" },
 ] as const;
 
 const STEPS = [
@@ -289,6 +289,17 @@ export default function Home() {
             <h2 className="s-h2">Your special day shouldn’t be hard work</h2>
             <p className="s-lead">We love a good celebration. But planning one can be expensive and complicated. in2min2 helps you make the invitation, set the mood on the day, and keep the memories, without the cost and without the stress.</p>
             <p className="s-lead">We keep it simple, creative and fun, and we add new features all the time.</p>
+            {/* The owner's banner (21 Nov 2026), with what the logo means. */}
+            <div className="s-logomean">
+              {/* eslint-disable-next-line @next/next/no-img-element -- the banner, already sized */}
+              <img src="/brand/logo-banner.png" alt="in2min2: a stopwatch, a ticket and people celebrating. Create, Invite, Celebrate" width={476} height={226} loading="lazy" />
+              <h3 className="s-h3">What our logo means</h3>
+              <ul className="s-meanlist">
+                <li><i aria-hidden="true">⏱️</i><span><b>The stopwatch:</b> your invitation ready in about two minutes.</span></li>
+                <li><i aria-hidden="true">🎟️</i><span><b>The ticket:</b> your invitation, shared with one link.</span></li>
+                <li><i aria-hidden="true">🙌</i><span><b>The people and the star:</b> everyone together, celebrating.</span></li>
+              </ul>
+            </div>
           </div>
         </section>
 

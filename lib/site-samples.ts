@@ -4,6 +4,7 @@
 // what the builder makes. Photos are the site's own (public/site).
 
 import { suggestedWords } from "@/app/new/kinds";
+import type { EventCopy } from "@/lib/ai/copy";
 import { applyType, newDraft, toViewData, type Draft } from "@/lib/draft";
 import type { EventViewData } from "@/lib/event-view";
 
@@ -14,10 +15,12 @@ function saturdayAhead(weeks: number, from = new Date()): string {
   return d.toISOString().slice(0, 10);
 }
 
-function sample(kind: string, o: Partial<Draft>, weeks = 3): EventViewData {
+// Any words given replace the ready-made ones, box by box.
+function sample(kind: string, o: Partial<Omit<Draft, "copy">> & { copy?: Partial<EventCopy> }, weeks = 3): EventViewData {
+  const { copy, ...rest } = o;
   const base = applyType(newDraft(), kind);
-  const d: Draft = { ...base, date: saturdayAhead(weeks), startTime: "18:00", venueName: "Community hall", wordsBy: "suggested", ...o };
-  return toViewData({ ...d, copy: { ...suggestedWords(d), ...(o.copy ?? {}) } });
+  const d: Draft = { ...base, date: saturdayAhead(weeks), startTime: "18:00", venueName: "Community hall", wordsBy: "suggested", ...rest };
+  return toViewData({ ...d, copy: { ...suggestedWords(d), ...copy } });
 }
 
 export function heroSample(): EventViewData {
@@ -29,11 +32,13 @@ export function heroSample(): EventViewData {
 }
 
 // The two-language example for "Your words, your way": a rich red wedding
-// card with the gold Royal frame, as weddings matter most (owner, 21 Nov 2026).
+// card with a traditional gold border and three photos in a stack, as
+// weddings matter most (owner, 21 Nov 2026; not the arch, used too often).
 export function wordsSample(): EventViewData {
   return sample("wedding", {
     title: "Meenu & Jose", stars: { relation: "The couple", names: "Meenu & Jose" }, venueName: "The Grand Hall", startTime: "11:00",
-    cover: "/site/petals-s.jpg", palette: "sindoor", backdrop: "luminous_red", border: "royal",
+    cover: "/site/petals-s.jpg", moreCovers: ["/site/w-heart-s.jpg", "/site/w-ceremony-s.jpg"], photoStyle: "polaroid",
+    palette: "sindoor", backdrop: "luminous_red", border: "ornate_flowers",
     languages: ["en", "ne"],
     copy: { card_headline: "Meenu & Jose are getting married", card_invite_body: "With joy in our hearts, we invite you to celebrate our wedding with us.",
       landing_page_story: "", guest_note_box: "", post_event_thank_you: "" },
@@ -42,10 +47,11 @@ export function wordsSample(): EventViewData {
   }, 6);
 }
 
-// Kinds shown as their own invitation, each in a look the builder offers
-// (owner's choices, 21 Nov 2026): Pasni in ritual red with a gold frame,
-// the anniversary with painted roses, the memorial dark green with fine gold
-// lines and no one's name, so it suits any memorial.
+// Kinds shown as their own invitation, each in a look the builder offers,
+// and between them every photo shape (owner's choices, 21 Nov 2026): Pasni in
+// ritual red with a gold frame (arch), the anniversary with painted roses
+// (heart), the memorial dark green with fine gold lines and no one's name, so
+// it suits any memorial (arch), Lhosar and the reunion panoramic (hero).
 const MEMORIAL_WORDS = "Family and friends are warmly invited to remember a much-loved life, share memories and support one another.";
 export function kindSample(kind: string): EventViewData {
   switch (kind) {
@@ -57,9 +63,11 @@ export function kindSample(kind: string): EventViewData {
       cover: "/site/memorial-s.jpg", palette: "emerald_gold", border: "fine_line",
       copy: { card_headline: "Remembering with love", card_invite_body: MEMORIAL_WORDS, landing_page_story: MEMORIAL_WORDS, guest_note_box: "",
         post_event_thank_you: "Thank you for being with us, and for your kind words and support." } });
-    case "reunion": return sample("reunion", { title: "Gurkha reunion 2027", venueName: "The Regimental Club", startTime: "12:00" }, 8);
+    case "reunion": return sample("reunion", { title: "25th Year Reunion 2027", venueName: "The Regimental Club", startTime: "12:00",
+      cover: "/site/reunion-s.jpg", photoStyle: "hero", palette: "royal_blue_gold", backdrop: "glow_royal", border: "khukuri",
+      copy: { card_invite_body: "25 years on, it’s time to get together again: old friends, good food and plenty of stories." } }, 8);
     case "anniversary": return sample("anniversary", { stars: { relation: "", names: "Hari & Sita" }, title: "Hari & Sita’s anniversary", startTime: "19:00",
-      cover: "/site/harisita-s.jpg", palette: "lali_gurans", backdrop: "rose_frame", border: "none" });
+      cover: "/site/harisita-s.jpg", photoStyle: "heart", palette: "lali_gurans", backdrop: "rose_frame", border: "none" });
     default: return sample("bratabandha", { stars: { relation: "", names: "Rohan" }, title: "Rohan’s Bratabandha", startTime: "08:00" });
   }
 }

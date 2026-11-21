@@ -243,8 +243,16 @@
 .s-plan-for { margin-top: 6px !important; font-size: 14px; color: var(--s-muted); }
 @media (min-width: 900px) { .s-plans { grid-template-columns: repeat(4, 1fr); gap: 18px; } .s-offer { grid-template-columns: 1fr auto; align-items: center; } .s-offer .s-btn { grid-row: span 3; grid-column: 2; } }
 
-/* Why */
+/* Why, with the owner's banner and what the logo means */
 .s-why { background: linear-gradient(180deg, var(--s-cream), var(--s-peach)); }
+.s-logomean { display: grid; justify-items: center; gap: 6px; margin-top: 36px; }
+.s-logomean img { display: block; width: min(100%, 440px); height: auto; }
+.s-logomean .s-h3 { margin: 18px 0 8px; }
+.s-meanlist { display: grid; gap: 10px; width: 100%; margin: 0; padding: 0; list-style: none; text-align: left; }
+.s-meanlist li { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 18px; background: var(--s-card); box-shadow: var(--s-shadow); font-size: 16.5px; line-height: 1.4; color: var(--s-muted); }
+.s-meanlist i { font-style: normal; font-size: 26px; text-align: center; }
+.s-meanlist b { color: var(--s-navy); }
+@media (min-width: 900px) { .s-meanlist { grid-template-columns: repeat(3, 1fr); } .s-meanlist li { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
 
 /* Questions */
 .s-faq { display: grid; gap: 10px; margin-top: 26px; }
