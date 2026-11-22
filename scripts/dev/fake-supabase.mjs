@@ -108,6 +108,17 @@ http.createServer((req, res) => {
       const g = args.p_token ? guests.find((x) => x.invite_token === args.p_token) : null;
       return send(e ? { ...e, guest: g ? { name: g.full_name, rsvp_status: g.rsvp_status, party_size: g.party_size } : null } : null);
     }
+    // Replies (submit_rsvp, 0004 + food needs 0014), kept in guests.
+    if (u.pathname === "/rest/v1/rpc/submit_rsvp") {
+      const r = args.p_reply ?? {};
+      const FOOD = ["vegetarian", "vegan", "halal", "gluten_free", "nut_allergy", "dairy_free"];
+      if ("food" in r && !Array.isArray(r.food)) return send({ ok: false, reason: "bad_reply" });
+      let g = args.p_token ? guests.find((x) => x.invite_token === args.p_token) : null;
+      if (!g) { g = { id: randomUUID(), invite_token: randomBytes(16).toString("hex"), created_at: new Date().toISOString(), source: "rsvp_form", guest_metadata: {} }; guests.push(g); }
+      Object.assign(g, { full_name: r.name, party_size: r.party_size ?? 1, rsvp_status: r.status, rsvp_at: new Date().toISOString(), rsvp_note: r.note || null });
+      if (Array.isArray(r.food)) g.guest_metadata = { ...(g.guest_metadata ?? {}), food: FOOD.filter((k) => r.food.includes(k)) };
+      return send({ ok: true, status: g.rsvp_status, name: g.full_name, party_size: g.party_size, token: g.invite_token });
+    }
     if (u.pathname === "/rest/v1/rpc/resolve_short_code") return send({ type: "wedding", slug: "meenu-jose" });
     if (u.pathname === "/rest/v1/rpc/event_usage") return send({ people: 0, attending: 0, guest_limit: 200, level: "ok" });
     if (u.pathname === "/rest/v1/rpc/public_photos") return send(wall());

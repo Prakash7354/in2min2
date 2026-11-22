@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
+import { FOOD_NEEDS, foodLabel, foodNeedsOf, type FoodNeed } from "@/lib/catalog";
 import type { Draft } from "@/lib/draft";
 import { formatDate } from "@/lib/event-view";
 import { copyLink, whatsappUrl } from "@/lib/share";
@@ -17,6 +18,7 @@ import { supabase } from "@/lib/supabase/client";
 export type Reply = {
   id: string; full_name: string; party_size: number; rsvp_status: "invited" | "attending" | "maybe" | "declined" | "waitlist";
   rsvp_at: string | null; rsvp_note: string | null; created_at: string;
+  guest_metadata?: { food?: unknown } | null;   // food needs ticked on the reply form (0014)
 };
 type Usage = { people: number; attending: number; guest_limit: number | null; level: string; venue_capacity: number | null; capacity_left: number | null };
 
@@ -45,7 +47,7 @@ export function useReplies(eventId: string | undefined, session: Session | null)
     if (!eventId || !session) return;
     const sb = supabase();
     const [r, u] = await Promise.all([
-      sb.from("guest_crm").select("id, full_name, party_size, rsvp_status, rsvp_at, rsvp_note, created_at")
+      sb.from("guest_crm").select("id, full_name, party_size, rsvp_status, rsvp_at, rsvp_note, created_at, guest_metadata")
         .eq("event_id", eventId).order("created_at", { ascending: false }).limit(1000),
       sb.rpc("event_usage", { p_event: eventId }),
     ]);
@@ -87,6 +89,26 @@ export function totals(rows: Reply[]) {
   return { coming: sum("attending"), maybe: sum("maybe"), cant: count("declined"), waiting: sum("waitlist"), replies: rows.filter((r) => r.rsvp_status !== "invited").length };
 }
 
+// Food needs (0014): each reply's, and how many replies (not declined) ticked
+// each, for the caterer.
+export function foodOf(r: Reply): FoodNeed[] {
+  return r.rsvp_status === "declined" ? [] : foodNeedsOf(r.guest_metadata?.food);
+}
+export function foodTotals(rows: Reply[]): { key: FoodNeed; label: string; icon: string; n: number }[] {
+  return FOOD_NEEDS.map((f) => ({ ...f, n: rows.filter((r) => foodOf(r).includes(f.key)).length })).filter((f) => f.n > 0);
+}
+// One line per reply for "Copy the list", and the summary above it.
+const LIST_LABEL: Record<Reply["rsvp_status"], string> = { attending: "Coming", maybe: "Maybe", declined: "Can't come", waitlist: "Waiting list", invited: "Not replied" };
+export function listLine(r: Reply): string {
+  const food = foodOf(r);
+  return `${r.full_name} · ${LIST_LABEL[r.rsvp_status]}${r.rsvp_status === "declined" ? "" : ` · ${r.party_size}`}`
+    + `${food.length ? ` · ${food.map(foodLabel).join(", ")}` : ""}${r.rsvp_note ? ` · "${r.rsvp_note}"` : ""}`;
+}
+export function foodSummary(rows: Reply[]): string {
+  const f = foodTotals(rows);
+  return f.length ? `\nFood needs (replies): ${f.map((x) => `${x.label} ${x.n}`).join(", ")}.` : "";
+}
+
 const LABEL: Record<Reply["rsvp_status"], string> = { attending: "Coming", maybe: "Maybe", declined: "Can't come", waitlist: "Waiting list", invited: "Not replied" };
 const TONE: Record<Reply["rsvp_status"], string> = {
   attending: "bg-brand text-white", maybe: "bg-marigold text-ink", declined: "bg-wash text-muted", waitlist: "bg-amber-wash text-ink ring-1 ring-marigold", invited: "bg-wash text-muted",
@@ -126,8 +148,9 @@ export function RepliesDialog({ d, state, link, onClose, say }: { d: Draft; stat
   const title = d.title.trim() || "Our event";
   const u = state.usage;
 
-  const list = rows.map((r) => `${r.full_name} · ${LABEL[r.rsvp_status]}${r.rsvp_status === "declined" ? "" : ` · ${r.party_size}`}${r.rsvp_note ? ` · "${r.rsvp_note}"` : ""}`).join("\n");
-  const summary = `${title}: ${t.coming} coming, ${t.maybe} maybe, ${t.cant} can't come${t.waiting ? `, ${t.waiting} on the waiting list` : ""}.`;
+  const list = rows.map(listLine).join("\n");
+  const summary = `${title}: ${t.coming} coming, ${t.maybe} maybe, ${t.cant} can't come${t.waiting ? `, ${t.waiting} on the waiting list` : ""}.${foodSummary(rows)}`;
+  const food = foodTotals(rows);
   const reminder = `Reminder: ${title}${d.date ? ` is on ${formatDate(d.date)}` : ""}. If you haven't replied yet, please tap the link and let us know:`;
 
   return (
@@ -162,6 +185,10 @@ export function RepliesDialog({ d, state, link, onClose, say }: { d: Draft; stat
             </p>
           )}
 
+          {food.length > 0 && (
+            <p className="text-[15px]"><span className="font-semibold">Food needs:</span> {food.map((f) => `${f.icon} ${f.label} ${f.n}`).join(" · ")}</p>
+          )}
+
           <div className="flex flex-wrap gap-2">
             {link && (
               <a href={whatsappUrl(link, reminder)} target="_blank" rel="noreferrer"
@@ -186,6 +213,7 @@ export function RepliesDialog({ d, state, link, onClose, say }: { d: Draft; stat
                     {LABEL[r.rsvp_status]}{r.rsvp_status !== "declined" ? ` · ${r.party_size}` : ""}
                   </span>
                 </p>
+                {foodOf(r).length > 0 && <p className="text-sm text-muted">{foodOf(r).map(foodLabel).join(" · ")}</p>}
                 {r.rsvp_note && <p className="text-[15px] leading-snug">&ldquo;{r.rsvp_note}&rdquo;</p>}
                 <p className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted">
                   <span>{ago(r.rsvp_at ?? r.created_at)}{twice.has(r.full_name.trim().toLowerCase()) ? " · Same name as another reply" : ""}</span>

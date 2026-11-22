@@ -86,29 +86,33 @@
   .s-logo img { height: 54px; }
 }
 
-/* Hero (owner, 22 Nov 2026): five photos fill it, each zooming slowly while
-   the next slides in (one 35 s loop, CSS only); a navy shade sits only where
-   the words are, so the photos stay clear elsewhere. */
+/* Hero (owner, 22 Nov 2026): eight photos fill it, each zooming slowly while
+   the next slides in (one 56 s loop, 7 s each, CSS only); a navy shade sits
+   only where the words are, so the photos stay clear elsewhere. */
 .s-hero { position: relative; isolation: isolate; overflow: hidden; padding: 34px 0 30px; background: var(--s-navy); color: #fff; }
 .s-heroshow { position: absolute; inset: 0; z-index: -2; }
-.s-heroshow img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: s-show-in 35s linear infinite; will-change: transform, opacity; }
+.s-heroshow img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: s-show-in 56s linear infinite; will-change: transform, opacity; }
 .s-heroshow img:first-child { opacity: 1; animation-delay: -1.75s; }
 .s-heroshow img:nth-child(2) { animation-name: s-show-out; animation-delay: 5.25s; }
 .s-heroshow img:nth-child(3) { animation-delay: 12.25s; }
 .s-heroshow img:nth-child(4) { animation-name: s-show-out; animation-delay: 19.25s; }
 .s-heroshow img:nth-child(5) { animation-delay: 26.25s; }
+.s-heroshow img:nth-child(6) { animation-name: s-show-out; animation-delay: 33.25s; }
+.s-heroshow img:nth-child(7) { animation-delay: 40.25s; }
+.s-heroshow img:nth-child(8) { animation-name: s-show-out; animation-delay: 47.25s; }
+/* Each photo: 1.75 s sliding in, on show until 7.7 s, gone by 9.45 s (of 56 s). */
 @keyframes s-show-in {
   0% { opacity: 0; transform: translateX(4%) scale(1.06); }
-  5% { opacity: 1; transform: translateX(0) scale(1.06); }
-  22% { opacity: 1; }
-  27% { opacity: 0; transform: translateX(-1%) scale(1.16); }
+  3.125% { opacity: 1; transform: translateX(0) scale(1.06); }
+  13.75% { opacity: 1; }
+  16.875% { opacity: 0; transform: translateX(-1%) scale(1.16); }
   100% { opacity: 0; transform: scale(1.16); }
 }
 @keyframes s-show-out {
   0% { opacity: 0; transform: translateX(4%) scale(1.16); }
-  5% { opacity: 1; transform: translateX(0) scale(1.16); }
-  22% { opacity: 1; }
-  27% { opacity: 0; transform: translateX(-1%) scale(1.06); }
+  3.125% { opacity: 1; transform: translateX(0) scale(1.16); }
+  13.75% { opacity: 1; }
+  16.875% { opacity: 0; transform: translateX(-1%) scale(1.06); }
   100% { opacity: 0; transform: scale(1.06); }
 }
 /* Phones: the words are on top, the devices below, so the shade is strongest at the top. */
@@ -169,6 +173,9 @@
 .s-dash-bar i[data-k="maybe"] { background: #ffb627; }
 .s-dash-bar i[data-k="no"] { background: #ff8a9a; }
 .s-dash-bar i[data-k="wait"] { background: #4a4470; }
+.s-dash-food { display: flex; flex-wrap: wrap; gap: 0.3em; }
+.s-dash-food span { padding: 0.2em 0.6em; border-radius: 99px; background: #1c1836; box-shadow: inset 0 0 0 1px rgba(169, 157, 255, 0.2); color: #e6e1ff; font-size: 0.68em; white-space: nowrap; }
+.s-dash-food b { color: #fff; }
 .s-dash-list { display: grid; gap: 0.5em; }
 .s-dash-row { display: grid; gap: 0.2em; padding: 0.55em 0.65em; border-radius: 0.75em; background: #17142c; box-shadow: inset 0 0 0 1px rgba(169, 157, 255, 0.14); }
 .s-dash-row p:first-child { display: flex; align-items: center; justify-content: space-between; gap: 0.5em; font-size: 0.9em; }

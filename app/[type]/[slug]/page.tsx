@@ -77,7 +77,8 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
   const reply = page.view === "page" && d.toggles.rsvp ? (
     <Rsvp type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} guestName={page.guestName} guestReply={page.guestReply}
       sensitive={d.sensitive} hostName={d.stars?.names.trim() || (d.sensitive ? "the family" : d.scale === "community" ? "the organisers" : "the hosts")}
-      cal={{ title: page.title, date: d.date, startTime: d.startTime, endTime: d.endTime, timezone: d.timezone, venue: [d.venueName, d.venueAddress].filter(Boolean).join(", ") }} />
+      cal={{ title: page.title, date: d.date, startTime: d.startTime, endTime: d.endTime, timezone: d.timezone, venue: [d.venueName, d.venueAddress].filter(Boolean).join(", ") }}
+      askFood={!!d.askFood} />
   ) : undefined;
   const photos = d.toggles.photo_wall && (page.view !== "page" || page.photosEarly) ? (
     <PhotoWall type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} sensitive={d.sensitive} live={page.view === "live"} motion={d.motion} compact />

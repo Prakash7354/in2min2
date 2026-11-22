@@ -13,7 +13,7 @@ import {
   eventType, heroMotionOf, language, ORGANISER_TYPES, paletteFor, plan, togglesFor,
   type CoverFit, type EffectKey, type HeroMotion, type Parking, type PhotoStyle, type PlanKey, type Scale, type Template, type TextStyle, type ToggleKey,
 } from "@/lib/catalog";
-import { creditFor, defaultCredit, type CreditChoice, type EventViewData, type InviteWay, type ViewFunction, type ViewPerson } from "@/lib/event-view";
+import { asksFood, creditFor, defaultCredit, type CreditChoice, type EventViewData, type InviteWay, type ViewFunction, type ViewPerson } from "@/lib/event-view";
 
 export type Draft = {
   v: 1;
@@ -108,6 +108,9 @@ export type Draft = {
   // feature_toggles.settings.photo_ring; "" is none, chosen.
   photoRing?: string;
   inviteWay?: InviteWay;
+  // Whether the reply form asks about food needs (catalog FOOD_NEEDS, 0014),
+  // in feature_toggles.settings.food. Left out: yes, except for memorials.
+  askFood?: boolean;
 };
 
 export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k, ""])) as EventCopy;
@@ -369,5 +372,6 @@ export function toViewData(d: Draft): EventViewData {
     photoRing: photoRingOf(d.photoRing),
     envFrom: (d.envFrom ?? "").trim().slice(0, 60),
     envTo: (d.envTo ?? "").trim().slice(0, 60),
+    askFood: asksFood(d.askFood, t?.sensitive ?? false),
   };
 }

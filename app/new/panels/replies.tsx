@@ -1,7 +1,8 @@
 "use client";
 
 // Guests' replies (0004), for the host: the numbers first (in people, as the
-// caterer needs them), then every reply with its message. A reminder on
+// caterer needs them), food needs ticked (0014), then every reply with its
+// food needs and message. A reminder on
 // WhatsApp, and the list copied for the caterer or venue. Row Level Security
 // decides who sees them: the event's own hosts only.
 
@@ -9,7 +10,8 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
 import { formatDate } from "@/lib/event-view";
 import { copyLink, whatsappUrl } from "@/lib/share";
-import { totals, type Reply } from "../../builder/replies";
+import { foodLabel } from "@/lib/catalog";
+import { foodOf, foodSummary, foodTotals, listLine, totals, type Reply } from "../../builder/replies";
 import { useB2 } from "../context";
 import { PanelShell } from "../panels";
 import { eventLink } from "../sheets";
@@ -60,8 +62,9 @@ export function RepliesPanel() {
   const twice = new Set(names.filter((n, i) => names.indexOf(n) !== i));
   const title = d.title.trim() || "Our event";
   const u = state.usage;
-  const list = rows.map((r) => `${r.full_name} · ${LABEL[r.rsvp_status]}${r.rsvp_status === "declined" ? "" : ` · ${r.party_size}`}${r.rsvp_note ? ` · "${r.rsvp_note}"` : ""}`).join("\n");
-  const summary = `${title}: ${t.coming} coming, ${t.maybe} maybe, ${t.cant} can't come${t.waiting ? `, ${t.waiting} on the waiting list` : ""}.`;
+  const list = rows.map(listLine).join("\n");
+  const summary = `${title}: ${t.coming} coming, ${t.maybe} maybe, ${t.cant} can't come${t.waiting ? `, ${t.waiting} on the waiting list` : ""}.${foodSummary(rows)}`;
+  const food = foodTotals(rows);
   const reminder = `Reminder: ${title}${d.date ? ` is on ${formatDate(d.date)}` : ""}. If you haven't replied yet, please tap the link and let us know:`;
 
   return (
@@ -77,6 +80,12 @@ export function RepliesPanel() {
           {u.guest_limit !== null && <>{u.people} of {u.guest_limit} people on your plan{u.level === "near" ? " (nearly full)" : u.level === "full" || u.level === "over" ? " (full)" : ""}. </>}
           {u.venue_capacity !== null && <>{u.attending} of {u.venue_capacity} places at the venue.</>}
         </p>
+      )}
+      {food.length > 0 && <p className="b2-small" style={{ margin: 0 }}>Food needs (number of replies):</p>}
+      {food.length > 0 && (
+        <div className="b2-chips" aria-label="Food needs, in replies">
+          {food.map((f) => <span key={f.key} className="b2-chip b2-chip-sm"><span aria-hidden="true">{f.icon}</span> {f.label} · {f.n}</span>)}
+        </div>
       )}
       <div className="b2-chips">
         {link && <a className="b2-chip b2-chip-sm b2-wa" href={whatsappUrl(link, reminder)} target="_blank" rel="noreferrer"><Icon name="message" className="" />Send a reminder</a>}
@@ -96,6 +105,7 @@ export function RepliesPanel() {
               <strong>{r.full_name}</strong>
               <span className="b2-pill" data-status={r.rsvp_status}>{LABEL[r.rsvp_status]}{r.rsvp_status !== "declined" ? ` · ${r.party_size}` : ""}</span>
             </p>
+            {foodOf(r).length > 0 && <p className="b2-small" style={{ margin: 0 }}>{foodOf(r).map(foodLabel).join(" · ")}</p>}
             {r.rsvp_note && <p style={{ margin: 0 }}>“{r.rsvp_note}”</p>}
             <p className="b2-small" style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
               <span>{ago(r.rsvp_at ?? r.created_at, now)}{twice.has(r.full_name.trim().toLowerCase()) ? " · Same name as another reply" : ""}</span>

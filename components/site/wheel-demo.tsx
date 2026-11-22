@@ -14,7 +14,7 @@ import type { WallPhoto } from "@/lib/photos";
 
 const PICS: [string, number, number, string][] = [
   ["w-ceremony-s", 600, 400, "Asha"], ["party-s", 480, 719, "Hari"], ["birthday-s", 600, 452, "Gita"], ["harisita-s", 600, 900, "Bikash"],
-  ["lhosar-s", 547, 365, "Maya"], ["w-cake-s", 480, 640, "Kamala"], ["reunion-s", 640, 454, "Ram"], ["w-mist-s", 480, 640, "Suman"],
+  ["lhosar-s", 640, 360, "Maya"], ["w-cake-s", 480, 640, "Kamala"], ["reunion-s", 640, 454, "Ram"], ["w-mist-s", 480, 640, "Suman"],
   ["christmas-s", 600, 400, "Anita"], ["jeena-s", 600, 400, "Dipak"], ["w-heart-s", 480, 640, "Sarita"], ["newyear-s", 600, 431, "Bimala"],
 ];
 const PHOTOS: WallPhoto[] = PICS.map(([id, w, h, by], i) => ({ id, w, h, by, at: "", loves: [24, 9, 15, 31, 6, 12, 8, 19, 4, 11, 7, 14][i], fav: i === 3 }));

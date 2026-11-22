@@ -694,3 +694,23 @@ export const ORGANISER_TYPES: { key: string; label: string }[] = [
   { key: "individual", label: "An individual" },
   { key: "family", label: "A family" },
 ];
+
+// Food needs guests can tick when they reply (owner, 22 Nov 2026; 0014). The
+// keys are checked by submit_rsvp in the database too: change both together.
+// Some say something about health or beliefs, so the form says only the hosts
+// see them, and they're optional (privacy page: explicit consent).
+export const FOOD_NEEDS = [
+  { key: "vegetarian", label: "Vegetarian", icon: "🌱" },
+  { key: "vegan", label: "Vegan", icon: "🥦" },
+  { key: "halal", label: "Halal", icon: "🍖" },
+  { key: "gluten_free", label: "Gluten-free", icon: "🌾" },
+  { key: "nut_allergy", label: "Nut allergy", icon: "🥜" },
+  { key: "dairy_free", label: "Dairy-free", icon: "🥛" },
+] as const;
+export type FoodNeed = (typeof FOOD_NEEDS)[number]["key"];
+// Only known keys, each once, in the list's order.
+export function foodNeedsOf(x: unknown): FoodNeed[] {
+  const got = Array.isArray(x) ? x : [];
+  return FOOD_NEEDS.map((f) => f.key).filter((k) => got.includes(k));
+}
+export const foodLabel = (k: FoodNeed) => FOOD_NEEDS.find((f) => f.key === k)?.label ?? k;

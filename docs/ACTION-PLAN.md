@@ -22,6 +22,8 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
+- [ ] **Food needs on the reply form (22 Nov).** Built: guests can tick Vegetarian, Vegan, Halal, Gluten-free, Nut allergy or Dairy-free when they reply (optional; only the hosts see them). Replies shows the totals for the caterer, and "Copy the list" includes them. Hosts can switch it off in Settings (it starts off for memorials). **To make it save, run the database file [0014_food_needs.sql](../supabase/migrations/0014_food_needs.sql):** open it on your Mac, select everything (Cmd+A), copy (Cmd+C). Supabase › your project › **SQL Editor** › **New query** › paste › **Run**. You should see "Success. No rows returned." Tell Claude Code. Until then the question shows but the ticks aren't kept.
+
 ## Launch checklist (20 Nov 2026): what's left before sharing with real families
 
 **Ready (Claude Code, 20 Nov):**

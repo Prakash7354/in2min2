@@ -163,6 +163,7 @@ export async function loadEvent(sb: SupabaseClient, id: string): Promise<{ ok: t
     envFrom: typeof settings.envelope_from === "string" ? settings.envelope_from : "",
     envTo: typeof settings.envelope_to === "string" ? settings.envelope_to : "",
     photoRing: photoRingOf(settings.photo_ring) ?? "",
+    ...(typeof settings.food === "boolean" ? { askFood: settings.food } : {}),
     eventId: id,
     publishedPath: `/${type}/${slug}`,
     shortPath: `/e/${str("short_code")}`,

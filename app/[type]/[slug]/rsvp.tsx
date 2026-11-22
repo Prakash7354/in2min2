@@ -2,17 +2,19 @@
 
 // The reply form on the public event page (0004, submit_rsvp). Made for
 // everyone, grandparents included: three big buttons, then a name, how many,
-// an optional message, and one "Send my reply". No account, no email.
+// food needs if the host asks (0014: one tap each, optional), an optional
+// message, and one "Send my reply". No account, no email.
 //
 // The guest's private token is kept on their phone, so coming back shows
 // their reply and "Change my reply" changes it rather than adding another.
 
 import { useEffect, useState } from "react";
+import { FOOD_NEEDS, foodLabel, foodNeedsOf, type FoodNeed } from "@/lib/catalog";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 import { addDays, zonedToUtcIso } from "@/lib/time";
 
 type Status = "attending" | "maybe" | "declined";
-type Saved = { token: string; name: string; status: Status | "waitlist"; partySize: number; note: string };
+type Saved = { token: string; name: string; status: Status | "waitlist"; partySize: number; note: string; food?: FoodNeed[] };
 type Cal = { title: string; date: string; startTime: string; endTime: string; timezone: string; venue: string };
 
 const s = (k: string) => `ev-${k}`;
@@ -21,6 +23,7 @@ const MESSAGES: Record<string, string> = {
   name: "Please type your name.",
   party_size: "One reply can be for up to 20 people. For more, please send a second reply.",
   note: "Please keep the message under 280 characters.",
+  bad_reply: "Something in the reply wasn't right. Please check it and try again.",
   full: "The host is updating the guest list. Please check back soon.",
   busy: "Lots of replies are arriving. Please try again in a few minutes.",
   closed: "Replies for this event have closed. Please contact the host.",
@@ -29,9 +32,9 @@ const MESSAGES: Record<string, string> = {
   no_event: "This event can't be found. Please check the link.",
 };
 
-export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, hostName, cal }: {
+export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, hostName, cal, askFood = false }: {
   type: string; slug: string; token: string | null; guestName: string | null;
-  guestReply: { status: string; partySize: number } | null; sensitive: boolean; hostName: string; cal: Cal;
+  guestReply: { status: string; partySize: number } | null; sensitive: boolean; hostName: string; cal: Cal; askFood?: boolean;
 }) {
   const key = `in2min2.reply.${type}/${slug}`;
   const [saved, setSaved] = useState<Saved | null>(null);
@@ -40,6 +43,9 @@ export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, host
   const [name, setName] = useState(guestName ?? "");
   const [size, setSize] = useState(1);
   const [note, setNote] = useState("");
+  // Food needs: null until known (from this phone) or touched, so a reply
+  // changed on another phone doesn't wipe what was ticked before.
+  const [food, setFood] = useState<FoodNeed[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,12 +57,12 @@ export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, host
       if (raw) mine = JSON.parse(raw) as Saved;
     } catch { /* private browsing: nothing saved */ }
     if (token && guestReply && guestReply.status !== "invited") {
-      mine = { token, name: guestName ?? mine?.name ?? "", status: guestReply.status as Saved["status"], partySize: guestReply.partySize, note: mine?.note ?? "" };
+      mine = { token, name: guestName ?? mine?.name ?? "", status: guestReply.status as Saved["status"], partySize: guestReply.partySize, note: mine?.note ?? "", food: mine?.food };
     }
     if (mine) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- reading this phone's saved reply once, after the first draw
       setSaved(mine);
-      setName(mine.name); setSize(mine.partySize); setNote(mine.note);
+      setName(mine.name); setSize(mine.partySize); setNote(mine.note); setFood(mine.food ? foodNeedsOf(mine.food) : null);
       setMode("done");
     }
   }, [key, token, guestReply, guestName]);
@@ -77,7 +83,8 @@ export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, host
         headers: { apikey: SUPABASE_PUBLISHABLE_KEY, Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           p_type: type, p_slug: slug, p_token: saved?.token ?? token ?? null,
-          p_reply: { name: name.trim(), status, party_size: status === "declined" ? 1 : size, note: note.trim() },
+          p_reply: { name: name.trim(), status, party_size: status === "declined" ? 1 : size, note: note.trim(),
+            ...(askFood && status !== "declined" && food !== null ? { food } : {}) },
         }),
       });
       const body = await res.json().catch(() => null) as { ok?: boolean; reason?: string; status?: Saved["status"]; token?: string; name?: string; party_size?: number; message?: string; code?: string } | null;
@@ -86,7 +93,8 @@ export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, host
         return;
       }
       if (!body.ok) { setError(MESSAGES[body.reason ?? ""] ?? "Something went wrong. Please try again."); return; }
-      const next: Saved = { token: body.token ?? "", name: body.name ?? name.trim(), status: body.status ?? status, partySize: body.party_size ?? size, note: note.trim() };
+      const next: Saved = { token: body.token ?? "", name: body.name ?? name.trim(), status: body.status ?? status, partySize: body.party_size ?? size, note: note.trim(),
+        ...(food !== null ? { food } : {}) };
       try { window.localStorage.setItem(key, JSON.stringify(next)); } catch { /* still replied; just not remembered here */ }
       setSaved(next);
       setMode("done");
@@ -111,6 +119,7 @@ export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, host
       <div className={s("replyDone")} role="status" aria-live="polite">
         <p className={s("replyBig")}>Thank you, {first}!</p>
         <p>{line}</p>
+        {askFood && saved.status !== "declined" && !!saved.food?.length && <p>Food needs: {saved.food.map(foodLabel).join(", ")}.</p>}
         {(saved.status === "attending" || saved.status === "maybe") && <CalendarLinks cal={cal} />}
         <div>
           <button type="button" className={`${s("btn")} ${s("btnGhost")} ${s("btnSmall")}`} onClick={() => { setStatus(saved.status === "waitlist" ? "attending" : saved.status as Status); setMode("details"); }}>
@@ -154,6 +163,23 @@ export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, host
             <span className={s("stepNum")} aria-live="polite">{size}</span>
             <button type="button" className={s("stepBtn")} aria-label="One more" disabled={size >= 20} onClick={() => setSize((n) => Math.min(20, n + 1))}>+</button>
           </div>
+        </div>
+      )}
+      {askFood && status !== "declined" && (
+        <div className={s("field")}>
+          <span className={s("label")} id="food-label">Any food needs? <span className={s("optional")}>(if any; only the hosts see this)</span></span>
+          <div className={s("foodChips")} role="group" aria-labelledby="food-label">
+            {FOOD_NEEDS.map((f) => {
+              const on = !!food?.includes(f.key);
+              return (
+                <button key={f.key} type="button" className={s("foodChip")} aria-pressed={on}
+                  onClick={() => setFood((cur) => foodNeedsOf(on ? (cur ?? []).filter((k) => k !== f.key) : [...(cur ?? []), f.key]))}>
+                  <span aria-hidden="true">{f.icon}</span> {f.label}
+                </button>
+              );
+            })}
+          </div>
+          <span className={s("hint")}>How many of you, or anything else? Add it to your message below.</span>
         </div>
       )}
       <label className={s("field")}>

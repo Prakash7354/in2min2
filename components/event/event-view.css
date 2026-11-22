@@ -1194,6 +1194,22 @@ button.ev-btn { cursor: pointer; }
   color: var(--ev-ink);
 }
 .ev-root:not([data-thumb]) .ev-label { font-size: max(1em, 15px); }
+/* Food needs on the reply form (0014): tick any that apply, big enough to tap. */
+.ev-foodChips { display: flex; flex-wrap: wrap; gap: 0.5em; }
+.ev-foodChip {
+  min-height: 44px;
+  padding: 0.45em 0.95em;
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--ev-ink) 22%, transparent);
+  background: var(--ev-bg);
+  color: var(--ev-ink);
+  font: inherit;
+  font-size: max(0.95em, 15px);
+  font-weight: 600;
+  cursor: pointer;
+}
+.ev-foodChip[aria-pressed="true"] { border-color: var(--ev-main); background: var(--ev-main); color: var(--ev-on-main); }
+.ev-hint { font-size: 0.9em; color: var(--ev-muted); }
 
 /* ── The guests' photo wall (components/photos/photo-wall.tsx) ── */
 .ev-photoWall,

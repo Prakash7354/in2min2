@@ -8,6 +8,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import EventView from "@/components/event/event-view";
+import { FOOD_NEEDS } from "@/lib/catalog";
 import type { Dash, HeroShow } from "@/lib/site-samples";
 
 const EVERY = 5500;
@@ -95,6 +96,12 @@ function Dashboard({ d }: { d: Dash }) {
       <div className="s-dash-bar">
         <i data-k="yes" style={{ width: pc(d.coming) }} /><i data-k="maybe" style={{ width: pc(d.maybe) }} />
         <i data-k="no" style={{ width: pc(d.cant) }} /><i data-k="wait" style={{ width: pc(d.fourth[1]) }} />
+      </div>
+      <div className="s-dash-food">
+        {d.food.map(([k, n]) => {
+          const f = FOOD_NEEDS.find((x) => x.key === k);
+          return f ? <span key={k}>{f.icon} {f.label} <b>{n}</b></span> : null;
+        })}
       </div>
       <div className="s-dash-list">
         {d.replies.map((r) => (

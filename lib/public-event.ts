@@ -5,7 +5,7 @@
 import { cache } from "react";
 import type { EventCopy } from "@/lib/ai/copy";
 import { backdropOf, eventType, heroMotionOf, musicOf, ORGANISER_TYPES, paletteFor, photoRingOf, TOGGLE_DEFAULTS, type CoverFit, type EffectKey, type Parking, type PhotoStyle, type Scale, type Template, type TextStyle, type ToggleKey } from "@/lib/catalog";
-import { creditChoice, creditFor, defaultCredit, type EventStageView, type EventViewData } from "@/lib/event-view";
+import { asksFood, creditChoice, creditFor, defaultCredit, type EventStageView, type EventViewData } from "@/lib/event-view";
 import { mediaUrl } from "@/lib/media";
 import { rpc } from "@/lib/supabase/rest";
 import { utcToZoned } from "@/lib/time";
@@ -32,7 +32,7 @@ type PublicEvent = {
     hero_keys?: string[]; hero_motion?: string;
   };
   people?: { role: "star" | "honour"; relation: string | null; names: string; names_local: string | null }[];
-  features?: Partial<Record<ToggleKey, boolean>> & { settings?: { photo_wall?: { early?: boolean }; credit?: unknown; topline?: unknown; backdrop?: unknown; music?: unknown; envelope?: unknown; envelope_from?: unknown; envelope_to?: unknown; photo_ring?: unknown } };
+  features?: Partial<Record<ToggleKey, boolean>> & { settings?: { photo_wall?: { early?: boolean }; credit?: unknown; topline?: unknown; backdrop?: unknown; music?: unknown; envelope?: unknown; envelope_from?: unknown; envelope_to?: unknown; photo_ring?: unknown; food?: unknown } };
   sub_events?: {
     title: string; kind: string; starts_at: string; venue_name: string | null; description: string | null;
     menu?: { course?: string; dish?: string }[] | null;
@@ -124,6 +124,7 @@ export const getPublicEvent = cache(async (type: string, slug: string, token?: s
     envFrom: typeof features.settings?.envelope_from === "string" ? features.settings.envelope_from.trim().slice(0, 60) : "",
     envTo: typeof features.settings?.envelope_to === "string" ? features.settings.envelope_to.trim().slice(0, 60) : "",
     photoRing: photoRingOf(features.settings?.photo_ring),
+    askFood: asksFood(typeof features.settings?.food === "boolean" ? features.settings.food : undefined, t?.sensitive ?? false),
   };
   const view: EventStageView = p.stage === "live" ? "live" : p.stage === "post" ? "after" : "page";
   return {

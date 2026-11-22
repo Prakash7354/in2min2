@@ -4,10 +4,11 @@
 // size of event (replies, countdown, photos…), each with an icon and one line.
 // Change them any time, even after publishing.
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
 import { EVENT_TYPES, SCALES, TOGGLES, eventType, type Scale, type ToggleKey } from "@/lib/catalog";
 import { applyScale, applyType } from "@/lib/draft";
+import { asksFood } from "@/lib/event-view";
 import { useB2 } from "../context";
 import { TYPE_ART } from "../kinds";
 import { PanelShell } from "../panels";
@@ -54,9 +55,16 @@ export function SettingsPanel() {
 
       <Section icon="switches" title="Switches" line="Only those for your kind of event.">
         {list.map((x) => (
-          <Toggle key={x.key} icon={TOGGLE_ICON[x.key]} label={x.label} line={x.line} checked={d.toggles[x.key]}
-            badge={x.later ? <span className="b2-pill" style={{ marginLeft: 8 }}>From {x.later}</span> : undefined}
-            onChange={(v) => update((y) => ({ ...y, toggles: { ...y.toggles, [x.key]: v } }))} />
+          <Fragment key={x.key}>
+            <Toggle icon={TOGGLE_ICON[x.key]} label={x.label} line={x.line} checked={d.toggles[x.key]}
+              badge={x.later ? <span className="b2-pill" style={{ marginLeft: 8 }}>From {x.later}</span> : undefined}
+              onChange={(v) => update((y) => ({ ...y, toggles: { ...y.toggles, [x.key]: v } }))} />
+            {/* Food needs on the reply form (0014), under Replies. */}
+            {x.key === "rsvp" && d.toggles.rsvp && (
+              <Toggle icon="bowlfood" label="Ask about food needs" line="Guests can tick vegetarian, vegan, halal, gluten-free, nut allergy or dairy-free when they reply"
+                checked={asksFood(d.askFood, t?.sensitive ?? false)} onChange={(v) => update((y) => ({ ...y, askFood: v }))} />
+            )}
+          </Fragment>
         ))}
         <Toggle icon="lock" label="Private event" line="Only guests with their own personal link can open the page." checked={d.isPrivate}
           onChange={(v) => update((y) => ({ ...y, isPrivate: v }))} />

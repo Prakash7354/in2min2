@@ -45,11 +45,12 @@ const COMMUNITY = [
   { type: "reunion", title: "Reunions and regimental days", line: "A 25th year, a regiment or a school: old friends, one link, a day to remember.", card: "reunion" },
 ] as const;
 
-// The photos turning at the top (owner's choice of eight, 22 Nov 2026; these
-// five are sharp enough to fill a laptop screen), with where to keep the
-// middle when a phone cuts them narrow.
+// The photos turning at the top (the owner's eight, 22 Nov 2026), with where
+// to keep the middle when a phone cuts them narrow. Light and dark take turns.
+// Eight here means eight nth-child rules in site.css (.s-heroshow).
 const HERO_PHOTOS: [string, string][] = [
-  ["show-party", "58% 50%"], ["show-mist", "64% 50%"], ["show-concert", "50% 50%"], ["show-bench", "52% 50%"], ["show-bride", "50% 50%"],
+  ["show-party", "58% 50%"], ["show-mist", "64% 50%"], ["show-lhosar", "62% 40%"], ["show-concert", "50% 50%"],
+  ["show-bench", "52% 50%"], ["show-football", "40% 50%"], ["show-reception", "60% 50%"], ["show-bride", "50% 50%"],
 ];
 
 const STEPS = [

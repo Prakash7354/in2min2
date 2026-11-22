@@ -4,9 +4,8 @@ The owner chose these free stock photos (21 Nov 2026) and the logo files. The
 originals stay in the git-ignored `images/` folder; the web copies in
 `public/site/` are made with `sips` (JPEG, about 600 px and 1200 px wide; the
 turning photos at the top, `show-*`, 900 and 1600 px at quality 50–55, as they
-sit under a shade). Of the owner's eight for the top (22 Nov 2026), Tamu Lhosar
-(547 px) and the football and party webps (1024 px) are too small to fill a
-laptop screen sharply, so five are used.
+sit under a shade). All eight of the owner's photos for the top are used (22 Nov
+2026); Lhosar, football and the party came as 1920 px PNGs.
 **Owner: please add the page link for each stock photo** (Pexels or Unsplash),
 as with the music in [music.md](music.md), so the source can always be shown.
 
@@ -14,11 +13,14 @@ as with the music in [music.md](music.md), so the source can always be shown.
 | --- | --- | --- | --- |
 | `show-party` | birthday-celebration copy.jpg | Top of the page, turning photos (1st) | (add) |
 | `show-mist` | newlyweds-in-the-mist2231126.jpg | Top of the page, turning photos (2nd) | (add) |
-| `show-concert` | event-audience-221126.jpg | Top of the page, turning photos (3rd) | (add) |
-| `show-bench` | happy-valentines-day-211126.jpg | Top of the page, turning photos (4th) | (add) |
-| `show-bride` | bride-and-groom-221126.jpg | Top of the page, turning photos (5th) | (add) |
+| `show-concert` | event-audience-221126.jpg | Top of the page, turning photos (4th) | (add) |
+| `show-bench` | happy-valentines-day-211126.jpg | Top of the page, turning photos (5th) | (add) |
+| `show-bride` | bride-and-groom-221126.jpg | Top of the page, turning photos (8th) | (add) |
+| `show-lhosar` | tamu-lhosar-celebration.png | Top of the page, turning photos (3rd) | (add) |
+| `show-football` | football-event.png | Top of the page, turning photos (6th) | (add) |
+| `show-reception` | multi-party-screen.png | Top of the page, turning photos (7th) | (add) |
 | `birthday` | birthday-celebration.jpg | Birthdays card, the demo invitation | (add) |
-| `wedding` | multi-party-atmospheric-221126.webp | Weddings and receptions | (add) |
+| `wedding` | multi-party-screen.png (the owner's 1920 px copy, 22 Nov) | Weddings and receptions | (add) |
 | `christmas` | christmas-family-lunch.jpg | Christmas | (add) |
 | `office` | christmas-function.jpg | Work and office parties | (add) |
 | `newyear` | new-year-celebration.jpg | New Year's Eve | (add) |
@@ -29,7 +31,7 @@ as with the music in [music.md](music.md), so the source can always be shown.
 | `jeena` | Jeena-wenning-221126.svg (the photo inside it) | Jeena’s Pasni card | (add) |
 | `harisita` | hari-sita-anniversary.svg (the photo inside it) | Hari & Sita’s anniversary card (heart), the photo wheel | (add) |
 | `memorial` | memorial-candle-24-1126.svg (the photo inside it) | The memorial card | (add) |
-| `lhosar-s` | tamu-lhosar-celebration-251126.jpeg | Tamu Lhosar card (only 547 px wide: a bigger copy would be sharper) | (add) |
+| `lhosar-s` | tamu-lhosar-celebration.png (the owner's 1920 px copy, 22 Nov) | Tamu Lhosar card, the photo wheel | (add) |
 | `petals` | wedding-241126.jpg | “Your words, your way” wedding card (top of the stack) | (add) |
 | `w-ceremony-s` | traditional-indian-wedding.jpg | The photo wheel, the wedding card’s stack | (add) |
 | `reunion-s` | reunion-group-211126.jpg (the owner’s group photo, 21 Nov) | 25th Year Reunion card, the photo wheel | owner’s own |

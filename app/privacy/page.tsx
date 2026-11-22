@@ -77,10 +77,10 @@ export default function Privacy() {
           ["Legal reason", "We hold it for the host (section 4)."],
           ["How long", "Deleted 30 days after the event page closes."],
         ] },
-        { what: "Diet and access needs (coming later)", lines: [
-          ["What", "Only if the host asks, and only if you choose to tell them. These can say something about your health or beliefs, so they're treated with extra care."],
+        { what: "Food needs", lines: [
+          ["What", "Only if the host asks, and only if you choose to tick them: vegetarian, vegan, halal, gluten-free, nut allergy or dairy-free. These can say something about your health or beliefs, so they're treated with extra care. (Access needs are coming later, in the same way.)"],
           ["Why", "So the host and caterer can look after you."],
-          ["Legal reason", "Your explicit consent. You can withdraw it at any time."],
+          ["Legal reason", "Your explicit consent. You can withdraw it at any time: change your reply and untick them."],
           ["How long", "Deleted 30 days after the event page closes. Only the host sees them."],
         ] },
         { what: "Photos you add", lines: [

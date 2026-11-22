@@ -5,6 +5,7 @@
 
 import { suggestedWords } from "@/app/new/kinds";
 import type { EventCopy } from "@/lib/ai/copy";
+import type { FoodNeed } from "@/lib/catalog";
 import { applyType, newDraft, toViewData, type Draft } from "@/lib/draft";
 import type { EventViewData } from "@/lib/event-view";
 
@@ -77,10 +78,10 @@ export function kindSample(kind: string): EventViewData {
 // The tablet copies the real Replies and Guests screens (app/new/panels):
 // coming, maybe, can't come, not replied (or the waiting list for a
 // community event), each reply with its note, "Send a reminder" and "Copy the
-// list". Food needs are in the guests' notes, as in the app today (a separate
-// diet question isn't built yet).
+// list", and the food needs ticked (0014), as the host sees them.
 export type DashReply = { name: string; status: "yes" | "maybe" | "no"; size?: number; note: string; ago: string };
-export type Dash = { title: string; when: string; coming: number; maybe: number; cant: number; fourth: [string, number]; bell: number; replies: DashReply[] };
+export type Dash = { title: string; when: string; coming: number; maybe: number; cant: number; fourth: [string, number]; bell: number;
+  food: [FoodNeed, number][]; replies: DashReply[] };
 export type HeroShow = { key: string; label: string; card: EventViewData; dash: Dash };
 
 function whenOf(d: EventViewData): string {
@@ -92,32 +93,32 @@ export function heroShows(): HeroShow[] {
   const show = (key: string, label: string, card: EventViewData, dash: Omit<Dash, "title" | "when">): HeroShow =>
     ({ key, label, card, dash: { title: card.title, when: whenOf(card), ...dash } });
   return [
-    show("birthday", "Birthday", heroSample(), { coming: 41, maybe: 6, cant: 4, fourth: ["Not replied", 18], bell: 3, replies: [
+    show("birthday", "Birthday", heroSample(), { coming: 41, maybe: 6, cant: 4, fourth: ["Not replied", 18], bell: 3, food: [["vegetarian", 9], ["vegan", 2], ["nut_allergy", 1]], replies: [
       { name: "Asha", status: "yes", size: 3, note: "Can’t wait! Two of us are vegetarian 🌱", ago: "2 min ago" },
       { name: "Hari", status: "maybe", size: 2, note: "Hoping to come after work.", ago: "1 hour ago" },
       { name: "Kamala", status: "no", note: "So sorry, we’re away. Happy birthday Sita! 🎉", ago: "Yesterday" },
     ] }),
-    show("pasni", "Pasni", kindSample("pasni"), { coming: 52, maybe: 5, cant: 3, fourth: ["Not replied", 11], bell: 2, replies: [
+    show("pasni", "Pasni", kindSample("pasni"), { coming: 52, maybe: 5, cant: 3, fourth: ["Not replied", 11], bell: 2, food: [["vegetarian", 14], ["vegan", 3], ["dairy_free", 1]], replies: [
       { name: "Bimala", status: "yes", size: 4, note: "Blessings to little Jeena 🙏 One of us is vegan.", ago: "5 min ago" },
       { name: "Dipak", status: "yes", size: 2, note: "We’ll be there for the ceremony.", ago: "2 hours ago" },
       { name: "Gita", status: "no", note: "Sorry to miss it. Lots of love to Jeena 💛", ago: "Yesterday" },
     ] }),
-    show("wedding", "Wedding", wordsSample(), { coming: 128, maybe: 14, cant: 9, fourth: ["Not replied", 37], bell: 5, replies: [
+    show("wedding", "Wedding", wordsSample(), { coming: 128, maybe: 14, cant: 9, fourth: ["Not replied", 37], bell: 5, food: [["vegetarian", 38], ["halal", 12], ["vegan", 6], ["nut_allergy", 3]], replies: [
       { name: "Sarita", status: "yes", size: 2, note: "Congratulations! ❤️ One vegetarian meal, please.", ago: "Just now" },
       { name: "Anita", status: "maybe", size: 3, note: "Waiting to hear about leave. Will confirm soon.", ago: "3 hours ago" },
       { name: "Ram", status: "no", note: "Sorry we’ll miss it. Sending love from Hong Kong!", ago: "Yesterday" },
     ] }),
-    show("lhosar", "Lhosar", kindSample("lhosar"), { coming: 236, maybe: 31, cant: 12, fourth: ["Waiting list", 8], bell: 4, replies: [
+    show("lhosar", "Lhosar", kindSample("lhosar"), { coming: 236, maybe: 31, cant: 12, fourth: ["Waiting list", 8], bell: 4, food: [["vegetarian", 61], ["halal", 9], ["gluten_free", 4]], replies: [
       { name: "Suman", status: "yes", size: 5, note: "Lhosar ko shubhakamana! 🎉 Is there vegetarian food?", ago: "10 min ago" },
       { name: "Maya", status: "yes", size: 2, note: "We’ll join the cultural dance 💃", ago: "1 hour ago" },
       { name: "Dil", status: "maybe", size: 4, note: "Coming if the children finish football in time.", ago: "Today" },
     ] }),
-    show("anniversary", "Anniversary", kindSample("anniversary"), { coming: 46, maybe: 4, cant: 2, fourth: ["Not replied", 6], bell: 2, replies: [
+    show("anniversary", "Anniversary", kindSample("anniversary"), { coming: 46, maybe: 4, cant: 2, fourth: ["Not replied", 6], bell: 2, food: [["vegetarian", 11], ["gluten_free", 2], ["dairy_free", 1]], replies: [
       { name: "Rita", status: "yes", size: 2, note: "So happy for you both 💛 A no-sugar dessert for Dad, please.", ago: "15 min ago" },
       { name: "Prem", status: "yes", size: 4, note: "Wouldn’t miss it! Congratulations!", ago: "2 hours ago" },
       { name: "Laxmi", status: "no", note: "Sorry, we’re in Nepal. Happy anniversary! 🌹", ago: "Yesterday" },
     ] }),
-    show("reunion", "Reunion", kindSample("reunion"), { coming: 86, maybe: 10, cant: 7, fourth: ["Not replied", 22], bell: 3, replies: [
+    show("reunion", "Reunion", kindSample("reunion"), { coming: 86, maybe: 10, cant: 7, fourth: ["Not replied", 22], bell: 3, food: [["vegetarian", 15], ["halal", 4], ["gluten_free", 2]], replies: [
       { name: "Bikash", status: "yes", size: 2, note: "25 years! Can’t wait to see the old faces 👋", ago: "Just now" },
       { name: "Nabin", status: "yes", size: 1, note: "Vegetarian, please. See you all there!", ago: "1 hour ago" },
       { name: "Dipak", status: "no", note: "Sorry, I’m overseas that week. Cheers to all!", ago: "Yesterday" },

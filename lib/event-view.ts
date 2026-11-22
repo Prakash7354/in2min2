@@ -68,6 +68,7 @@ export type EventViewData = {
   envFrom: string;
   envTo: string;
   photoRing?: string | null;   // a moving decoration round the photo (catalog PHOTO_RINGS)
+  askFood?: boolean;           // the reply form asks about food needs (lib/draft.ts asksFood)
   date: string;       // YYYY-MM-DD in the event's own time zone
   startTime: string;   // HH:MM
   endTime: string;     // HH:MM or ""
@@ -206,4 +207,10 @@ export function defaultTo(d: Pick<EventViewData, "scale" | "sensitive">): string
 // To: the guest's own name from their personal link, else the host's line.
 export function envelopeTo(d: Pick<EventViewData, "envTo" | "scale" | "sensitive">, guestName?: string | null): string {
   return guestName?.trim() || d.envTo.trim() || defaultTo(d);
+}
+
+// Whether the reply form asks about food needs (catalog FOOD_NEEDS, 0014):
+// the host's choice, or yes except for memorials (sensitive kinds).
+export function asksFood(choice: boolean | undefined, sensitive: boolean): boolean {
+  return choice ?? !sensitive;
 }
