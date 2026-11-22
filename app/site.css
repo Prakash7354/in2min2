@@ -86,31 +86,108 @@
   .s-logo img { height: 54px; }
 }
 
-/* Hero */
-.s-hero { padding: 34px 0 56px; background: radial-gradient(80% 60% at 90% 10%, rgba(25, 169, 168, 0.14), transparent 70%), radial-gradient(70% 60% at 0% 100%, rgba(244, 124, 32, 0.12), transparent 70%); }
-.s-herogrid { display: grid; gap: 40px; align-items: center; }
-.s-pill { display: inline-block; margin: 0 0 16px; padding: 7px 16px; border-radius: 999px; background: var(--s-navy); color: #fff; font-weight: 800; font-size: 15px; }
+/* Hero (owner, 22 Nov 2026): five photos fill it, each zooming slowly while
+   the next slides in (one 35 s loop, CSS only); a navy shade sits only where
+   the words are, so the photos stay clear elsewhere. */
+.s-hero { position: relative; isolation: isolate; overflow: hidden; padding: 34px 0 30px; background: var(--s-navy); color: #fff; }
+.s-heroshow { position: absolute; inset: 0; z-index: -2; }
+.s-heroshow img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: s-show-in 35s linear infinite; will-change: transform, opacity; }
+.s-heroshow img:first-child { opacity: 1; animation-delay: -1.75s; }
+.s-heroshow img:nth-child(2) { animation-name: s-show-out; animation-delay: 5.25s; }
+.s-heroshow img:nth-child(3) { animation-delay: 12.25s; }
+.s-heroshow img:nth-child(4) { animation-name: s-show-out; animation-delay: 19.25s; }
+.s-heroshow img:nth-child(5) { animation-delay: 26.25s; }
+@keyframes s-show-in {
+  0% { opacity: 0; transform: translateX(4%) scale(1.06); }
+  5% { opacity: 1; transform: translateX(0) scale(1.06); }
+  22% { opacity: 1; }
+  27% { opacity: 0; transform: translateX(-1%) scale(1.16); }
+  100% { opacity: 0; transform: scale(1.16); }
+}
+@keyframes s-show-out {
+  0% { opacity: 0; transform: translateX(4%) scale(1.16); }
+  5% { opacity: 1; transform: translateX(0) scale(1.16); }
+  22% { opacity: 1; }
+  27% { opacity: 0; transform: translateX(-1%) scale(1.06); }
+  100% { opacity: 0; transform: scale(1.06); }
+}
+/* Phones: the words are on top, the devices below, so the shade is strongest at the top. */
+.s-heroshade { position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(180deg, rgba(9, 22, 44, 0.84) 0%, rgba(9, 22, 44, 0.74) 48%, rgba(9, 22, 44, 0.3) 72%, rgba(9, 22, 44, 0.55) 100%); }
+.s-herogrid { display: grid; gap: 30px; align-items: center; }
+.s-herotext { text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35); }
+.s-hero .s-h1 { color: #fff; }
+.s-hero .s-h1 span { background: linear-gradient(90deg, #6fe3df, #ffb067); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.s-hero .s-lead { color: #e2eaf6; }
+.s-hero .s-lead strong { color: #fff; }
+.s-hero .s-small { color: #c6d3e8; }
+.s-pill { display: inline-block; margin: 0 0 16px; padding: 7px 16px; border-radius: 999px; background: var(--s-gold); color: var(--s-navy); font-weight: 800; font-size: 15px; text-shadow: none; }
 .s-pill::before { content: "🎉 "; }
-.s-heroart { position: relative; min-height: 380px; }
-.s-heropic { position: absolute; inset: 0 18% 8% 0; border-radius: 28px; overflow: hidden; box-shadow: var(--s-shadow); transform: rotate(-2deg); }
-.s-heropic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.s-hero .s-btn { text-shadow: none; }
+
+/* The tablet (the host's Replies) and the phone (the invitation) */
+.s-heroart { position: relative; }
+.s-devices { position: relative; width: 100%; max-width: 560px; margin: 0 auto; aspect-ratio: 1 / 0.97; }
+.s-tablet { position: absolute; left: 0; top: 0; width: 63%; padding: 2.4%; border-radius: 22px; background: #0a0a12; box-shadow: 0 30px 60px -26px rgba(0, 0, 0, 0.85), inset 0 0 0 1.5px rgba(255, 255, 255, 0.12); }
+.s-tabscreen { position: relative; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 14px; container-type: inline-size; background: #0e0c1c; }
 .s-phone { border-radius: 30px; padding: 8px; background: var(--s-navy); box-shadow: 0 30px 50px -24px rgba(15, 42, 79, 0.7); }
 .s-phonescreen { border-radius: 23px; overflow: hidden; background: #fff; }
-.s-herophone { position: absolute; right: 0; bottom: 0; width: min(46%, 230px); transform: rotate(3deg); animation: s-bob 6s ease-in-out infinite; }
-.s-chip {
-  position: absolute; z-index: 2; padding: 8px 14px; border-radius: 999px; background: #fff; color: var(--s-navy);
-  font-weight: 800; font-size: 15px; box-shadow: 0 12px 24px -12px rgba(15, 42, 79, 0.55); white-space: nowrap;
-  animation: s-float 5s ease-in-out infinite;
-}
-.s-chip-a { left: 4%; top: 6%; }
-.s-chip-b { left: 10%; bottom: 14%; animation-delay: -1.6s; }
-.s-chip-c { right: 26%; top: 38%; animation-delay: -3.1s; background: var(--s-teal-deep); color: #fff; }
-@keyframes s-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
-@keyframes s-bob { 0%, 100% { transform: rotate(3deg) translateY(0); } 50% { transform: rotate(2deg) translateY(-8px); } }
+.s-herophone { position: absolute; right: 0; bottom: 0; width: 40%; padding: 2.2%; border-radius: 26px; background: #0a0a12; box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.9), inset 0 0 0 1.5px rgba(255, 255, 255, 0.14); animation: s-bob 7s ease-in-out infinite; }
+.s-phonefit { position: relative; aspect-ratio: 9 / 18.5; border-radius: 20px; }
+@keyframes s-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+/* One example at a time: it slides in from the right, the last one out to the left. */
+.s-slide { position: absolute; inset: 0; transition: transform 0.8s cubic-bezier(0.22, 0.8, 0.24, 1), opacity 0.6s ease; }
+.s-slide[data-pos="next"] { transform: translateX(105%); opacity: 0; }
+.s-slide[data-pos="gone"] { transform: translateX(-30%); opacity: 0; }
+.s-slide[data-pos="on"] { transform: none; opacity: 1; }
+.s-fit { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; }
+.s-fitin { width: 100%; transform-origin: 50% 50%; }
+.s-devdots { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 16px; }
+.s-devdots button { min-height: 32px; padding: 0 12px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: #e2eaf6; font: inherit; font-size: 13.5px; font-weight: 700; cursor: pointer; }
+.s-devdots button[data-on] { background: var(--s-orange); color: var(--s-navy); }
+
+/* The Replies screen, drawn like the builder's dark screens. Sized in em on
+   the tablet's width, so it shrinks with the tablet like a real screenshot. */
+.s-dash { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 0.75em; padding: 1.1em 1em; overflow: hidden;
+  font-size: 4.3cqw; line-height: 1.3; color: #f2efff; text-shadow: none;
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139, 124, 255, 0.24), transparent 70%), #0e0c1c; }
+.s-dash p { margin: 0; }
+.s-dash-top { display: flex; align-items: center; justify-content: space-between; }
+.s-dash-app { font-family: var(--font-display); font-weight: 800; font-size: 1.35em; }
+.s-dash-bell { position: relative; font-size: 1.1em; }
+.s-dash-bell i { position: absolute; top: -0.45em; right: -0.6em; min-width: 1.35em; padding: 0 0.3em; border-radius: 99px; background: #ff5a6e; color: #fff; font-style: normal; font-size: 0.62em; font-weight: 800; line-height: 1.35em; text-align: center; }
+.s-dash-ev { font-weight: 800; font-size: 1.05em; }
+.s-dash-when { color: #b9b2dc; font-size: 0.82em; }
+.s-dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4em; }
+.s-dash-stats span { display: grid; gap: 0.1em; padding: 0.5em 0.35em; border-radius: 0.7em; background: #1c1836; color: #b9b2dc; font-size: 0.7em; text-align: center; }
+.s-dash-stats b { color: #fff; font-family: var(--font-display); font-size: 1.85em; line-height: 1; }
+.s-dash-stats [data-k="yes"] b { color: #4fe3a6; }
+.s-dash-stats [data-k="maybe"] b { color: #ffb627; }
+.s-dash-stats [data-k="no"] b { color: #ff8a9a; }
+.s-dash-bar { display: flex; height: 0.45em; overflow: hidden; border-radius: 99px; background: #1c1836; }
+.s-dash-bar i[data-k="yes"] { background: #4fe3a6; }
+.s-dash-bar i[data-k="maybe"] { background: #ffb627; }
+.s-dash-bar i[data-k="no"] { background: #ff8a9a; }
+.s-dash-bar i[data-k="wait"] { background: #4a4470; }
+.s-dash-list { display: grid; gap: 0.5em; }
+.s-dash-row { display: grid; gap: 0.2em; padding: 0.55em 0.65em; border-radius: 0.75em; background: #17142c; box-shadow: inset 0 0 0 1px rgba(169, 157, 255, 0.14); }
+.s-dash-row p:first-child { display: flex; align-items: center; justify-content: space-between; gap: 0.5em; font-size: 0.9em; }
+.s-dash-pill { padding: 0.15em 0.6em; border-radius: 99px; font-size: 0.78em; font-weight: 800; white-space: nowrap; }
+.s-dash-pill[data-k="yes"] { background: #ffb627; color: #1a1330; }
+.s-dash-pill[data-k="maybe"] { background: #3b3320; color: #ffe1a3; }
+.s-dash-pill[data-k="no"] { background: #3a1f2a; color: #ffc0c9; }
+.s-dash-note { color: #e6e1ff; font-size: 0.8em; }
+.s-dash-ago { color: #8f88b8; font-size: 0.68em; }
+.s-dash-btns { display: flex; gap: 0.4em; margin-top: auto; }
+.s-dash-btns span { padding: 0.45em 0.8em; border-radius: 99px; background: #241f45; color: #f2efff; font-size: 0.72em; font-weight: 700; }
+.s-dash-btns [data-k="wa"] { background: #1f9e5a; color: #fff; }
+
 @media (min-width: 900px) {
-  .s-hero { padding: 64px 0 86px; }
-  .s-herogrid { grid-template-columns: 1.05fr 1fr; gap: 56px; }
-  .s-heroart { min-height: 520px; }
+  .s-hero { padding: 64px 0 56px; }
+  .s-herogrid { grid-template-columns: 1.02fr 1fr; gap: 48px; }
+  /* Laptops: the words on the left, so the shade fades out towards the devices. */
+  .s-heroshade { background: linear-gradient(90deg, rgba(9, 22, 44, 0.88) 0%, rgba(9, 22, 44, 0.78) 34%, rgba(9, 22, 44, 0.42) 54%, rgba(9, 22, 44, 0.08) 72%, rgba(9, 22, 44, 0.12) 100%),
+    linear-gradient(0deg, rgba(9, 22, 44, 0.5), transparent 28%); }
 }
 
 /* What you get */
@@ -290,7 +367,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .s-herophone, .s-chip, .s-minihand, .s-typed, .s-step, .s-mt-on, .s-mini-line, .s-mini-ok { animation: none !important; }
+  .s-herophone, .s-minihand, .s-typed, .s-step, .s-mt-on, .s-mini-line, .s-mini-ok { animation: none !important; }
+  .s-heroshow img { animation: none !important; }
+  .s-slide { transition: none; }
   .s-scene { animation: none; opacity: 0; }
   .s-scene4 { opacity: 1; }
   .s-mini-ok { opacity: 1; }

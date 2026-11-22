@@ -2,13 +2,21 @@
 
 The owner chose these free stock photos (21 Nov 2026) and the logo files. The
 originals stay in the git-ignored `images/` folder; the web copies in
-`public/site/` are made with `sips` (JPEG, about 600 px and 1200 px wide).
+`public/site/` are made with `sips` (JPEG, about 600 px and 1200 px wide; the
+turning photos at the top, `show-*`, 900 and 1600 px at quality 50–55, as they
+sit under a shade). Of the owner's eight for the top (22 Nov 2026), Tamu Lhosar
+(547 px) and the football and party webps (1024 px) are too small to fill a
+laptop screen sharply, so five are used.
 **Owner: please add the page link for each stock photo** (Pexels or Unsplash),
 as with the music in [music.md](music.md), so the source can always be shown.
 
 | Web copy | Original | Used for | Source link |
 | --- | --- | --- | --- |
-| `hero-birthday` | birthday-celebration-party-221126.webp | Top of the page, sharing picture | (add) |
+| `show-party` | birthday-celebration copy.jpg | Top of the page, turning photos (1st) | (add) |
+| `show-mist` | newlyweds-in-the-mist2231126.jpg | Top of the page, turning photos (2nd) | (add) |
+| `show-concert` | event-audience-221126.jpg | Top of the page, turning photos (3rd) | (add) |
+| `show-bench` | happy-valentines-day-211126.jpg | Top of the page, turning photos (4th) | (add) |
+| `show-bride` | bride-and-groom-221126.jpg | Top of the page, turning photos (5th) | (add) |
 | `birthday` | birthday-celebration.jpg | Birthdays card, the demo invitation | (add) |
 | `wedding` | multi-party-atmospheric-221126.webp | Weddings and receptions | (add) |
 | `christmas` | christmas-family-lunch.jpg | Christmas | (add) |

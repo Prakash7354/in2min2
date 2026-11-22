@@ -3,11 +3,12 @@ import Link from "next/link";
 import EventView, { eventVars } from "@/components/event/event-view";
 import { LegalLinks } from "@/components/legal/legal-page";
 import { GuestDemoButton } from "@/components/site/guest-demo";
+import { HeroDevices } from "@/components/site/hero-devices";
 import { SiteHeader } from "@/components/site/header";
 import { WheelDemo } from "@/components/site/wheel-demo";
 import { TapHand } from "@/components/tap-hand";
 import { formatPence, PLANS } from "@/lib/catalog";
-import { heroSample, kindSample, wordsSample } from "@/lib/site-samples";
+import { heroSample, heroShows, kindSample, wordsSample } from "@/lib/site-samples";
 import { SHARE_DESCRIPTION, SHARE_IMAGE, SHARE_TITLE } from "@/lib/site-share";
 import "./site.css";
 
@@ -44,6 +45,13 @@ const COMMUNITY = [
   { type: "reunion", title: "Reunions and regimental days", line: "A 25th year, a regiment or a school: old friends, one link, a day to remember.", card: "reunion" },
 ] as const;
 
+// The photos turning at the top (owner's choice of eight, 22 Nov 2026; these
+// five are sharp enough to fill a laptop screen), with where to keep the
+// middle when a phone cuts them narrow.
+const HERO_PHOTOS: [string, string][] = [
+  ["show-party", "58% 50%"], ["show-mist", "64% 50%"], ["show-concert", "50% 50%"], ["show-bench", "52% 50%"], ["show-bride", "50% 50%"],
+];
+
 const STEPS = [
   { title: "Choose your event", line: "Birthday, wedding, Pasni, Lhosar, a party or a tournament. Each one comes with the right questions." },
   { title: "Answer a few questions", line: "Mostly taps: names, the date and the place. Then pick a look you like." },
@@ -75,14 +83,25 @@ export default function Home() {
   const now = madeAt();
   const hero = heroSample();
   const words = wordsSample();
+  const shows = heroShows();
   const family = PLANS.filter((p) => ["popup", "season", "half_year", "keepsake"].includes(p.key));
   return (
     <div className="s-site">
       <SiteHeader />
 
       <main>
-        {/* ── Hero ── */}
+        {/* ── Hero: the owner's photos turning behind (zooming gently, the
+             next sliding in), the words on a shade only where they sit, and
+             the tablet and phone changing together through six events. ── */}
         <section className="s-hero">
+          <div className="s-heroshow" aria-hidden="true">
+            {HERO_PHOTOS.map(([name, at], i) => (
+              // eslint-disable-next-line @next/next/no-img-element -- pre-sized copies; Cloudflare has no image resizer here
+              <img key={name} src={`/site/${name}-s.jpg`} srcSet={`/site/${name}-s.jpg 900w, /site/${name}.jpg 1600w`} sizes="100vw" alt=""
+                style={{ objectPosition: at }} loading={i === 0 ? "eager" : "lazy"} fetchPriority={i === 0 ? "high" : "low"} decoding="async" />
+            ))}
+          </div>
+          <div className="s-heroshade" aria-hidden="true" />
           <div className="s-wrap s-herogrid">
             <div className="s-herotext">
               <p className="s-pill">Free until 31 January 2027</p>
@@ -90,19 +109,13 @@ export default function Home() {
               <p className="s-lead"><strong>Your event online in two minutes.</strong> Make a beautiful invitation and event page on your phone. Send one link on WhatsApp or Facebook. Guests reply, share photos and leave messages, all in one place.</p>
               <div className="s-btnrow">
                 <Link href="/new" className="s-btn s-btn-go">Start free</Link>
-                <GuestDemoButton data={hero} title={hero.copy.card_headline || hero.title} className="s-btn s-btn-line">
+                <GuestDemoButton data={hero} title={hero.copy.card_headline || hero.title} className="s-btn s-btn-ghost-light">
                   <span className="s-play" aria-hidden="true">▶</span>See what your guests get
                 </GuestDemoButton>
               </div>
               <p className="s-small">No app to download. Works on any phone.</p>
             </div>
-            <div className="s-heroart" aria-hidden="true">
-              <div className="s-heropic"><Photo name="hero-birthday" alt="" wide /></div>
-              <div className="s-phone s-herophone"><div className="s-phonescreen"><EventView data={hero} view="card" now={now} thumb /></div></div>
-              <span className="s-chip s-chip-a">✓ 32 coming</span>
-              <span className="s-chip s-chip-b">📷 128 photos</span>
-              <span className="s-chip s-chip-c">💬 Happy birthday, Sita!</span>
-            </div>
+            <HeroDevices shows={shows} now={now} />
           </div>
         </section>
 
