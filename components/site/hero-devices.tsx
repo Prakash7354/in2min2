@@ -9,6 +9,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import EventView from "@/components/event/event-view";
 import { FOOD_NEEDS } from "@/lib/catalog";
+import { daysUntil } from "@/lib/event-view";
 import type { Dash, HeroShow } from "@/lib/site-samples";
 
 const EVERY = 5500;
@@ -28,7 +29,7 @@ export function HeroDevices({ shows, now }: { shows: HeroShow[]; now: number }) 
       <div className="s-devices" aria-hidden="true">
         <div className="s-tablet">
           <div className="s-tabscreen">
-            {shows.map((s, i) => <div key={s.key} className="s-slide" data-pos={pos(i)}><Dashboard d={s.dash} /></div>)}
+            {shows.map((s, i) => <div key={s.key} className="s-slide" data-pos={pos(i)}><Dashboard d={s.dash} days={s.card.date ? daysUntil(s.card.date, s.card.timezone, now) : null} /></div>)}
           </div>
         </div>
         <div className="s-phone s-herophone">
@@ -74,8 +75,10 @@ function Fit({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Dashboard({ d }: { d: Dash }) {
+function Dashboard({ d, days }: { d: Dash; days: number | null }) {
   const total = d.coming + d.maybe + d.cant + d.fourth[1];
+  // Numbered like the real Replies: No. 1 the first in, newest at the top.
+  const replies = Math.round((d.coming + d.maybe) / 2.4) + d.cant;
   const pc = (n: number) => `${(n / total) * 100}%`;
   return (
     <div className="s-dash">
@@ -85,7 +88,7 @@ function Dashboard({ d }: { d: Dash }) {
       </div>
       <div>
         <p className="s-dash-ev">{d.title}</p>
-        <p className="s-dash-when">{d.when}</p>
+        <p className="s-dash-when">{d.when}{days !== null && days > 1 && <span className="s-dash-days">{days} days to go</span>}</p>
       </div>
       <div className="s-dash-stats">
         <span data-k="yes"><b>{d.coming}</b>Coming</span>
@@ -104,9 +107,9 @@ function Dashboard({ d }: { d: Dash }) {
         })}
       </div>
       <div className="s-dash-list">
-        {d.replies.map((r) => (
+        {d.replies.map((r, i) => (
           <div key={r.name} className="s-dash-row">
-            <p><b>{r.name}</b><span className="s-dash-pill" data-k={r.status}>{STATUS[r.status]}{r.size ? ` · ${r.size}` : ""}</span></p>
+            <p><b><i className="s-dash-no">{replies - i}</i>{r.name}</b><span className="s-dash-pill" data-k={r.status}>{STATUS[r.status]}{r.size ? ` · ${r.size}` : ""}</span></p>
             <p className="s-dash-note">“{r.note}”</p>
             <p className="s-dash-ago">{r.ago}</p>
           </div>

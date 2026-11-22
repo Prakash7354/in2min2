@@ -87,6 +87,21 @@ const mineSubs = { [mine[0].id]: [{ title: "Ceremony", kind: "other", starts_at:
 const mineToggles = { [mine[0].id]: { rsvp: true, photo_wall: true, settings: { envelope: true, music: "wedding_vows", envelope_from: "Meenu & Jose" } } };
 
 const guests = [];
+// SEED_REPLIES=1: replies already in (oldest first) and two personal invitations
+// not answered, for the Replies panel. VENUE_CAP=120: the venue's safe capacity.
+if (process.env.SEED_REPLIES) {
+  const seed = [["Asha Gurung", "attending", 3, "Can't wait!", ["vegetarian"]], ["Hari", "maybe", 2, "Hoping to come after work.", []],
+    ["Kamala", "declined", 1, "So sorry, we're away.", []], ["Sunita & family", "attending", 4, "", ["vegetarian", "nut_allergy"]],
+    ["Bikash", "attending", 1, "See you there", ["halal"]], ["Maya", "attending", 2, "", []]];
+  seed.forEach(([n, st, size, note, food], i) => {
+    const at = new Date(Date.now() - (seed.length - i) * 3_600_000).toISOString();
+    guests.push({ id: randomUUID(), invite_token: randomBytes(16).toString("hex"), invited_at: null, created_at: at, rsvp_at: at, source: "rsvp_form",
+      full_name: n, party_size: size, rsvp_status: st, rsvp_note: note || null, guest_metadata: { food } });
+  });
+  for (const n of ["Uncle Ram", "Didi"]) guests.push({ id: randomUUID(), invite_token: randomBytes(16).toString("hex"), invited_at: new Date().toISOString(),
+    created_at: new Date(Date.now() - 9 * 3_600_000).toISOString(), rsvp_at: null, source: "host", full_name: n, party_size: 2, rsvp_status: "invited", rsvp_note: null, guest_metadata: {} });
+}
+const venueCap = process.env.VENUE_CAP ? Number(process.env.VENUE_CAP) : null;
 
 http.createServer((req, res) => {
   let body = "";
@@ -120,7 +135,11 @@ http.createServer((req, res) => {
       return send({ ok: true, status: g.rsvp_status, name: g.full_name, party_size: g.party_size, token: g.invite_token });
     }
     if (u.pathname === "/rest/v1/rpc/resolve_short_code") return send({ type: "wedding", slug: "meenu-jose" });
-    if (u.pathname === "/rest/v1/rpc/event_usage") return send({ people: 0, attending: 0, guest_limit: 200, level: "ok" });
+    if (u.pathname === "/rest/v1/rpc/event_usage") {
+      const sum = (f) => guests.filter(f).reduce((n, g) => n + g.party_size, 0);
+      const people = sum((g) => ["invited", "attending", "maybe"].includes(g.rsvp_status)), attending = sum((g) => g.rsvp_status === "attending");
+      return send({ people, attending, guest_limit: 300, level: "ok", venue_capacity: venueCap, capacity_left: venueCap === null ? null : venueCap - attending });
+    }
     if (u.pathname === "/rest/v1/rpc/public_photos") return send(wall());
     if (u.pathname === "/rest/v1/rpc/public_live") return send(live());
     if (u.pathname === "/rest/v1/rpc/love_photo") return send({ ok: true, loves: 13, mine: !!args.p_love });
@@ -153,7 +172,11 @@ http.createServer((req, res) => {
 
     if (u.pathname === "/rest/v1/guest_crm") {
       const id = eq("id");
-      if (req.method === "GET") return send(guests);
+      if (req.method === "GET") {
+        const src = eq("source"), desc = u.searchParams.get("order") === "created_at.desc";
+        const list = guests.filter((g) => !src || g.source === src).sort((a, b) => (a.created_at < b.created_at ? -1 : 1));
+        return send(desc ? list.reverse() : list);
+      }
       if (req.method === "POST") {
         for (const g of [].concat(args)) guests.push({ id: randomUUID(), invite_token: randomBytes(16).toString("hex"), invited_at: null, created_at: new Date().toISOString(), ...g });
         res.statusCode = 201; res.end(""); return;

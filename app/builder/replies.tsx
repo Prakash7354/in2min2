@@ -108,6 +108,19 @@ export function foodSummary(rows: Reply[]): string {
   const f = foodTotals(rows);
   return f.length ? `\nFood needs (replies): ${f.map((x) => `${x.label} ${x.n}`).join(", ")}.` : "";
 }
+// Each reply's number (owner, 22 Nov 2026): No. 1 is the first that came in,
+// so the numbers stay put as new ones arrive. `rows` are newest first.
+export const replyNo = (rows: Reply[], i: number) => rows.length - i;
+// "Copy the list": the numbers, then one numbered line per reply, oldest
+// first, with the same numbers as on the screen.
+export function copyText(title: string, rows: Reply[], u?: { venue_capacity: number | null; capacity_left: number | null } | null): string {
+  const t = totals(rows);
+  const head = `${title}: ${t.replies} ${t.replies === 1 ? "reply" : "replies"}. ${t.coming} people coming, ${t.maybe} maybe, ${t.cant} can't come`
+    + `${t.waiting ? `, ${t.waiting} on the waiting list` : ""}.`;
+  const venue = u?.venue_capacity != null ? `\nPlaces left at the venue: ${Math.max(0, u.capacity_left ?? 0)} of ${u.venue_capacity}.` : "";
+  const list = [...rows].reverse().map((r, i) => `${i + 1}. ${listLine(r)}`).join("\n");
+  return `${head}${venue}${foodSummary(rows)}\n\n${list}`;
+}
 
 const LABEL: Record<Reply["rsvp_status"], string> = { attending: "Coming", maybe: "Maybe", declined: "Can't come", waitlist: "Waiting list", invited: "Not replied" };
 const TONE: Record<Reply["rsvp_status"], string> = {
@@ -148,8 +161,6 @@ export function RepliesDialog({ d, state, link, onClose, say }: { d: Draft; stat
   const title = d.title.trim() || "Our event";
   const u = state.usage;
 
-  const list = rows.map(listLine).join("\n");
-  const summary = `${title}: ${t.coming} coming, ${t.maybe} maybe, ${t.cant} can't come${t.waiting ? `, ${t.waiting} on the waiting list` : ""}.${foodSummary(rows)}`;
   const food = foodTotals(rows);
   const reminder = `Reminder: ${title}${d.date ? ` is on ${formatDate(d.date)}` : ""}. If you haven't replied yet, please tap the link and let us know:`;
 
@@ -195,7 +206,7 @@ export function RepliesDialog({ d, state, link, onClose, say }: { d: Draft; stat
                 className="inline-flex min-h-10 items-center rounded-full bg-[#25D366] px-4 text-sm font-bold text-[#073B1C]">Send a reminder on WhatsApp</a>
             )}
             <button type="button" className="inline-flex min-h-10 items-center rounded-full bg-wash px-4 text-sm font-bold hover:bg-line"
-              onClick={async () => { const r = await copyLink(`${summary}\n\n${list}`); say(r === "copied" ? "List copied. Paste it for the caterer or venue." : "Couldn't copy here."); }}
+              onClick={async () => { const r = await copyLink(copyText(title, rows, u)); say(r === "copied" ? "List copied. Paste it for the caterer or venue." : "Couldn't copy here."); }}
               disabled={!rows.length}>Copy the list</button>
             <button type="button" className="inline-flex min-h-10 items-center rounded-full bg-wash px-4 text-sm font-bold hover:bg-line" onClick={refresh}>Refresh</button>
           </div>
@@ -205,10 +216,10 @@ export function RepliesDialog({ d, state, link, onClose, say }: { d: Draft; stat
             <p className="rounded-2xl bg-wash px-4 py-3 text-[15px]">No replies yet. Share your link, and each reply will appear here and on the bell.</p>
           )}
           <ul className="grid gap-2">
-            {rows.map((r) => (
+            {rows.map((r, i) => (
               <li key={r.id} className="grid gap-1.5 rounded-2xl border border-line p-3">
                 <p className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="font-semibold">{r.full_name}</span>
+                  <span className="font-semibold"><span className="mr-1.5 text-muted tabular-nums">{replyNo(rows, i)}.</span>{r.full_name}</span>
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${TONE[r.rsvp_status]}`}>
                     {LABEL[r.rsvp_status]}{r.rsvp_status !== "declined" ? ` · ${r.party_size}` : ""}
                   </span>

@@ -255,10 +255,10 @@ function Personal() {
             {u?.guest_limit != null && <> · {u.people} of {u.guest_limit} on your plan</>}
           </p>
           <ul className="b2-guests">
-            {rows.map((g) => (
+            {rows.map((g, i) => (
               <li key={g.id} className="b2-row b2-guest">
                 <span className="b2-grow">
-                  <strong>{g.full_name}</strong>
+                  <strong><span style={{ color: "var(--b2-text-2)", fontVariantNumeric: "tabular-nums" }}>{i + 1}.</span> {g.full_name}</strong>
                   <small>{g.party_size} {g.party_size === 1 ? "person" : "people"} · {g.rsvp_status === "invited" ? (g.invited_at ? "Sent, not replied" : "Not sent yet") : STATUS[g.rsvp_status] ?? g.rsvp_status}</small>
                 </span>
                 {confirm === g.id ? (

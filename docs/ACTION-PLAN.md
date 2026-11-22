@@ -22,7 +22,21 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
 
 ## Now
 
-- [ ] **Food needs on the reply form (22 Nov).** Built: guests can tick Vegetarian, Vegan, Halal, Gluten-free, Nut allergy or Dairy-free when they reply (optional; only the hosts see them). Replies shows the totals for the caterer, and "Copy the list" includes them. Hosts can switch it off in Settings (it starts off for memorials). **To make it save, run the database file [0014_food_needs.sql](../supabase/migrations/0014_food_needs.sql):** open it on your Mac, select everything (Cmd+A), copy (Cmd+C). Supabase › your project › **SQL Editor** › **New query** › paste › **Run**. You should see "Success. No rows returned." Tell Claude Code. Until then the question shows but the ticks aren't kept.
+- [x] **✓ Done 22 Nov (0014 run).** **Food needs on the reply form (22 Nov).** Built: guests can tick Vegetarian, Vegan, Halal, Gluten-free, Nut allergy or Dairy-free when they reply (optional; only the hosts see them). Replies shows the totals for the caterer, and "Copy the list" includes them. Hosts can switch it off in Settings (it starts off for memorials). **To make it save, run the database file [0014_food_needs.sql](../supabase/migrations/0014_food_needs.sql):** open it on your Mac, select everything (Cmd+A), copy (Cmd+C). Supabase › your project › **SQL Editor** › **New query** › paste › **Run**. You should see "Success. No rows returned." Tell Claude Code. Until then the question shows but the ticks aren't kept.
+
+- [ ] **Get found on Google and Bing (22 Nov, about 20 minutes; free).** The website now has a sitemap (the list of pages for search engines): https://in2min2.com/sitemap.xml.
+  - **Google:**
+    1. Go to **search.google.com/search-console** and sign in with your Google account.
+    2. Choose **Domain** (the left-hand box), type `in2min2.com` and tap **Continue**.
+    3. Google proves the domain is yours. If it offers **Start verification** with Cloudflare, tap it, sign in to Cloudflare and tap **Authorise**. Otherwise tap **Copy** beside the TXT record. Then go to Cloudflare › **in2min2.com** › **DNS** › **Records** › **+ Add record**. Type: **TXT**. Name: `@`. Content: paste. Tap **Save**. Back in Google, tap **Verify**. This can take a few minutes.
+    4. In the left menu, tap **Sitemaps**. Under "Add a new sitemap", type `sitemap.xml` and tap **Submit**. It should say **Success**.
+    5. In the search bar at the top, paste `https://in2min2.com` and press Enter. Tap **Request indexing**. Do the same for `https://in2min2.com/new`.
+  - **Microsoft (Bing; it also feeds Yahoo, DuckDuckGo, Ecosia and Copilot):**
+    1. Go to **bing.com/webmasters** and sign in (your Google account works).
+    2. Choose **Import from Google Search Console** › **Import**, allow it, tick **in2min2.com** › **Import**. This copies the proof and the sitemap across, so there's nothing else to verify.
+    3. In the left menu, check **Sitemaps** lists `https://in2min2.com/sitemap.xml`. If it doesn't: **Submit sitemap** › paste it › **Submit**.
+  - **Optional, in Cloudflare:** **in2min2.com** › **Caching** › **Configuration** › switch on **Crawler Hints**. Bing then hears about changes straight away.
+  - It usually takes a few days to two weeks before in2min2.com shows up in searches. Check **Performance** in Google once a week. Tell Claude Code if Google lists a page as having a problem.
 
 ## Launch checklist (20 Nov 2026): what's left before sharing with real families
 

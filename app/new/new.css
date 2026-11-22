@@ -819,6 +819,16 @@ a.b2-row { color: var(--b2-text); }
 .b2-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .b2-stat { display: grid; gap: 2px; padding: 14px; border-radius: 18px; background: var(--b2-s1); box-shadow: var(--b2-edge), var(--b2-shadow); }
 .b2-stat strong { font-family: var(--font-display); font-weight: 800; font-size: 34px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+/* Replies (22 Nov 2026): days to go and places left, above the numbers; each reply's number */
+.b2-stats-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.b2-stats-two[data-one] { grid-template-columns: minmax(0, 1fr); }
+.b2-stat[data-k="days"] strong { color: var(--b2-accent-text); }
+.b2-stat[data-k="left"] strong { color: var(--b2-ok); }
+.b2-stat[data-full] strong { color: var(--b2-accent-text); }
+.b2-num {
+  display: inline-grid; place-items: center; flex: none; min-width: 26px; height: 26px; padding: 0 7px; border-radius: 999px;
+  background: var(--b2-s3); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums;
+}
 .b2-thumbimg { width: 80px; height: 80px; object-fit: cover; border-radius: 14px; background: var(--b2-s3); }
 .b2-grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .b2-grid3 button { position: relative; aspect-ratio: 1; padding: 0; border: 0; border-radius: 12px; overflow: hidden; background: var(--b2-s3); cursor: pointer; }
@@ -830,6 +840,8 @@ a.b2-row { color: var(--b2-text); }
 
 @media (min-width: 640px) {
   .b2-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .b2-stats-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .b2-stats-two[data-one] { grid-template-columns: minmax(0, 1fr); }
   .b2-palettes { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .b2-cardgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
