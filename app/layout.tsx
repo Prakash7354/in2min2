@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   description: "Your event online in two minutes, from invitation to memory book, on one link.",
   // The sharing picture for pages that don't set their own (lib/site-share.ts).
   openGraph: DEFAULT_OPEN_GRAPH,
+  // Proves to Bing Webmaster Tools that in2min2.com is the owner's (22 Nov
+  // 2026). Bing checks it again from time to time: never remove it. A public
+  // code, not a secret. (Google is proved by a DNS record in Cloudflare.)
+  verification: { other: { "msvalidate.01": "C754E3FA87842FE699B9A6F6ABEC38FD" } },
 };
 
 export const viewport: Viewport = {
