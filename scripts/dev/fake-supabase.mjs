@@ -30,7 +30,7 @@ const pages = {
       card_invite_body: "With joy in our hearts, we invite you to celebrate our wedding.", venue_name: "The Grand Hall", scale: "celebration", theme: "classic",
       palette: "sindoor", text_style: "calligraphy", border: "golden_roses" }),
     people: [{ role: "star", relation: "The couple", names: "Meenu & Jose", names_local: null }],
-    features: { rsvp: true, photo_wall: true, settings: { music: "wedding_vows", envelope: true, photo_wall: { early: true } } } },
+    features: { rsvp: true, photo_wall: true, settings: { music: "wedding_vows", envelope: true, photo_wall: { early: true }, ...(process.env.SEARCHABLE ? { search: true } : {}) } } },
   "birthday/sita-50": { stage: "pre", event: base({ type: "birthday", slug: "sita-50", title: "Sita’s 50th birthday", card_headline: "Sita’s 50th birthday",
       card_invite_body: "Join us for food, music and dancing.", venue_name: "Riverside Community Hall", scale: "personal", theme: "modern",
       palette: "rani_gold", text_style: "classic", border: "none", photo_style: "polaroid" }),

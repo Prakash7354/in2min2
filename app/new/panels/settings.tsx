@@ -69,6 +69,11 @@ export function SettingsPanel() {
         ))}
         <Toggle icon="lock" label="Private event" line="Only guests with their own personal link can open the page." checked={d.isPrivate}
           onChange={(v) => update((y) => ({ ...y, isPrivate: v }))} />
+        {/* Show on Google (owner, 23 Nov 2026): off unless chosen; never for a private event. */}
+        {!d.isPrivate && (
+          <Toggle icon="globe" label="Show on Google" checked={!!d.searchable} onChange={(v) => update((y) => ({ ...y, searchable: v }))}
+            line="Lets anyone find this page by searching, with its date and place in Google’s event listings. Good for a mela, a tournament or a community day. Leave it off for family events with children’s names or your home address. Guests’ photos are never shown on Google." />
+        )}
       </Section>
 
       {/* How long it stays online, and closing it early (0015). */}

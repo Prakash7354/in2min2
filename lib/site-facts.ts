@@ -30,7 +30,7 @@ export const QUESTIONS = [
   { q: "Can I still use WhatsApp, Viber or text messages?", a: "Yes, that’s how most people share it. Send your link in a WhatsApp, Viber or text message, or in a group chat, and guests tap it to open the invitation. in2min2 even gives you ready-made messages for each step, from the invitation to the reminder and the thank-you. For a personal touch, send each guest their own link." },
   { q: "Can I change things after I’ve sent the link?", a: "Yes, any time. Change the time, the place or the words and press Update. The link stays the same." },
   { q: "How long does my page stay online, and can I close it sooner?", a: "Your page is live from the moment you publish until 90 days after your event, free. Paid plans can keep it for 6 or 12 months. You can close it at any time, without asking: open your event, tap Settings, then Close the page now. You can open it again within 30 days." },
-  { q: "Who can see my event?", a: "Only people you send the link to. For a private event, each guest gets their own link with their name on the envelope." },
+  { q: "Who can see my event?", a: "Only people you send the link to. For a private event, each guest gets their own link with their name on the envelope. For a public event, such as a mela or a tournament, you can also choose Show on Google, so people can find it by searching. Guests’ photos are never shown on Google." },
   { q: "Can I use it for a big community event?", a: "Yes. Make the event page, share the programme, post updates on the day and collect photos. Ticketing, stalls and sponsors are coming soon." },
   { q: "How do I get help?", a: `Email ${CONTACT} and a real person will reply.` },
 ];

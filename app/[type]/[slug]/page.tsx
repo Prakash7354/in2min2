@@ -3,6 +3,7 @@
 // on the day, after) comes from the clock in the database, not from the host.
 // Never listed by search engines: event pages carry people's names.
 
+import { eventJsonLd } from "@/lib/event-schema";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Wordmark } from "@/components/brand/wordmark";
@@ -24,17 +25,22 @@ const token = (sp: Record<string, string | string[] | undefined>) => (typeof sp.
 // phone when they published (or their main photo).
 export async function generateMetadata({ params, searchParams }: PageProps<"/[type]/[slug]">): Promise<Metadata> {
   const { type, slug } = await params;
-  const page = await getPublicEvent(type, slug, token(await searchParams));
+  const g = token(await searchParams);
+  const page = await getPublicEvent(type, slug, g);
   const robots = { index: false, follow: false };
   if (page.kind !== "event") return { title: `${page.kind === "ended" ? page.title : "in2min2"} · in2min2`, robots };
   const d = page.data;
   const when = [d.date && formatDate(d.date), formatTime(d.startTime)].filter(Boolean).join(", ");
   const description = [when, d.venueName].filter(Boolean).join(" · ") || "An invitation made with in2min2";
   const images = page.shareImage ? [{ url: page.shareImage, width: 1200, height: 630, alt: page.title }] : undefined;
+  // Never listed, unless the host of a public event chose "Show on Google"
+  // (owner, 23 Nov 2026); a personal link (?g=) is never listed either.
+  const listed = !!d.searchable && !g;
   return {
     title: `${page.title} · in2min2`,
     description,
-    robots,
+    robots: listed ? { index: true, follow: true } : robots,
+    ...(listed ? { alternates: { canonical: `/${type}/${slug}` } } : {}),
     openGraph: { type: "website", siteName: "in2min2", title: page.title, description, images },
     twitter: { card: images ? "summary_large_image" : "summary", title: page.title, description, images: images?.map((i) => i.url) },
   };
@@ -83,8 +89,11 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
   const photos = d.toggles.photo_wall && (page.view !== "page" || page.photosEarly) ? (
     <PhotoWall type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} sensitive={d.sensitive} live={page.view === "live"} motion={d.motion} compact />
   ) : undefined;
+  // "Show on Google" (owner, 23 Nov 2026): the event's facts for Google's search and events listings.
+  const schema = d.searchable && !g ? eventJsonLd(d, `https://in2min2.com/${type}/${slug}`, page.title) : null;
   return (
     <main className={`${eventFontVariables} min-h-dvh sm:py-8`} style={{ background: p.gradient ? `linear-gradient(${p.soft}e6, ${p.soft}e6), ${p.gradient}` : p.soft }}>
+      {schema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema).replace(/</g, "\\u003c") }} />}
       {d.envelope && page.view !== "after" && <>
         {/* The envelope to tap (opening.tsx), shown once per visit. These hide
             it before the page appears if it was opened already in this tab,

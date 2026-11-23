@@ -106,6 +106,8 @@ export type Draft = {
   envTo?: string;
   // The envelope's colour (catalog ENVELOPE_COLOURS), in feature_toggles.settings.envelope_colour.
   envColour?: string;
+  // Show this page on Google and other search engines (owner, 23 Nov 2026; off unless chosen; never for a private event), in feature_toggles.settings.search.
+  searchable?: boolean;
   // A moving decoration round the photo (catalog PHOTO_RINGS), in
   // feature_toggles.settings.photo_ring; "" is none, chosen.
   photoRing?: string;
@@ -375,6 +377,7 @@ export function toViewData(d: Draft): EventViewData {
     envFrom: (d.envFrom ?? "").trim().slice(0, 60),
     envTo: (d.envTo ?? "").trim().slice(0, 60),
     envColour: d.envColour || null,
+    searchable: !!d.searchable && !d.isPrivate,
     askFood: asksFood(d.askFood, t?.sensitive ?? false),
   };
 }

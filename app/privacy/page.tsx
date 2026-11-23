@@ -19,7 +19,7 @@ export default function Privacy() {
       short={[
         <>We collect as little as we can: your email to sign in, what you type about your event, guests&apos; replies, and the photos guests choose to add.</>,
         <>Your data is stored in London. We never sell it, never show adverts and never track you around the internet.</>,
-        <>Event pages are never listed on Google or other search engines. Photos have their hidden location removed.</>,
+        <>Event pages are not listed on Google or other search engines, unless the organiser of a public event chooses to show it. Guests’ photos never are. Photos have their hidden location removed.</>,
         <>Everything is deleted on a timetable. Guest details and photos go 30 days after an event page closes.</>,
         <>You can see, correct or delete your data at any time. Email {mail}.</>,
       ]}
@@ -106,7 +106,7 @@ export default function Privacy() {
         <li>Sell, rent or swap your data.</li>
         <li>Show adverts, or use advertising or tracking cookies.</li>
         <li>Use face recognition.</li>
-        <li>List event pages or galleries on search engines.</li>
+        <li>List guests’ photos on search engines, or an event page unless its organiser chooses to.</li>
         <li>Use your words or photos to train AI.</li>
         <li>Send you marketing unless you&apos;ve said yes.</li>
       </ul>
@@ -150,7 +150,7 @@ export default function Privacy() {
       <h2 id="children">7. Children</h2>
       <p>
         Accounts are for adults (18 and over). Children can be guests, and can appear in photos with their family&apos;s permission. Event pages are
-        open only to people with the link, never listed on search engines, with no adverts, tracking or location. Organisers of public events must
+        open only to people with the link, not listed on search engines unless the organiser of a public event chooses to, with no adverts, tracking or location. Organisers of public events must
         have parents&apos; permission before showing under-18s in team photos.
       </p>
 
