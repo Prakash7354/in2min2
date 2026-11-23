@@ -28,10 +28,10 @@ function friendly(message: string): string {
     return "Couldn't connect to the sign-in service. Check your signal and try again.";
   }
   if (m.includes("sending")) {
-    return "The email with your code couldn't be sent. In2Min2's own email sender is being set up (see the action plan); until then codes only reach the Supabase team's address.";
+    return "The email with your code couldn't be sent. in2min2's own email sender is being set up (see the action plan); until then codes only reach the Supabase team's address.";
   }
   if (m.includes("not authorized") || m.includes("not allowed")) {
-    return "While In2Min2 is being tested, codes are only sent to its own team's email addresses. This opens to everyone before the pilot.";
+    return "While in2min2 is being tested, codes are only sent to its own team's email addresses. This opens to everyone before the pilot.";
   }
   if (m.includes("rate limit") || m.includes("too many") || m.includes("security purposes")) {
     return "Too many codes asked for just now. Please wait a few minutes and try again.";
@@ -64,7 +64,7 @@ export function SignInDialog({ why, onClose, onDone }: { why: string; onClose: (
               <rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" />
             </svg>
           </span>
-          <h2 id="signin-title" className="font-display text-2xl font-extrabold leading-tight">Sign in to In2Min2</h2>
+          <h2 id="signin-title" className="font-display text-2xl font-extrabold leading-tight">Sign in to in2min2</h2>
           <p className="text-[15px] leading-snug text-white/85">{why}</p>
           <button type="button" onClick={onClose} aria-label="Close"
             className="absolute right-3 top-3 grid size-11 place-items-center rounded-full text-white/80 hover:bg-white/10 hover:text-white">

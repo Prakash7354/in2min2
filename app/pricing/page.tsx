@@ -8,7 +8,7 @@ import Link from "next/link";
 import { ADDRESS, CONTACT, LegalPage, legalMetadata } from "@/components/legal/legal-page";
 import { PLANS, SAME_AGAIN_PERCENT, WELCOME_BACK_PERCENT, formatPence, plan } from "@/lib/catalog";
 
-export const metadata: Metadata = legalMetadata("Prices and fair fees", "In2Min2's prices, launch offers, and the rules for reduced fees.");
+export const metadata: Metadata = legalMetadata("Prices and fair fees", "in2min2's prices, launch offers, and the rules for reduced fees.");
 
 const mail = <a href={`mailto:${CONTACT}`}>{CONTACT}</a>;
 
@@ -21,10 +21,10 @@ export default function Fees() {
     <LegalPage
       current="/pricing"
       title="Prices and fair fees"
-      intro={<p>What In2Min2 costs, the launch offers, and the written rules we follow when someone asks for a reduced fee.</p>}
+      intro={<p>What in2min2 costs, the launch offers, and the written rules we follow when someone asks for a reduced fee.</p>}
       short={[
         <>Everyone pays the same published prices, and the same rules apply to everyone.</>,
-        <><strong>Festive launch: In2Min2 is free until 31 January 2027.</strong></>,
+        <><strong>Festive launch: in2min2 is free until 31 January 2027.</strong></>,
         <>Memorials and funerals are free, with no need to ask. Charities and armed forces welfare events can ask for half price.</>,
         <>Public events are free to set up. There&apos;s a small fee only on online sales, and nothing on cash or free tickets.</>,
         <>Ask about a reduced fee at {mail}.</>,
@@ -55,7 +55,7 @@ export default function Fees() {
         <li>{bookingFee} per online order, not per ticket. It&apos;s shown before paying, and added to the buyer&apos;s total unless the organiser chooses to pay it.</li>
         <li>Nothing on cash or card sales on the day, and nothing at all on free events.</li>
         <li>Stripe&apos;s own card cost is included in the fee.</li>
-        <li>Online payments go through Stripe: about 1.5% + 20p on standard UK cards, more on premium and overseas cards. Card details go straight to Stripe; In2Min2 never sees them.</li>
+        <li>Online payments go through Stripe: about 1.5% + 20p on standard UK cards, more on premium and overseas cards. Card details go straight to Stripe; in2min2 never sees them.</li>
       </ul>
 
       <h2 id="offers">2. Launch offers: for everyone, no need to ask</h2>
@@ -66,7 +66,7 @@ export default function Fees() {
         </li>
         <li><strong>LAUNCH50:</strong> the first 50 families get a free Keepsake (12 months). One per account; not for public events. Type the code when you publish.</li>
         <li>
-          <strong>Organisers:</strong> no In2Min2 fee on your first event&apos;s online sales, if you sign up by 31 March 2027. Stripe&apos;s card cost
+          <strong>Organisers:</strong> no in2min2 fee on your first event&apos;s online sales, if you sign up by 31 March 2027. Stripe&apos;s card cost
           (about 1.5% + 20p) still applies.
         </li>
       </ul>
@@ -85,7 +85,7 @@ export default function Fees() {
         <Rule level="Full" who="Everyone else" how="The normal prices and launch offers." />
       </div>
       <ul>
-        <li><strong>Half</strong> means half of In2Min2&apos;s price or fee: for example, Season {formatPence(plan("season").pricePence / 2)}, or {community.bookingFeeBps / 200}% + {community.bookingFeePence / 2}p per online order.</li>
+        <li><strong>Half</strong> means half of in2min2&apos;s price or fee: for example, Season {formatPence(plan("season").pricePence / 2)}, or {community.bookingFeeBps / 200}% + {community.bookingFeePence / 2}p per online order.</li>
         <li>On Half and Free, Stripe&apos;s card cost (about 1.5% + 20p) still applies to online sales. It&apos;s Stripe&apos;s charge, not ours, and we can&apos;t waive it.</li>
       </ul>
 

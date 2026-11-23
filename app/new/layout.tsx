@@ -17,7 +17,7 @@ import { eventFontVariables } from "@/components/event/fonts";
 import "./new.css";
 
 export const metadata: Metadata = {
-  title: "In2Min2 · Make your invitation in two minutes",
+  title: "in2min2 · Make your invitation in two minutes",
   description: "Beautiful invitations and event pages in two minutes, free to start: replies, photos and comments on the day, and a thank-you page after.",
 };
 

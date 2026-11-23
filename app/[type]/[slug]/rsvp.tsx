@@ -208,7 +208,7 @@ function CalendarLinks({ cal }: { cal: Cal }) {
   const google = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(cal.title)}&dates=${stamp(start)}/${stamp(end)}`
     + `&location=${encodeURIComponent(cal.venue)}&details=${encodeURIComponent(here)}`;
   const esc = (t: string) => t.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
-  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//In2Min2//EN", "BEGIN:VEVENT", `UID:${stamp(start)}-${esc(cal.title).slice(0, 40)}@in2min2.com`,
+  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//in2min2//EN", "BEGIN:VEVENT", `UID:${stamp(start)}-${esc(cal.title).slice(0, 40)}@in2min2.com`,
     `DTSTAMP:${stamp(new Date().toISOString())}`, `DTSTART:${stamp(start)}`, `DTEND:${stamp(end)}`, `SUMMARY:${esc(cal.title)}`,
     `LOCATION:${esc(cal.venue)}`, `URL:${here}`, `DESCRIPTION:${esc(here)}`, "END:VEVENT", "END:VCALENDAR"].join("\r\n");
   return (

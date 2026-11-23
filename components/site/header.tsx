@@ -7,10 +7,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 const LINKS = [
-  { href: "#how", label: "How it works" },
-  { href: "#events", label: "Events" },
-  { href: "#prices", label: "Prices" },
-  { href: "#questions", label: "Questions" },
+  { href: "/#how", label: "How it works" },
+  { href: "/#events", label: "Events" },
+  { href: "/#prices", label: "Prices" },
+  { href: "/#questions", label: "Questions" },
 ];
 
 export function SiteHeader() {

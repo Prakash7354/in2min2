@@ -3,7 +3,7 @@
 // event (applyType + the ready-made words), so what visitors see is exactly
 // what the builder makes. Photos are the site's own (public/site).
 
-import { suggestedWords } from "@/app/new/kinds";
+import { DISHES, kindOf, planFor, suggestedWords } from "@/app/new/kinds";
 import type { EventCopy } from "@/lib/ai/copy";
 import type { FoodNeed } from "@/lib/catalog";
 import { applyType, newDraft, toViewData, type Draft } from "@/lib/draft";
@@ -17,15 +17,19 @@ function saturdayAhead(weeks: number, from = new Date()): string {
 }
 
 // Any words given replace the ready-made ones, box by box.
-function sample(kind: string, o: Partial<Omit<Draft, "copy">> & { copy?: Partial<EventCopy> }, weeks = 3): EventViewData {
+type Choices = Partial<Omit<Draft, "copy">> & { copy?: Partial<EventCopy> };
+function draftOf(kind: string, o: Choices, weeks = 3): Draft {
   const { copy, ...rest } = o;
   const base = applyType(newDraft(), kind);
   const d: Draft = { ...base, date: saturdayAhead(weeks), startTime: "18:00", venueName: "Community hall", wordsBy: "suggested", ...rest };
-  return toViewData({ ...d, copy: { ...suggestedWords(d), ...copy } });
+  return { ...d, copy: { ...suggestedWords(d), ...copy } };
 }
 
 export function heroSample(): EventViewData {
-  return sample("birthday", {
+  return toViewData(heroDraft());
+}
+function heroDraft(): Draft {
+  return draftOf("birthday", {
     // 23, as on the balloons in the photo (owner, 21 Nov 2026).
     title: "Sita’s 23rd birthday", stars: { relation: "The birthday star", names: "Sita" }, milestone: "23rd",
     venueName: "Riverside Hall", cover: "/site/birthday-s.jpg", coverFit: "fill",
@@ -36,7 +40,10 @@ export function heroSample(): EventViewData {
 // card with a traditional gold border and three photos in a stack, as
 // weddings matter most (owner, 21 Nov 2026; not the arch, used too often).
 export function wordsSample(): EventViewData {
-  return sample("wedding", {
+  return toViewData(weddingDraft());
+}
+function weddingDraft(): Draft {
+  return draftOf("wedding", {
     title: "Meenu & Jose", stars: { relation: "The couple", names: "Meenu & Jose" }, venueName: "The Grand Hall", startTime: "11:00",
     cover: "/site/petals-s.jpg", moreCovers: ["/site/w-heart-s.jpg", "/site/w-ceremony-s.jpg"], photoStyle: "polaroid",
     palette: "sindoor", backdrop: "luminous_red", border: "ornate_flowers",
@@ -55,22 +62,56 @@ export function wordsSample(): EventViewData {
 // it suits any memorial (arch), Lhosar and the reunion panoramic (hero).
 const MEMORIAL_WORDS = "Family and friends are warmly invited to remember a much-loved life, share memories and support one another.";
 export function kindSample(kind: string): EventViewData {
+  return toViewData(kindDraft(kind));
+}
+// Every kind's sample (the website's page for each kind, lib/kind-pages.ts):
+// the owner's photos where there is one, else the site's stock photos, else
+// the monogram on the event's colours.
+export function kindDraft(kind: string): Draft {
+  const community = { organiserName: "Our community group", organiserType: "community_group" as const, forProfit: false };
   switch (kind) {
-    case "pasni": return sample("pasni", { stars: { relation: "", names: "Jeena" }, title: "Jeena’s Pasni", startTime: "10:00",
+    case "birthday": return heroDraft();
+    case "wedding": return weddingDraft();
+    case "pasni": return draftOf("pasni", { stars: { relation: "", names: "Jeena" }, title: "Jeena’s Pasni", startTime: "10:00",
       cover: "/site/jeena-s.jpg", palette: "sindoor", backdrop: "red_gold_frame", border: "none" });
-    case "lhosar": return sample("lhosar", { title: "Tamu Lhosar 2026", organiserName: "Gurung community", organiserType: "community_group", forProfit: false, startTime: "11:00",
+    case "lhosar": return draftOf("lhosar", { title: "Tamu Lhosar 2026", organiserName: "Gurung community", organiserType: "community_group", forProfit: false, startTime: "11:00",
       cover: "/site/lhosar-s.jpg" }, 5);
-    case "memorial": return sample("memorial", { stars: { relation: "", names: "" }, title: "Remembering with love", venueName: "Community hall", startTime: "14:00",
+    // No "days to go" on a memorial (the builder's own default follows with the next database file).
+    case "memorial": return draftOf("memorial", { stars: { relation: "", names: "" }, title: "Remembering with love", venueName: "Community hall", startTime: "14:00",
+      toggles: { ...applyType(newDraft(), "memorial").toggles, countdown: false },
       cover: "/site/memorial-s.jpg", palette: "emerald_gold", border: "fine_line",
       copy: { card_headline: "Remembering with love", card_invite_body: MEMORIAL_WORDS, landing_page_story: MEMORIAL_WORDS, guest_note_box: "",
         post_event_thank_you: "Thank you for being with us, and for your kind words and support." } });
-    case "reunion": return sample("reunion", { title: "25th Year Reunion 2027", venueName: "The Regimental Club", startTime: "12:00",
+    case "reunion": return draftOf("reunion", { title: "25th Year Reunion 2027", venueName: "The Regimental Club", startTime: "12:00",
       cover: "/site/reunion-s.jpg", photoStyle: "hero", palette: "royal_blue_gold", backdrop: "glow_royal", border: "khukuri",
       copy: { card_invite_body: "25 years on, it’s time to get together again: old friends, good food and plenty of stories." } }, 8);
-    case "anniversary": return sample("anniversary", { stars: { relation: "", names: "Hari & Sita" }, title: "Hari & Sita’s anniversary", startTime: "19:00",
+    case "anniversary": return draftOf("anniversary", { stars: { relation: "", names: "Hari & Sita" }, title: "Hari & Sita’s anniversary", startTime: "19:00",
       cover: "/site/harisita-s.jpg", photoStyle: "heart", palette: "lali_gurans", backdrop: "rose_frame", border: "none" });
-    default: return sample("bratabandha", { stars: { relation: "", names: "Rohan" }, title: "Rohan’s Bratabandha", startTime: "08:00" });
+    case "bratabandha": return draftOf("bratabandha", { stars: { relation: "", names: "Rohan" }, title: "Rohan’s Bratabandha", startTime: "08:00" });
+    case "ceremony": return draftOf("ceremony", { title: "Naming ceremony for our daughter", startTime: "10:00" });
+    case "engagement": return draftOf("engagement", { stars: { relation: "", names: "Asha & Rohit" }, title: "Asha & Rohit’s engagement", startTime: "17:00",
+      cover: "/site/w-heart-s.jpg", photoStyle: "heart" }, 5);
+    case "party": return draftOf("party", { title: "House-warming party", cover: "/site/party-s.jpg", startTime: "19:00" });
+    case "christmas": return draftOf("christmas", { title: "Christmas lunch", cover: "/site/christmas-s.jpg", startTime: "13:00" }, 2);
+    case "new-year": return draftOf("new-year", { title: "New Year’s Eve party", cover: "/site/newyear-s.jpg", startTime: "19:30" }, 4);
+    case "corporate": return draftOf("corporate", { title: "Annual dinner", cover: "/site/office-s.jpg", venueName: "The Grand Hotel", startTime: "19:00" });
+    case "mela": return draftOf("mela", { ...community, title: "Summer Mela", cover: "/site/festival-s.jpg", venueName: "Town park", startTime: "11:00" }, 8);
+    case "sport": return draftOf("sport", { ...community, title: "Football tournament", cover: "/site/sport-s.jpg", venueName: "Sports ground", startTime: "09:00" }, 8);
+    case "charity": return draftOf("charity", { ...community, title: "Charity fun day", cover: "/site/marquee-s.jpg", venueName: "Village green", startTime: "11:00" }, 6);
+    case "community": return draftOf("community", { ...community, title: "Cultural evening", cover: "/site/show-concert-s.jpg", startTime: "18:00" }, 5);
+    default: return draftOf(kind, {});
   }
+}
+
+// The whole page for a kind (what guests see after the envelope): its sample
+// with the day plan ready and a few popular dishes on the menu.
+export function fullSample(kind: string): EventViewData {
+  const d = kindDraft(kind);
+  const dishes = DISHES[kindOf(kind).dishes];
+  const menu = [dishes.find(([c]) => c === "Starter"), ...dishes.filter(([c]) => c === "Main").slice(0, 2), dishes.find(([c]) => c === "Dessert")]
+    .filter((x): x is [string, string] => !!x).map(([course, dish]) => ({ course, dish }));
+  const functions = planFor(d).map((f, i) => ({ ...f, id: `s${i}`, menu: f.meal && kind !== "memorial" ? menu : [] }));
+  return toViewData({ ...d, functions });
 }
 
 // The top of the website (owner, 22 Nov 2026): six invitations on a phone,
@@ -82,7 +123,7 @@ export function kindSample(kind: string): EventViewData {
 export type DashReply = { name: string; status: "yes" | "maybe" | "no"; size?: number; note: string; ago: string };
 export type Dash = { title: string; when: string; coming: number; maybe: number; cant: number; fourth: [string, number]; bell: number;
   food: [FoodNeed, number][]; replies: DashReply[] };
-export type HeroShow = { key: string; label: string; card: EventViewData; dash: Dash };
+export type HeroShow = { key: string; label: string; card: EventViewData; full: EventViewData; dash: Dash };
 
 function whenOf(d: EventViewData): string {
   const day = d.date ? new Date(`${d.date}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }) : "";
@@ -91,7 +132,7 @@ function whenOf(d: EventViewData): string {
 
 export function heroShows(): HeroShow[] {
   const show = (key: string, label: string, card: EventViewData, dash: Omit<Dash, "title" | "when">): HeroShow =>
-    ({ key, label, card, dash: { title: card.title, when: whenOf(card), ...dash } });
+    ({ key, label, card, full: fullSample(key), dash: { title: card.title, when: whenOf(card), ...dash } });
   return [
     show("birthday", "Birthday", heroSample(), { coming: 41, maybe: 6, cant: 4, fourth: ["Not replied", 18], bell: 3, food: [["vegetarian", 9], ["vegan", 2], ["nut_allergy", 1]], replies: [
       { name: "Asha", status: "yes", size: 3, note: "Can’t wait! Two of us are vegetarian 🌱", ago: "2 min ago" },

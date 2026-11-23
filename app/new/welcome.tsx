@@ -1,7 +1,7 @@
 "use client";
 
 // Welcome, the first time someone opens the builder (owner, 19 Nov 2026):
-// what In2Min2 does in one line, a button that plays what guests get (the
+// what in2min2 does in one line, a button that plays what guests get (the
 // envelope with their name, then the invitation, with music), and the three
 // steps, each lit up in turn with a hand tapping it. Shown until they start.
 
@@ -32,7 +32,7 @@ export function Welcome() {
   return (
     <>
       <header className="b2-top b2-appbar">
-        <span className="b2-brand">In2Min2</span>
+        <span className="b2-brand">in2min2</span>
         <span style={{ display: "flex", gap: 8 }}><ThemeButton /><AccountButton /></span>
       </header>
       <section className="b2-screen b2-welcome">

@@ -133,7 +133,7 @@ export default function Builder() {
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b border-line bg-cream/95 backdrop-blur" style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}>
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4">
-          <Link href="/" className="text-[22px]" aria-label="In2Min2 home">
+          <Link href="/" className="text-[22px]" aria-label="in2min2 home">
             <Wordmark />
           </Link>
           <span className="flex min-w-0 items-center gap-1 sm:gap-3">

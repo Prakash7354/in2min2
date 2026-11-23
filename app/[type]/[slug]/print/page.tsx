@@ -17,7 +17,7 @@ import { wallPath } from "@/lib/photos";
 import { getWall, keyParam, siteOrigin } from "@/lib/public-wall";
 import { PrintButton } from "./print-button";
 
-export const metadata: Metadata = { title: "Table cards · In2Min2", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Table cards · in2min2", robots: { index: false, follow: false } };
 
 export default async function PrintPage({ params, searchParams }: PageProps<"/[type]/[slug]/print">) {
   const { type, slug } = await params;
@@ -27,7 +27,7 @@ export default async function PrintPage({ params, searchParams }: PageProps<"/[t
   const w = await getWall(type, slug, key);
   if (w === null) notFound();
   if (w === undefined) return <WallMessage title="Photos aren't open yet" line="Please try again a little later." />;
-  if (w.private) return <WallMessage title="This is a private event" line="Please open the table cards from your In2Min2 builder." />;
+  if (w.private) return <WallMessage title="This is a private event" line="Please open the table cards from your in2min2 builder." />;
   if (!w.event) return <WallMessage title={w.title ?? "This event"} line="This event has ended." />;
 
   const ev = w.event;
@@ -48,7 +48,7 @@ export default async function PrintPage({ params, searchParams }: PageProps<"/[t
         <strong>1</strong> Open your phone’s camera &nbsp;·&nbsp; <strong>2</strong> Point it at the code<br />
         <strong>3</strong> Tap the link, then <strong>{ev.sensitive ? "Share a photo or memory" : "Add your photos"}</strong>
       </p>
-      <p className="print-small">No app needed{typed ? ` · or go to ${typed}` : ""} · Made with In2Min2</p>
+      <p className="print-small">No app needed{typed ? ` · or go to ${typed}` : ""} · Made with in2min2</p>
     </div>
   );
 

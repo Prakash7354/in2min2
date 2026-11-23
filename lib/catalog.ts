@@ -213,7 +213,7 @@ export function quote(
   return { plan: p.key, people: n, basePence: p.pricePence, packs, packsPence, subtotalPence, discount: subtotalPence ? best : null, totalPence };
 }
 
-// In2Min2's booking fee on one online order (community events), in pence.
+// in2min2's booking fee on one online order (community events), in pence.
 export function bookingFee(orderPence: number, chargePercent: 0 | 50 | 100 = 100, p: Plan = plan("community")): number {
   if (orderPence <= 0) return 0;
   const full = (orderPence * p.bookingFeeBps) / 10000 + p.bookingFeePence;
@@ -260,7 +260,7 @@ export function togglesFor(typeKey: string | null): Record<ToggleKey, boolean> {
 
 // ─────────────────────────────── The look ───────────────────────────────
 
-export type PaletteFamily = "In2Min2" | "Seasonal" | "Formal" | "Nepali and South Asian" | "Modern" | "Festival colours" | "Party" | "Sport" | "Calm";
+export type PaletteFamily = "in2min2" | "Seasonal" | "Formal" | "Nepali and South Asian" | "Modern" | "Festival colours" | "Party" | "Sport" | "Calm";
 
 export type Palette = {
   key: string;
@@ -276,10 +276,10 @@ export type Palette = {
 // Every pair used for text passes WCAG AA (4.5:1); checked by npm run test:db.
 // Grouped like a high-street shop: formal first, party last.
 export const PALETTES: Palette[] = [
-  // In2Min2's own three (owner's choice, 13 Nov 2026)
-  { key: "marigold_indigo", tag: "popular", name: "Marigold & Indigo", family: "In2Min2", bg: "#FFF9EF", main: "#2E2A6E", onMain: "#FFFFFF", accent: "#F4A522", onAccent: "#1C1A3A", soft: "#F7E6C4", ink: "#1C1A3A", muted: "#5C5878" },
-  { key: "lali_gurans", name: "Lali Gurans", family: "In2Min2", bg: "#FFF8F4", main: "#C0163D", onMain: "#FFFFFF", accent: "#F2B134", onAccent: "#15203B", soft: "#F3DCD6", ink: "#15203B", muted: "#5E5A66" },
-  { key: "himalayan_dusk", name: "Himalayan Dusk", family: "In2Min2", bg: "#F6F7FA", main: "#4A2545", onMain: "#FFFFFF", accent: "#F7A072", onAccent: "#4A2545", soft: "#CFE6E4", ink: "#22172A", muted: "#5D5866" },
+  // in2min2's own three (owner's choice, 13 Nov 2026)
+  { key: "marigold_indigo", tag: "popular", name: "Marigold & Indigo", family: "in2min2", bg: "#FFF9EF", main: "#2E2A6E", onMain: "#FFFFFF", accent: "#F4A522", onAccent: "#1C1A3A", soft: "#F7E6C4", ink: "#1C1A3A", muted: "#5C5878" },
+  { key: "lali_gurans", name: "Lali Gurans", family: "in2min2", bg: "#FFF8F4", main: "#C0163D", onMain: "#FFFFFF", accent: "#F2B134", onAccent: "#15203B", soft: "#F3DCD6", ink: "#15203B", muted: "#5E5A66" },
+  { key: "himalayan_dusk", name: "Himalayan Dusk", family: "in2min2", bg: "#F6F7FA", main: "#4A2545", onMain: "#FFFFFF", accent: "#F7A072", onAccent: "#4A2545", soft: "#CFE6E4", ink: "#22172A", muted: "#5D5866" },
   // Seasonal: Christmas, New Year and Lhosar (14 Nov 2026)
   { key: "christmas", tag: "new", name: "Christmas Red & Green", family: "Seasonal", bg: "#FFF8F0", main: "#A3172B", onMain: "#FFFFFF", accent: "#1F6B45", onAccent: "#FFFFFF", soft: "#F3E1D6", ink: "#2A1215", muted: "#6A4F52",
     party: ["#A3172B", "#1F6B45", "#D4AF37", "#C8102E", "#2E8B57", "#E9DCC9"] },
@@ -348,7 +348,7 @@ export const PALETTES: Palette[] = [
   { key: "lily", name: "Lily White & Sage", family: "Calm", bg: "#FFFFFF", main: "#47604F", onMain: "#FFFFFF", accent: "#B9C7B5", onAccent: "#1D2A21", soft: "#EEF2EC", ink: "#1D2A21", muted: "#56645A" },
 ];
 
-export const PALETTE_FAMILIES: PaletteFamily[] = ["In2Min2", "Seasonal", "Formal", "Nepali and South Asian", "Modern", "Festival colours", "Party", "Sport", "Calm"];
+export const PALETTE_FAMILIES: PaletteFamily[] = ["in2min2", "Seasonal", "Formal", "Nepali and South Asian", "Modern", "Festival colours", "Party", "Sport", "Calm"];
 
 function luminance(hex: string): number {
   const n = hex.replace("#", "");
@@ -500,7 +500,7 @@ export const PHOTO_STYLES: { key: PhotoStyle; name: string; line: string }[] = [
 ];
 
 // Borders and decorations, drawn in code (components/event/borders.tsx) so
-// In2Min2 owns them outright and they take the event's colours.
+// in2min2 owns them outright and they take the event's colours.
 export type BorderKey =
   | "none" | "fine_line" | "ornate" | "art_deco" | "laurel" | "floral" | "vines" | "marigold" | "dhaka" | "mandala"
   | "balloons" | "confetti" | "bunting" | "stars" | "sunburst" | "rainbow" | "stripes" | "pitch"

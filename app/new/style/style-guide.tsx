@@ -26,13 +26,13 @@ export default function StyleGuide() {
     <MotionConfig reducedMotion="user">
       <div className="b2-shell" data-wide="">
         <header className="b2-top" style={{ gridTemplateColumns: "1fr auto" }}>
-          <span className="b2-kicker">In2Min2 · New look</span>
+          <span className="b2-kicker">in2min2 · New look</span>
           <ThemeButton />
         </header>
         <main className="b2-screen" style={{ gap: 30, paddingBottom: 80 }}>
           <section style={{ display: "grid", gap: 14 }}>
             <h1 className="b2-h1">Bold, simple, one thing per screen</h1>
-            <p className="b2-lead">The new look for In2Min2, to judge on your phone. Tap the sun or moon at the top to switch between dark and light.</p>
+            <p className="b2-lead">The new look for in2min2, to judge on your phone. Tap the sun or moon at the top to switch between dark and light.</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               <Link href="/new" className="b2-btn b2-primary">Try the Quick start</Link>
               <Link href="/new/home" className="b2-btn b2-secondary">See an event Home</Link>
@@ -112,7 +112,7 @@ export default function StyleGuide() {
             </div>
           </Part>
 
-          <Part title="Icons" line="A picture beside every heading, drawn for In2Min2.">
+          <Part title="Icons" line="A picture beside every heading, drawn for in2min2.">
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(64px, 1fr))", gap: 10 }}>
               {ICON_NAMES.map((n) => (
                 <div key={n} title={n} className="b2-card" style={{ padding: 12, display: "grid", placeItems: "center" }}><Icon name={n} className="size-7" /></div>

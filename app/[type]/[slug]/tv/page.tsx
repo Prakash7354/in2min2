@@ -19,7 +19,7 @@ import { getWall, keyParam, siteOrigin } from "@/lib/public-wall";
 export async function generateMetadata({ params, searchParams }: PageProps<"/[type]/[slug]/tv">): Promise<Metadata> {
   const { type, slug } = await params;
   const w = await getWall(type, slug, keyParam(await searchParams));
-  return { title: `${w?.event ? `${w.event.headline || w.event.title} · ` : ""}Photo slideshow · In2Min2`, robots: { index: false, follow: false } };
+  return { title: `${w?.event ? `${w.event.headline || w.event.title} · ` : ""}Photo slideshow · in2min2`, robots: { index: false, follow: false } };
 }
 
 export default async function TvPage({ params, searchParams }: PageProps<"/[type]/[slug]/tv">) {
@@ -29,7 +29,7 @@ export default async function TvPage({ params, searchParams }: PageProps<"/[type
   const w = await getWall(type, slug, key);
   if (w === null) notFound();
   if (w === undefined) return <WallMessage title="Photos aren't open yet" line="Please try again a little later." />;
-  if (w.private) return <WallMessage title="This is a private event" line="Please open the slideshow from the link in your In2Min2 builder." />;
+  if (w.private) return <WallMessage title="This is a private event" line="Please open the slideshow from the link in your in2min2 builder." />;
   if (!w.event) return <WallMessage title={w.title ?? "This event"} line="This event has ended." />;
 
   const ev = w.event;

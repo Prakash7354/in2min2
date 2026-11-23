@@ -12,11 +12,11 @@ import type { EventStageView } from "@/lib/event-view";
 import { useB2 } from "./context";
 import { Chips } from "./ui";
 
-const VIEWS: { key: EventStageView; label: string }[] = [{ key: "card", label: "Invitation" }, { key: "page", label: "Event page" }];
+const VIEWS: { key: EventStageView; label: string }[] = [{ key: "page", label: "What guests see" }, { key: "card", label: "Card only" }];
 
 export function SidePreview() {
   const { d, now, open } = useB2();
-  const [view, setView] = useState<EventStageView>("card");
+  const [view, setView] = useState<EventStageView>("page");
   return (
     <aside className="b2-side" aria-label="Live preview">
       <div className="b2-sidehead">

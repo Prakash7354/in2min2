@@ -12,16 +12,16 @@ import { PanelShell } from "../panels";
 import { Chips } from "../ui";
 
 const VIEWS: { key: EventStageView; label: string }[] = [
-  { key: "card", label: "Invitation" }, { key: "page", label: "Event page" }, { key: "live", label: "On the day" }, { key: "after", label: "After" },
+  { key: "page", label: "What guests see" }, { key: "card", label: "Card only" }, { key: "live", label: "On the day" }, { key: "after", label: "After" },
 ];
 
 // Which stage to open on next time (Share › "Preview the thank-you page" opens "after").
-let startAt: EventStageView = "card";
+let startAt: EventStageView = "page";   // the whole page first (owner, 23 Nov 2026)
 export function previewAt(v: EventStageView) { startAt = v; }
 
 export function PreviewPanel() {
   const { d, now } = useB2();
-  const [view, setView] = useState<EventStageView>(() => { const v = startAt; startAt = "card"; return v; });
+  const [view, setView] = useState<EventStageView>(() => { const v = startAt; startAt = "page"; return v; });
   return (
     <PanelShell icon="eye" title="As guests see it" line="Exactly what guests get, at each stage.">
       <div className="b2-tabs">

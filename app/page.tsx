@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import EventView, { eventVars } from "@/components/event/event-view";
-import { LegalLinks } from "@/components/legal/legal-page";
 import { GuestDemoButton } from "@/components/site/guest-demo";
 import { HeroDevices } from "@/components/site/hero-devices";
+import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader } from "@/components/site/header";
 import { WheelDemo } from "@/components/site/wheel-demo";
+import { WhySection } from "@/components/site/why";
+import { KIND_PAGES } from "@/lib/kind-pages";
 import { TapHand } from "@/components/tap-hand";
 import { formatPence, PLANS } from "@/lib/catalog";
 import { heroSample, heroShows, kindSample, wordsSample } from "@/lib/site-samples";
@@ -13,7 +15,7 @@ import { QUESTIONS, siteJsonLd } from "@/lib/site-facts";
 import { SHARE_DESCRIPTION, SHARE_IMAGE, SHARE_TITLE } from "@/lib/site-share";
 import "./site.css";
 
-// in2min2.com: the website (owner, 21 Nov 2026). What In2Min2 does, shown
+// in2min2.com: the website (owner, 21 Nov 2026). What in2min2 does, shown
 // with real examples: the photos are the owner's free stock photos
 // (public/site, docs/reference/site-images.md), and the invitations and the
 // photo wheel are the same code guests see. Simple British English, written
@@ -36,7 +38,7 @@ const FAMILY = [
   { type: "christmas", title: "Christmas", line: "A family lunch or a big get-together.", photo: "christmas" },
   { type: "new-year", title: "New Year’s Eve", line: "Count down to midnight together, wherever everyone is.", photo: "newyear" },
   { type: "party", title: "Parties", line: "House-warming, graduation, or just because.", photo: "party" },
-  { type: "memorial", title: "Memorials", line: "A funeral, prayers or a day of remembrance. Gentle, respectful, and always free for up to a year.", card: "memorial" },
+  { type: "memorial", title: "Memorials", line: "A funeral, prayers or a day of remembrance. Gentle, respectful, and always free.", card: "memorial" },
 ] as const;
 const COMMUNITY = [
   { type: "lhosar", title: "Lhosar", line: "Tamu, Sonam and Gyalpo Lhosar, for the whole community.", card: "lhosar" },
@@ -191,8 +193,14 @@ export default function Home() {
             <div className="s-cards s-cards-5">
               {COMMUNITY.map((e) => <EventCard key={e.type} e={e} now={now} />)}
             </div>
+            <nav className="s-related" aria-label="Also made for">
+              <span>Also made for:</span>
+              {KIND_PAGES.filter((k) => ![...FAMILY, ...COMMUNITY].some((e) => e.type === k.type)).map((k) => <Link key={k.type} href={`/${k.type}`}>{k.name}</Link>)}
+            </nav>
           </div>
         </section>
+
+        <WhySection />
 
         {/* ── Words ── */}
         <section className="s-section">
@@ -339,46 +347,21 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="s-footer">
-        <div className="s-wrap s-footgrid">
-          <div className="s-footbrand">
-            {/* eslint-disable-next-line @next/next/no-img-element -- the logo */}
-            <img src="/brand/logo.png" alt="in2min2: Create, Invite, Celebrate" width={640} height={330} />
-            <p>Beautiful invitations and event pages, from the invitation to the thank-you.</p>
-          </div>
-          <nav aria-label="Make an event">
-            <p className="s-foothead">Make an event</p>
-            <Link href="/new">Start free</Link>
-            <a href="#how">How it works</a>
-            <a href="#events">Events</a>
-            <a href="#prices">Prices</a>
-          </nav>
-          <nav aria-label="Help">
-            <p className="s-foothead">Help</p>
-            <a href="#questions">Questions</a>
-            <Link href="/new/guide">Step-by-step guide</Link>
-            <a href="mailto:hello@in2min2.com">hello@in2min2.com</a>
-          </nav>
-        </div>
-        <div className="s-wrap s-footlow">
-          <p>© 2026 in2min2 · A GoChuchuro product · Made in the UK</p>
-          <LegalLinks className="s-legal" />
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
 
 function EventCard({ e, now }: { e: { type: string; title: string; line: string; photo?: string; card?: string }; now: number }) {
   return (
-    <Link href={`/new?type=${e.type}`} className="s-card">
+    <Link href={`/${e.type}`} className="s-card">
       <span className="s-cardpic" data-kind={e.card ? "card" : "photo"}>
         {e.photo ? <Photo name={e.photo} alt="" /> : <span className="s-cardinv"><EventView data={kindSample(e.card!)} view="card" now={now} thumb /></span>}
       </span>
       <span className="s-cardtext">
         <b>{e.title}</b>
         <span>{e.line}</span>
-        <span className="s-cardgo">Start one →</span>
+        <span className="s-cardgo">See more →</span>
       </span>
     </Link>
   );

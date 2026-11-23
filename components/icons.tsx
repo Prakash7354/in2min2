@@ -1,4 +1,4 @@
-// In2Min2's own line icons, drawn here (no icon library): one simple style,
+// in2min2's own line icons, drawn here (no icon library): one simple style,
 // 24 × 24, rounded ends, in the colour of the text around them. Used beside
 // headings in the builder and on event pages, so words come with a picture.
 

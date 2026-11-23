@@ -1,6 +1,6 @@
-// In2Min2's own fonts (website, builder, dashboard), self-hosted by next/font
+// in2min2's own fonts (website, builder, dashboard), self-hosted by next/font
 // so no request goes to Google from anyone's phone:
-//   Bricolage Grotesque for headings and the In2Min2 wordmark,
+//   Bricolage Grotesque for headings and the in2min2 wordmark,
 //   Mukta for text (Latin and Devanagari in one family).
 // The event pages' fonts are in components/event/fonts.ts.
 

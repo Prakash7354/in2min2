@@ -73,7 +73,7 @@ function eventRow(d: Draft, slug: string) {
 function explain(e: { code?: string; message?: string }): PublishResult {
   const m = e.message ?? "";
   // A column the live database doesn't have yet: a migration still to run.
-  if (e.code === "PGRST204" || e.code === "42703") return { ok: false, message: "In2Min2's database needs its latest update before this can be published. (For Claude Code: a migration hasn't been run.)" };
+  if (e.code === "PGRST204" || e.code === "42703") return { ok: false, message: "in2min2's database needs its latest update before this can be published. (For Claude Code: a migration hasn't been run.)" };
   if (e.code === "23505") return { ok: false, step: 6, message: "That web address is already taken. Change it under “Web address” and publish again." };
   if (m.includes("community_organiser_named")) return { ok: false, step: 1, message: "A public event needs the organiser's name, what kind of organiser, and whether anyone profits." };
   if (e.code === "23514") return { ok: false, message: "Something is too long or not filled in properly. Check the words and numbers, then try again." };

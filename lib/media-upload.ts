@@ -138,7 +138,7 @@ export async function drawShareImage(v: EventViewData): Promise<Blob | null> {
   }
   ctx.fillStyle = p.muted;
   ctx.font = `600 24px ${body}`;
-  ctx.fillText("Made with In2Min2", X, H - 44);
+  ctx.fillText("Made with in2min2", X, H - 44);
 
   return new Promise((ok) => canvas.toBlob((b) => ok(b), "image/jpeg", 0.86));
 }

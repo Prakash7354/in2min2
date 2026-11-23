@@ -8,7 +8,8 @@
 import { useState } from "react";
 import { Icon } from "@/components/icons";
 import type { Draft } from "@/lib/draft";
-import { formatTime, type MenuItem } from "@/lib/event-view";
+import { EVENT_TYPES } from "@/lib/catalog";
+import { asksFood, formatTime, type MenuItem } from "@/lib/event-view";
 import { COURSES, DEFAULT_RUN, MEAL_WORDS, RUN_SUGGESTIONS, nextTime } from "@/lib/running-order";
 import { useB2 } from "../context";
 import { DISHES, kindOf, planFor } from "../kinds";
@@ -65,6 +66,16 @@ export function PlanPanel() {
             <PlanItem key={f.id} f={f} d={d} open={openId === f.id} onToggle={() => setOpenId(openId === f.id ? null : f.id)}
               edit={(patch) => edit(f.id, patch)} remove={() => update((x) => ({ ...x, functions: x.functions.filter((g) => g.id !== f.id) }))} />
           ))}
+        </Section>
+      )}
+
+      {/* Food needs beside the meals (owner, 23 Nov 2026): on unless switched
+          off, e.g. for a bring-your-own event. The same switch as in Settings. */}
+      {d.toggles.rsvp && (
+        <Section icon="bowlfood" title="Food needs" line="When guests reply, they can tick vegetarian, vegan, halal, gluten-free, nut allergy or dairy-free.">
+          <Toggle icon="bowlfood" label="Ask guests about food needs" line="Switch it off if you aren’t serving food, or it’s bring your own."
+            checked={asksFood(d.askFood, EVENT_TYPES.find((t) => t.key === d.eventType)?.sensitive ?? false)}
+            onChange={(v) => update((y) => ({ ...y, askFood: v }))} />
         </Section>
       )}
 

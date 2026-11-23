@@ -9,7 +9,7 @@ import { WallFrame, WallMessage } from "@/components/photos/wall-frame";
 import type { WallEvent } from "@/lib/photos";
 import { rpc } from "@/lib/supabase/rest";
 
-export const metadata: Metadata = { title: "Add your photos · In2Min2", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Add your photos · in2min2", robots: { index: false, follow: false } };
 
 type PgWall = {
   active: boolean; stage: string; on: boolean; limit: number | null; used: number; mine: number;

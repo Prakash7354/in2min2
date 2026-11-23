@@ -6,6 +6,7 @@
 
 import { DRAFT } from "@/components/legal/legal-page";
 import { FESTIVE_UNTIL, PLANS, formatPence, plan } from "@/lib/catalog";
+import { KIND_PAGES } from "@/lib/kind-pages";
 
 export const SITE = "https://in2min2.com";
 const CONTACT = "hello@in2min2.com";
@@ -103,6 +104,10 @@ ${prices.join("\n")}
 ## Privacy
 
 Event pages are never listed by search engines. Replies and food needs are seen only by the hosts. Replies and photos are stored in the UK and Europe. No adverts and no tracking cookies.
+
+## A page for each kind of event
+
+${KIND_PAGES.map((k) => `- [${k.h1}](${SITE}/${k.type}): ${k.description}`).join("\n")}
 
 ## Links
 

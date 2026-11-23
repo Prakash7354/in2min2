@@ -6,7 +6,7 @@
 // (Authentication › Attack Protection › Captcha, with Turnstile's secret key).
 //
 // The site key is public (it sits in the page): Cloudflare › Turnstile ›
-// "In2Min2 sign-in", made by the owner on 19 Nov 2026 for in2min2.com,
+// "in2min2 sign-in", made by the owner on 19 Nov 2026 for in2min2.com,
 // www.in2min2.com and in2min2.pksgrg.workers.dev. The secret key goes only
 // into Supabase. On this Mac (localhost) Cloudflare's always-pass test key is
 // used instead, so test sign-ins need a stand-in database, not the real one.
@@ -92,4 +92,4 @@ export function useCaptcha() {
 }
 
 // When Supabase turns a sign-in away because the check didn't pass.
-export const CAPTCHA_FAILED = "The “are you a person?” check didn’t finish. Please try again. If it keeps happening, try another browser or turn off ad-blocking for In2Min2.";
+export const CAPTCHA_FAILED = "The “are you a person?” check didn’t finish. Please try again. If it keeps happening, try another browser or turn off ad-blocking for in2min2.";

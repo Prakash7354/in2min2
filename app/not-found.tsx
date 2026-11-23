@@ -8,7 +8,7 @@ export default function NotFound() {
         <p className="text-2xl"><Wordmark /></p>
         <h1 className="font-display text-3xl font-extrabold">We couldn&apos;t find that page</h1>
         <p className="text-muted">Check the link, or ask the host to send it again.</p>
-        <Link href="/" className="font-semibold text-brand underline underline-offset-4">Go to In2Min2</Link>
+        <Link href="/" className="font-semibold text-brand underline underline-offset-4">Go to in2min2</Link>
       </div>
     </main>
   );

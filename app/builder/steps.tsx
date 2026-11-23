@@ -470,7 +470,7 @@ export function StepWords({ d, update, session, askSignIn }: StepProps) {
       }));
       setW({ busy: false, error: null, done: true, trimmed: res.headers.get("X-Copy-Trimmed")?.split(",").filter(Boolean) ?? [] });
     } catch {
-      setW({ busy: false, trimmed: [], done: false, error: "Couldn't reach In2Min2. Check your signal and try again." });
+      setW({ busy: false, trimmed: [], done: false, error: "Couldn't reach in2min2. Check your signal and try again." });
     }
   }
   const languagesText = second ? `${main.name} and ${second.name}` : main.name;
@@ -715,7 +715,7 @@ export function StepLook({ d, update, now }: StepProps) {
       <Group icon="palette" title="Colours" line="Every set is checked so the words stay easy to read.">
         {PALETTE_FAMILIES.map((family) => (
           <div key={family} className="grid gap-2">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-muted">{family === "In2Min2" ? "In2Min2 colours" : family}</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-muted">{family === "in2min2" ? "in2min2 colours" : family}</h3>
             <div role="radiogroup" aria-label={`${family} colours`} className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {PALETTES.filter((p) => p.family === family).map((p) => (
                 <Tile key={p.key} tag={p.tag} on={d.palette === p.key} onClick={() => update(set("palette", p.key))} label={p.name}>

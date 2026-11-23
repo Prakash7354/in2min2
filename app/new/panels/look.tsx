@@ -219,7 +219,7 @@ function Colours() {
         <div className="b2-palettes" role="radiogroup" aria-label="Suggested colours">{picks.map(swatch)}</div>
       ) : PALETTE_FAMILIES.map((family) => (
         <div key={family} style={{ display: "grid", gap: 8 }}>
-          <p className="b2-kicker">{family === "In2Min2" ? "In2Min2 colours" : family}</p>
+          <p className="b2-kicker">{family === "in2min2" ? "in2min2 colours" : family}</p>
           <div className="b2-palettes" role="radiogroup" aria-label={`${family} colours`}>{PALETTES.filter((p) => p.family === family).map((p) => swatch(p.key))}</div>
         </div>
       ))}

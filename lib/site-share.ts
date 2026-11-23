@@ -1,6 +1,6 @@
 // What WhatsApp, Viber and Facebook show when someone shares in2min2.com
 // (owner, 21 Nov 2026): the picture with the owner's banner, a title and a
-// line that says what In2Min2 does and invites people in.
+// line that says what in2min2 does and invites people in.
 //
 // The picture is a plain file in public/share (made from
 // scripts/art/share-image.html), not app/opengraph-image.jpg: Next.js sends

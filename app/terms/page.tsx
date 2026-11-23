@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ADDRESS, CONTACT, LegalPage, OWNER, legalMetadata } from "@/components/legal/legal-page";
 
-export const metadata: Metadata = legalMetadata("Terms", "The rules for using In2Min2: accounts, event pages, payments, refunds and public events.");
+export const metadata: Metadata = legalMetadata("Terms", "The rules for using in2min2: accounts, event pages, payments, refunds and public events.");
 
 const mail = <a href={`mailto:${CONTACT}`}>{CONTACT}</a>;
 
@@ -16,9 +16,9 @@ export default function Terms() {
     <LegalPage
       current="/terms"
       title="Terms"
-      intro={<p>The agreement between you and In2Min2. Guests only need section 6, the rules for everyone.</p>}
+      intro={<p>The agreement between you and in2min2. Guests only need section 6, the rules for everyone.</p>}
       short={[
-        <>In2Min2 makes event pages: the invitation, the day itself and the memory book, on one link.</>,
+        <>in2min2 makes event pages: the invitation, the day itself and the memory book, on one link.</>,
         <>You need to be 18 or over to make an account. Guests don&apos;t need one.</>,
         <>Your words and photos stay yours. You&apos;re responsible for what you publish, and for having permission for photos of other people, especially children.</>,
         <>The AI writes suggestions. Check every word before you publish.</>,
@@ -29,7 +29,7 @@ export default function Terms() {
     >
       <h2 id="us">1. Who we are</h2>
       <p>
-        In2Min2 (in2min2.com) is a service of GoChuchuro, run by {OWNER}, a sole trader in England.
+        in2min2 (in2min2.com) is a service of GoChuchuro, run by {OWNER}, a sole trader in England.
         Address: {ADDRESS}. Email: {mail}.
       </p>
       <p>
@@ -73,7 +73,7 @@ export default function Terms() {
       <h3>We will</h3>
       <ul>
         <li>use guests&apos; details only to run your event, as you set it up, and never for anything of our own;</li>
-        <li>keep them confidential, and make sure anyone working on In2Min2 does too;</li>
+        <li>keep them confidential, and make sure anyone working on in2min2 does too;</li>
         <li>keep them secure, as our <Link href="/privacy#safety">privacy notice</Link> describes;</li>
         <li>use only the companies listed in our <Link href="/privacy#helpers">privacy notice</Link>, and tell you before adding a new one, so you can object;</li>
         <li>help you answer guests who ask to see, correct or delete their details;</li>
@@ -89,7 +89,7 @@ export default function Terms() {
       </ul>
 
       <h2 id="rules">6. Rules for everyone</h2>
-      <p>Hosts, organisers and guests must not use In2Min2 to:</p>
+      <p>Hosts, organisers and guests must not use in2min2 to:</p>
       <ul>
         <li>break the law, or help anyone else to;</li>
         <li>post anything hateful, threatening, harassing or sexual, or anything that puts a child at risk;</li>
@@ -97,7 +97,7 @@ export default function Terms() {
         <li>pretend to be someone else;</li>
         <li>claim a free or reduced fee you aren&apos;t entitled to, for example by calling an event a memorial when it isn&apos;t;</li>
         <li>post other people&apos;s photos, music or writing without permission;</li>
-        <li>send spam, or try to break, overload or get round the security of In2Min2.</li>
+        <li>send spam, or try to break, overload or get round the security of in2min2.</li>
       </ul>
       <p>
         If you see a page that breaks these rules, tell us at {mail}. We can remove anything that breaks them, charge the normal price where
@@ -118,7 +118,7 @@ export default function Terms() {
       <ul>
         <li>Ask within 14 days of paying, and we refund you in full.</li>
         <li>If your event has already happened by then, we refund the part of your plan you haven&apos;t used yet.</li>
-        <li>If In2Min2 lets you down on the day (for example, your page doesn&apos;t work), we refund what you paid for that event.</li>
+        <li>If in2min2 lets you down on the day (for example, your page doesn&apos;t work), we refund what you paid for that event.</li>
         <li>None of this affects your legal rights as a consumer.</li>
       </ul>
 
@@ -136,7 +136,7 @@ export default function Terms() {
         <li><strong>If the organiser cancels the event,</strong> buyers must get all their money back, including our booking fee, which we return.</li>
         <li>
           <strong>Safety is the organiser&apos;s responsibility,</strong> with the venue: licences, insurance, safe numbers, food hygiene, first aid
-          and permissions. In2Min2 keeps accurate records and checklists, but it doesn&apos;t certify that any event is safe.
+          and permissions. in2min2 keeps accurate records and checklists, but it doesn&apos;t certify that any event is safe.
         </li>
         <li>
           <strong>Honest details.</strong> The organiser&apos;s name, kind, profit answer and contact are shown on the page. A false answer breaks
@@ -146,19 +146,19 @@ export default function Terms() {
 
       <h2 id="service">10. Our service</h2>
       <ul>
-        <li>We work hard to keep In2Min2 running and your data safe, but we can&apos;t promise it will never be interrupted.</li>
-        <li>We improve In2Min2 all the time. We&apos;ll tell you before we take away anything you&apos;ve paid for.</li>
-        <li>If we ever close In2Min2, we&apos;ll give at least 60 days&apos; notice, time to download your photos, and a refund for paid time not used.</li>
+        <li>We work hard to keep in2min2 running and your data safe, but we can&apos;t promise it will never be interrupted.</li>
+        <li>We improve in2min2 all the time. We&apos;ll tell you before we take away anything you&apos;ve paid for.</li>
+        <li>If we ever close in2min2, we&apos;ll give at least 60 days&apos; notice, time to download your photos, and a refund for paid time not used.</li>
       </ul>
 
       <h2 id="liability">11. If something goes wrong</h2>
       <ul>
         <li>
-          <strong>If you use In2Min2 for yourself or your family:</strong> we&apos;re responsible for loss you suffer that was foreseeable and
+          <strong>If you use in2min2 for yourself or your family:</strong> we&apos;re responsible for loss you suffer that was foreseeable and
           caused by us breaking these terms or not taking reasonable care. We&apos;re not responsible for business losses.
         </li>
         <li>
-          <strong>If you use In2Min2 for a business, club, charity or other organisation:</strong> our total responsibility is limited to the
+          <strong>If you use in2min2 for a business, club, charity or other organisation:</strong> our total responsibility is limited to the
           fees you paid us in the 12 months before the problem, or £100, whichever is more. We&apos;re not responsible for lost profits or
           indirect losses.
         </li>

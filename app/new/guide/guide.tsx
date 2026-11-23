@@ -1,6 +1,6 @@
 "use client";
 
-// How In2Min2 works (in2min2.com/new/guide; owner, 16 Nov 2026: "demo pages
+// How in2min2 works (in2min2.com/new/guide; owner, 16 Nov 2026: "demo pages
 // for people to get an idea from: how to create an event page, edit and
 // refine, send the invite, where the replies arrive, the day with comments
 // and the wheel, and the thank-you"). Six short steps, each with a real,
@@ -75,7 +75,7 @@ export default function Guide() {
     <MotionConfig reducedMotion="user">
       <div className="b2-shell">
         <header className="b2-top b2-appbar">
-          <Link href="/new" className="b2-brand" style={{ color: "inherit", textDecoration: "none" }}>In2Min2</Link>
+          <Link href="/new" className="b2-brand" style={{ color: "inherit", textDecoration: "none" }}>in2min2</Link>
           <ThemeButton />
         </header>
         <main className="b2-screen" style={{ gap: 26, paddingBottom: 60 }}>

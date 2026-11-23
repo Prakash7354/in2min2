@@ -1,5 +1,5 @@
 // Borders and decorations for the invitation card and the top of the event
-// page, drawn in code: In2Min2 owns them outright, they stay sharp at any
+// page, drawn in code: in2min2 owns them outright, they stay sharp at any
 // size, and they take the event's colours (CSS variables set by EventView:
 // --ev-main, --ev-accent, --ev-leaf, --ev-c1 … --ev-c6).
 //

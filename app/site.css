@@ -365,7 +365,7 @@
 .s-footlow { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--s-line); color: var(--s-muted); font-size: 14px; }
 .s-footlow p { margin: 0; }
 .s-legal { display: flex; flex-wrap: wrap; gap: 14px; }
-@media (min-width: 900px) { .s-footgrid { grid-template-columns: 2fr 1fr 1fr; } }
+@media (min-width: 900px) { .s-footgrid { grid-template-columns: 1.4fr 1fr 1.6fr; } }
 
 /* "See what your guests get": the envelope, then the page */
 .s-demo { position: fixed; inset: 0; z-index: 80; overflow-y: auto; background: #0f2a4f; overscroll-behavior: contain; }
@@ -384,3 +384,42 @@
   .s-mini-ok { opacity: 1; }
   .s-card, .s-cardpic img { transition: none; }
 }
+
+/* ── The page for each kind of event (owner, 23 Nov 2026; app/[type]/page.tsx) ── */
+.s-kindtop { padding-top: 40px; }
+.s-h1-kind { font-size: clamp(36px, 8.5vw, 58px); }
+.s-crumbs { margin: 0 0 14px; font-size: 15px; color: var(--s-muted); }
+.s-crumbs a { color: var(--s-teal-deep); font-weight: 700; }
+.s-fullphone { display: grid; justify-items: center; }
+.s-fullphone .s-phone { width: min(100%, 360px); }
+.s-fullphone .s-phonescreen { height: min(660px, 78vh); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.s-kpoints { display: grid; gap: 14px; margin: 28px 0 0; padding: 0; list-style: none; }
+.s-kpoints li { display: grid; gap: 6px; padding: 20px; border-radius: 20px; background: var(--s-card); box-shadow: var(--s-shadow); border-top: 4px solid var(--s-teal); }
+.s-kpoints li:nth-child(2) { border-top-color: var(--s-orange); }
+.s-kpoints li:nth-child(3) { border-top-color: var(--s-gold); }
+.s-kpoints li:nth-child(4) { border-top-color: var(--s-navy-2); }
+.s-kpoints b { font-family: var(--font-display); font-size: 20px; line-height: 1.2; color: var(--s-navy); }
+.s-kpoints span { color: var(--s-muted); font-size: 17px; }
+.s-related { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; font-size: 16px; color: var(--s-muted); }
+.s-related a { padding: 8px 16px; border-radius: 999px; background: var(--s-card); box-shadow: var(--s-shadow); color: var(--s-navy); font-weight: 700; text-decoration: none; }
+.s-related a:hover { text-decoration: underline; }
+@media (min-width: 700px) { .s-kpoints { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1000px) { .s-kpoints { grid-template-columns: repeat(4, 1fr); } }
+
+/* Why not just a WhatsApp message? (components/site/why.tsx) */
+.s-whygrid { display: grid; gap: 12px; margin: 28px 0 0; padding: 0; list-style: none; }
+.s-whygrid li { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; row-gap: 4px; padding: 18px; border-radius: 20px; background: var(--s-card); box-shadow: var(--s-shadow); }
+.s-whygrid li > span:first-child { grid-row: span 2; font-size: 30px; line-height: 1; }
+.s-whygrid b { font-family: var(--font-display); font-size: 19px; line-height: 1.2; color: var(--s-navy); }
+.s-whygrid li > span:last-child { color: var(--s-muted); font-size: 16.5px; }
+@media (min-width: 700px) { .s-whygrid { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1100px) { .s-whygrid { grid-template-columns: repeat(4, 1fr); } .s-whygrid li { grid-template-columns: 1fr; } .s-whygrid li > span:first-child { grid-row: auto; } }
+
+/* The footer's list of event pages */
+.s-footkinds { grid-template-columns: 1fr 1fr; column-gap: 18px; }
+.s-footkinds .s-foothead { grid-column: 1 / -1; }
+
+/* Under the hero's phone: open the invitation showing, as a guest gets it */
+.s-devopen { display: block; margin: 14px auto 0; padding: 8px 14px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: #fff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+.s-devopen:hover { background: rgba(255, 255, 255, 0.2); }
+.s-devopen span { color: var(--s-gold); }

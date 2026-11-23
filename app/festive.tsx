@@ -25,7 +25,7 @@ export function FestiveLaunch() {
       <div className="grid gap-2">
         <p className="text-sm font-bold uppercase tracking-[0.14em] text-marigold">Festive launch</p>
         <h2 id="festive-title" className="font-display text-3xl font-extrabold leading-tight sm:text-4xl">
-          In2Min2 is free until 31 January 2027
+          in2min2 is free until 31 January 2027
         </h2>
         <p className="max-w-2xl text-lg text-white/85">
           Every switch, every design, no card needed. Start with a festive design and change anything.

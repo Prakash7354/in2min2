@@ -146,7 +146,7 @@ function CreditSection() {
   const label = d.credit?.label ?? made?.label ?? (d.scale === "community" ? "Organised by" : t?.sensitive ? "With love from" : "Hosted by");
   const name = d.credit ? d.credit.name : made?.name ?? "";
   return (
-    <Section icon="star" title="At the bottom of the page" line="Who's behind the event, so guests can trust it. “Made with In2Min2” sits small on the right.">
+    <Section icon="star" title="At the bottom of the page" line="Who's behind the event, so guests can trust it. “Made with in2min2” sits small on the right.">
       <Chips label="What it says" small value={d.credit === null ? "none" : label}
         options={[...CREDIT_LABELS.map((l) => ({ key: l as string, label: l })), { key: "none", label: "Don’t show" }]}
         onChange={(v) => update((x) => ({ ...x, credit: !v || v === "none" ? null : { label: v, name } }))} />

@@ -256,14 +256,15 @@ function PreviewBody() {
   const b = useB2();
   const fromSheet = useFromSheet();
   const { d, now } = b;
-  // The day plan and the switches show on the page, not the card.
-  const [view, setView] = useState<"card" | "page">(() => (b.nav.panel === "plan" || b.nav.panel === "settings" ? "page" : "card"));
+  // The whole page first, as guests get it after the envelope (owner, 23 Nov
+  // 2026: the details matter as much as the card); the card alone is one tap.
+  const [view, setView] = useState<"card" | "page">("page");
   const changes = CHANGES.filter((c) => c.panel !== b.nav.panel)
     .map((c) => (c.panel === "people" && d.scale === "community" ? { ...c, label: "Organiser" } : c));
   return (
     <div style={{ display: "grid", gap: 14 }}>
       <Chips label="Which to see" small value={view} onChange={(v) => v && setView(v)}
-        options={[{ key: "card", label: "Invitation", icon: "envelope" }, { key: "page", label: "Event page", icon: "layout" }]} />
+        options={[{ key: "page", label: "What guests see", icon: "layout" }, { key: "card", label: "Card only", icon: "envelope" }]} />
       <div className="b2-previewframe"><EventView data={toViewData(d)} view={view} now={now} /></div>
       <p className="b2-small">
         {!d.eventId ? "Only you can see this until you publish." : unpublishedChanges(d) ? "Your guests still see the last version you published, until you update it." : "This is what your guests see now."}
@@ -294,7 +295,7 @@ export function updates(b: B2): Update[] {
   const { d, session } = b;
   const items: Update[] = [];
   const missing = missingForPublish(d);
-  if (!b.saved) items.push({ tone: "todo", icon: "shield", title: "Not saved on this phone", line: "This browser isn't letting In2Min2 save (private browsing, or the phone is full). Sign in and publish to keep your event safe." });
+  if (!b.saved) items.push({ tone: "todo", icon: "shield", title: "Not saved on this phone", line: "This browser isn't letting in2min2 save (private browsing, or the phone is full). Sign in and publish to keep your event safe." });
   if (!session) items.push({ tone: "todo", icon: "lock", title: "Sign in to keep your event safe", line: "Until then it's kept only on this phone.", action: { label: "Sign in", run: () => b.askSignIn("Sign in to keep your event safe in your account.") } });
   if (unpublishedChanges(d)) items.push({ tone: "todo", icon: "pen", title: "Changes not live yet", line: "Guests still see the last version you published.", action: { label: "Update my page", panel: "publish" } });
   if (!d.eventId && missing.length) items.push({ tone: "todo", icon: "list", title: `${missing.length} thing${missing.length > 1 ? "s" : ""} still needed to publish`, line: missing.map((m) => m.text).join(", "), action: { label: "Show me", panel: MISSING_PANEL[missing[0].step] ?? "publish" } });

@@ -1,4 +1,4 @@
-// The frame for In2Min2's own documents: the privacy notice, the terms, and
+// The frame for in2min2's own documents: the privacy notice, the terms, and
 // prices and fair fees (owner's request, 14 Nov 2026: easy to read and use,
 // with working links between them). Each starts with "The short version".
 //
@@ -26,7 +26,7 @@ export const ICO_NUMBER = "";
 export function LegalLinks({ className }: { className?: string }) {
   if (DRAFT) return null;
   return (
-    <nav aria-label="In2Min2 documents" className={className}>
+    <nav aria-label="in2min2 documents" className={className}>
       {PAGES.map((p) => <Link key={p.href} href={p.href} className="underline underline-offset-2">{p.label}</Link>)}
     </nav>
   );
@@ -45,8 +45,8 @@ export function LegalPage({ current, title, intro, short, children }: {
     <div className="flex min-h-dvh flex-col">
       <header className="border-b border-line bg-card">
         <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-          <Link href="/" aria-label="In2Min2 home"><Wordmark className="text-[24px]" /></Link>
-          <nav aria-label="In2Min2 documents" className="flex flex-wrap gap-1.5">
+          <Link href="/" aria-label="in2min2 home"><Wordmark className="text-[24px]" /></Link>
+          <nav aria-label="in2min2 documents" className="flex flex-wrap gap-1.5">
             {PAGES.map((p) => (
               <Link key={p.href} href={p.href} aria-current={p.href === current ? "page" : undefined}
                 className="rounded-full px-3 py-1.5 text-sm font-bold text-brand hover:bg-wash aria-[current=page]:bg-brand aria-[current=page]:text-white">
@@ -84,7 +84,7 @@ export function LegalPage({ current, title, intro, short, children }: {
 
       <footer className="border-t border-line">
         <div className="mx-auto flex w-full max-w-3xl flex-wrap justify-between gap-2 px-4 py-6 text-sm text-muted">
-          <span>In2Min2 is a GoChuchuro product</span>
+          <span>in2min2 is a GoChuchuro product</span>
           <a href={`mailto:${CONTACT}`} className="font-semibold text-brand underline underline-offset-4">{CONTACT}</a>
         </div>
       </footer>
@@ -129,7 +129,7 @@ export function Items({ items }: { items: { what: string; lines: [string, ReactN
 }
 
 export const legalMetadata = (title: string, description: string) => ({
-  title: `${title} · In2Min2`,
+  title: `${title} · in2min2`,
   description,
   robots: DRAFT ? { index: false, follow: false } : undefined,
 });

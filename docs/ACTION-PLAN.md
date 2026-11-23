@@ -43,6 +43,9 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
   - **Your decision:** may AI companies *learn* from the website (not guests' pages)? It's on for now (recommended): future AI models then know in2min2 by name. Say "no AI learning" and Claude Code switches it off.
   - **See where visitors come from (5 minutes, free, no cookies):** Cloudflare dashboard › **Analytics & Logs** › **Web Analytics** › **Add a site** › choose **in2min2.com** › **Done**. A day later, look under **Referers** for chatgpt.com, perplexity.ai, copilot.microsoft.com and gemini.google.com. Tell Claude Code when it's on, so the privacy page can say so. If it shows you a code snippet instead, send that to Claude Code (it isn't a secret).
 
+- [x] **A page for each kind of event (23 Nov):** in2min2.com/pasni, /wedding, /lhosar, /memorial and 14 more, each with the invitation, the full page guests get, "Why not just a WhatsApp message?" and questions. **Please check the cultural wording** (Pasni ages, what Bratabandha is, the Lhosar months), and tell Claude Code anything to change.
+- [ ] **Your decision: how long pages stay online (23 Nov).** See Claude Code's message of 23 Nov. Once you decide, one database file brings in the rules, the year for memorials, and no countdown on memorials.
+
 ## Launch checklist (20 Nov 2026): what's left before sharing with real families
 
 **Ready (Claude Code, 20 Nov):**

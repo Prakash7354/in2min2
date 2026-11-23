@@ -26,16 +26,16 @@ export async function generateMetadata({ params, searchParams }: PageProps<"/[ty
   const { type, slug } = await params;
   const page = await getPublicEvent(type, slug, token(await searchParams));
   const robots = { index: false, follow: false };
-  if (page.kind !== "event") return { title: `${page.kind === "ended" ? page.title : "In2Min2"} · In2Min2`, robots };
+  if (page.kind !== "event") return { title: `${page.kind === "ended" ? page.title : "in2min2"} · in2min2`, robots };
   const d = page.data;
   const when = [d.date && formatDate(d.date), formatTime(d.startTime)].filter(Boolean).join(", ");
-  const description = [when, d.venueName].filter(Boolean).join(" · ") || "An invitation made with In2Min2";
+  const description = [when, d.venueName].filter(Boolean).join(" · ") || "An invitation made with in2min2";
   const images = page.shareImage ? [{ url: page.shareImage, width: 1200, height: 630, alt: page.title }] : undefined;
   return {
-    title: `${page.title} · In2Min2`,
+    title: `${page.title} · in2min2`,
     description,
     robots,
-    openGraph: { type: "website", siteName: "In2Min2", title: page.title, description, images },
+    openGraph: { type: "website", siteName: "in2min2", title: page.title, description, images },
     twitter: { card: images ? "summary_large_image" : "summary", title: page.title, description, images: images?.map((i) => i.url) },
   };
 }

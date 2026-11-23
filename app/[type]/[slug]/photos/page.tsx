@@ -14,7 +14,7 @@ export async function generateMetadata({ params, searchParams }: PageProps<"/[ty
   const { type, slug } = await params;
   const w = await getWall(type, slug, keyParam(await searchParams));
   const title = w?.event ? `Photos · ${w.event.headline || w.event.title}` : "Photos";
-  return { title: `${title} · In2Min2`, robots: { index: false, follow: false } };
+  return { title: `${title} · in2min2`, robots: { index: false, follow: false } };
 }
 
 export default async function PhotosPage({ params, searchParams }: PageProps<"/[type]/[slug]/photos">) {

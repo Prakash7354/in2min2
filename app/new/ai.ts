@@ -100,7 +100,7 @@ export async function aiWrite(d: Draft, one?: { key: CopyKey; adjust: Adjustment
     return { ok: true, copy: pick(json), translation: json.translation, trimmed: !!res.headers.get("X-Copy-Trimmed") };
   } catch {
     if (why) return { ok: false, message: why === "quiet" ? "The AI went quiet, so we stopped waiting. Please try again." : "The AI took too long this time. Please try again, or write it yourself." };
-    return { ok: false, message: "Couldn't reach In2Min2. Check your signal and try again." };
+    return { ok: false, message: "Couldn't reach in2min2. Check your signal and try again." };
   } finally {
     window.clearTimeout(quiet);
     window.clearTimeout(longest);

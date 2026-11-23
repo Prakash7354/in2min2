@@ -8,6 +8,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import EventView from "@/components/event/event-view";
+import { GuestDemoButton } from "@/components/site/guest-demo";
 import { FOOD_NEEDS } from "@/lib/catalog";
 import { daysUntil } from "@/lib/event-view";
 import type { Dash, HeroShow } from "@/lib/site-samples";
@@ -49,6 +50,15 @@ export function HeroDevices({ shows, now }: { shows: HeroShow[]; now: number }) 
             <span>{s.label}</span>
           </button>
         ))}
+      </div>
+      {/* The whole invitation as a guest gets it: the envelope, then the card
+          and the page with the time, place, day plan, menu and reply (owner,
+          23 Nov 2026: show the details too). */}
+      {/* Opening it holds the examples still, so the invitation doesn't change underneath. */}
+      <div onClickCapture={() => setHeld(true)}>
+        <GuestDemoButton data={shows[at].full} title={shows[at].full.copy.card_headline || shows[at].full.title} className="s-devopen">
+          <span aria-hidden="true">▶</span> Open this invitation as a guest
+        </GuestDemoButton>
       </div>
     </div>
   );

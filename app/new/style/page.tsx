@@ -3,7 +3,7 @@
 import type { Metadata } from "next";
 import { StyleGuide } from "../loader";
 
-export const metadata: Metadata = { title: "In2Min2 · Style", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "in2min2 · Style", robots: { index: false, follow: false } };
 
 export default function NewStylePage() {
   return <StyleGuide />;

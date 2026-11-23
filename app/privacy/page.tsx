@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ADDRESS, CONTACT, Items, LegalPage, OWNER, legalMetadata, ICO_NUMBER } from "@/components/legal/legal-page";
 
-export const metadata: Metadata = legalMetadata("Privacy notice", "What In2Min2 collects, why, where it's kept, and for how long.");
+export const metadata: Metadata = legalMetadata("Privacy notice", "What in2min2 collects, why, where it's kept, and for how long.");
 
 const mail = <a href={`mailto:${CONTACT}`}>{CONTACT}</a>;
 
@@ -15,7 +15,7 @@ export default function Privacy() {
     <LegalPage
       current="/privacy"
       title="Privacy notice"
-      intro={<p>This explains what In2Min2 collects about hosts, organisers and guests, why, where it&apos;s kept and for how long, and your rights.</p>}
+      intro={<p>This explains what in2min2 collects about hosts, organisers and guests, why, where it&apos;s kept and for how long, and your rights.</p>}
       short={[
         <>We collect as little as we can: your email to sign in, what you type about your event, guests&apos; replies, and the photos guests choose to add.</>,
         <>Your data is stored in London. We never sell it, never show adverts and never track you around the internet.</>,
@@ -26,7 +26,7 @@ export default function Privacy() {
     >
       <h2 id="who">1. Who we are</h2>
       <p>
-        In2Min2 is a service of GoChuchuro, run by {OWNER} as a sole trader in the UK. Under data protection law we
+        in2min2 is a service of GoChuchuro, run by {OWNER} as a sole trader in the UK. Under data protection law we
         are the &ldquo;controller&rdquo; of the information in this notice, except where section 4 says the host is responsible.
       </p>
       <ul>
@@ -95,7 +95,7 @@ export default function Privacy() {
       <Items items={[
         { what: "Technical records", lines: [
           ["What", "Your internet address, browser type and the pages opened, in our hosting provider's logs."],
-          ["Why", "To keep In2Min2 working and to stop attacks and misuse."],
+          ["Why", "To keep in2min2 working and to stop attacks and misuse."],
           ["Legal reason", "Legitimate interests: keeping the service safe."],
           ["How long", "A few days."],
         ] },
@@ -123,7 +123,7 @@ export default function Privacy() {
       <p>To change or remove something, ask the host, or write to us at {mail} and we&apos;ll help.</p>
 
       <h2 id="helpers">5. Who helps us</h2>
-      <p>These companies run parts of In2Min2 for us. Each may use your data only to do that job, under a contract.</p>
+      <p>These companies run parts of in2min2 for us. Each may use your data only to do that job, under a contract.</p>
       <Items items={[
         { what: "Supabase", lines: [["Does", "Our database, sign-in, and each event's main photo and preview picture"], ["Where", "London, UK"]] },
         { what: "Cloudflare", lines: [["Does", "Hosting, security, and guests' photos"], ["Where", "Worldwide network; stored files in Europe"]] },
@@ -156,7 +156,7 @@ export default function Privacy() {
 
       <h2 id="cookies">8. Cookies and storage on your device</h2>
       <p>
-        We use no advertising or tracking cookies, so there&apos;s no cookie banner. Your browser stores only what In2Min2 needs to work: that
+        We use no advertising or tracking cookies, so there&apos;s no cookie banner. Your browser stores only what in2min2 needs to work: that
         you&apos;re signed in, the event you&apos;re building, and, if you reply to an invitation, your reply, so you can change it later. If you add
         photos, it also keeps a random number that counts how many your phone has added, and any photos still waiting to send.
       </p>
@@ -179,7 +179,7 @@ export default function Privacy() {
       <h2 id="safety">10. How we keep it safe</h2>
       <ul>
         <li>Everything is encrypted on its way to us and where it&apos;s stored.</li>
-        <li>Each host sees only their own events. These rules are tested automatically before every change to In2Min2.</li>
+        <li>Each host sees only their own events. These rules are tested automatically before every change to in2min2.</li>
         <li>Guests&apos; personal links can&apos;t be guessed.</li>
         <li>We never hold card numbers.</li>
       </ul>

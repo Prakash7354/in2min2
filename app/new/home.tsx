@@ -46,7 +46,7 @@ export function Home() {
   return (
     <>
       <header className="b2-top b2-appbar">
-        <span className="b2-brand">In2Min2</span>
+        <span className="b2-brand">in2min2</span>
         <TopButtons />
       </header>
       <main className="b2-screen" style={{ gap: 18 }}>
