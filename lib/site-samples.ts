@@ -76,9 +76,7 @@ export function kindDraft(kind: string): Draft {
       cover: "/site/jeena-s.jpg", palette: "sindoor", backdrop: "red_gold_frame", border: "none" });
     case "lhosar": return draftOf("lhosar", { title: "Tamu Lhosar 2026", organiserName: "Gurung community", organiserType: "community_group", forProfit: false, startTime: "11:00",
       cover: "/site/lhosar-s.jpg" }, 5);
-    // No "days to go" on a memorial (the builder's own default follows with the next database file).
     case "memorial": return draftOf("memorial", { stars: { relation: "", names: "" }, title: "Remembering with love", venueName: "Community hall", startTime: "14:00",
-      toggles: { ...applyType(newDraft(), "memorial").toggles, countdown: false },
       cover: "/site/memorial-s.jpg", palette: "emerald_gold", border: "fine_line",
       copy: { card_headline: "Remembering with love", card_invite_body: MEMORIAL_WORDS, landing_page_story: MEMORIAL_WORDS, guest_note_box: "",
         post_event_thank_you: "Thank you for being with us, and for your kind words and support." } });

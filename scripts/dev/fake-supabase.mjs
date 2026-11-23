@@ -64,7 +64,9 @@ const ev = (o) => ({
   owner_id: HOST, timezone: "Europe/London", ends_at: null, venue_address: null, parking: "unknown", parking_note: null, expected_guests: null, venue_capacity: null,
   organiser_name: null, organiser_type: null, for_profit: null, charity_number: null, organiser_contact: null, languages: ["en"], landing_page_story: "",
   guest_note_box: "", post_event_thank_you: "", copy_translations: {}, cover_fit: "fill", motion: true, effect: "none", is_private: false, plan: "popup",
-  cover_image_key: null, share_image_key: null, hero_keys: [], hero_motion: "zoomin", status: "published", ...o,
+  cover_image_key: null, share_image_key: null, hero_keys: [], hero_motion: "zoomin", status: "published", closed_at: null, ...o,
+  // When the page ends (0001/0013/0015): 90 days after the event here.
+  hosting_until: new Date(Date.parse(o.ends_at ?? o.starts_at) + 90 * 86_400_000).toISOString(),
 });
 const mine = [
   ev({ id: "e1000000-0000-4000-8000-000000000001", event_type: "wedding", scale: "celebration", slug: "meenu-jose", short_code: "w3dd1", title: "Meenu & Jose",
@@ -138,7 +140,8 @@ http.createServer((req, res) => {
     if (u.pathname === "/rest/v1/rpc/event_usage") {
       const sum = (f) => guests.filter(f).reduce((n, g) => n + g.party_size, 0);
       const people = sum((g) => ["invited", "attending", "maybe"].includes(g.rsvp_status)), attending = sum((g) => g.rsvp_status === "attending");
-      return send({ people, attending, guest_limit: 300, level: "ok", venue_capacity: venueCap, capacity_left: venueCap === null ? null : venueCap - attending });
+      const e = mine.find((x) => x.id === args.p_event);
+      return send({ people, attending, guest_limit: 300, level: "ok", venue_capacity: venueCap, capacity_left: venueCap === null ? null : venueCap - attending, hosting_until: e?.hosting_until ?? null });
     }
     if (u.pathname === "/rest/v1/rpc/public_photos") return send(wall());
     if (u.pathname === "/rest/v1/rpc/public_live") return send(live());
@@ -163,7 +166,11 @@ http.createServer((req, res) => {
       const e = { id: randomUUID(), event_type: row.event_type, slug: row.slug, short_code: randomBytes(3).toString("hex").slice(0, 5) };
       return send(one ? e : [e], 201);
     }
-    if (u.pathname === "/rest/v1/events" && req.method === "PATCH") return send(one ? { id: eq("id") } : [], 200);
+    if (u.pathname === "/rest/v1/events" && req.method === "PATCH") {
+      const e = mine.find((x) => x.id === eq("id"));
+      if (e && "closed_at" in args) e.closed_at = args.closed_at;   // closing the page early (0015)
+      return send(one ? (e ?? { id: eq("id") }) : e ? [e] : [], 200);
+    }
     if (u.pathname.startsWith("/rest/v1/") && ["POST", "PATCH", "DELETE"].includes(req.method) && u.pathname !== "/rest/v1/guest_crm") {
       res.statusCode = req.method === "POST" ? 201 : 204; res.end(); return;
     }

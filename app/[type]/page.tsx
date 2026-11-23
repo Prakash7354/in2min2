@@ -55,7 +55,9 @@ export default async function KindPage({ params }: PageProps<"/[type]">) {
   const meal = plan.some(([, , m]) => m);
   const dishes = DISHES[kindOf(k.type).dishes].map(([, dish]) => dish).slice(0, 5);
   const food = asksFood(undefined, EVENT_TYPES.find((t) => t.key === k.type)?.sensitive ?? false);
-  const questions = [...k.questions, ...(k.noFree ? [] : [shared("Is it really free?")]), shared("Do my guests need an app or an account?")];
+  const questions = [...k.questions, ...(k.noFree ? [] : [shared("Is it really free?")]), shared("Do my guests need an app or an account?"),
+    shared("Can I still use WhatsApp, Viber or text messages?"),
+    ...(k.type === "memorial" ? [] : [shared("How long does my page stay online, and can I close it sooner?")])];
   const related = k.related.map((t) => kindPage(t)).filter((x) => !!x);
   const title = full.copy.card_headline || full.title;
   const jsonLd = {

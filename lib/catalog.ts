@@ -85,7 +85,7 @@ export const EVENT_TYPES: EventType[] = [
     line: "Walks, dinners, appeals", starLabel: "The cause", palette: "garden_green", textStyle: "contemporary", borders: ["vines", "rainbow", "sunburst", "floral", "bunting"], photoStyle: "hero", tone: "Warm and welcoming" },
   { key: "community", label: "Community event", scale: "community", theme: "festive", toggles: { tickets: true, sponsors: true }, repeatsYearly: true, sensitive: false,
     line: "Dashain, Teej, cultural show", starLabel: "The event", palette: "dhaka", textStyle: "heritage", borders: ["dhaka", "bunting", "rainbow", "marigold", "sunburst", "khukuri"], photoStyle: "hero", tone: "Festive and joyful" },
-  { key: "memorial", tag: "new", label: "Memorial or funeral", scale: "celebration", theme: "classic", toggles: { guestbook: true }, repeatsYearly: false, sensitive: true,
+  { key: "memorial", tag: "new", label: "Memorial or funeral", scale: "celebration", theme: "classic", toggles: { guestbook: true, countdown: false }, repeatsYearly: false, sensitive: true,
     line: "Funeral, prayers, remembrance", starLabel: "In memory of", palette: "calm", textStyle: "formal", borders: ["fine_line", "laurel", "golden_leaves", "khukuri", "vines", "none"], photoStyle: "arch", tone: "Gentle and respectful" },
   // Festive season (owner, 14 Nov 2026: seasonal designs to show off the festive launch; 0004)
   { key: "christmas", tag: "new", label: "Christmas party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,

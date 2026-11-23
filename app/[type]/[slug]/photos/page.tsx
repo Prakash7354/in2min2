@@ -24,7 +24,7 @@ export default async function PhotosPage({ params, searchParams }: PageProps<"/[
   if (w === null) notFound();
   if (w === undefined) return <WallMessage title="Photos aren't open yet" line="Please try again a little later." />;
   if (w.private) return <WallMessage title="This is a private event" line="Please scan the QR code at the event, or open the personal link the host sent you." />;
-  if (!w.event) return <WallMessage title={w.title ?? "This event"} line="This event has ended. Thank you to everyone who came." />;
+  if (!w.event) return <WallMessage title={w.title ?? "This event"} line="This page is now closed. Thank you to everyone who was part of it." />;
 
   const ev = w.event;
   return (

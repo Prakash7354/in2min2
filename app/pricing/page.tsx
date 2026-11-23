@@ -32,7 +32,7 @@ export default function Fees() {
     >
       <h2 id="prices">1. Prices</h2>
       <h3>Family events and celebrations</h3>
-      <p>You pay once per event. The plan sets how long your page stays online after the event.</p>
+      <p>You pay once per event. Your page is live from the moment you publish, and the plan sets how long it stays online after the event. You can close it sooner at any time, in Settings.</p>
       <div className="my-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {family.map((p) => (
           <div key={p.key} className="grid content-start gap-1 rounded-2xl border border-line bg-card p-4">
@@ -75,7 +75,7 @@ export default function Fees() {
       <p>The system never decides who pays less. These written rules do, and they&apos;re the same for everyone.</p>
       <div className="my-4 grid gap-3">
         <Rule level="Free" who="Memorials and funerals"
-          how="Automatic: choose “Memorial or funeral” and the page is free. A grieving family never has to ask. Using it for any other event breaks our terms: we move the event to the normal price, or take the page down." />
+          how="Automatic: choose “Memorial or funeral” and the page is free, online for a year after the day. A grieving family never has to ask, and can close the page sooner at any time. Using it for any other event breaks our terms: we move the event to the normal price, or take the page down." />
         <Rule level="Half" who="Fundraising events run by a registered charity"
           how="Ask by email or letter with your charity number. We check it on the Charity Commission, OSCR (Scotland) or Northern Ireland register." />
         <Rule level="Half" who="Small charities that don't have to register (income under £5,000), and armed forces welfare or benevolent events"

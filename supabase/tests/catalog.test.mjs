@@ -36,6 +36,12 @@ const dbTypes = [...(sql + later).matchAll(typeRe)].map((m) => ({
   key: m[1], label: m[2], scale: m[3], theme: m[4], toggles: JSON.parse(m[5]), repeatsYearly: m[6] === "true", sensitive: m[7] === "true", sort: +m[8],
 }));
 ok("found the 18 event types in the database files", dbTypes.length === 18, String(dbTypes.length));
+// Later changes to a kind's starting switches, e.g. 0015's
+// "update public.event_types set default_toggles = default_toggles || '{"countdown": false}'::jsonb where key = 'memorial'".
+for (const m of later.matchAll(/update public\.event_types set default_toggles = default_toggles \|\| '(\{[^']*\})'::jsonb where key = '([a-z-]+)'/g)) {
+  const d = dbTypes.find((x) => x.key === m[2]);
+  if (d) d.toggles = { ...d.toggles, ...JSON.parse(m[1]) };
+}
 for (const d of dbTypes) {
   const t = cat.EVENT_TYPES.find((x) => x.key === d.key);
   const same = t && t.label === d.label && t.scale === d.scale && t.theme === d.theme && t.repeatsYearly === d.repeatsYearly

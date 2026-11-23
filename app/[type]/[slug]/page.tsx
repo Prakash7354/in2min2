@@ -63,7 +63,7 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
           ) : (
             <>
               <h1 className="font-display text-3xl font-extrabold">{page.title}</h1>
-              <p className="text-muted">This event has ended. Thank you to everyone who came.</p>
+              <p className="text-muted">This page is now closed. Thank you to everyone who was part of it.</p>
             </>
           )}
           <Link href="/" className="font-semibold text-brand underline underline-offset-4">Make your own event page</Link>

@@ -44,7 +44,8 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
   - **See where visitors come from (5 minutes, free, no cookies):** Cloudflare dashboard › **Analytics & Logs** › **Web Analytics** › **Add a site** › choose **in2min2.com** › **Done**. A day later, look under **Referers** for chatgpt.com, perplexity.ai, copilot.microsoft.com and gemini.google.com. Tell Claude Code when it's on, so the privacy page can say so. If it shows you a code snippet instead, send that to Claude Code (it isn't a secret).
 
 - [x] **A page for each kind of event (23 Nov):** in2min2.com/pasni, /wedding, /lhosar, /memorial and 14 more, each with the invitation, the full page guests get, "Why not just a WhatsApp message?" and questions. **Please check the cultural wording** (Pasni ages, what Bratabandha is, the Lhosar months), and tell Claude Code anything to change.
-- [ ] **Your decision: how long pages stay online (23 Nov).** See Claude Code's message of 23 Nov. Once you decide, one database file brings in the rules, the year for memorials, and no countdown on memorials.
+- [ ] **Close a page early, and a year for memorials (built 23 Nov).** Any host can close their page at any time: open the event › **Settings** › **Your page online** › **Close the page now** (they can open it again within 30 days). Memorial pages stay online for a year, free, and start with no countdown. **Run the database file [0015_close_page_and_memorials.sql](../supabase/migrations/0015_close_page_and_memorials.sql):** open it on your Mac, select everything (Cmd+A), copy (Cmd+C). Supabase › your project › **SQL Editor** › **New query** › paste › **Run**. You should see "Success. No rows returned." Tell Claude Code.
+- [ ] **Your decision (23 Nov):** free pages' event dates at most 12 months after first publishing? (Stops a free page being kept for years.)
 
 ## Launch checklist (20 Nov 2026): what's left before sharing with real families
 

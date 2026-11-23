@@ -519,6 +519,38 @@ ok("another host can't see anyone's food needs", (await q(`select guest_metadata
 await as(A);
 await q(`delete from events where id = $1`, [fd.id]);
 
+console.log("Closing a page early, and memorials (0015):");
+await as(A);
+await q(`insert into events (event_type, slug, title, starts_at, status) values ('birthday','close-test','Close test', '2027-06-01 14:00+00', 'published')`);
+const [shut] = await q(`select id, hosting_until from events where slug = 'close-test'`);
+await as(null);
+let [cpg] = await q(`select public_event('birthday','close-test') as p`);
+ok("an open page shows to the public", !!cpg.p.event);
+await as(B);
+const bShut = await db.query(`update events set closed_at = now() where id = $1`, [shut.id]);
+ok("another host can't close A's page", bShut.affectedRows === 0);
+await as(A);
+await q(`update events set closed_at = now() - interval '1 minute' where id = $1`, [shut.id]);
+await as(null);
+[cpg] = await q(`select public_event('birthday','close-test') as p`);
+ok("the owner closes it: the public sees only that it has ended", !cpg.p.event && cpg.p.stage === "expired" && cpg.p.title === "Close test", JSON.stringify(cpg.p));
+ok("…and replies are closed", (await reply({ name: "Late guest", status: "attending" }, null, "close-test")).reason === "closed");
+await as(A);
+ok("closing doesn't change when the page would have ended", (await q(`select hosting_until from events where id = $1`, [shut.id]))[0].hosting_until.getTime() === shut.hosting_until.getTime());
+await expectError("…and the host still can't move that end", `update events set hosting_until = now() + interval '10 years' where id = '${shut.id}'`, /permission denied/);
+await q(`update events set closed_at = null where id = $1`, [shut.id]);
+await as(null);
+[cpg] = await q(`select public_event('birthday','close-test') as p`);
+ok("the owner opens it again", !!cpg.p.event);
+await as(A);
+await q(`delete from events where id = $1`, [shut.id]);
+await q(`insert into events (event_type, slug, title, starts_at, ends_at, status) values ('memorial','in-memory','In memory', '2027-06-01 14:00+00', '2027-06-01 18:00+00', 'published')`);
+const [memE] = await q(`select id, plan, hosting_until from events where slug = 'in-memory'`);
+ok("a memorial on the free plan stays online 12 months after the day", memE.plan === "popup" && new Date(memE.hosting_until).toISOString() === "2028-05-31T18:00:00.000Z", `${memE.plan} ${memE.hosting_until}`);
+const [memT] = await q(`select countdown, guestbook from feature_toggles where event_id = $1`, [memE.id]);
+ok("a memorial starts with no countdown", memT.countdown === false && memT.guestbook === true);
+await q(`delete from events where id = $1`, [memE.id]);
+
 console.log("Festive designs, effects and the preview picture (0004):");
 await as(null);
 const fest = await q(`select key, scale from event_types where key in ('christmas', 'new-year', 'lhosar') order by sort_order`);

@@ -301,6 +301,10 @@ export function updates(b: B2): Update[] {
   if (!d.eventId && missing.length) items.push({ tone: "todo", icon: "list", title: `${missing.length} thing${missing.length > 1 ? "s" : ""} still needed to publish`, line: missing.map((m) => m.text).join(", "), action: { label: "Show me", panel: MISSING_PANEL[missing[0].step] ?? "publish" } });
   if (!d.eventId && !missing.length) items.push({ tone: "todo", icon: "check", title: "Ready to publish", line: "Everything needed is filled in.", action: { label: "Publish", panel: "publish" } });
   if (d.eventId && !unpublishedChanges(d)) items.push({ tone: "ok", icon: "check", title: "Your page is live", line: "Share the link with your guests." });
+  // How long it stays online, and where to close it sooner (0015).
+  const until = b.replies.usage?.hosting_until;
+  if (d.eventId && until) items.push({ tone: "info", icon: "clock", title: `Online until ${new Date(until).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`,
+    line: "Then it closes by itself. You can close it sooner in Settings, whenever you wish.", action: { label: "Settings", panel: "settings" } });
   const fresh = b.replies.fresh ?? 0;
   if (d.eventId && b.replies.rows) {
     const t = totals(b.replies.rows);

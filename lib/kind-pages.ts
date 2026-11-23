@@ -293,7 +293,8 @@ export const KIND_PAGES: KindPage[] = [
       ["Photos, with care", "Friends can share photos; the family checks each one before it shows."],
     ],
     questions: [
-      { q: "Is it really free?", a: "Yes. Memorial and funeral pages are free, with no need to ask." },
+      { q: "Is it really free?", a: "Yes. Memorial and funeral pages are free, with no need to ask, and stay online for a year after the day." },
+      { q: "Can we close the page sooner?", a: "Yes, whenever you wish, without asking anyone. Open your event, tap Settings, then Close the page now. Family and friends then see that the page is closed. You can open it again within 30 days." },
       { q: "Can I add the 13th-day rites as well?", a: "Yes. Add each rite or gathering with its own date, time and place, and family see them in order." },
       { q: "Can the page be in Nepali?", a: NEPALI },
     ],

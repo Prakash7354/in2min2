@@ -20,7 +20,7 @@ export type Reply = {
   rsvp_at: string | null; rsvp_note: string | null; created_at: string;
   guest_metadata?: { food?: unknown } | null;   // food needs ticked on the reply form (0014)
 };
-type Usage = { people: number; attending: number; guest_limit: number | null; level: string; venue_capacity: number | null; capacity_left: number | null };
+type Usage = { people: number; attending: number; guest_limit: number | null; level: string; venue_capacity: number | null; capacity_left: number | null; hosting_until?: string | null };
 
 export type RepliesState = {
   rows: Reply[] | null;

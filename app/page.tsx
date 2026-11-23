@@ -38,7 +38,7 @@ const FAMILY = [
   { type: "christmas", title: "Christmas", line: "A family lunch or a big get-together.", photo: "christmas" },
   { type: "new-year", title: "New Year’s Eve", line: "Count down to midnight together, wherever everyone is.", photo: "newyear" },
   { type: "party", title: "Parties", line: "House-warming, graduation, or just because.", photo: "party" },
-  { type: "memorial", title: "Memorials", line: "A funeral, prayers or a day of remembrance. Gentle, respectful, and always free.", card: "memorial" },
+  { type: "memorial", title: "Memorials", line: "A funeral, prayers or a day of remembrance. Gentle, respectful, and free for a year.", card: "memorial" },
 ] as const;
 const COMMUNITY = [
   { type: "lhosar", title: "Lhosar", line: "Tamu, Sonam and Gyalpo Lhosar, for the whole community.", card: "lhosar" },

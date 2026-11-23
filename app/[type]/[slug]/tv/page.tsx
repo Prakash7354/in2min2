@@ -30,7 +30,7 @@ export default async function TvPage({ params, searchParams }: PageProps<"/[type
   if (w === null) notFound();
   if (w === undefined) return <WallMessage title="Photos aren't open yet" line="Please try again a little later." />;
   if (w.private) return <WallMessage title="This is a private event" line="Please open the slideshow from the link in your in2min2 builder." />;
-  if (!w.event) return <WallMessage title={w.title ?? "This event"} line="This event has ended." />;
+  if (!w.event) return <WallMessage title={w.title ?? "This event"} line="This page is now closed." />;
 
   const ev = w.event;
   const p = paletteFor(ev.palette, ev.primary_color);

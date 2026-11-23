@@ -11,6 +11,7 @@ import { applyScale, applyType } from "@/lib/draft";
 import { asksFood } from "@/lib/event-view";
 import { useB2 } from "../context";
 import { TYPE_ART } from "../kinds";
+import { PageOnline } from "./online";
 import { PanelShell } from "../panels";
 import { Chips, Note, Section, Toggle } from "../ui";
 
@@ -69,6 +70,9 @@ export function SettingsPanel() {
         <Toggle icon="lock" label="Private event" line="Only guests with their own personal link can open the page." checked={d.isPrivate}
           onChange={(v) => update((y) => ({ ...y, isPrivate: v }))} />
       </Section>
+
+      {/* How long it stays online, and closing it early (0015). */}
+      <PageOnline />
     </PanelShell>
   );
 }
