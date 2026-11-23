@@ -4,13 +4,14 @@
 // (photos, colours, border, letters, and the rest), each shown on the
 // host's own card. Suggestions for this kind of event come first.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import EventView from "@/components/event/event-view";
 import { useMusic, useStopOnLeave } from "@/components/event/music";
 import { Opening } from "@/components/event/opening";
 import { Icon } from "@/components/icons";
 import {
   BACKDROP_GROUPS, BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, PHOTO_STYLES, TEMPLATES, TEXT_STYLES, eventType, language, musicFor, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle, PHOTO_RINGS, photoRingOf, RING_SHAPES,
+  ENVELOPE_COLOURS,
 } from "@/lib/catalog";
 import { toViewData } from "@/lib/draft";
 import { envelopeFrom, envelopeTo } from "@/lib/event-view";
@@ -365,6 +366,23 @@ function Music() {
       <Section icon="envelope" title="Envelope">
         <Toggle label="Open with an envelope" checked={!!d.envelope} onChange={(v) => update((x) => ({ ...x, envelope: v }))}
           line="Guests first see an envelope addressed to them, like real post, and tap anywhere to open it. That tap also starts the music." />
+        {/* The envelope's colour (owner, 23 Nov 2026: a few rich colours, all VIP). */}
+        {d.envelope && (
+          <div className="b2-field">
+            <span className="b2-label">Envelope colour</span>
+            <div className="b2-envcols" role="radiogroup" aria-label="Envelope colour">
+              {[...(sensitive ? [{ key: "", label: "Calm (the page’s colours)", paper: data.palette.main, ink: data.palette.onMain }] : []), ...ENVELOPE_COLOURS].map((c) => {
+                const on = (d.envColour || (sensitive ? "" : "royal_red")) === c.key;
+                return (
+                  <button key={c.key || "page"} type="button" role="radio" aria-checked={on} className="b2-envcol" onClick={() => update((x) => ({ ...x, envColour: c.key }))}>
+                    <span style={{ "--p": c.paper, "--i": c.ink } as CSSProperties} aria-hidden="true" />
+                    <small>{c.label}</small>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
         {d.envelope && (
           <Row icon="pen" label={`From ${envelopeFrom(data) || "(add your names)"}`} line={`To ${envelopeTo(data)}${(d.inviteWay ?? "personal") === "personal" && d.scale !== "community" ? ", or each guest's own name with a personal link" : ""}`}
             onClick={() => open("guests")} />

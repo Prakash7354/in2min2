@@ -140,6 +140,7 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
   if (photoRingOf(d.photoRing)) settings.photo_ring = d.photoRing; else delete settings.photo_ring;
   if (d.envFrom?.trim()) settings.envelope_from = d.envFrom.trim().slice(0, 60); else delete settings.envelope_from;
   if (d.envTo?.trim()) settings.envelope_to = d.envTo.trim().slice(0, 60); else delete settings.envelope_to;
+  if (d.envColour) settings.envelope_colour = d.envColour; else delete settings.envelope_colour;
   if (d.askFood === undefined) delete settings.food; else settings.food = d.askFood;
   if (d.credit === undefined) delete settings.credit;
   else settings.credit = d.credit === null ? { hidden: true } : { label: d.credit.label.trim().slice(0, 30), name: d.credit.name.trim().slice(0, 80) };

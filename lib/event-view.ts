@@ -67,6 +67,7 @@ export type EventViewData = {
   // words, or "" to have them made from the names already given.
   envFrom: string;
   envTo: string;
+  envColour?: string | null;   // ENVELOPE_COLOURS key; Royal red when empty
   photoRing?: string | null;   // a moving decoration round the photo (catalog PHOTO_RINGS)
   askFood?: boolean;           // the reply form asks about food needs (lib/draft.ts asksFood)
   date: string;       // YYYY-MM-DD in the event's own time zone

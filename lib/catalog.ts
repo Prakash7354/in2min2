@@ -604,6 +604,21 @@ export const backdropImage = (b: Backdrop) => b.css ?? `url(${b.file})`;
 // (…-2.m4a), because phones keep these for a year. `loop` is where the sound
 // starts and fades out, in seconds, so the repeat has no silent gap.
 export type Track = { key: string; name: string; line: string; file: string; seconds: number; loop: [number, number]; kinds: string[] };
+// The envelope guests tap to open: a few rich colours, each with gold
+// writing and a gold seal (owner, 23 Nov 2026: "all look VIP"). Saved in
+// feature_toggles.settings.envelope_colour; Royal red unless the host picks
+// another. Memorials keep their own calm colours.
+export type EnvelopeColour = { key: string; label: string; paper: string; ink: string; wax: string; waxText: string };
+export const ENVELOPE_COLOURS: EnvelopeColour[] = [
+  { key: "royal_red", label: "Royal red", paper: "#6B0A1B", ink: "#F1D28A", wax: "#D2A848", waxText: "#5C0716" },
+  { key: "emerald", label: "Emerald", paper: "#0B4A38", ink: "#F1D28A", wax: "#D2A848", waxText: "#083A2B" },
+  { key: "midnight", label: "Midnight blue", paper: "#13235A", ink: "#EFCF86", wax: "#D2A848", waxText: "#0F1C49" },
+  { key: "plum", label: "Royal purple", paper: "#4B1748", ink: "#F1D28A", wax: "#D2A848", waxText: "#3A0F37" },
+  { key: "black", label: "Black and gold", paper: "#17161A", ink: "#E6C774", wax: "#C9A043", waxText: "#17161A" },
+  { key: "ivory", label: "Ivory and gold", paper: "#F3E9D8", ink: "#7A5A1E", wax: "#B8862F", waxText: "#FFF6E3" },
+];
+export const envelopeColourOf = (key: string | null | undefined) => ENVELOPE_COLOURS.find((c) => c.key === key) ?? ENVELOPE_COLOURS[0];
+
 export const MUSIC: Track[] = [
   { key: "happy_birthday", name: "Happy Birthday", line: "A cheerful party tune", file: "/music/happy-birthday-1.m4a", seconds: 69, loop: [0, 67.4],
     kinds: ["birthday", "party", "pasni"] },

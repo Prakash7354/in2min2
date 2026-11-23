@@ -21,7 +21,7 @@ import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties }
 import { createPortal } from "react-dom";
 import { Icon, type IconName } from "@/components/icons";
 import { TapHand } from "@/components/tap-hand";
-import { backdropImage, backdropOf } from "@/lib/catalog";
+import { backdropImage, backdropOf, envelopeColourOf } from "@/lib/catalog";
 import { envelopeFrom, envelopeTo, formatDate, openedKey, type EventViewData } from "@/lib/event-view";
 import { eventVars } from "./event-view";
 import { eventFontVariables } from "./fonts";
@@ -62,49 +62,67 @@ type Props = {
   to?: string | null;        // the guest's name, from their personal link
   id: string;                // "type/slug": remembers it was opened this visit
   preview?: () => void;      // the builder's "See the envelope": always shows, then calls this
+  // The website (owner, 23 Nov 2026): plays inside a phone picture. Opens by
+  // itself after autoOpen ms, with no music, no page lock, nothing remembered,
+  // then calls onDone.
+  embedded?: boolean;
+  autoOpen?: number;
+  onDone?: () => void;
 };
 
-export function Opening({ data, title, to, id, preview }: Props) {
-  const already = useSyncExternalStore(noop, () => !preview && seen(id), () => false);
+export function Opening({ data, title, to, id, preview, embedded = false, autoOpen, onDone }: Props) {
+  const already = useSyncExternalStore(noop, () => !preview && !embedded && seen(id), () => false);
   const [phase, setPhase] = useState<"closed" | "opening" | "gone">("closed");
   const music = useMusic(data.music);
   const showEnvelope = (data.envelope || !!preview) && !already && phase !== "gone";
   const button = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!showEnvelope) return;
+    if (!showEnvelope || embedded) return;
     const html = document.documentElement;
     const before = html.style.overflow;
     html.style.overflow = "hidden";
     button.current?.focus({ preventScroll: true });
     return () => { html.style.overflow = before; };
-  }, [showEnvelope]);
+  }, [showEnvelope, embedded]);
 
   function open() {
     if (phase !== "closed") return;
-    if (data.music) music.start(); // inside the tap, so phones allow it
+    if (data.music && !embedded) music.start(); // inside the tap, so phones allow it
     setPhase("opening");
     const quick = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     window.setTimeout(() => {
+      if (embedded) { setPhase("gone"); onDone?.(); return; }
       if (!preview) { try { sessionStorage.setItem(openedKey(id), "1"); } catch { /* fine */ } }
       setPhase(preview ? "closed" : "gone");
       preview?.();
     }, quick ? 450 : 2800);
   }
 
+  // The website's phone opens by itself (embedded).
+  const openRef = useRef(open);
+  useEffect(() => { openRef.current = open; });
+  useEffect(() => {
+    if (!embedded || autoOpen === undefined) return;
+    const t = window.setTimeout(() => openRef.current(), autoOpen);
+    return () => window.clearTimeout(t);
+  }, [embedded, autoOpen]);
+
   const p = data.palette;
   const bd = backdropOf(data.backdrop);
+  const env = envelopeColourOf(data.envColour);
   const vars = {
     ...eventVars(p, data.textStyle),
     "--op-sky": bd ? backdropImage(bd) : p.gradient ? `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}d9, ${p.bg}f2), ${p.gradient}` : `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}, ${p.bg})`,
     "--op-text": bd ? (bd.dark ? "#FFFFFF" : p.ink) : p.ink,
-    // The envelope: a deep "VIP" red with gold writing, a gold seal and a
-    // gold lining, for every event whatever its colours (owner, 23 Nov 2026).
-    // Memorials keep their own calm colour, with the old seal rule.
-    "--op-env": data.sensitive ? p.main : "#6B0A1B",
-    "--op-env-ink": data.sensitive ? p.onMain : "#F1D28A",
-    "--op-wax": data.sensitive ? (p.dark ? p.bg : p.accent) : "#D2A848",
-    "--op-wax-text": data.sensitive ? (p.dark ? p.main : p.onAccent) : "#5C0716",
+    // The envelope: a rich colour with gold writing, a gold seal and a gold
+    // lining (catalog ENVELOPE_COLOURS; Royal red unless the host chose
+    // another), whatever the page's colours (owner, 23 Nov 2026). Memorials
+    // keep their own calm colours unless the family picks one.
+    "--op-env": data.sensitive && !data.envColour ? p.main : env.paper,
+    "--op-env-ink": data.sensitive && !data.envColour ? p.onMain : env.ink,
+    "--op-wax": data.sensitive && !data.envColour ? (p.dark ? p.bg : p.accent) : env.wax,
+    "--op-wax-text": data.sensitive && !data.envColour ? (p.dark ? p.main : p.onAccent) : env.waxText,
   } as CSSProperties;
   const guest = to?.trim() || null;
   const toLine = envelopeTo(data, guest);
@@ -114,7 +132,7 @@ export function Opening({ data, title, to, id, preview }: Props) {
   const postmark = m ? [`${Number(m[3])} ${MONTHS[Number(m[2]) - 1]}`, m[1]] : null;
 
   const envelope = showEnvelope ? (
-    <div className={`op ${eventFontVariables}`} data-op={preview ? "preview" : id} data-phase={phase} style={vars}
+    <div className={`op ${eventFontVariables}`} data-op={preview ? "preview" : id} data-phase={phase} data-embedded={embedded ? "" : undefined} style={vars}
       role="dialog" aria-modal="true" aria-label="Your invitation">
       <div className="op-sky" aria-hidden="true">{!data.sensitive && <span className="op-glints" />}</div>
       {/* The whole screen is the button: a tap anywhere opens it. */}
@@ -142,7 +160,12 @@ export function Opening({ data, title, to, id, preview }: Props) {
           {/* The front: what's seen first */}
           <span className="op-front">
             {fromLine && <span className="op-from"><small>From</small><span>{fromLine}</span></span>}
-            <span className="op-stamp"><span className="op-stamp-art"><Icon name={STAMP[data.typeKey] ?? "heart"} className="" /></span></span>
+            {/* The stamp: the initials (owner, 23 Nov 2026: "S&V in the middle"), or a picture for a memorial. */}
+            <span className="op-stamp"><span className="op-stamp-art">
+              {data.sensitive || seal === "♥" ? <Icon name={STAMP[data.typeKey] ?? "heart"} className="" /> : <span className="op-stamp-ini" data-one={seal.length === 1 ? "" : undefined}>{seal.replace(/\s+/g, "")}</span>}
+            </span></span>
+            <span className="op-corner op-corner-l" />
+            <span className="op-corner op-corner-r" />
             {postmark && <span className="op-postmark"><span>{postmark[0]}</span><span>{postmark[1]}</span></span>}
             <span className="op-waves" />
             <span className="op-address" data-long={Array.from(toLine).length > 24 ? "" : undefined}>
@@ -165,7 +188,7 @@ export function Opening({ data, title, to, id, preview }: Props) {
   return (
     <>
       {preview ? (envelope && typeof document !== "undefined" ? createPortal(envelope, document.body) : null) : envelope}
-      {!preview && data.music && !showEnvelope && (
+      {!preview && !embedded && data.music && !showEnvelope && (
         <MusicButton state={music.state} onTap={music.toggle} colour={p.main} textColour={p.onMain} />
       )}
     </>

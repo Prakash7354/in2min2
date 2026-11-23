@@ -450,12 +450,25 @@
 .s-gdpr-foot a { color: #fff; font-weight: 700; }
 @media (min-width: 800px) { .s-nostrings { grid-template-columns: repeat(3, 1fr); } .s-gdpr { padding: 30px 34px; } .s-gdpr-list { grid-template-columns: 1fr 1fr; column-gap: 34px; } }
 
-/* Paying: trust under the plans (app/page.tsx) */
-.s-paytrust { display: grid; gap: 16px; margin-top: 22px; padding: 20px; border-radius: 22px; background: var(--s-card); box-shadow: var(--s-shadow); }
-.s-payticks { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+/* Paying: trust under the plans (app/page.tsx), like a real checkout page */
+.s-paytrust { display: grid; gap: 16px; margin-top: 24px; padding: 22px 20px; border-radius: 24px; background: var(--s-card); box-shadow: var(--s-shadow); border: 1px solid var(--s-line); }
+.s-payhead { display: flex; align-items: center; gap: 12px; }
+.s-paylock { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: var(--s-mint); color: var(--s-teal-deep); flex: none; }
+.s-payh { margin: 0; font-family: var(--font-display); font-size: 21px; font-weight: 800; color: var(--s-navy); }
+.s-paysub { margin: 0; font-size: 15px; color: var(--s-muted); }
+.s-paycards { display: flex; flex-wrap: wrap; gap: 10px; }
+.pay-card { display: grid; place-items: center; width: 78px; height: 50px; border-radius: 10px; background: #fff; border: 1px solid #e3e7ee;
+  box-shadow: 0 1px 2px rgba(15, 42, 79, 0.06), 0 8px 16px -10px rgba(15, 42, 79, 0.35); }
+.pay-card img { max-width: 70%; max-height: 56%; width: auto; height: auto; object-fit: contain; }
+.pay-card[data-pay="amex"] img { max-width: 64%; max-height: 80%; }
+.pay-card[data-pay="mastercard"] img { max-height: 72%; }
+.s-paystripe { margin: 0; color: var(--s-muted); font-size: 15.5px; }
+.s-paystripe img { margin: 0 2px 3px; }
+.s-payticks { display: grid; gap: 8px; margin: 0; padding: 14px 0 0; list-style: none; border-top: 1px solid var(--s-line); }
 .s-payticks li { position: relative; padding-left: 30px; font-weight: 700; color: var(--s-navy); }
 .s-payticks li::before { content: "✓"; position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 999px; background: var(--s-mint); color: var(--s-teal-deep); font-size: 14px; }
-.s-paymarks { display: grid; gap: 10px; }
-.s-paymarks p { margin: 0; color: var(--s-muted); font-size: 15.5px; }
-.s-paymarks > span { display: flex; flex-wrap: wrap; gap: 8px; }
-@media (min-width: 800px) { .s-paytrust { grid-template-columns: 1fr 1fr; align-items: center; padding: 24px 28px; } .s-payticks { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 800px) { .s-paytrust { padding: 26px 30px; } .s-payticks { grid-template-columns: 1fr 1fr; } .pay-card { width: 92px; height: 58px; } }
+
+/* "The big days": the phone that plays by itself (components/site/autoplay-phone.tsx) */
+.s-autoplay { position: relative; scrollbar-width: none; }
+.s-autoplay::-webkit-scrollbar { display: none; }

@@ -6,14 +6,15 @@ import { HeroDevices } from "@/components/site/hero-devices";
 import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader } from "@/components/site/header";
 import { ShareStrip } from "@/components/site/share-strip";
+import { AutoPlayPhone } from "@/components/site/autoplay-phone";
 import { TrustBand } from "@/components/site/trust";
-import { PayMark, type PayKey } from "@/components/pay-icons";
+import { PAY_ORDER, PayCard, StripeLogo } from "@/components/pay-icons";
 import { WheelDemo } from "@/components/site/wheel-demo";
 import { WhySection } from "@/components/site/why";
 import { KIND_PAGES } from "@/lib/kind-pages";
 import { TapHand } from "@/components/tap-hand";
 import { formatPence, PLANS } from "@/lib/catalog";
-import { fullSample, heroSample, heroShows, kindSample, wordsSample } from "@/lib/site-samples";
+import { bigDaySample, heroSample, heroShows, heroWedding, kindSample, wordsSample } from "@/lib/site-samples";
 import { QUESTIONS, TAGLINE, siteJsonLd } from "@/lib/site-facts";
 import { SHARE_DESCRIPTION, SHARE_IMAGE, SHARE_TITLE } from "@/lib/site-share";
 import "./site.css";
@@ -82,7 +83,8 @@ export default function Home() {
   const hero = heroSample();
   const words = wordsSample();
   const shows = heroShows();
-  const bigDay = fullSample("wedding");
+  const bigDay = bigDaySample();
+  const wedding = heroWedding();
   const family = PLANS.filter((p) => ["popup", "season", "half_year", "keepsake"].includes(p.key));
   return (
     <div className="s-site">
@@ -233,9 +235,7 @@ export default function Home() {
         <section className="s-section s-tint">
           <div className="s-wrap s-split">
             <div className="s-fullphone">
-              <div className="s-phone"><div className="s-phonescreen" tabIndex={0} aria-label="A wedding page, as guests see it">
-                <EventView data={bigDay} view="page" now={now} />
-              </div></div>
+              <AutoPlayPhone data={bigDay} title={bigDay.copy.card_headline || bigDay.title} now={now} label="A wedding invitation opening, then the whole page, as guests see it" />
             </div>
             <div>
               <p className="s-kicker">The big days</p>
@@ -271,7 +271,7 @@ export default function Home() {
                 <li><b>Updates:</b> “Food is served”, “Car park full”: guests see it straight away.</li>
               </ul>
             </div>
-            <WheelDemo vars={eventVars(words.palette, words.textStyle)} />
+            <WheelDemo vars={eventVars(wedding.palette, wedding.textStyle)} />
           </div>
         </section>
 
@@ -337,18 +337,25 @@ export default function Home() {
             <p className="s-small s-center-text">Need room for more people? Add 100 for £3. Memorials are always free. Community events: a free page, and a small fee only on online ticket sales (coming soon).</p>
             {/* Paying, with the same trust as sharing (owner, 23 Nov 2026). Payments open in February. */}
             <div className="s-paytrust">
+              <div className="s-payhead">
+                <span className="s-paylock" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5" /><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3" /></svg>
+                </span>
+                <div>
+                  <p className="s-payh">Safe, simple payments</p>
+                  <p className="s-paysub">Paid plans open in February 2027</p>
+                </div>
+              </div>
+              <div className="s-paycards" role="list" aria-label="Ways to pay">
+                {PAY_ORDER.map((k) => <span key={k} role="listitem"><PayCard pay={k} /></span>)}
+              </div>
+              <p className="s-paystripe">Secure checkout by <StripeLogo height={20} />. Your card details go straight to Stripe: we never see them.</p>
               <ul className="s-payticks">
                 <li>Pay once per event, no subscription</li>
                 <li>No card needed to start</li>
                 <li>Full refund within 14 days</li>
                 <li>If we let you down on the day, your money back</li>
               </ul>
-              <div className="s-paymarks">
-                <p>Secure card payments through Stripe, from February 2027. Your card details go straight to Stripe: we never see them.</p>
-                <span aria-label="Stripe, Visa, Mastercard, Apple Pay and Google Pay" role="img">
-                  {(["stripe", "visa", "mastercard", "applepay", "googlepay"] as PayKey[]).map((k) => <PayMark key={k} pay={k} size={32} />)}
-                </span>
-              </div>
             </div>
           </div>
         </section>

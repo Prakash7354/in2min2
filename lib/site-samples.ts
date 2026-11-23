@@ -39,8 +39,46 @@ function heroDraft(): Draft {
 // The two-language example for "Your words, your way": a rich red wedding
 // card with a traditional gold border and three photos in a stack, as
 // weddings matter most (owner, 21 Nov 2026; not the arch, used too often).
-export function wordsSample(): EventViewData {
+export function heroWedding(): EventViewData {
   return toViewData(weddingDraft());
+}
+
+// "Your words, your way" (owner, 23 Nov 2026: a different look and photo from
+// the top's wedding): ivory and gold with golden roses, a wide photo, and
+// Hindi under the English, as the site is for every culture.
+export function wordsSample(): EventViewData {
+  return toViewData(draftOf("wedding", {
+    title: "Priya & Arjun", stars: { relation: "The couple", names: "Priya & Arjun" }, venueName: "The Manor House", startTime: "12:00",
+    cover: "/site/show-bride-s.jpg", photoStyle: "hero", palette: "burgundy_gold", backdrop: "ivory_frame", border: "golden_roses", envColour: "ivory",
+    languages: ["en", "hi"],
+    copy: { card_headline: "Priya & Arjun are getting married", card_invite_body: "With love and joy, we invite you to celebrate our wedding with us.",
+      landing_page_story: "", guest_note_box: "", post_event_thank_you: "" },
+    translation: { card_headline: "प्रिया और अर्जुन का शुभ विवाह", card_invite_body: "हमारे शुभ विवाह में आप सादर आमंत्रित हैं।",
+      landing_page_story: "", guest_note_box: "", post_event_thank_you: "" },
+  }, 6));
+}
+
+// "The big days" (owner, 23 Nov 2026: not the same as the other weddings):
+// emerald and gold, and two days of events, so the auto-playing phone shows
+// the envelope, then the whole page with the mehndi, sangeet, ceremony and
+// reception, each with its own day, time and place, and the dinner menu.
+export function bigDaySample(): EventViewData {
+  const d = draftOf("wedding", {
+    title: "Simran & Dev", stars: { relation: "The couple", names: "Simran & Dev" }, venueName: "The Grand Hall", startTime: "11:00",
+    cover: "/site/w-heart-s.jpg", photoStyle: "arch", palette: "emerald_gold", backdrop: "jali_emerald", border: "wedding_lines", envColour: "emerald",
+    copy: { card_headline: "Simran & Dev are getting married", card_invite_body: "Two families, one celebration. Join us for the mehndi, the sangeet, our wedding and the reception." },
+  }, 7);
+  const friday = new Date(`${d.date}T12:00:00Z`);
+  friday.setUTCDate(friday.getUTCDate() - 1);
+  const fri = friday.toISOString().slice(0, 10);
+  const menu = [{ course: "Starter", dish: "Samosas and pakoras" }, { course: "Main", dish: "Butter chicken" }, { course: "Main", dish: "Paneer tikka masala" }, { course: "Dessert", dish: "Gulab jamun" }];
+  const functions = [
+    { id: "b1", title: "Mehndi", date: fri, time: "16:00", place: "Our family home", note: "", meal: false, menu: [] },
+    { id: "b2", title: "Sangeet", date: fri, time: "19:30", place: "Our family home", note: "", meal: false, menu: [] },
+    { id: "b3", title: "Wedding ceremony", date: d.date, time: "11:00", place: "Riverside Gardens", note: "", meal: false, menu: [] },
+    { id: "b4", title: "Reception and dinner", date: d.date, time: "18:30", place: "The Grand Hall", note: "", meal: true, menu },
+  ];
+  return toViewData({ ...d, functions });
 }
 function weddingDraft(): Draft {
   return draftOf("wedding", {
@@ -142,7 +180,7 @@ export function heroShows(): HeroShow[] {
       { name: "Dipak", status: "yes", size: 2, note: "We’ll be there for the ceremony.", ago: "2 hours ago" },
       { name: "Gita", status: "no", note: "Sorry to miss it. Lots of love to Jeena 💛", ago: "Yesterday" },
     ] }),
-    show("wedding", "Wedding", wordsSample(), { coming: 128, maybe: 14, cant: 9, fourth: ["Not replied", 37], bell: 5, food: [["vegetarian", 38], ["halal", 12], ["vegan", 6], ["nut_allergy", 3]], replies: [
+    show("wedding", "Wedding", heroWedding(), { coming: 128, maybe: 14, cant: 9, fourth: ["Not replied", 37], bell: 5, food: [["vegetarian", 38], ["halal", 12], ["vegan", 6], ["nut_allergy", 3]], replies: [
       { name: "Simran", status: "yes", size: 2, note: "Congratulations! ❤️ One vegetarian meal, please.", ago: "Just now" },
       { name: "Arjun", status: "maybe", size: 3, note: "Waiting to hear about leave. Will confirm soon.", ago: "3 hours ago" },
       { name: "Sarah", status: "no", note: "Sorry we’ll miss it. Sending love from Hong Kong!", ago: "Yesterday" },

@@ -104,6 +104,8 @@ export type Draft = {
   // phone only, which of the three ways the host is inviting.
   envFrom?: string;
   envTo?: string;
+  // The envelope's colour (catalog ENVELOPE_COLOURS), in feature_toggles.settings.envelope_colour.
+  envColour?: string;
   // A moving decoration round the photo (catalog PHOTO_RINGS), in
   // feature_toggles.settings.photo_ring; "" is none, chosen.
   photoRing?: string;
@@ -372,6 +374,7 @@ export function toViewData(d: Draft): EventViewData {
     photoRing: photoRingOf(d.photoRing),
     envFrom: (d.envFrom ?? "").trim().slice(0, 60),
     envTo: (d.envTo ?? "").trim().slice(0, 60),
+    envColour: d.envColour || null,
     askFood: asksFood(d.askFood, t?.sensitive ?? false),
   };
 }
