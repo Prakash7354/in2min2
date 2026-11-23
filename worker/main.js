@@ -89,10 +89,10 @@ async function hourly(env, at) {
   if (weekly && !lines.length) lines.push(`All well this week. ${backupNote ?? ""}`.trim());
 
   if (lines.length) {
-    const subject = errors.length ? `In2Min2: ${errors.length} error${errors.length === 1 ? "" : "s"}` : !dbOk ? "In2Min2: database not answering"
-      : lines.some((l) => l.includes("answering again")) ? "In2Min2: database answering again"
-      : weekly ? "In2Min2: weekly check" : "In2Min2: backup problem";
-    const sent = await email(env, subject, `${lines.join("\n\n")}\n\nSent by the In2Min2 Worker's hourly check. Give this email to Claude Code if anything needs fixing.\n`);
+    const subject = errors.length ? `in2min2: ${errors.length} error${errors.length === 1 ? "" : "s"}` : !dbOk ? "in2min2: database not answering"
+      : lines.some((l) => l.includes("answering again")) ? "in2min2: database answering again"
+      : weekly ? "in2min2: weekly check" : "in2min2: backup problem";
+    const sent = await email(env, subject, `${lines.join("\n\n")}\n\nSent by the in2min2 Worker's hourly check. Give this email to Claude Code if anything needs fixing.\n`);
     state.lastEmail = { at: at.toISOString(), subject, sent: sent === true, ...(sent === true ? {} : { why: sent || "not set up" }) };
     // Clear the reported errors only once the email has gone.
     if (sent === true && errors.length) await env.BACKUPS.delete(errors.map((e) => e.key));
@@ -151,7 +151,7 @@ async function listErrors(env) {
 async function email(env, subject, text) {
   if (!env.ALERTS || !env.ALERT_EMAIL) return "not set up";
   const raw = [
-    `From: In2Min2 alerts <${FROM}>`,
+    `From: in2min2 alerts <${FROM}>`,
     `To: <${env.ALERT_EMAIL}>`,
     `Subject: ${subject}`,
     `Date: ${new Date().toUTCString()}`,

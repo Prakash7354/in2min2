@@ -18,7 +18,7 @@ import fs from "node:fs";
 const file = process.argv[2];
 if (!file) { console.error("Usage: node scripts/backup/restore-check.mjs backup.json"); process.exit(1); }
 const backup = JSON.parse(fs.readFileSync(file, "utf8"));
-if (backup.version !== 1 || !backup.tables) { console.error("That doesn't look like an In2Min2 backup."); process.exit(1); }
+if (backup.version !== 1 || !backup.tables) { console.error("That doesn't look like an in2min2 backup."); process.exit(1); }
 
 const dir = new URL("../../supabase/migrations/", import.meta.url);
 const migrations = fs.readdirSync(dir).filter((f) => f.endsWith(".sql")).sort().map((f) => fs.readFileSync(new URL(f, dir), "utf8")).join("\n");
