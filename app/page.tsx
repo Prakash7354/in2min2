@@ -9,6 +9,7 @@ import { WheelDemo } from "@/components/site/wheel-demo";
 import { TapHand } from "@/components/tap-hand";
 import { formatPence, PLANS } from "@/lib/catalog";
 import { heroSample, heroShows, kindSample, wordsSample } from "@/lib/site-samples";
+import { QUESTIONS, siteJsonLd } from "@/lib/site-facts";
 import { SHARE_DESCRIPTION, SHARE_IMAGE, SHARE_TITLE } from "@/lib/site-share";
 import "./site.css";
 
@@ -60,15 +61,6 @@ const STEPS = [
   { title: "Share and celebrate", line: "Send one link. Guests open an envelope with their name on it, reply, and add photos on the day." },
 ];
 
-const QUESTIONS = [
-  { q: "Is it really free?", a: "Yes. Until 31 January 2027 every family event is free, for up to 300 people and 300 photos, and stays online for 90 days after the day. After that, a short Pop-Up page is still free, and longer plans start at £9. Memorials are always free." },
-  { q: "Do my guests need an app or an account?", a: "No. They open your link on any phone, tablet or computer. Only you, the host, sign in, with a code we email you." },
-  { q: "Which languages can I use?", a: "English and Nepali are ready, in Nepali script or in English letters. Hindi, Punjabi, Gujarati, Bengali, Tamil, Tagalog and Polish are in beta. You can put two languages on one invitation." },
-  { q: "Can I change things after I’ve sent the link?", a: "Yes, any time. Change the time, the place or the words and press Update. The link stays the same." },
-  { q: "Who can see my event?", a: "Only people you send the link to. For a private event, each guest gets their own link with their name on the envelope." },
-  { q: "Can I use it for a big community event?", a: "Yes. Make the event page, share the programme, post updates on the day and collect photos. Ticketing, stalls and sponsors are coming soon." },
-  { q: "How do I get help?", a: "Email hello@in2min2.com and a real person will reply." },
-];
 
 function Photo({ name, alt, wide = false }: { name: string; alt: string; wide?: boolean }) {
   // eslint-disable-next-line @next/next/no-img-element -- pre-sized copies; Cloudflare has no image resizer here
@@ -88,6 +80,8 @@ export default function Home() {
   const family = PLANS.filter((p) => ["popup", "season", "half_year", "keepsake"].includes(p.key));
   return (
     <div className="s-site">
+      {/* What in2min2 is, for Google, Bing and AI assistants (lib/site-facts.ts). */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd(now)).replace(/</g, "\\u003c") }} />
       <SiteHeader />
 
       <main>
