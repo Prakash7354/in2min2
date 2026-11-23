@@ -983,7 +983,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
         )}
         {!community && (
           <Notice>
-            Paying for a plan opens in February. Until then, a published page is on the free plan: online 7 days after the event,
+            Paying for a plan opens in February. Until then, a published page is on the free plan: online 90 days after the event,
             up to 200 people. With the code <strong>LAUNCH50</strong> the first 50 families get a free Keepsake (12 months).
           </Notice>
         )}

@@ -12,22 +12,24 @@ export const SITE = "https://in2min2.com";
 const CONTACT = "hello@in2min2.com";
 
 // One sentence that says what in2min2 is, the way an AI assistant would quote it.
-export const WHAT_IT_IS = "in2min2 makes an online invitation and event page from your phone in about two minutes. "
-  + "Guests open one link to reply, see the day plan and directions, add photos and leave messages; "
-  + "the host sees every reply in one place.";
+// The short line for search results, sharing and the top of the page (owner, 23 Nov 2026).
+export const TAGLINE = "in2min2 makes organising your event simple: a beautiful invitation in two minutes, replies counted for you, and everyone’s photos on one link. Free to start.";
+export const WHAT_IT_IS = "in2min2 makes organising your event simple, quick and affordable. "
+  + "Make a beautiful invitation on your phone in about two minutes and share one link on WhatsApp, Viber or anywhere. "
+  + "Guests reply in a tap, find the plan and directions, and share their photos, and you see every reply counted in one place.";
 
 // The home page's "Good to know" (also in the structured facts, as a FAQ).
 export const QUESTIONS = [
-  { q: "What is in2min2?", a: `${WHAT_IT_IS} It’s made in the UK for families and communities, in English, Nepali and more.` },
-  { q: "Is it really free?", a: "Yes. Until 31 January 2027 every family event is free, for up to 300 people and 300 photos, and stays online for 90 days after the day. After that, a short Pop-Up page is still free, and longer plans start at £9. Memorials are always free." },
+  { q: "What is in2min2?", a: `${WHAT_IT_IS} Nothing to download, free to start, and you can stop whenever you like. Made in the UK, for families and communities of every culture.` },
+  { q: "Is it really free?", a: "Yes. Every page is free and stays online until 90 days after your event. Until 31 January 2027 a free page takes up to 300 people and 300 photos; after that, up to 200 people and 50 photos. Paid plans, from £9, add more people and photos, or keep your page for 6 or 12 months. Memorials are always free." },
   { q: "Do my guests need an app or an account?", a: "No. They open your link on any phone, tablet or computer. Only you, the host, sign in, with a code we email you." },
-  { q: "Can I make an invitation for a Pasni, Bratabandha or Lhosar?", a: "Yes. Pasni (rice feeding), Bratabandha, Tamu, Sonam and Gyalpo Lhosar, weddings, birthdays, reunions and regimental days each have their own questions, designs and ready-made words, in English, Nepali or both." },
+  { q: "Which cultures and celebrations is it made for?", a: "Every culture. Weddings with mehndi, sangeet and haldi, Pasni (Annaprashan), Bratabandha, naming ceremonies, Lhosar, birthdays, Christmas, reunions and regimental days each come with their own questions, designs and ready-made words. For Diwali, Eid, Vaisakhi, Holi or Lunar New Year, choose a party or community event and name it your way." },
   { q: "Which languages can I use?", a: "English and Nepali are ready, in Nepali script or in English letters. Hindi, Punjabi, Gujarati, Bengali, Tamil, Tagalog and Polish are in beta. You can put two languages on one invitation." },
   { q: "Can guests tell me about food needs?", a: "Yes. When they reply, guests can tick vegetarian, vegan, halal, gluten-free, nut allergy or dairy-free. You see the totals for the caterer and can copy the numbered list. You can switch the question off." },
   { q: "How is it different from a WhatsApp group or a paper card?", a: "A paper card can’t collect replies, and in a WhatsApp group the replies get lost in the chat. With in2min2 each guest replies on the page, and you see who is coming, how many people and their messages in one numbered list. The same link then shows the day plan, directions and everyone’s photos." },
   { q: "Can I still use WhatsApp, Viber or text messages?", a: "Yes, that’s how most people share it. Send your link in a WhatsApp, Viber or text message, or in a group chat, and guests tap it to open the invitation. in2min2 even gives you ready-made messages for each step, from the invitation to the reminder and the thank-you. For a personal touch, send each guest their own link." },
   { q: "Can I change things after I’ve sent the link?", a: "Yes, any time. Change the time, the place or the words and press Update. The link stays the same." },
-  { q: "How long does my page stay online, and can I close it sooner?", a: "Your page is live from the moment you publish until a set time after your event: 7 days on the free Pop-Up page, and longer on other plans. Memorial pages stay for a year, free. You can close your page at any time, without asking: open your event, tap Settings, then Close the page now. You can open it again within 30 days." },
+  { q: "How long does my page stay online, and can I close it sooner?", a: "Your page is live from the moment you publish until 90 days after your event, free. Paid plans can keep it for 6 or 12 months. You can close it at any time, without asking: open your event, tap Settings, then Close the page now. You can open it again within 30 days." },
   { q: "Who can see my event?", a: "Only people you send the link to. For a private event, each guest gets their own link with their name on the envelope." },
   { q: "Can I use it for a big community event?", a: "Yes. Make the event page, share the programme, post updates on the day and collect photos. Ticketing, stalls and sponsors are coming soon." },
   { q: "How do I get help?", a: `Email ${CONTACT} and a real person will reply.` },
@@ -51,7 +53,7 @@ export function siteJsonLd(now: number) {
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "Organization", ...org, name: "in2min2", alternateName: ["In2Min2", "in 2 min 2"], url: `${SITE}/`,
-        logo: `${SITE}/brand/logo.png`, email: CONTACT, slogan: "Create, invite, celebrate", areaServed: "GB" },
+        logo: `${SITE}/brand/logo.png`, email: CONTACT, slogan: "Create, invite, celebrate", description: TAGLINE, areaServed: "GB" },
       { "@type": "WebSite", "@id": `${SITE}/#website`, name: "in2min2", url: `${SITE}/`, inLanguage: "en-GB", publisher: org },
       { "@type": "WebApplication", "@id": `${SITE}/#app`, name: "in2min2", url: `${SITE}/new`, description: WHAT_IT_IS,
         applicationCategory: "LifestyleApplication", operatingSystem: "Any (works in a web browser)", inLanguage: ["en-GB", "ne"],
@@ -80,7 +82,9 @@ export function llmsText(now: number): string {
   ];
   return `# in2min2
 
-> ${WHAT_IT_IS} Made in the UK for families and communities, in English, Nepali and more.
+> ${TAGLINE}
+
+${WHAT_IT_IS} Made in the UK for families and communities of every culture: English and Nepali are ready, and Hindi, Punjabi, Gujarati, Bengali, Tamil and more are in beta.
 
 ## What hosts and guests get
 
@@ -93,7 +97,7 @@ export function llmsText(now: number): string {
 
 ## Events it's made for
 
-Birthdays, weddings and receptions, engagements, wedding anniversaries, Pasni (rice feeding), Bratabandha, family ceremonies, Christmas and New Year's Eve parties, reunions and regimental days, memorials and funerals, Lhosar (Tamu, Sonam and Gyalpo), melas and festivals, charity and community events, and work parties. Ticketing, stalls, sponsors and tournament scores for big community events are coming in early 2027.
+Birthdays, weddings and receptions, engagements, wedding anniversaries, Pasni (rice feeding), Bratabandha, family ceremonies, Christmas and New Year's Eve parties, reunions and regimental days, memorials and funerals, Lhosar (Tamu, Sonam and Gyalpo), melas and festivals, charity and community events, and work parties. For Diwali, Eid, Vaisakhi, Holi or Lunar New Year, hosts choose a party or community event and name it. Ticketing, stalls, sponsors and tournament scores for big community events are coming in early 2027.
 
 ## Languages
 

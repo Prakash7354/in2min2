@@ -21,6 +21,7 @@ export type KindPage = {
 };
 
 const NEPALI = "Yes. The AI writer drafts the words in Nepali script or in English letters, and one invitation can show English and Nepali together.";
+const LANGS = "Yes. The AI writer drafts the words in English and Nepali (Nepali script or English letters), with Hindi, Punjabi, Gujarati, Bengali, Tamil and more in beta, and one invitation can show two languages.";
 const TICKETS = "Not yet. Online tickets, parking passes and business stalls arrive in February 2027. You can make the page and share the programme now.";
 
 export const KIND_PAGES: KindPage[] = [
@@ -44,10 +45,10 @@ export const KIND_PAGES: KindPage[] = [
   },
   {
     type: "pasni", name: "Pasni",
-    title: "Pasni invitation online (rice feeding ceremony) | in2min2",
-    description: "Make a Pasni invitation in English and Nepali on your phone, free. A day plan with puja, rice feeding and tika, replies with food needs, and photos for the family.",
-    kicker: "Pasni (rice feeding)", h1: "Pasni invitations, in English and Nepali",
-    intro: "Invite family and friends to your baby’s first rice. Make a beautiful Pasni invitation on your phone in two minutes, in English, Nepali or both, and send one link to everyone, near and far.",
+    title: "Pasni and Annaprashan invitations online (rice feeding ceremony) | in2min2",
+    description: "Make a Pasni or Annaprashan invitation on your phone, free, in English, Nepali or Hindi. A day plan with puja, rice feeding and blessings, replies with food needs, and photos.",
+    kicker: "Pasni and Annaprashan (rice feeding)", h1: "Pasni and Annaprashan invitations",
+    intro: "Invite family and friends to your baby’s first rice: a Pasni, Annaprashan or rice-feeding ceremony. Make a beautiful invitation on your phone in two minutes, in English, Nepali or Hindi, and send one link to everyone, near and far.",
     points: [
       ["Ready for the day", "The plan is ready: guests arrive, puja, rice feeding, lunch, then tika and blessings. Change anything with a tap."],
       ["Traditional looks", "Rich sindoor red and gold, painted frames or soft colours, with your baby’s photo in an arch, heart or polaroid."],
@@ -56,7 +57,7 @@ export const KIND_PAGES: KindPage[] = [
     ],
     questions: [
       { q: "When is a Pasni held?", a: "Many families hold the Pasni (also called Annaprashan) when the baby is about six months old for a boy, or five months for a girl, on a date the family priest suggests." },
-      { q: "Can I write the invitation in Nepali?", a: NEPALI },
+      { q: "Can I write the invitation in Nepali or Hindi?", a: LANGS },
       { q: "Can guests tell me if they’re vegetarian?", a: "Yes. When they reply, guests can tick vegetarian, vegan, halal, gluten-free, nut allergy or dairy-free, and you see the totals for the kitchen." },
     ],
     related: ["bratabandha", "ceremony", "birthday"],
@@ -83,13 +84,13 @@ export const KIND_PAGES: KindPage[] = [
   {
     type: "ceremony", name: "Family ceremonies",
     title: "Invitations for pujas and family ceremonies | in2min2",
-    description: "Invite family to a puja, a naming ceremony, a house blessing or any family ceremony. The day plan, directions, replies and photos on one link, free to make.",
+    description: "Invite family to a puja, a naming ceremony (Namkaran or Nwaran), a house blessing or any family ceremony. The day plan, directions, replies and photos on one link, free.",
     kicker: "Family ceremonies", h1: "Invitations for pujas and family ceremonies",
-    intro: "A puja, a naming ceremony, a house blessing or a special family prayer: make an invitation that suits the occasion, with the plan for the day and the way to get there.",
+    intro: "A puja, a naming ceremony (Namkaran or Nwaran), a house blessing, a Satyanarayan katha or a special family prayer: make an invitation that suits the occasion, with the plan for the day and the way to get there.",
     points: [
       ["The right plan", "Guests arrive, puja, lunch, then tika and blessings, with times, ready to change."],
       ["Calm, traditional looks", "Soft colours or red and gold, with a photo of the family or the place."],
-      ["One link for everyone", "Send it on WhatsApp, Viber or by text. Elders can read it in Nepali."],
+      ["One link for everyone", "Send it on WhatsApp, Viber or by text. Elders can read it in Nepali, and Hindi, Punjabi or Gujarati in beta."],
       ["Replies you can count", "See who is coming and how many, numbered, with any food needs, so the kitchen knows how much to cook."],
     ],
     questions: [
@@ -103,9 +104,9 @@ export const KIND_PAGES: KindPage[] = [
     title: "Online wedding invitations with RSVP, in English and Nepali | in2min2",
     description: "Make a wedding invitation and wedding page on your phone, free. Mehndi, ceremony and reception on one link, replies with food needs, and every guest’s photos.",
     kicker: "Weddings and receptions", h1: "Wedding invitations and wedding pages",
-    intro: "Make a wedding invitation as special as your day, then share one link for everything: the mehndi, the ceremony, the reception, directions and replies. In English, Nepali or both.",
+    intro: "Make a wedding invitation as special as your day, then share one link for everything: the mehndi, sangeet, ceremony and reception, directions and replies. In two languages if you like.",
     points: [
-      ["Every part in one place", "Mehndi, haldi, janti, ceremony, reception: each with its own time and place, in order."],
+      ["Every part in one place", "Mehndi, haldi, sangeet, janti or baraat, ceremony, reception: each with its own time and place, in order."],
       ["Rich, traditional designs", "Sindoor red and gold, ornate borders, painted roses, and your photos in a stack, heart or arch."],
       ["Replies the caterer can use", "Numbered replies with totals in people and food needs. Copy the list in one tap."],
       ["Photos from every guest", "Guests’ photos turn on the photo wheel and on the TV at the reception. Your photographer’s photos show their name."],
@@ -194,7 +195,7 @@ export const KIND_PAGES: KindPage[] = [
     title: "Mela and festival event pages | in2min2",
     description: "Make a page for a mela or festival, free: the programme, updates on the day, parking information and a photo wall. Tickets and stalls arrive in February.",
     kicker: "Melas and festivals", h1: "Melas and festivals",
-    intro: "A Dashain or Tihar mela, a Teej festival or a summer food festival: give it one page with everything visitors need, from the programme and parking to live updates on the day.",
+    intro: "A Diwali, Vaisakhi, Eid or Dashain mela, a Teej or Holi festival, or a summer food festival: give it one page with everything visitors need, from the programme and parking to live updates on the day.",
     points: [
       ["The programme", "Opening, cultural show, food stalls, raffle draw: in time order, showing what’s on now on the day."],
       ["Updates on the day", "Post “Car park full” or “Dance show starts in 10 minutes”, and visitors see it straight away."],
@@ -248,7 +249,7 @@ export const KIND_PAGES: KindPage[] = [
     title: "Community event pages: programme, replies and photos | in2min2",
     description: "Make a page for a community event, society meeting or cultural show, free. The programme, updates on the day, replies, directions and a photo wall.",
     kicker: "Community events", h1: "Community events and cultural shows",
-    intro: "For societies, temples, clubs and community groups: one page with the programme, the place and updates, shared in every group chat. Members reply and add their photos.",
+    intro: "For societies, temples, gurdwaras, mosques, churches, clubs and community groups: one page with the programme, the place and updates, shared in every group chat. Members reply and add their photos.",
     points: [
       ["The programme", "Welcome, programme, food, close: with times, showing what’s on now on the day."],
       ["Updates on the day", "Post news as it happens, and everyone sees it on the page straight away."],
@@ -256,7 +257,7 @@ export const KIND_PAGES: KindPage[] = [
       ["Photos, checked first", "Members add photos; you check each one before it shows on the page and the big screen."],
     ],
     questions: [
-      { q: "Can the page be in Nepali?", a: NEPALI },
+      { q: "Can the page be in our language?", a: LANGS },
       { q: "Can I sell tickets?", a: TICKETS },
     ],
     related: ["lhosar", "mela", "charity"],
@@ -293,7 +294,7 @@ export const KIND_PAGES: KindPage[] = [
       ["Photos, with care", "Friends can share photos; the family checks each one before it shows."],
     ],
     questions: [
-      { q: "Is it really free?", a: "Yes. Memorial and funeral pages are free, with no need to ask, and stay online for a year after the day." },
+      { q: "Is it really free?", a: "Yes. Memorial and funeral pages are free, with no need to ask, and stay online until 90 days after the day." },
       { q: "Can we close the page sooner?", a: "Yes, whenever you wish, without asking anyone. Open your event, tap Settings, then Close the page now. Family and friends then see that the page is closed. You can open it again within 30 days." },
       { q: "Can I add the 13th-day rites as well?", a: "Yes. Add each rite or gathering with its own date, time and place, and family see them in order." },
       { q: "Can the page be in Nepali?", a: NEPALI },
@@ -340,7 +341,7 @@ export const KIND_PAGES: KindPage[] = [
     title: "Party invitations online: house-warming, graduation and more | in2min2",
     description: "Make a party invitation in two minutes, free: house-warming, graduation, baby shower or just because. Replies, directions and photos on one link.",
     kicker: "Parties", h1: "Party invitations for any reason",
-    intro: "House-warming, graduation, baby shower, leaving do, or just because: make a party invitation on your phone and send one link.",
+    intro: "House-warming, graduation, baby shower, a Diwali or Eid get-together, a Lunar New Year dinner, or just because: make a party invitation on your phone and send one link.",
     points: [
       ["Name it anything", "Tap a quick name or type your own."],
       ["Bright looks", "Confetti, balloons or calm and classic, with your own photo."],

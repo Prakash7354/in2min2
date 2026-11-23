@@ -8,14 +8,14 @@
 import { ShareStrip } from "@/components/site/share-strip";
 
 const WHY: [string, string, string][] = [
-  ["🪔", "Made for your culture", "Pasni, Bratabandha, Lhosar, weddings and regimental days come with the right questions, day plans, dishes and designs, from sindoor red and gold to crossed khukuris."],
-  ["🗣️", "In your language", "The AI writer drafts your words in English, Nepali or both, so grandparents and grandchildren read the same invitation."],
+  ["🪔", "Made for every culture", "Weddings with mehndi and sangeet, Pasni, naming ceremonies, Lhosar and regimental days come with the right questions, day plans, dishes and designs. Diwali, Eid or Lunar New Year? Name your party your way."],
+  ["🗣️", "In your languages", "The AI writer drafts your words in English and Nepali, with Hindi, Punjabi, Gujarati, Bengali, Tamil and more in beta, so grandparents and grandchildren read the same invitation."],
   ["💌", "Personal to every guest", "Each guest can have their own link, with their name on the envelope. They open it with a tap, like a real card, with music."],
   ["✨", "Looks as special as your day", "A beautiful invitation and a full event page, not just a line of text lost in a chat. Guests remember it."],
   ["✅", "Every reply in one place", "Who’s coming, how many people, food needs and places left, numbered in one list. No counting messages in a group."],
   ["🔒", "Private and safe", "Guests don’t share their phone numbers with each other. Only you see replies and food needs, kept in the UK and Europe under UK data protection law."],
   ["📸", "Together on the day", "Everyone’s photos on one wall and on the big screen, comments and cheers, and a thank-you page to keep."],
-  ["💷", "A fair, simple price", "Free while our launch offer lasts, then a short page is free, or one price for the whole event from £9. No adverts."],
+  ["💷", "A fair, simple price", "Free until 90 days after your event. Need more people, photos or time? One price for the whole event, from £9. No adverts."],
 ];
 
 export function WhySection({ tint = false }: { tint?: boolean }) {

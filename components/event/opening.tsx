@@ -98,10 +98,13 @@ export function Opening({ data, title, to, id, preview }: Props) {
     ...eventVars(p, data.textStyle),
     "--op-sky": bd ? backdropImage(bd) : p.gradient ? `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}d9, ${p.bg}f2), ${p.gradient}` : `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}, ${p.bg})`,
     "--op-text": bd ? (bd.dark ? "#FFFFFF" : p.ink) : p.ink,
-    // On the dark sets the envelope is gold, so the wax and lining take the
-    // deep colour (red wax on gold, as on wedding cards); otherwise the accent.
-    "--op-wax": p.dark ? p.bg : p.accent,
-    "--op-wax-text": p.dark ? p.main : p.onAccent,
+    // The envelope: a deep "VIP" red with gold writing, a gold seal and a
+    // gold lining, for every event whatever its colours (owner, 23 Nov 2026).
+    // Memorials keep their own calm colour, with the old seal rule.
+    "--op-env": data.sensitive ? p.main : "#6B0A1B",
+    "--op-env-ink": data.sensitive ? p.onMain : "#F1D28A",
+    "--op-wax": data.sensitive ? (p.dark ? p.bg : p.accent) : "#D2A848",
+    "--op-wax-text": data.sensitive ? (p.dark ? p.main : p.onAccent) : "#5C0716",
   } as CSSProperties;
   const guest = to?.trim() || null;
   const toLine = envelopeTo(data, guest);

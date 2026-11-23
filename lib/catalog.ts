@@ -128,9 +128,9 @@ export type Plan = {
 };
 
 export const PLANS: Plan[] = [
-  { key: "popup", name: "Pop-Up", pricePence: 0, daysAfter: 7, guestLimit: 200, photoLimit: 50, photosPerGuest: 10, aiWrites: 5,
+  { key: "popup", name: "Pop-Up", pricePence: 0, daysAfter: 90, guestLimit: 200, photoLimit: 50, photosPerGuest: 10, aiWrites: 5,
     fullResDownload: false, hideBranding: false, bookingFeeBps: 0, bookingFeePence: 0, scales: ["personal", "celebration"],
-    packSize: 100, packPence: 300, sortOrder: 1, duration: "7 days", bestFor: "Birthdays, Pasni, parties" },
+    packSize: 100, packPence: 300, sortOrder: 1, duration: "90 days", bestFor: "Birthdays, Pasni, parties" },
   { key: "season", name: "Season", pricePence: 900, daysAfter: 90, guestLimit: 300, photoLimit: 300, photosPerGuest: 20, aiWrites: 30,
     fullResDownload: false, hideBranding: false, bookingFeeBps: 0, bookingFeePence: 0, scales: ["personal", "celebration"],
     packSize: 100, packPence: 300, sortOrder: 2, duration: "90 days", bestFor: "Anniversaries, engagements, reunions" },

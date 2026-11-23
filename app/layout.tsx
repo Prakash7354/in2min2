@@ -8,7 +8,7 @@ import { DEFAULT_OPEN_GRAPH } from "@/lib/site-share";
 export const metadata: Metadata = {
   metadataBase: new URL("https://in2min2.com"),
   title: "in2min2",
-  description: "Your event online in two minutes, from invitation to memory book, on one link.",
+  description: "in2min2 makes organising your event simple: a beautiful invitation in two minutes, replies counted for you, and everyone’s photos on one link. Free to start.",
   // The sharing picture for pages that don't set their own (lib/site-share.ts).
   openGraph: DEFAULT_OPEN_GRAPH,
   // Proves to Bing Webmaster Tools that in2min2.com is the owner's (22 Nov

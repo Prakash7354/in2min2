@@ -23,7 +23,7 @@ export const SHARE_IMAGE = {
 
 export const SHARE_TITLE = "in2min2 · Your event online in two minutes";
 export const SHARE_DESCRIPTION =
-  "Make your invitation and event page on your phone, free until 31 January. Guests reply, share photos and leave messages, all on one link. Try it now!";
+  "A beautiful invitation in two minutes, replies counted for you, and everyone’s photos on one link. Free until 31 January. Try it now!";
 
 // For every page that doesn't set its own (the root layout).
 export const DEFAULT_OPEN_GRAPH: Metadata["openGraph"] = {

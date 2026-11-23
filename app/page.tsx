@@ -6,13 +6,15 @@ import { HeroDevices } from "@/components/site/hero-devices";
 import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader } from "@/components/site/header";
 import { ShareStrip } from "@/components/site/share-strip";
+import { TrustBand } from "@/components/site/trust";
+import { PayMark, type PayKey } from "@/components/pay-icons";
 import { WheelDemo } from "@/components/site/wheel-demo";
 import { WhySection } from "@/components/site/why";
 import { KIND_PAGES } from "@/lib/kind-pages";
 import { TapHand } from "@/components/tap-hand";
 import { formatPence, PLANS } from "@/lib/catalog";
-import { heroSample, heroShows, kindSample, wordsSample } from "@/lib/site-samples";
-import { QUESTIONS, siteJsonLd } from "@/lib/site-facts";
+import { fullSample, heroSample, heroShows, kindSample, wordsSample } from "@/lib/site-samples";
+import { QUESTIONS, TAGLINE, siteJsonLd } from "@/lib/site-facts";
 import { SHARE_DESCRIPTION, SHARE_IMAGE, SHARE_TITLE } from "@/lib/site-share";
 import "./site.css";
 
@@ -24,7 +26,7 @@ import "./site.css";
 
 export const metadata: Metadata = {
   title: "in2min2 · Create, invite, celebrate. Your event online in two minutes",
-  description: "Make a beautiful invitation and event page on your phone in two minutes, free. Guests reply, share photos and messages on one link. English, Nepali and more.",
+  description: TAGLINE,
   alternates: { canonical: "/" },
   // What WhatsApp, Viber and Facebook show (lib/site-share.ts).
   openGraph: { type: "website", siteName: "in2min2", locale: "en_GB", url: "/", title: SHARE_TITLE, description: SHARE_DESCRIPTION, images: [SHARE_IMAGE] },
@@ -34,12 +36,12 @@ export const metadata: Metadata = {
 const FAMILY = [
   { type: "birthday", title: "Birthdays", line: "From the first birthday to the 60th, with cake, music and everyone’s photos.", photo: "birthday" },
   { type: "wedding", title: "Weddings and receptions", line: "Mehndi, ceremony and reception on one page, in two languages if you like.", photo: "wedding" },
-  { type: "pasni", title: "Pasni and Bratabandha", line: "Family ceremonies, with the blessings, the day plan and the menu.", card: "pasni" },
+  { type: "pasni", title: "Pasni and family ceremonies", line: "Pasni (Annaprashan), Bratabandha, naming ceremonies and pujas, with the day plan and the menu.", card: "pasni" },
   { type: "anniversary", title: "Anniversaries", line: "25 years, 50 years, or any year worth a party.", card: "anniversary" },
   { type: "christmas", title: "Christmas", line: "A family lunch or a big get-together.", photo: "christmas" },
   { type: "new-year", title: "New Year’s Eve", line: "Count down to midnight together, wherever everyone is.", photo: "newyear" },
   { type: "party", title: "Parties", line: "House-warming, graduation, or just because.", photo: "party" },
-  { type: "memorial", title: "Memorials", line: "A funeral, prayers or a day of remembrance. Gentle, respectful, and free for a year.", card: "memorial" },
+  { type: "memorial", title: "Memorials", line: "A funeral, prayers or a day of remembrance. Gentle, respectful, and always free.", card: "memorial" },
 ] as const;
 const COMMUNITY = [
   { type: "lhosar", title: "Lhosar", line: "Tamu, Sonam and Gyalpo Lhosar, for the whole community.", card: "lhosar" },
@@ -58,7 +60,7 @@ const HERO_PHOTOS: [string, string][] = [
 ];
 
 const STEPS = [
-  { title: "Choose your event", line: "Birthday, wedding, Pasni, Lhosar, a party or a tournament. Each one comes with the right questions." },
+  { title: "Choose your event", line: "Birthday, wedding, mehndi, Pasni, a Diwali or Eid party, Lhosar or a tournament. Each one comes with the right questions." },
   { title: "Answer a few questions", line: "Mostly taps: names, the date and the place. Then pick a look you like." },
   { title: "Let the AI write it", line: "In English, Nepali or both, warm, fun or formal. You check every word." },
   { title: "Share and celebrate", line: "Send one link. Guests open an envelope with their name on it, reply, and add photos on the day." },
@@ -80,6 +82,7 @@ export default function Home() {
   const hero = heroSample();
   const words = wordsSample();
   const shows = heroShows();
+  const bigDay = fullSample("wedding");
   const family = PLANS.filter((p) => ["popup", "season", "half_year", "keepsake"].includes(p.key));
   return (
     <div className="s-site">
@@ -121,7 +124,7 @@ export default function Home() {
         {/* ── What you get ── */}
         <section className="s-strip" aria-label="What you get">
           <ul className="s-wrap s-striplist">
-            <li><b>Two languages</b> English and Nepali, and more</li>
+            <li><b>Your languages</b> English, Nepali, Hindi, Punjabi and more</li>
             <li><b>AI writer</b> Your first draft in seconds</li>
             <li><b>On the day</b> Photos, comments and the TV wheel</li>
             <li><b>Fair price</b> Free to start, from £9 to keep longer</li>
@@ -212,7 +215,7 @@ export default function Home() {
               <h2 className="s-h2">Written for you, in your languages</h2>
               <p className="s-lead">The AI writes your invitation in seconds. Then you make it yours.</p>
               <ul className="s-ticks">
-                <li><b>Two languages on one card,</b> for example English with Nepali underneath, so grandparents and grandchildren can both read it.</li>
+                <li><b>Two languages on one card,</b> for example English with Nepali, Hindi or Punjabi underneath, so grandparents and grandchildren can both read it.</li>
                 <li><b>Choose the tone:</b> warm, formal, fun or festive.</li>
                 <li><b>Ready to send:</b> messages for WhatsApp, Facebook and text, with the right link, for each step from the invitation to the thank-you.</li>
                 <li><b>You’re in charge.</b> The AI only suggests. Nothing goes live until you check it and press Publish.</li>
@@ -220,6 +223,36 @@ export default function Home() {
             </div>
             <div className="s-wordsart" aria-hidden="true">
               <div className="s-phone"><div className="s-phonescreen"><EventView data={words} view="card" now={now} thumb /></div></div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── The big days (owner, 23 Nov 2026): weddings and other big
+             celebrations, where the season brings hundreds of guests, shown as
+             "big celebrations" rather than weddings alone. ── */}
+        <section className="s-section s-tint">
+          <div className="s-wrap s-split">
+            <div className="s-fullphone">
+              <div className="s-phone"><div className="s-phonescreen" tabIndex={0} aria-label="A wedding page, as guests see it">
+                <EventView data={bigDay} view="page" now={now} />
+              </div></div>
+            </div>
+            <div>
+              <p className="s-kicker">The big days</p>
+              <h2 className="s-h2">Made for big celebrations</h2>
+              <p className="s-lead">Weddings, receptions, engagements and milestone anniversaries bring hundreds of guests and more than one event. in2min2 keeps it all on one link, and looks the part.</p>
+              <ul className="s-ticks">
+                <li><b>Every event, one link:</b> mehndi, sangeet, haldi, the ceremony and the reception, each with its own day, time and place.</li>
+                <li><b>Every guest by name:</b> personal invitations with their name on the envelope, and replies counted in people, with food needs for the caterer.</li>
+                <li><b>Both families, both languages:</b> English with Nepali, Hindi or Punjabi on the same invitation.</li>
+                <li><b>On the day:</b> everyone’s photos on the big screen at the reception, your photographer’s work with their name, and a thank-you page to keep.</li>
+                <li><b>Room for everyone:</b> plans for 300, 400 or 500 guests, more at £3 for each 100, and your page and photos kept for up to 12 months.</li>
+              </ul>
+              <div className="s-btnrow">
+                <Link href="/wedding" className="s-btn s-btn-go">See wedding pages</Link>
+                <Link href="/engagement" className="s-btn s-btn-line">Engagements</Link>
+                <Link href="/anniversary" className="s-btn s-btn-line">Anniversaries</Link>
+              </div>
             </div>
           </div>
         </section>
@@ -255,7 +288,7 @@ export default function Home() {
               <ul className="s-ticks">
                 <li><b>Save any photo</b> to your phone, free.</li>
                 <li><b>Guests’ messages</b> stay with the photos, to read again later.</li>
-                <li><b>Online for 90 days</b> during our festive offer, and longer plans from February.</li>
+                <li><b>Online until 90 days after the day,</b> free. Longer plans from February.</li>
               </ul>
             </div>
           </div>
@@ -301,9 +334,26 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <p className="s-small s-center-text">Need room for more people? Add 100 for £3. Pay once per event, no subscription. Memorials are always free. Community events: a free page, and a small fee only on online ticket sales (coming soon).</p>
+            <p className="s-small s-center-text">Need room for more people? Add 100 for £3. Memorials are always free. Community events: a free page, and a small fee only on online ticket sales (coming soon).</p>
+            {/* Paying, with the same trust as sharing (owner, 23 Nov 2026). Payments open in February. */}
+            <div className="s-paytrust">
+              <ul className="s-payticks">
+                <li>Pay once per event, no subscription</li>
+                <li>No card needed to start</li>
+                <li>Full refund within 14 days</li>
+                <li>If we let you down on the day, your money back</li>
+              </ul>
+              <div className="s-paymarks">
+                <p>Secure card payments through Stripe, from February 2027. Your card details go straight to Stripe: we never see them.</p>
+                <span aria-label="Stripe, Visa, Mastercard, Apple Pay and Google Pay" role="img">
+                  {(["stripe", "visa", "mastercard", "applepay", "googlepay"] as PayKey[]).map((k) => <PayMark key={k} pay={k} size={32} />)}
+                </span>
+              </div>
+            </div>
           </div>
         </section>
+
+        <TrustBand tint />
 
         {/* ── Why ── */}
         <section className="s-section s-why">

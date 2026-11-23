@@ -62,7 +62,7 @@ export default function Fees() {
       <ul>
         <li>
           <strong>Festive launch: free until 31 January 2027.</strong> Every event page made until then is free, with every switch. It stays online
-          until 7 days after the event; after that you can keep it longer at the normal price.
+          until 90 days after the event; after that you can keep it longer at the normal price.
         </li>
         <li><strong>LAUNCH50:</strong> the first 50 families get a free Keepsake (12 months). One per account; not for public events. Type the code when you publish.</li>
         <li>
@@ -75,7 +75,7 @@ export default function Fees() {
       <p>The system never decides who pays less. These written rules do, and they&apos;re the same for everyone.</p>
       <div className="my-4 grid gap-3">
         <Rule level="Free" who="Memorials and funerals"
-          how="Automatic: choose “Memorial or funeral” and the page is free, online for a year after the day. A grieving family never has to ask, and can close the page sooner at any time. Using it for any other event breaks our terms: we move the event to the normal price, or take the page down." />
+          how="Automatic: choose “Memorial or funeral” and the page is free, online until 90 days after the day, like every free page. A grieving family never has to ask, and can close the page sooner at any time. Using it for any other event breaks our terms: we move the event to the normal price, or take the page down." />
         <Rule level="Half" who="Fundraising events run by a registered charity"
           how="Ask by email or letter with your charity number. We check it on the Charity Commission, OSCR (Scotland) or Northern Ireland register." />
         <Rule level="Half" who="Small charities that don't have to register (income under £5,000), and armed forces welfare or benevolent events"

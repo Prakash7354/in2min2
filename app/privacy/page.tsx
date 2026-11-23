@@ -138,7 +138,7 @@ export default function Privacy() {
 
       <h2 id="how-long">6. How long we keep things</h2>
       <ul>
-        <li><strong>An event page</strong> is online until its plan ends: 7 days to 12 months after the event.</li>
+        <li><strong>An event page</strong> is online until its plan ends: 90 days to 12 months after the event.</li>
         <li><strong>Guest details, photos and messages</strong> are deleted 30 days after the page closes. The host gets a warning email first, and can download the photos. A host can press &ldquo;Delete everything&rdquo; at any time.</li>
         <li><strong>Kept for next year</strong>, only if the host chooses: the guest list and the page details, offline, for up to 13 months after the event. Any guest can ask to be taken off.</li>
         <li><strong>Your account:</strong> until you delete it, or after 2 years without use. We email you first.</li>

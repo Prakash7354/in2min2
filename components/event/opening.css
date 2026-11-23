@@ -1,5 +1,7 @@
 /* The envelope guests tap to open (components/event/opening.tsx), drawn in
-   CSS in the event's own colours: no pictures to load.
+   CSS: no pictures to load. The envelope is a deep "VIP" red with gold
+   writing and a gold seal (--op-env, owner 23 Nov 2026); the card inside
+   keeps the event's own colours. Memorials keep their own calm colour.
    Order of events: front (From, stamp, To) → tap anywhere → it turns over
    → the seal breaks → the flap lifts → the card slides out → the page. */
 
@@ -49,10 +51,10 @@
 .op-front {
   z-index: 8; overflow: hidden;
   background:
-    radial-gradient(ellipse 120% 80% at 30% 0%, color-mix(in srgb, var(--ev-main) 82%, white), transparent 60%),
-    linear-gradient(170deg, var(--ev-main), color-mix(in srgb, var(--ev-main) 90%, black));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ev-on-main) 18%, transparent);
-  color: var(--ev-on-main);
+    radial-gradient(ellipse 120% 80% at 30% 0%, color-mix(in srgb, var(--op-env) 82%, white), transparent 60%),
+    linear-gradient(170deg, var(--op-env), color-mix(in srgb, var(--op-env) 90%, black));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--op-env-ink) 50%, transparent), inset 0 0 0 6px transparent, inset 0 0 0 7px color-mix(in srgb, var(--op-env-ink) 28%, transparent);
+  color: var(--op-env-ink);
 }
 .op-from { position: absolute; left: 6%; top: 8%; width: 46%; display: grid; gap: 1px; text-align: left; }
 .op-from small, .op-address small { font-size: 9px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; opacity: 0.75; }
@@ -102,7 +104,7 @@
 }
 
 /* The back: inside, card, pocket (three folds), flap, seal. */
-.op-back { inset: 0; border-radius: 10px; background: color-mix(in srgb, var(--ev-main) 72%, black); }
+.op-back { inset: 0; border-radius: 10px; background: color-mix(in srgb, var(--op-env) 72%, black); }
 .op-card {
   left: 6%; right: 6%; top: 5%; height: 90%; z-index: 2;
   display: grid; align-content: center; justify-items: center; gap: 6px; padding: 10% 8%;
@@ -114,11 +116,11 @@
 .op-card-title { font-family: var(--ev-display); font-size: clamp(18px, 5.4vw, 24px); line-height: 1.15; color: var(--ev-main); }
 .op-card-date { font-size: 12px; color: var(--ev-muted); }
 .op-pocket { inset: 0; z-index: 3; }
-.op-pocket-l { clip-path: polygon(0 0, 50% 52%, 0 100%); background: linear-gradient(100deg, color-mix(in srgb, var(--ev-main) 92%, black), var(--ev-main)); border-radius: 10px 0 0 10px; }
-.op-pocket-r { clip-path: polygon(100% 0, 50% 52%, 100% 100%); background: linear-gradient(260deg, color-mix(in srgb, var(--ev-main) 92%, black), var(--ev-main)); border-radius: 0 10px 10px 0; }
+.op-pocket-l { clip-path: polygon(0 0, 50% 52%, 0 100%); background: linear-gradient(100deg, color-mix(in srgb, var(--op-env) 92%, black), var(--op-env)); border-radius: 10px 0 0 10px; }
+.op-pocket-r { clip-path: polygon(100% 0, 50% 52%, 100% 100%); background: linear-gradient(260deg, color-mix(in srgb, var(--op-env) 92%, black), var(--op-env)); border-radius: 0 10px 10px 0; }
 .op-pocket-b {
   clip-path: polygon(0 100%, 50% 44%, 100% 100%);
-  background: linear-gradient(0deg, var(--ev-main), color-mix(in srgb, var(--ev-main) 86%, white));
+  background: linear-gradient(0deg, var(--op-env), color-mix(in srgb, var(--op-env) 86%, white));
   border-radius: 0 0 10px 10px;
 }
 .op-flap {
@@ -128,7 +130,7 @@
 .op-flap-out, .op-flap-in { inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
 .op-flap-out {
   clip-path: polygon(0 0, 100% 0, 50% 100%);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--ev-main) 88%, white), var(--ev-main) 70%, color-mix(in srgb, var(--ev-main) 90%, black));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--op-env) 88%, white), var(--op-env) 70%, color-mix(in srgb, var(--op-env) 90%, black));
   border-radius: 10px 10px 0 0;
 }
 .op-flap-in {
@@ -193,7 +195,7 @@
 .op-hint {
   display: inline-flex; align-items: center; gap: 4px;
   min-height: 44px; padding: 10px 20px; border-radius: 999px;
-  background: color-mix(in srgb, var(--ev-main) 88%, transparent); color: var(--ev-on-main);
+  background: color-mix(in srgb, var(--op-env) 88%, transparent); color: var(--op-env-ink);
   font-size: 16px; font-weight: 700;
   box-shadow: 0 8px 20px -8px rgb(0 0 0 / 0.45);
 }

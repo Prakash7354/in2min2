@@ -430,3 +430,32 @@
 .s-sharestrip-compact { align-items: center; gap: 10px 12px; margin-top: 18px; font-size: 15px; font-weight: 700; color: var(--s-muted); }
 .s-shareicons { display: flex; flex-wrap: wrap; gap: 8px; }
 .s-hero .s-sharestrip-compact { color: #e2eaf6; }
+
+/* "No strings" and "Your data, protected" (components/site/trust.tsx) */
+.s-nostrings { display: grid; gap: 12px; margin: 26px 0 0; padding: 0; list-style: none; }
+.s-nostrings li { display: grid; grid-template-columns: auto 1fr; column-gap: 14px; row-gap: 2px; padding: 18px; border-radius: 20px; background: var(--s-card); box-shadow: var(--s-shadow); }
+.s-nostrings li > span:first-child { grid-row: span 2; font-size: 30px; line-height: 1; }
+.s-nostrings b { font-family: var(--font-display); font-size: 19px; color: var(--s-navy); }
+.s-nostrings li > span:last-child { color: var(--s-muted); font-size: 16.5px; }
+.s-gdpr { margin-top: 22px; padding: 24px 22px; border-radius: 24px; background: linear-gradient(160deg, var(--s-navy), var(--s-navy-2)); color: #e8eef8; box-shadow: var(--s-shadow); }
+.s-gdpr-head { display: flex; align-items: center; gap: 14px; }
+.s-gdpr-shield { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 18px; background: rgba(25, 169, 168, 0.22); color: #6fe3df; flex: none; }
+.s-gdpr .s-kicker { color: #6fe3df; margin: 0; }
+.s-gdpr-h { margin: 2px 0 0; font-family: var(--font-display); font-size: clamp(24px, 5vw, 32px); line-height: 1.1; color: #fff; }
+.s-gdpr-list { display: grid; gap: 10px; margin: 18px 0 0; padding: 0; list-style: none; }
+.s-gdpr-list li { position: relative; padding-left: 32px; font-size: 17px; }
+.s-gdpr-list li::before { content: ""; position: absolute; left: 0; top: 3px; width: 20px; height: 20px; border-radius: 999px; background: var(--s-teal); }
+.s-gdpr-list li::after { content: ""; position: absolute; left: 7px; top: 7px; width: 5px; height: 9px; border: solid #fff; border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); }
+.s-gdpr-foot { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 18px 0 0; font-size: 15px; }
+.s-gdpr-foot a { color: #fff; font-weight: 700; }
+@media (min-width: 800px) { .s-nostrings { grid-template-columns: repeat(3, 1fr); } .s-gdpr { padding: 30px 34px; } .s-gdpr-list { grid-template-columns: 1fr 1fr; column-gap: 34px; } }
+
+/* Paying: trust under the plans (app/page.tsx) */
+.s-paytrust { display: grid; gap: 16px; margin-top: 22px; padding: 20px; border-radius: 22px; background: var(--s-card); box-shadow: var(--s-shadow); }
+.s-payticks { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.s-payticks li { position: relative; padding-left: 30px; font-weight: 700; color: var(--s-navy); }
+.s-payticks li::before { content: "✓"; position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 999px; background: var(--s-mint); color: var(--s-teal-deep); font-size: 14px; }
+.s-paymarks { display: grid; gap: 10px; }
+.s-paymarks p { margin: 0; color: var(--s-muted); font-size: 15.5px; }
+.s-paymarks > span { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (min-width: 800px) { .s-paytrust { grid-template-columns: 1fr 1fr; align-items: center; padding: 24px 28px; } .s-payticks { grid-template-columns: 1fr 1fr; } }

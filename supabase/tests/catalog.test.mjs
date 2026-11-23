@@ -23,6 +23,11 @@ const dbPlans = [...(sql + later).matchAll(planRe)].map((m) => ({
   bookingFeeBps: +m[11], bookingFeePence: +m[12], scales: m[13].split(","), packSize: num(m[14]), packPence: num(m[15]), sortOrder: +m[16],
 }));
 ok("found the 6 plans in the database files (5, and the festive launch's)", dbPlans.length === 6, String(dbPlans.length));
+// Later changes to a plan's time, e.g. 0016's "update public.plans set hosting_days_after = 90 where key = 'popup'".
+for (const m of later.matchAll(/update public\.plans set hosting_days_after = (\d+) where key = '([a-z_]+)'/g)) {
+  const d = dbPlans.find((x) => x.key === m[2]);
+  if (d) d.daysAfter = +m[1];
+}
 for (const d of dbPlans) {
   const t = cat.PLANS.find((p) => p.key === d.key);
   const same = t && Object.keys(d).every((k) => JSON.stringify(d[k]) === JSON.stringify(t[k]));

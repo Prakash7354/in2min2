@@ -15,6 +15,7 @@ import { GuestDemoButton } from "@/components/site/guest-demo";
 import { SiteHeader } from "@/components/site/header";
 import { ShareStrip } from "@/components/site/share-strip";
 import { WhySection } from "@/components/site/why";
+import { TrustBand } from "@/components/site/trust";
 import { asksFood } from "@/lib/event-view";
 import { EVENT_TYPES } from "@/lib/catalog";
 import { KIND_PAGES, kindPage } from "@/lib/kind-pages";
@@ -136,8 +137,11 @@ export default async function KindPage({ params }: PageProps<"/[type]">) {
 
         {k.type !== "memorial" && <WhySection tint />}
 
+        {/* No strings, and your data protected (owner, 23 Nov 2026). */}
+        <TrustBand tint={k.type === "memorial"} />
+
         {/* ── Questions ── */}
-        <section className={`s-section${k.type === "memorial" ? " s-tint" : ""}`}>
+        <section className={`s-section${k.type === "memorial" ? "" : " s-tint"}`}>
           <div className="s-wrap s-narrow">
             <p className="s-kicker">Questions</p>
             <h2 className="s-h2">Good to know</h2>
