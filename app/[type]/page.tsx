@@ -13,6 +13,7 @@ import EventView from "@/components/event/event-view";
 import { SiteFooter } from "@/components/site/footer";
 import { GuestDemoButton } from "@/components/site/guest-demo";
 import { SiteHeader } from "@/components/site/header";
+import { ShareStrip } from "@/components/site/share-strip";
 import { WhySection } from "@/components/site/why";
 import { asksFood } from "@/lib/event-view";
 import { EVENT_TYPES } from "@/lib/catalog";
@@ -90,6 +91,7 @@ export default async function KindPage({ params }: PageProps<"/[type]">) {
                   <span className="s-play" aria-hidden="true">▶</span>See it as a guest
                 </GuestDemoButton>
               </div>
+              <ShareStrip compact />
               <p className="s-small">No app to download. Works on any phone.</p>
             </div>
             <div className="s-wordsart" aria-hidden="true">

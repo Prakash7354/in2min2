@@ -1078,3 +1078,10 @@ a.b2-row { color: var(--b2-text); }
 .b2-live-pop { font-size: 38px; line-height: 1; animation: b2-live-pop 0.8s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
 @keyframes b2-live-pop { from { transform: scale(0.2) rotate(-30deg); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .b2-live-pop { animation: none; } }
+
+/* Share › "Or send it with": the apps as their own icons (app/new/share-apps.tsx) */
+.b2-apps { display: flex; flex-wrap: wrap; gap: 12px 14px; }
+.b2-app { display: grid; justify-items: center; gap: 6px; min-width: 52px; padding: 0; border: 0; background: none; color: var(--b2-text-2); font: inherit; font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; }
+.b2-app:hover span:last-child { color: var(--b2-text); }
+.b2-app:focus-visible { outline: 3px solid var(--b2-accent); outline-offset: 4px; border-radius: 14px; }
+.app-own { width: 100%; height: 100%; }

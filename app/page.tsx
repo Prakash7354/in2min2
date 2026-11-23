@@ -5,6 +5,7 @@ import { GuestDemoButton } from "@/components/site/guest-demo";
 import { HeroDevices } from "@/components/site/hero-devices";
 import { SiteFooter } from "@/components/site/footer";
 import { SiteHeader } from "@/components/site/header";
+import { ShareStrip } from "@/components/site/share-strip";
 import { WheelDemo } from "@/components/site/wheel-demo";
 import { WhySection } from "@/components/site/why";
 import { KIND_PAGES } from "@/lib/kind-pages";
@@ -103,13 +104,14 @@ export default function Home() {
             <div className="s-herotext">
               <p className="s-pill">Free until 31 January 2027</p>
               <h1 className="s-h1">Create. Invite. <span>Celebrate.</span></h1>
-              <p className="s-lead"><strong>Your event online in two minutes.</strong> Make a beautiful invitation and event page on your phone. Send one link on WhatsApp or Facebook. Guests reply, share photos and leave messages, all in one place.</p>
+              <p className="s-lead"><strong>Your event online in two minutes.</strong> Make a beautiful invitation and event page on your phone. Send one link on WhatsApp, Viber or Facebook. Guests reply, share photos and leave messages, all in one place.</p>
               <div className="s-btnrow">
                 <Link href="/new" className="s-btn s-btn-go">Start free</Link>
                 <GuestDemoButton data={hero} title={hero.copy.card_headline || hero.title} className="s-btn s-btn-ghost-light">
                   <span className="s-play" aria-hidden="true">▶</span>See what your guests get
                 </GuestDemoButton>
               </div>
+              <ShareStrip compact />
               <p className="s-small">No app to download. Works on any phone.</p>
             </div>
             <HeroDevices shows={shows} now={now} />

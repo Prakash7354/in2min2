@@ -15,6 +15,8 @@ import { missingForPublish, toViewData, unpublishedChanges, type Draft } from "@
 import { formatDate } from "@/lib/event-view";
 import { wallPath } from "@/lib/photos";
 import { copyLink, shareLink, whatsappUrl } from "@/lib/share";
+import { AppIcon } from "@/components/app-icons";
+import { ShareApps } from "./share-apps";
 import { supabase } from "@/lib/supabase/client";
 import { moments } from "../builder/share-links";
 import { totals } from "../builder/replies";
@@ -182,11 +184,12 @@ function ShareLinks({ d, link, say }: { d: Draft; link: string; say: (m: string)
         <p className="b2-msgtext">{invite.text}<br /><span>{bare(link)}</span></p>
         <a className="b2-btn b2-primary b2-block b2-wa" href={whatsappUrl(link, invite.text)} target="_blank" rel="noreferrer"
           style={{ position: "relative" }} onClick={() => markHint("share-send")}>
-          <Icon name="message" className="" />Send on WhatsApp
+          <AppIcon app="whatsapp" bare size={22} />Send on WhatsApp
           {b.pub.first && <Hint id="share-send" label="Send it" style={{ right: 18, bottom: 4 }} />}
         </a>
+        <p className="b2-small" style={{ margin: "2px 0 -2px" }}>Or send it with:</p>
+        <ShareApps url={link} text={invite.text} subject={d.title.trim() || "You're invited"} isPrivate={d.isPrivate} onMore={() => void share(link, invite.text)} />
         <div className="b2-chips">
-          <button type="button" className="b2-chip b2-chip-sm" onClick={() => void share(link, invite.text)}><Icon name="share" className="" />More ways</button>
           <button type="button" className="b2-chip b2-chip-sm" onClick={() => void copy(`${invite.text}\n${link}`, "Invitation")}><Icon name="copy" className="" />Copy</button>
           <button type="button" className="b2-chip b2-chip-sm" aria-expanded={qr} onClick={() => setQr(!qr)}><Icon name="qr" className="" />QR code</button>
           {!community && <button type="button" className="b2-chip b2-chip-sm" onClick={() => void fromSheet("guests")}><Icon name="user" className="" />Personal invitations</button>}
@@ -220,7 +223,7 @@ function ShareLinks({ d, link, say }: { d: Draft; link: string; say: (m: string)
             <>
               <p className="b2-msgtext">{m.text}</p>
               <div className="b2-chips">
-                <a className="b2-chip b2-chip-sm b2-wa" href={whatsappUrl(m.url, m.text)} target="_blank" rel="noreferrer"><Icon name="message" className="" />WhatsApp</a>
+                <a className="b2-chip b2-chip-sm b2-wa" href={whatsappUrl(m.url, m.text)} target="_blank" rel="noreferrer"><AppIcon app="whatsapp" bare size={18} />WhatsApp</a>
                 <button type="button" className="b2-chip b2-chip-sm" onClick={() => void share(m.url!, m.text!)}><Icon name="share" className="" />Share</button>
                 <button type="button" className="b2-chip b2-chip-sm" onClick={() => void copy(`${m.text}\n${m.url}`, "Message")}><Icon name="copy" className="" />Copy</button>
               </div>
@@ -386,7 +389,7 @@ function BellBody() {
                   <span className="b2-small">Ready once the event is over, when your page becomes the thank-you page.</span>
                 ) : (
                   <a className="b2-chip b2-chip-sm b2-wa" style={{ justifySelf: "start", marginTop: 4 }} href={whatsappUrl(link + (m.hash ?? ""), m.text)} target="_blank" rel="noreferrer">
-                    <Icon name="message" className="" />Send on WhatsApp
+                    <AppIcon app="whatsapp" bare size={18} />Send on WhatsApp
                   </a>
                 )}
               </div>

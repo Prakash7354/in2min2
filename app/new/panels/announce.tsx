@@ -7,6 +7,7 @@
 // finishes the sentence. Up to 10 a day.
 
 import { useCallback, useEffect, useState } from "react";
+import { AppIcon } from "@/components/app-icons";
 import { Icon, type IconName } from "@/components/icons";
 import { eventType } from "@/lib/catalog";
 import type { AnnouncementKind } from "@/lib/live";
@@ -124,7 +125,7 @@ export function AnnouncePanel() {
 
       {latest && link && (
         <a className="b2-btn b2-primary b2-block b2-wa" href={whatsappUrl(link, latest.body)} target="_blank" rel="noreferrer">
-          <Icon name="message" className="" />Send the latest on WhatsApp
+          <AppIcon app="whatsapp" bare size={20} />Send the latest on WhatsApp
         </a>
       )}
 
@@ -138,7 +139,7 @@ export function AnnouncePanel() {
               <span className="b2-chips">
                 {link && (
                   <a className="b2-chip b2-chip-sm b2-wa" href={whatsappUrl(link, a.body)} target="_blank" rel="noreferrer">
-                    <Icon name="message" className="" />WhatsApp
+                    <AppIcon app="whatsapp" bare size={18} />WhatsApp
                   </a>
                 )}
                 <button type="button" className="b2-chip b2-chip-sm" onClick={() => void remove(a.id)}><Icon name="trash" className="" />Remove</button>

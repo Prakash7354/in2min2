@@ -15,6 +15,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
+import { AppIcon } from "@/components/app-icons";
 import { Opening } from "@/components/event/opening";
 import { toViewData, unpublishedChanges } from "@/lib/draft";
 import { defaultTo, envelopeFrom, formatDate, TO_LINES, type InviteWay } from "@/lib/event-view";
@@ -121,7 +122,7 @@ function ToLine({ way }: { way: Exclude<InviteWay, "personal"> }) {
       )}
       {link ? (
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <a className="b2-btn b2-primary" href={whatsappUrl(link, message)} target="_blank" rel="noreferrer"><Icon name="message" className="" />Send on WhatsApp</a>
+          <a className="b2-btn b2-primary" href={whatsappUrl(link, message)} target="_blank" rel="noreferrer"><AppIcon app="whatsapp" bare size={20} />Send on WhatsApp</a>
           <button type="button" className="b2-btn b2-secondary" onClick={async () => { const r = await copyLink(link); say(r === "copied" ? "Link copied." : "Couldn't copy here."); }}>
             <Icon name="copy" className="" />Copy link
           </button>
@@ -269,7 +270,7 @@ function Personal() {
                 ) : (
                   <span style={{ display: "flex", gap: 6 }}>
                     <a className="b2-round b2-round-sm b2-wa" href={whatsappUrl(linkFor(g), message(g))} target="_blank" rel="noreferrer"
-                      aria-label={`Send ${g.full_name}'s invitation on WhatsApp`} onClick={() => void sent(g)}><Icon name="message" className="" /></a>
+                      aria-label={`Send ${g.full_name}'s invitation on WhatsApp`} onClick={() => void sent(g)}><AppIcon app="whatsapp" bare size={20} /></a>
                     <button type="button" className="b2-round b2-round-sm" aria-label={`Copy ${g.full_name}'s link`}
                       onClick={async () => { const r = await copyLink(linkFor(g)); if (r === "copied") { say(`${g.full_name}'s link copied.`); void sent(g); } }}>
                       <Icon name="copy" className="" />

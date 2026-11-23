@@ -55,6 +55,8 @@ minutes" and "Free until 31 January", made from `scripts/art/share-image.html` (
 at the top of that file). Its title and words are in `lib/site-share.ts`.
 **Change both in February**, and give the new picture a new file name.
 
+**App icons** (23 Nov 2026): the WhatsApp, Viber, Messenger and Facebook logo shapes in `components/app-icons.tsx` come from Simple Icons 13.21.0 (simpleicons.org), CC0 (public domain). Each company allows its logo on a "share with" button; keep them unchanged and in their own colours.
+
 **Banner** (owner's design, stopwatch and people): `public/brand/logo-banner.png` from
 in2min2-banner-211126.jpeg (only 512 px wide; a bigger copy would be sharper), white
 taken off as above. Shown in “Why we made in2min2” with what the logo means.

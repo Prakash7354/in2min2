@@ -423,3 +423,10 @@
 .s-devopen { display: block; margin: 14px auto 0; padding: 8px 14px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.12); color: #fff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
 .s-devopen:hover { background: rgba(255, 255, 255, 0.2); }
 .s-devopen span { color: var(--s-gold); }
+
+/* "Send it on": the apps as their own icons (components/site/share-strip.tsx) */
+.s-sharestrip { display: flex; flex-wrap: wrap; gap: 14px 16px; margin: 24px 0 0; padding: 0; list-style: none; }
+.s-sharestrip li { display: grid; justify-items: center; gap: 6px; min-width: 56px; font-size: 14px; font-weight: 700; color: var(--s-navy); }
+.s-sharestrip-compact { align-items: center; gap: 10px 12px; margin-top: 18px; font-size: 15px; font-weight: 700; color: var(--s-muted); }
+.s-shareicons { display: flex; flex-wrap: wrap; gap: 8px; }
+.s-hero .s-sharestrip-compact { color: #e2eaf6; }

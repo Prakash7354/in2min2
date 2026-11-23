@@ -9,6 +9,7 @@
 
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
+import { AppIcon } from "@/components/app-icons";
 import { daysUntil, formatDate } from "@/lib/event-view";
 import { copyLink, whatsappUrl } from "@/lib/share";
 import { foodLabel } from "@/lib/catalog";
@@ -111,7 +112,7 @@ export function RepliesPanel() {
         </div>
       )}
       <div className="b2-chips">
-        {link && <a className="b2-chip b2-chip-sm b2-wa" href={whatsappUrl(link, reminder)} target="_blank" rel="noreferrer"><Icon name="message" className="" />Send a reminder</a>}
+        {link && <a className="b2-chip b2-chip-sm b2-wa" href={whatsappUrl(link, reminder)} target="_blank" rel="noreferrer"><AppIcon app="whatsapp" bare size={18} />Send a reminder</a>}
         <button type="button" className="b2-chip b2-chip-sm" disabled={!rows.length}
           onClick={async () => b.say((await copyLink(copyText(title, rows, u))) === "copied" ? "List copied. Paste it for the caterer or venue." : "Couldn't copy here.")}>
           <Icon name="copy" className="" />Copy the list

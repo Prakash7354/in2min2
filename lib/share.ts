@@ -33,3 +33,22 @@ export async function copyLink(text: string): Promise<ShareResult> {
 export function whatsappUrl(url: string, text: string): string {
   return `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`;
 }
+
+// The other apps people share with (owner, 23 Nov 2026), each opening with the
+// message typed in where the app allows it. Viber and Messenger open the app
+// on a phone; Messenger can take only the link, and only on a phone.
+export function viberUrl(url: string, text: string): string {
+  return `viber://forward?text=${encodeURIComponent(`${text}\n${url}`)}`;
+}
+export function smsUrl(url: string, text: string): string {
+  return `sms:?&body=${encodeURIComponent(`${text} ${url}`)}`;
+}
+export function emailUrl(url: string, text: string, subject: string): string {
+  return `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`${text}\n\n${url}`)}`;
+}
+export function facebookUrl(url: string): string {
+  return `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+}
+export function messengerUrl(url: string): string {
+  return `fb-messenger://share/?link=${encodeURIComponent(url)}`;
+}

@@ -5,6 +5,8 @@
 // price. Only what's built. On the home page and the event pages (not the
 // memorial page, which keeps its own gentle words).
 
+import { ShareStrip } from "@/components/site/share-strip";
+
 const WHY: [string, string, string][] = [
   ["🪔", "Made for your culture", "Pasni, Bratabandha, Lhosar, weddings and regimental days come with the right questions, day plans, dishes and designs, from sindoor red and gold to crossed khukuris."],
   ["🗣️", "In your language", "The AI writer drafts your words in English, Nepali or both, so grandparents and grandchildren read the same invitation."],
@@ -22,7 +24,8 @@ export function WhySection({ tint = false }: { tint?: boolean }) {
       <div className="s-wrap">
         <p className="s-kicker">Why in2min2</p>
         <h2 className="s-h2">Why not just a WhatsApp message?</h2>
-        <p className="s-lead">WhatsApp, Viber and texts are great for chatting. For an occasion that matters, in2min2 does the rest. Send the link in the same WhatsApp message.</p>
+        <p className="s-lead">Keep using the apps you love. Send your in2min2 link on WhatsApp, Viber, Messenger or Facebook, by text or email, or print its QR code on a card. Then in2min2 does what a chat can’t:</p>
+        <ShareStrip />
         <ul className="s-whygrid">
           {WHY.map(([icon, title, line]) => (
             <li key={title}><span aria-hidden="true">{icon}</span><b>{title}</b><span>{line}</span></li>
