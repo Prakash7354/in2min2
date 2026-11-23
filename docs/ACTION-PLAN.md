@@ -38,6 +38,11 @@ Tick `[x]` when a step is done, or just tell Claude Code. If a screen looks diff
   - **Optional, in Cloudflare:** **in2min2.com** › **Caching** › **Configuration** › switch on **Crawler Hints**. Bing then hears about changes straight away.
   - It usually takes a few days to two weeks before in2min2.com shows up in searches. Check **Performance** in Google once a week. Tell Claude Code if Google lists a page as having a problem.
 
+- [x] **Google and Bing set up (22 Nov).** Crawler Hints and Always Online stay off (your decision, 23 Nov).
+- [ ] **AI assistants (built 23 Nov).** ChatGPT, Perplexity, Claude and DuckDuckGo's assistant may read the website, but no AI robot may read guests' event pages. A plain fact sheet for AI is at https://in2min2.com/llms.txt, and the home page has four new questions (What is in2min2? Pasni, Bratabandha or Lhosar? Food needs? WhatsApp group or paper card?).
+  - **Your decision:** may AI companies *learn* from the website (not guests' pages)? It's on for now (recommended): future AI models then know in2min2 by name. Say "no AI learning" and Claude Code switches it off.
+  - **See where visitors come from (5 minutes, free, no cookies):** Cloudflare dashboard › **Analytics & Logs** › **Web Analytics** › **Add a site** › choose **in2min2.com** › **Done**. A day later, look under **Referers** for chatgpt.com, perplexity.ai, copilot.microsoft.com and gemini.google.com. Tell Claude Code when it's on, so the privacy page can say so. If it shows you a code snippet instead, send that to Claude Code (it isn't a secret).
+
 ## Launch checklist (20 Nov 2026): what's left before sharing with real families
 
 **Ready (Claude Code, 20 Nov):**
