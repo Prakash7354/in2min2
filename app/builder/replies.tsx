@@ -97,6 +97,28 @@ export function foodOf(r: Reply): FoodNeed[] {
 export function foodTotals(rows: Reply[]): { key: FoodNeed; label: string; icon: string; n: number }[] {
   return FOOD_NEEDS.map((f) => ({ ...f, n: rows.filter((r) => foodOf(r).includes(f.key)).length })).filter((f) => f.n > 0);
 }
+export const foodIcon = (k: FoodNeed) => FOOD_NEEDS.find((f) => f.key === k)?.icon ?? "";
+// An allergy is a safety matter for the caterer, so it stands out from a choice.
+export const isAllergy = (k: FoodNeed) => k === "nut_allergy";
+
+// Filters for the host's list (24 Nov 2026): by answer, only those who left a
+// comment, only those with a food need, or one food need ("need:nut_allergy").
+export type ReplyFilter = "all" | Exclude<Reply["rsvp_status"], "invited"> | "comment" | "food" | `need:${FoodNeed}`;
+export const hasComment = (r: Reply) => !!r.rsvp_note?.trim();
+export function matchesFilter(r: Reply, f: ReplyFilter): boolean {
+  if (f === "all") return true;
+  if (f === "comment") return hasComment(r);
+  if (f === "food") return foodOf(r).length > 0;
+  if (f.startsWith("need:")) return foodOf(r).includes(f.slice(5) as FoodNeed);
+  return r.rsvp_status === f;
+}
+// How many replies each filter would show, so the screen offers only those
+// that show something.
+export function filterCounts(rows: Reply[]): Record<"all" | "attending" | "maybe" | "declined" | "waitlist" | "comment" | "food", number> {
+  const n = (f: ReplyFilter) => rows.filter((r) => matchesFilter(r, f)).length;
+  return { all: rows.length, attending: n("attending"), maybe: n("maybe"), declined: n("declined"), waitlist: n("waitlist"), comment: n("comment"), food: n("food") };
+}
+
 // One line per reply for "Copy the list", and the summary above it.
 const LIST_LABEL: Record<Reply["rsvp_status"], string> = { attending: "Coming", maybe: "Maybe", declined: "Can't come", waitlist: "Waiting list", invited: "Not replied" };
 export function listLine(r: Reply): string {

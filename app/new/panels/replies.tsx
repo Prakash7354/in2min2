@@ -2,8 +2,10 @@
 
 // Guests' replies (0004), for the host: days to go and places left at the
 // venue, the numbers (in people, as the caterer needs them), food needs ticked
-// (0014), then every reply, numbered (No. 1 the first in), with its food needs
-// and message. A reminder on WhatsApp, and the numbered list copied for the
+// (0014), then every reply, numbered (No. 1 the first in), with its people,
+// food needs and message. Filters (24 Nov 2026) narrow the list to one answer,
+// to those who left a comment, or to who needs which food (tap "Nut allergy" to
+// see whose). A reminder on WhatsApp, and the numbered list copied for the
 // caterer or venue. Row Level Security decides who sees them: the event's own
 // hosts only.
 
@@ -13,7 +15,7 @@ import { AppIcon } from "@/components/app-icons";
 import { daysUntil, formatDate } from "@/lib/event-view";
 import { copyLink, whatsappUrl } from "@/lib/share";
 import { foodLabel } from "@/lib/catalog";
-import { copyText, foodOf, foodTotals, replyNo, totals, type Reply } from "../../builder/replies";
+import { copyText, filterCounts, foodIcon, foodOf, foodTotals, isAllergy, matchesFilter, replyNo, totals, type Reply, type ReplyFilter } from "../../builder/replies";
 import { useB2 } from "../context";
 import { PanelShell } from "../panels";
 import { eventLink } from "../sheets";
@@ -36,6 +38,7 @@ export function RepliesPanel() {
   const b = useB2();
   const { d, replies: state } = b;
   const [confirm, setConfirm] = useState<string | null>(null);
+  const [filter, setFilter] = useState<ReplyFilter>("all");
   const [now] = useState(() => Date.now());
   const { markSeen, refresh } = state;
   useEffect(() => { markSeen(); refresh(); }, [markSeen]); // eslint-disable-line react-hooks/exhaustive-deps -- once, on opening
@@ -66,6 +69,10 @@ export function RepliesPanel() {
   const title = d.title.trim() || "Our event";
   const u = state.usage;
   const food = foodTotals(rows);
+  const counts = filterCounts(rows);
+  // A filter that no longer shows anything (the last reply removed) goes back to all.
+  const active: ReplyFilter = filter === "all" || (filter.startsWith("need:") ? food.some((f) => `need:${f.key}` === filter) : counts[filter as keyof typeof counts] > 0) ? filter : "all";
+  const shown = rows.map((r, i) => ({ r, no: replyNo(rows, i) })).filter(({ r }) => matchesFilter(r, active));
   const days = d.date ? daysUntil(d.date, d.timezone, now) : null;
   const left = u && u.venue_capacity !== null ? Math.max(0, u.capacity_left ?? 0) : null;
   const reminder = `Reminder: ${title}${d.date ? ` is on ${formatDate(d.date)}` : ""}. If you haven't replied yet, please tap the link and let us know:`;
@@ -105,10 +112,18 @@ export function RepliesPanel() {
           )}
         </p>
       )}
-      {food.length > 0 && <p className="b2-small" style={{ margin: 0 }}>Food needs (number of replies):</p>}
+      {food.length > 0 && <p className="b2-small" style={{ margin: 0 }}>Food needs (number of replies). Tap one to see who:</p>}
       {food.length > 0 && (
-        <div className="b2-chips" aria-label="Food needs, in replies">
-          {food.map((f) => <span key={f.key} className="b2-chip b2-chip-sm"><span aria-hidden="true">{f.icon}</span> {f.label} · {f.n}</span>)}
+        <div className="b2-chips" role="radiogroup" aria-label="Food needs, in replies">
+          {food.map((f) => {
+            const k = `need:${f.key}` as const;
+            return (
+              <button key={f.key} type="button" role="radio" aria-checked={active === k} className="b2-chip b2-chip-sm" data-alert={isAllergy(f.key) ? "" : undefined}
+                onClick={() => setFilter(active === k ? "all" : k)}>
+                <span aria-hidden="true">{f.icon}</span> {f.label} · {f.n}
+              </button>
+            );
+          })}
         </div>
       )}
       <div className="b2-chips">
@@ -123,33 +138,70 @@ export function RepliesPanel() {
       {state.rows === null && !state.error && <p className="b2-small">Loading…</p>}
       {state.rows !== null && rows.length === 0 && <Note>No replies yet. Share your link, and each reply appears here and on the bell.</Note>}
       {rows.length > 0 && (
+        <div className="b2-chips" role="radiogroup" aria-label="Show these replies">
+          {([["all", "All", counts.all], ["attending", "Coming", counts.attending], ["maybe", "Maybe", counts.maybe], ["declined", "Can't come", counts.declined],
+            ["waitlist", "Waiting list", counts.waitlist], ["comment", "With a message", counts.comment], ["food", "With food needs", counts.food]] as const)
+            .filter(([k, , n]) => k === "all" || n > 0).map(([k, label, n]) => (
+              <button key={k} type="button" role="radio" aria-checked={active === k} className="b2-chip b2-chip-sm" onClick={() => setFilter(k)}>{label} · {n}</button>
+            ))}
+        </div>
+      )}
+      {rows.length > 0 && (
         <p className="b2-small" style={{ margin: 0 }}>
-          {rows.length} {rows.length === 1 ? "reply" : "replies"}, newest first{notYet > 0 ? ` · ${notYet} personal ${notYet === 1 ? "invitation" : "invitations"} not answered yet` : ""}
+          {active === "all"
+            ? `${rows.length} ${rows.length === 1 ? "reply" : "replies"}, newest first`
+            : `Showing ${shown.length} of ${rows.length} ${rows.length === 1 ? "reply" : "replies"}, newest first`}
+          {notYet > 0 ? ` · ${notYet} personal ${notYet === 1 ? "invitation" : "invitations"} not answered yet` : ""}
         </p>
       )}
       <div style={{ display: "grid", gap: 10 }}>
-        {rows.map((r, i) => (
-          <div key={r.id} className="b2-subcard">
-            <p style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", margin: 0 }}>
-              <strong style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-                <span className="b2-num" aria-label={`Reply ${replyNo(rows, i)}`}>{replyNo(rows, i)}</span>
-                <span style={{ overflowWrap: "anywhere" }}>{r.full_name}</span>
-              </strong>
-              <span className="b2-pill" data-status={r.rsvp_status}>{LABEL[r.rsvp_status]}{r.rsvp_status !== "declined" ? ` · ${r.party_size}` : ""}</span>
-            </p>
-            {foodOf(r).length > 0 && <p className="b2-small" style={{ margin: 0 }}>{foodOf(r).map(foodLabel).join(" · ")}</p>}
-            {r.rsvp_note && <p style={{ margin: 0 }}>“{r.rsvp_note}”</p>}
-            <p className="b2-small" style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
-              <span>{ago(r.rsvp_at ?? r.created_at, now)}{twice.has(r.full_name.trim().toLowerCase()) ? " · Same name as another reply" : ""}</span>
-              {confirm === r.id ? (
-                <span style={{ display: "flex", gap: 12 }}>
-                  <button type="button" className="b2-link" onClick={async () => { setConfirm(null); b.say((await state.remove(r.id)) ? "Reply removed." : "Couldn't remove it. Only the owner and co-hosts can."); }}>Yes, remove</button>
-                  <button type="button" className="b2-link" onClick={() => setConfirm(null)}>Keep</button>
-                </span>
-              ) : <button type="button" className="b2-link" onClick={() => setConfirm(r.id)}>Remove</button>}
-            </p>
-          </div>
-        ))}
+        {shown.map(({ r, no }) => {
+          const needs = foodOf(r);
+          const note = r.rsvp_note?.trim();
+          return (
+            <div key={r.id} className="b2-subcard">
+              <p style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "center", margin: 0 }}>
+                <strong style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                  <span className="b2-num" aria-label={`Reply ${no}`}>{no}</span>
+                  <span style={{ overflowWrap: "anywhere" }}>{r.full_name}</span>
+                </strong>
+                <span className="b2-pill" data-status={r.rsvp_status}>{LABEL[r.rsvp_status]}</span>
+              </p>
+              {(r.rsvp_status !== "declined" || needs.length > 0) && (
+                <div className="b2-facts">
+                  {r.rsvp_status !== "declined" && (
+                    <div className="b2-fact">
+                      <span className="b2-small">{r.party_size === 1 ? "Person" : "People"}</span>
+                      <strong>{r.party_size}</strong>
+                    </div>
+                  )}
+                  {needs.length > 0 && (
+                    <div className="b2-fact" data-grow="">
+                      <span className="b2-small">Food needs</span>
+                      <span className="b2-chips">
+                        {needs.map((k) => (
+                          <span key={k} className="b2-chip b2-chip-sm" data-alert={isAllergy(k) ? "" : undefined}>
+                            <span aria-hidden="true">{foodIcon(k)}</span> {foodLabel(k)}
+                          </span>
+                        ))}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+              {note && <blockquote className="b2-quote" aria-label="Their message">&ldquo;{note}&rdquo;</blockquote>}
+              <p className="b2-small" style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                <span>{ago(r.rsvp_at ?? r.created_at, now)}{twice.has(r.full_name.trim().toLowerCase()) ? " · Same name as another reply" : ""}</span>
+                {confirm === r.id ? (
+                  <span style={{ display: "flex", gap: 12 }}>
+                    <button type="button" className="b2-link" onClick={async () => { setConfirm(null); b.say((await state.remove(r.id)) ? "Reply removed." : "Couldn't remove it. Only the owner and co-hosts can."); }}>Yes, remove</button>
+                    <button type="button" className="b2-link" onClick={() => setConfirm(null)}>Keep</button>
+                  </span>
+                ) : <button type="button" className="b2-link" onClick={() => setConfirm(r.id)}>Remove</button>}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </PanelShell>
   );
