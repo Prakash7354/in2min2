@@ -379,6 +379,8 @@ The owner's aim: *"find the gaps and fill them for the unserved community, by la
 
 ### 5b. Personal and celebration events: time sets the plan, people add packs
 
+> **Changed 24 Nov 2026 (owner):** from 1 February 2027 Pop-Up becomes **Free**: 100 people, 25 photos, online **14 days from publishing**. Paid plans keep their clock. Running out: +100 people for £3, or move up and pay the difference. Full plan: [PLAN-pricing-free-plan.md](PLAN-pricing-free-plan.md). The Pop-Up column below is out of date.
+
 **How it works (Decided, owner, 13 Nov 2026):** the plan is *how long the page stays up*. Each plan includes a starting number of people, and any plan can add more in packs of 100 for £3, as many as needed.
 
 The page is live from the moment it is published. It stays up for this long *after* the event:
