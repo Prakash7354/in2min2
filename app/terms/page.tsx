@@ -106,7 +106,7 @@ export default function Terms() {
 
       <h2 id="prices">7. Prices and paying</h2>
       <ul>
-        <li>The free plan (Pop-Up) stays free.</li>
+        <li>The Free plan stays free.</li>
         <li>Paid plans and &ldquo;+100 people&rdquo; packs are one-off payments for one event. Your page stays online for the time you bought. There&apos;s nothing to renew or cancel.</li>
         <li>You see the price before you pay. We&apos;re not registered for VAT, so no VAT is added.</li>
         <li>Payments are taken by Stripe. Paying opens in February 2027; until then, every page is free.</li>

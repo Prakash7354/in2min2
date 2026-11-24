@@ -15,7 +15,7 @@ const WHY: [string, string, string][] = [
   ["✅", "Every reply in one place", "Who’s coming, how many people, food needs and places left, numbered in one list. No counting messages in a group."],
   ["🔒", "Private and safe", "Guests don’t share their phone numbers with each other. Only you see replies and food needs, kept in the UK and Europe under UK data protection law."],
   ["📸", "Together on the day", "Everyone’s photos on one wall and on the big screen, comments and cheers, and a thank-you page to keep."],
-  ["💷", "A fair, simple price", "Free until 90 days after your event. Need more people, photos or time? One price for the whole event, from £9. No adverts."],
+  ["💷", "A fair, simple price", "Free to start. Need more people, photos or time? One price for the whole event, from £9. No adverts."],
 ];
 
 export function WhySection({ tint = false }: { tint?: boolean }) {

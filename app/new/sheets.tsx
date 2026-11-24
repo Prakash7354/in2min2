@@ -10,7 +10,7 @@ import Link from "next/link";
 import EventView from "@/components/event/event-view";
 import { Icon, type IconName } from "@/components/icons";
 import { QrCode } from "@/components/qr-code";
-import { eventType, plan, freePlanAt } from "@/lib/catalog";
+import { eventType, plan, freePlanAt, onlineWords } from "@/lib/catalog";
 import { missingForPublish, toViewData, unpublishedChanges, type Draft } from "@/lib/draft";
 import { daysUntil, formatDate } from "@/lib/event-view";
 import { wallPath } from "@/lib/photos";
@@ -160,11 +160,12 @@ function ShareLinks({ d, link, say }: { d: Draft; link: string; say: (m: string)
 
   // Straight after the first publish (owner, 20 Nov 2026): you're live, on
   // which plan for how long, one step left, and enjoy the day.
-  const pl = plan(freePlanAt(d.plan, d.scale, b.now));
+  const pl = plan(freePlanAt(d.plan, d.scale, b.now, !!eventType(d.eventType)?.sensitive));
   const planLine = community ? "Free to set up, and your page is online now."
     : d.offerClaimed ? "Your code worked: you're on Keepsake, online for 12 months."
     : pl.key === "festive" ? "Free in our festive launch: your page stays online until 90 days after the event."
-    : `You're on the free ${pl.name} plan: your page stays online until ${pl.duration} after the event.`;
+    : pl.key === "memorial" ? "Memorial pages are always free: your page stays online until 90 days after the day, and you can close it sooner at any time."
+    : `You're on the free ${pl.name} plan: your page is ${onlineWords(pl)}.`;
   return (
     <div style={{ display: "grid", gap: 16 }}>
       {b.pub.first && (

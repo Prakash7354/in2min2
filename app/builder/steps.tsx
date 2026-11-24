@@ -10,7 +10,7 @@ import { copyRequest } from "@/lib/ai/request";
 import { COURSES, DEFAULT_RUN, MEAL_WORDS, RUN_SUGGESTIONS, nextTime } from "@/lib/running-order";
 import {
   BORDERS, COVER_FITS, EFFECTS, EVENT_TYPES, HERO_MOTIONS, LANGUAGES, MAX_SHOWCASE, ORGANISER_TYPES, PALETTE_FAMILIES, PALETTES, PARKING_OPTIONS, PHOTO_STYLES, SCALES,
-  TEMPLATES, TEXT_STYLES, TOGGLES, TONES, eventType, formatPence, language, paletteFor, plan, plansFor, quote,
+  TEMPLATES, TEXT_STYLES, TOGGLES, TONES, eventType, formatPence, language, onlineWords, paletteFor, plan, plansFor, quote,
   type CoverFit, type EffectKey, type HeroMotion, type Palette, type PhotoStyle, type Scale, type Tag,
 } from "@/lib/catalog";
 import {
@@ -397,7 +397,7 @@ function PlanPicker({ d, update }: Pick<StepProps, "d" | "update">) {
           const q = quote(p.key, n);
           return {
             key: p.key,
-            label: <span>{p.duration} after <span className="font-normal text-muted">· {p.name}</span></span>,
+            label: <span>{p.fromPublish ? `${p.duration} from publishing` : `${p.duration} after`} <span className="font-normal text-muted">· {p.name}</span></span>,
             line: (
               <span className="grid gap-0.5">
                 <span>Up to {p.guestLimit} people{q.packs ? `; you need ${q.packs} extra pack${q.packs > 1 ? "s" : ""} (+${q.packs * (p.packSize ?? 0)} people)` : ""}</span>
@@ -966,7 +966,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
         ) : (
           <div className="grid gap-1">
             <p className="flex items-baseline justify-between gap-4">
-              <span>{p.name}: online {p.duration} after the event, up to {p.guestLimit} people</span>
+              <span>{p.name}: {onlineWords(p)}, up to {p.guestLimit} people</span>
               <strong className="tabular-nums">{formatPence(p.pricePence)}</strong>
             </p>
             {q.packs > 0 && (
@@ -984,7 +984,7 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
         {!community && (
           <Notice>
             Paying for a plan opens in February. Until then, a published page is on the free plan: online 90 days after the event,
-            up to 200 people. With the code <strong>LAUNCH50</strong> the first 50 families get a free Keepsake (12 months).
+            up to 300 people. With the code <strong>LAUNCH50</strong> the first 50 families get a free Keepsake (12 months).
           </Notice>
         )}
         {!community && (

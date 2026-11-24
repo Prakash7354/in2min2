@@ -6,7 +6,7 @@
 // sheet opens.
 
 import { Icon } from "@/components/icons";
-import { eventType, formatPence, freePlanAt, plan } from "@/lib/catalog";
+import { eventType, formatPence, freePlanAt, onlineWords, plan } from "@/lib/catalog";
 import { missingForPublish, slugOk, unpublishedChanges } from "@/lib/draft";
 import { defaultCredit } from "@/lib/event-view";
 import { useB2 } from "../context";
@@ -27,7 +27,7 @@ export function PublishPanel() {
   const slug = d.slug || suggestedSlug(d);
   const ready = missing.length === 0 && d.checked;
   const link = eventLink(d);
-  const p = plan(freePlanAt(d.plan, d.scale, b.now));
+  const p = plan(freePlanAt(d.plan, d.scale, b.now, !!t?.sensitive));
   const [nudge, setNudge] = useState(false);
 
   // The host's own line at the bottom ("Hosted by …"), or the family names if given.
@@ -102,7 +102,8 @@ export function PublishPanel() {
             <p className="b2-h3">{formatPence(0)} to publish</p>
             <p className="b2-small">{p.key === "festive"
               ? "Free during our festive launch (until 31 January): your page stays online 90 days after the event, for up to 300 people and 300 photos."
-              : `Paying for a plan opens in February. Until then a published page is on the free plan: online ${p.duration} after the event, up to ${p.guestLimit ?? 200} people.`}</p>
+              : p.key === "memorial" ? "Memorial pages are always free: online until 90 days after the day, for up to 300 people and 300 photos."
+              : `Paying for a plan opens in February. Until then a published page is on the free plan: ${onlineWords(p)}, up to ${p.guestLimit ?? 100} people.`}</p>
             {!d.offerClaimed ? (
               <Field label="Have a code?" hint="For example LAUNCH50: a free Keepsake (12 months) for the first 50 families. Checked when you publish.">
                 <input className="b2-input b2-input-sm" value={d.offerCode} maxLength={20} placeholder="LAUNCH50"

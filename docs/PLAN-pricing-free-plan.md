@@ -83,8 +83,8 @@ Small parties      Anniversaries,         Weddings planned   Weddings and
 
 | Step | What | Model | Migration |
 | --- | --- | --- | --- |
-| 1 | **0017**: Free = 100 people, 25 photos (5 per phone), 14 days from publishing; plan name "Free" (key stays `popup`); a free `memorial` plan (Recommended) taken by sensitive types; `PLANS` in `lib/catalog.ts` and `catalog.test.mjs` / `schema.test.mjs` to match. Festive pages are not touched. | Sonnet 5.5 (medium) | 0017, owner runs it |
-| 2 | Prices section and `/pricing` as in section 5; site facts and builder words. | Sonnet 5.5 (medium) | none |
+| 1 ✅ built 24 Nov (owner runs 0017) | **0017**: Free = 100 people, 25 photos (5 per phone), 14 days from publishing; plan name "Free" (key stays `popup`); a free `memorial` plan (Recommended) taken by sensitive types; `PLANS` in `lib/catalog.ts` and `catalog.test.mjs` / `schema.test.mjs` to match. Festive pages are not touched. | Sonnet 5.5 (medium) | 0017, owner runs it |
+| 2 ✅ built 24 Nov | Prices section and `/pricing` as in section 5; site facts and builder words. | Sonnet 5.5 (medium) | none |
 | 3 | Publish screen warning (section 1, item 2) and the bell's "closes on" words for Free. | Sonnet 5.5 (medium) | none |
 | 4 | Closing-soon nudges by email from the Worker cron; free photo download before closing. | Sonnet 5.5 (medium) | none |
 | 5 | **Payments and upgrades** (Stripe Checkout, webhook, pay the difference, +100 people). Must be live **before 1 February 2027**, or free hosts from then have no way to upgrade. | `/plan` on Opus 5.5 (high) first, then Sonnet | yes |

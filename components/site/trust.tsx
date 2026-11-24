@@ -10,7 +10,7 @@ import { DRAFT, ICO_NUMBER } from "@/components/legal/legal-page";
 
 const NO_STRINGS: [string, string, string][] = [
   ["📲", "Nothing to download", "Works in any phone’s web browser, for you and for every guest."],
-  ["🤝", "No subscription, no contract", "Free until 90 days after your event. Pay once, only if you want more."],
+  ["🤝", "No subscription, no contract", "Free to start. Pay once, only if you want more."],
   ["✋", "Stop whenever you like", "Close your page at any time, without asking anyone."],
 ];
 

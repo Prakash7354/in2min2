@@ -70,7 +70,9 @@ ok("insert returns the row (select policy on own insert)", !!ev?.id);
 ok("owner_id defaulted to auth.uid()", ev.owner_id === A);
 ok("plan defaults to popup", ev.plan === "popup");
 ok("short code is 5 readable chars", /^[2-9a-hjkmnp-z]{5}$/.test(ev.short_code), ev.short_code);
-ok("hosting_until = end + 90 days (0016)", new Date(ev.hosting_until).toISOString() === "2027-06-12T23:00:00.000Z", ev.hosting_until);
+// Free (0017) counts its 14 days from publishing, not from the event: this one is still a draft, so from now.
+ok("a Free page's closing date is 14 days from publishing (0017), whatever the event's date",
+  Math.abs(new Date(ev.hosting_until).getTime() - (Date.now() + 14 * 86400e3)) < 120000, ev.hosting_until);
 const hosts = await q(`select role from event_hosts where event_id = $1`, [ev.id]);
 ok("creator added as owner", hosts.length === 1 && hosts[0].role === "owner");
 const [ft] = await q(`select * from feature_toggles where event_id = $1`, [ev.id]);
@@ -214,6 +216,9 @@ ok("a wrong token does not open it", pe.p.private === true);
 
 console.log("Lifecycle from the clock (event in London, 14 Mar 2027 13:00–23:00 UTC):");
 await db.exec(`reset role`);
+// On a paid plan that counts from the event (Free counts from publishing; checked above and further down).
+await db.exec(`update events set plan = 'season' where slug = 'meenu-jose'`);
+ok("Season: hosting_until = end of the event + 90 days", new Date((await q(`select hosting_until from events where slug = 'meenu-jose'`))[0].hosting_until).toISOString() === "2027-06-12T23:00:00.000Z");
 const stageAt = async (ts) => (await q(`select stage(e) as s from events e where slug = 'meenu-jose'`.replace("stage(e)", `(select case
     when e.status = 'cancelled' then 'cancelled' when e.status = 'draft' then 'draft'
     when '${ts}'::timestamptz >= e.hosting_until then 'expired'
@@ -224,15 +229,15 @@ ok("13 Mar 23:59 London → pre",  (await stageAt("2027-03-13 23:59+00")) === "p
 ok("14 Mar 00:00 London → live", (await stageAt("2027-03-14 00:00+00")) === "live");
 ok("14 Mar 22:59 → live",        (await stageAt("2027-03-14 22:59+00")) === "live");
 ok("14 Mar 23:00 → post",        (await stageAt("2027-03-14 23:00+00")) === "post");
-ok("12 Jun 22:59 (popup +90d) → still post", (await stageAt("2027-06-12 22:59+00")) === "post");
-ok("12 Jun 23:00 (popup +90d) → expired", (await stageAt("2027-06-12 23:00+00")) === "expired");
+ok("12 Jun 22:59 (Season +90d) → still post", (await stageAt("2027-06-12 22:59+00")) === "post");
+ok("12 Jun 23:00 (Season +90d) → expired", (await stageAt("2027-06-12 23:00+00")) === "expired");
 // Same rule checked against the real function by moving the event instead of the clock.
 await db.exec(`update events set starts_at = now() - interval '1 hour', ends_at = now() + interval '2 hours' where slug = 'meenu-jose'`);
 ok("real stage(): happening now → live", (await q(`select stage(e) s from events e where slug='meenu-jose'`))[0].s === "live");
 await db.exec(`update events set starts_at = now() - interval '3 days', ends_at = now() - interval '2 days' where slug = 'meenu-jose'`);
-ok("real stage(): ended 2 days ago (popup) → post", (await q(`select stage(e) s from events e where slug='meenu-jose'`))[0].s === "post");
+ok("real stage(): ended 2 days ago (Season) → post", (await q(`select stage(e) s from events e where slug='meenu-jose'`))[0].s === "post");
 await db.exec(`update events set starts_at = now() - interval '92 days', ends_at = now() - interval '91 days' where slug = 'meenu-jose'`);
-ok("real stage(): ended 91 days ago (popup, 90 days) → expired", (await q(`select stage(e) s from events e where slug='meenu-jose'`))[0].s === "expired");
+ok("real stage(): ended 91 days ago (Season, 90 days) → expired", (await q(`select stage(e) s from events e where slug='meenu-jose'`))[0].s === "expired");
 await db.exec(`update events set plan = 'keepsake' where slug = 'meenu-jose'`);
 ok("server upgrades to keepsake → post again (365 days)", (await q(`select stage(e) s from events e where slug='meenu-jose'`))[0].s === "post");
 await as(null);
@@ -263,11 +268,11 @@ console.log("How full is the event (plan limit and venue capacity):");
 await as(A);
 const usage = async () => (await q(`select event_usage($1) as u`, [ru.id]))[0].u;
 let u = await usage();
-ok("empty event: 0 people, Pop-Up limit 200, level ok", u.people === 0 && u.guest_limit === 200 && u.level === "ok", JSON.stringify(u));
+ok("empty event: 0 people, Free limit 100, level ok", u.people === 0 && u.guest_limit === 100 && u.level === "ok", JSON.stringify(u));
 await q(`insert into guest_crm (event_id, full_name, party_size, rsvp_status) values
-  ($1, 'The Rai family', 4, 'attending'), ($1, 'B Company tables', 156, 'invited'), ($1, 'Could not come', 6, 'declined')`, [ru.id]);
+  ($1, 'The Rai family', 4, 'attending'), ($1, 'B Company tables', 76, 'invited'), ($1, 'Could not come', 6, 'declined')`, [ru.id]);
 u = await usage();
-ok("head count adds party sizes and skips those who declined", u.people === 160 && u.attending === 4, JSON.stringify(u));
+ok("head count adds party sizes and skips those who declined", u.people === 80 && u.attending === 4, JSON.stringify(u));
 ok("80% of the limit → near", u.level === "near");
 await q(`insert into guest_crm (event_id, full_name, party_size) values ($1, 'Late additions', 48)`, [ru.id]);
 u = await usage();
@@ -276,7 +281,7 @@ ok("venue capacity left counts only those attending", u.capacity_left === 196);
 await db.exec(`reset role; update events set extra_guests = 100 where id = '${ru.id}'`);
 await as(A);
 u = await usage();
-ok("after a pack is bought (server only) the limit is 300, level ok", u.guest_limit === 300 && u.level === "ok", JSON.stringify(u));
+ok("after a pack is bought (server only) the limit is 200, level ok", u.guest_limit === 200 && u.level === "ok", JSON.stringify(u));
 await as(B);
 ok("another host gets nothing from event_usage", (await q(`select event_usage($1) as u`, [ru.id]))[0].u === null);
 
@@ -316,7 +321,7 @@ ok("…and stays on the normal plan", (await q(`select plan from events where id
 console.log("Plans, repeats and sensitive occasions (13 Nov 2026, v3.1):");
 await as(null);
 const limits = Object.fromEntries((await q(`select key, guest_limit from plans`)).map((r) => [r.key, r.guest_limit]));
-ok("people included: Pop-Up 200, Season 300, Half-Year 400, Keepsake 500", limits.popup === 200 && limits.season === 300 && limits.half_year === 400 && limits.keepsake === 500, JSON.stringify(limits));
+ok("people included: Free 100, Season 300, Half-Year 400, Keepsake 500", limits.popup === 100 && limits.season === 300 && limits.half_year === 400 && limits.keepsake === 500, JSON.stringify(limits));
 const types = Object.fromEntries((await q(`select key, scale, repeats_yearly, repeat_as, sensitive from event_types`)).map((r) => [r.key, r]));
 ok("a wedding comes back as its anniversary", types.wedding.repeats_yearly && types.wedding.repeat_as === "anniversary");
 ok("birthdays, tournaments and reunions repeat yearly; Pasni doesn't", types.birthday.repeats_yearly && types.sport.repeats_yearly && types.reunion.repeats_yearly && !types.pasni.repeats_yearly);
@@ -361,7 +366,7 @@ ok("a family event needs no organiser to publish (wedding above)", true);
 
 console.log("Rights on a strict Supabase (0002) and the AI writes cap:");
 await as(null);
-ok("the public can read plans (5, and the festive launch's) and event types (pricing page)", (await q(`select key from plans`)).length === 6 && (await q(`select key from event_types`)).length === 18);
+ok("the public can read plans (5, the festive launch's and the memorial plan) and event types (pricing page)", (await q(`select key from plans`)).length === 7 && (await q(`select key from event_types`)).length === 18);
 await expectError("the public cannot read the AI usage table", `select * from ai_usage`, /permission denied/);
 ok("the public gets no AI writes", (await q(`select take_ai_write() as ok`).catch(() => [{ ok: "refused" }]))[0].ok !== true);
 await as(B);
@@ -481,9 +486,9 @@ ok("a draft can't be replied to", (await reply({ name: "Early", status: "attendi
 
 await as(A);
 await q(`update events set venue_capacity = null where id = $1`, [rv.id]);
-await q(`insert into guest_crm (event_id, full_name, party_size, rsvp_status) values ($1, 'Whole class', 200, 'invited')`, [rv.id]);
+await q(`insert into guest_crm (event_id, full_name, party_size, rsvp_status) values ($1, 'Whole class', 90, 'invited')`, [rv.id]);
 await as(null);
-// 200 invited + Hari 6 + Gita 2 = 208 of 200 so far; 10% grace allows 220.
+// 90 invited + Hari 6 + Gita 2 = 98 of 100 so far; 10% grace allows 110.
 ok("the plan's limit has 10% grace", (await reply({ name: "Grace", status: "maybe", party_size: 12 })).ok === true);
 ok("…then replies pause kindly", (await reply({ name: "One more", status: "attending", party_size: 1 })).reason === "full");
 ok("…though anyone can still say they can't come", (await reply({ name: "Sorry", status: "declined" })).ok === true);
@@ -547,7 +552,7 @@ await as(A);
 await q(`delete from events where id = $1`, [shut.id]);
 await q(`insert into events (event_type, slug, title, starts_at, ends_at, status) values ('memorial','in-memory','In memory', '2027-06-01 14:00+00', '2027-06-01 18:00+00', 'published')`);
 const [memE] = await q(`select id, plan, hosting_until from events where slug = 'in-memory'`);
-ok("a memorial on the free plan stays online 90 days after the day, like every free page (0016)", memE.plan === "popup" && new Date(memE.hosting_until).toISOString() === "2027-08-30T18:00:00.000Z", `${memE.plan} ${memE.hosting_until}`);
+ok("a memorial is on its own free plan and stays online 90 days after the day (0016, 0017)", memE.plan === "memorial" && new Date(memE.hosting_until).toISOString() === "2027-08-30T18:00:00.000Z", `${memE.plan} ${memE.hosting_until}`);
 const [memT] = await q(`select countdown, guestbook from feature_toggles where event_id = $1`, [memE.id]);
 ok("a memorial starts with no countdown", memT.countdown === false && memT.guestbook === true);
 await q(`delete from events where id = $1`, [memE.id]);
@@ -619,20 +624,20 @@ ok("the right secret shows it", s1.ok === true && s1.status === "shown");
 ok("…once only", (await stored(a1.id, a1.secret)).reason === "no_upload");
 w = await wall();
 ok("the wall lists it with its size and the guest's name", w.photos.length === 1 && w.photos[0].id === a1.id && w.photos[0].w === 1600 && w.photos[0].by === "Sita");
-ok("…and tells this phone how many it has added", w.mine.added === 1 && w.mine.waiting === 0 && w.per_guest === 10);
+ok("…and tells this phone how many it has added", w.mine.added === 1 && w.mine.waiting === 0 && w.per_guest === 5);
 ok("the wall never gives out the event's photo key", !JSON.stringify(w).includes(pw.wall_key));
 ok("a bad phone id is refused", (await addPhoto("NOT valid!")).reason === "bad_photo");
 ok("a photo too big is refused", (await q(`select add_photo('birthday','photo-party',null,$1,null,9000,1200,350000) as r`, [DEV1]))[0].r.reason === "bad_photo");
-for (let i = 0; i < 9; i++) { const a = await addPhoto(); await stored(a.id, a.secret); }
+for (let i = 0; i < 4; i++) { const a = await addPhoto(); await stored(a.id, a.secret); }
 const share = await addPhoto();
-ok("one phone can add its share (10 on Pop-Up), then no more", share.reason === "your_share" && share.per_guest === 10, JSON.stringify(share));
+ok("one phone can add its share (5 on Free), then no more", share.reason === "your_share" && share.per_guest === 5, JSON.stringify(share));
 ok("…while another phone still can", (await addPhoto(DEV2)).ok === true);
 await db.exec(`reset role; update event_photos set created_at = now() - interval '2 hours' where status = 'uploading'`);
 ok("a reservation never finished stops counting after an hour", (await wall("photo-party", null, DEV2)).mine.added === 0);
 await db.exec(`reset role; insert into event_photos (event_id, status, width, height, bytes, device, ready_at)
   select '${pw.id}', 'shown', 100, 100, 100, 'filler' || lpad(i::text, 18, '0'), now() from generate_series(1, 40) i`);
 await as(null);
-ok("the plan's photos (50 on Pop-Up) fill up, then it says full", (await addPhoto(DEV2)).reason === "full");
+ok("the plan's photos (25 on Free) fill up, then it says full", (await addPhoto(DEV2)).reason === "full");
 await db.exec(`reset role; delete from event_photos where device like 'filler%'`);
 await db.exec(`reset role; insert into event_photos (event_id, status, width, height, bytes, device)
   select '${pw.id}', 'uploading', 100, 100, 100, 'flood' || lpad(i::text, 19, '0') from generate_series(1, 300) i`);
@@ -650,7 +655,7 @@ await q(`insert into event_hosts (event_id, user_id, role) values ($1, $2, 'help
 await as(C);
 const chp = await db.query(`update event_photos set status = 'hidden' where id = $1`, [a1.id]);
 ok("a helper can hide a photo", chp.affectedRows === 1);
-ok("…which comes off the wall", (await (async () => { await as(null); return (await wall()).photos.length; })()) === 9);
+ok("…which comes off the wall", (await (async () => { await as(null); return (await wall()).photos.length; })()) === 4);
 await as(C);
 ok("a helper can't remove a photo for good", (await q(`select remove_photos(array[$1]::uuid[]) as r`, [a1.id]))[0].r.length === 0);
 await expectError("a host can't change a photo's size or phone", `update event_photos set width = 20 where id = '${a1.id}'`, /permission denied/);
@@ -1008,6 +1013,27 @@ const allTables = (await q(`select tablename from pg_tables where schemaname = '
 ok("the server's backup has every table", allTables.length > 10 && allTables.every((t) => Array.isArray(snap.tables[t])),
   allTables.filter((t) => !Array.isArray(snap.tables[t])).join(", "));
 ok("…with every row in it", snap.tables.events.length === (await q(`select count(*)::int n from events`))[0].n && typeof snap.taken_at === "string");
+console.log("The Free plan (0017):");
+await festiveUntil("2000-01-01 00:00+00");
+await as(A);
+const [frE] = await q(`insert into events (event_type, slug, title, starts_at, ends_at, status) values ('birthday','free-clock','Free clock', '2028-05-01 14:00+00', '2028-05-01 20:00+00', 'published') returning id, plan, published_at, hosting_until`);
+ok("a published Free page closes 14 days after publishing, not after the event",
+  frE.plan === "popup" && new Date(frE.hosting_until).getTime() === new Date(frE.published_at).getTime() + 14 * 86400e3, `${frE.plan} ${frE.hosting_until}`);
+await q(`update events set title = 'Free clock again' where id = $1`, [frE.id]);
+ok("…and editing it never moves that date", new Date((await q(`select hosting_until from events where id = $1`, [frE.id]))[0].hosting_until).getTime() === new Date(frE.hosting_until).getTime());
+await db.exec(`reset role; update events set plan = 'season' where id = '${frE.id}'`);
+ok("moving up to Season moves the closing date to 90 days after the event",
+  new Date((await q(`select hosting_until from events where id = $1`, [frE.id]))[0].hosting_until).toISOString() === "2028-07-30T20:00:00.000Z");
+await as(A);
+const [frU] = await q(`select event_usage($1) as u`, [frE.id]);
+ok("…with Season's 300 people", frU.u.guest_limit === 300);
+await q(`delete from events where id = $1`, [frE.id]);
+const [frM] = await q(`insert into events (event_type, slug, title, starts_at, status) values ('memorial','free-memorial','In memory', '2028-05-01 14:00+00', 'published') returning plan`);
+ok("a memorial is on its own free plan", frM.plan === "memorial", frM.plan);
+const [frMu] = await q(`select event_usage(id) as u from events where slug = 'free-memorial'`);
+ok("…with 300 people", frMu.u.guest_limit === 300);
+await q(`delete from events where slug = 'free-memorial'`);
+
 console.log("The festive launch (0013):");
 await festiveUntil("2999-01-01 00:00+00");
 await as(A);

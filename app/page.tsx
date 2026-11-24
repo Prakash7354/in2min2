@@ -13,7 +13,7 @@ import { WheelDemo } from "@/components/site/wheel-demo";
 import { WhySection } from "@/components/site/why";
 import { KIND_PAGES } from "@/lib/kind-pages";
 import { TapHand } from "@/components/tap-hand";
-import { formatPence, PLANS } from "@/lib/catalog";
+import { FESTIVE_UNTIL, formatPence, PLANS, type Plan } from "@/lib/catalog";
 import { bigDaySample, heroSample, heroShows, heroWedding, kindSample, wordsSample } from "@/lib/site-samples";
 import { QUESTIONS, TAGLINE, siteJsonLd } from "@/lib/site-facts";
 import { SHARE_DESCRIPTION, SHARE_IMAGE, SHARE_TITLE } from "@/lib/site-share";
@@ -76,6 +76,14 @@ function Photo({ name, alt, wide = false }: { name: string; alt: string; wide?: 
 // The time this page was made (a function, so it isn't read during render).
 function madeAt(): number {
   return Date.now();
+}
+
+// What each price card ticks (every one is built; the numbers are PLANS').
+function planTicks(p: Plan): string[] {
+  const online = p.fromPublish ? `${p.duration} online from publishing` : `Online until ${p.duration} after the event`;
+  const last = p.key === "keepsake" ? "Full-quality download, no in2min2 badge"
+    : p.key === "popup" ? "Every design, envelope and music" : p.key === "season" ? "Everything in Free" : "Everything in Season";
+  return [online, `${p.guestLimit} people`, `${p.photoLimit?.toLocaleString("en-GB")} photos`, `${p.aiWrites} AI writes`, last];
 }
 
 export default function Home() {
@@ -314,7 +322,8 @@ export default function Home() {
         <section id="prices" className="s-section">
           <div className="s-wrap">
             <p className="s-kicker">Prices</p>
-            <h2 className="s-h2">Simple and fair</h2>
+            <h2 className="s-h2">Prices</h2>
+            <p className="s-lead">Pay once per event. No subscription.</p>
             <div className="s-offer">
               <span className="s-offer-tag">Festive offer</span>
               <p className="s-offer-h">Completely free until 31 January 2027</p>
@@ -323,18 +332,33 @@ export default function Home() {
             </div>
             <h3 className="s-h3">From 1 February 2027</h3>
             <div className="s-plans">
-              {family.map((p) => (
-                <div key={p.key} className="s-plan" data-best={p.key === "season" ? "" : undefined}>
-                  {p.key === "season" && <span className="s-plan-best">Our pick</span>}
-                  <p className="s-plan-name">{p.name}</p>
-                  <p className="s-plan-price">{p.pricePence ? formatPence(p.pricePence) : "Free"}</p>
-                  <p className="s-plan-line">Online {p.duration} after the event</p>
-                  <p className="s-plan-line">{p.guestLimit} people · {p.photoLimit?.toLocaleString("en-GB")} photos</p>
-                  <p className="s-plan-for">{p.bestFor}</p>
-                </div>
-              ))}
+              {family.map((p) => {
+                const offer = p.key === "season" && now < FESTIVE_UNTIL; // the festive offer gives exactly Season's allowance
+                return (
+                  <div key={p.key} className="s-plan" data-best={p.key === "season" ? "" : undefined}>
+                    {p.key === "season" && <span className="s-plan-best">Our pick</span>}
+                    <p className="s-plan-name">{p.name}</p>
+                    {offer ? (
+                      <>
+                        <p className="s-plan-price"><s>{formatPence(p.pricePence)}</s></p>
+                        <p className="s-plan-offer">Free until 31 January</p>
+                        <p className="s-plan-from">then {formatPence(p.pricePence)}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="s-plan-price">{p.pricePence ? formatPence(p.pricePence) : "Free"}</p>
+                        <p className="s-plan-from">{p.pricePence ? "from 1 February" : "always"}</p>
+                      </>
+                    )}
+                    <ul className="s-plan-ticks">
+                      {planTicks(p).map((t) => <li key={t}>{t}</li>)}
+                    </ul>
+                    <p className="s-plan-for">Best for: {p.bestFor}</p>
+                  </div>
+                );
+              })}
             </div>
-            <p className="s-small s-center-text">Need room for more people? Add 100 for £3. Memorials are always free. Community events: a free page, and a small fee only on online ticket sales (coming soon).</p>
+            <p className="s-small s-center-text">Run out on the day? Add 100 people for {formatPence(PLANS[0].packPence ?? 300)}, or move up a plan and pay only the difference. Memorials are always free. Community events: a free page, and a small fee only on online ticket sales (coming soon).</p>
             {/* Paying, with the same trust as sharing (owner, 23 Nov 2026). Payments open in February. */}
             <div className="s-paytrust">
               <div className="s-payhead">

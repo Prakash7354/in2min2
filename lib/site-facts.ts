@@ -5,7 +5,7 @@
 // from PLANS, so they can't drift from the prices page. Only say what's built.
 
 import { DRAFT } from "@/components/legal/legal-page";
-import { FESTIVE_UNTIL, PLANS, formatPence, plan } from "@/lib/catalog";
+import { FESTIVE_UNTIL, PLANS, formatPence, onlineWords, plan } from "@/lib/catalog";
 import { KIND_PAGES } from "@/lib/kind-pages";
 
 export const SITE = "https://in2min2.com";
@@ -21,7 +21,7 @@ export const WHAT_IT_IS = "in2min2 makes organising your event simple, quick and
 // The home page's "Good to know" (also in the structured facts, as a FAQ).
 export const QUESTIONS = [
   { q: "What is in2min2?", a: `${WHAT_IT_IS} Nothing to download, free to start, and you can stop whenever you like. Made in the UK, for families and communities of every culture.` },
-  { q: "Is it really free?", a: "Yes. Every page is free and stays online until 90 days after your event. Until 31 January 2027 a free page takes up to 300 people and 300 photos; after that, up to 200 people and 50 photos. Paid plans, from £9, add more people and photos, or keep your page for 6 or 12 months. Memorials are always free." },
+  { q: "Is it really free?", a: "Yes. Until 31 January 2027 every family page is free, with up to 300 people and 300 photos, online until 90 days after your event. From 1 February the Free plan is free for ever: up to 100 people and 25 photos, online for 14 days from the day you publish. Paid plans, from £9, add more people and photos and keep your page online until 90, 6 or 12 months after the event. Memorials are always free." },
   { q: "Do my guests need an app or an account?", a: "No. They open your link on any phone, tablet or computer. Only you, the host, sign in, with a code we email you." },
   { q: "Which cultures and celebrations is it made for?", a: "Every culture. Weddings with mehndi, sangeet and haldi, Pasni (Annaprashan), Bratabandha, naming ceremonies, Lhosar, birthdays, Christmas, reunions and regimental days each come with their own questions, designs and ready-made words. For Diwali, Eid, Vaisakhi, Holi or Lunar New Year, choose a party or community event and name it your way." },
   { q: "Which languages can I use?", a: "English and Nepali are ready, in Nepali script or in English letters. Hindi, Punjabi, Gujarati, Bengali, Tamil, Tagalog and Polish are in beta. You can put two languages on one invitation." },
@@ -29,7 +29,7 @@ export const QUESTIONS = [
   { q: "How is it different from a WhatsApp group or a paper card?", a: "A paper card can’t collect replies, and in a WhatsApp group the replies get lost in the chat. With in2min2 each guest replies on the page, and you see who is coming, how many people and their messages in one numbered list. The same link then shows the day plan, directions and everyone’s photos." },
   { q: "Can I still use WhatsApp, Viber or text messages?", a: "Yes, that’s how most people share it. Send your link in a WhatsApp, Viber or text message, or in a group chat, and guests tap it to open the invitation. in2min2 even gives you ready-made messages for each step, from the invitation to the reminder and the thank-you. For a personal touch, send each guest their own link." },
   { q: "Can I change things after I’ve sent the link?", a: "Yes, any time. Change the time, the place or the words and press Update. The link stays the same." },
-  { q: "How long does my page stay online, and can I close it sooner?", a: "Your page is live from the moment you publish until 90 days after your event, free. Paid plans can keep it for 6 or 12 months. You can close it at any time, without asking: open your event, tap Settings, then Close the page now. You can open it again within 30 days." },
+  { q: "How long does my page stay online, and can I close it sooner?", a: "Your page is live from the moment you publish. Until 31 January 2027 it stays online until 90 days after your event, free. From 1 February the Free plan keeps it for 14 days from publishing, and a paid plan keeps it until 90 days, 6 months or 12 months after the event. You can close it at any time, without asking: open your event, tap Settings, then Close the page now. You can open it again within 30 days." },
   { q: "Who can see my event?", a: "Only people you send the link to. For a private event, each guest gets their own link with their name on the envelope. For a public event, such as a mela or a tournament, you can also choose Show on Google, so people can find it by searching. Guests’ photos are never shown on Google." },
   { q: "Can I use it for a big community event?", a: "Yes. Make the event page, share the programme, post updates on the day and collect photos. Ticketing, stalls and sponsors are coming soon." },
   { q: "How do I get help?", a: `Email ${CONTACT} and a real person will reply.` },
@@ -37,7 +37,7 @@ export const QUESTIONS = [
 
 const FAMILY_PLANS = PLANS.filter((p) => ["popup", "season", "half_year", "keepsake"].includes(p.key));
 const limits = (p: (typeof PLANS)[number]) =>
-  `online for ${p.duration} after the event, up to ${p.guestLimit} people and ${p.photoLimit} photos`;
+  `${onlineWords(p)}, up to ${p.guestLimit} people and ${p.photoLimit} photos`;
 
 // Structured facts for the home page (schema.org JSON-LD). They repeat what
 // the page itself says; search engines ignore facts that aren't on the page.

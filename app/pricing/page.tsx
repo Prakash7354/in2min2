@@ -13,7 +13,7 @@ export const metadata: Metadata = legalMetadata("Prices and fair fees", "in2min2
 const mail = <a href={`mailto:${CONTACT}`}>{CONTACT}</a>;
 
 export default function Fees() {
-  const family = PLANS.filter((p) => p.key !== "community" && p.key !== "festive");
+  const family = PLANS.filter((p) => p.sortOrder > 0 && p.key !== "community");
   const community = plan("community");
   const pack = formatPence(family[0].packPence ?? 0);
   const bookingFee = `${community.bookingFeeBps / 100}% + ${community.bookingFeePence}p`;
@@ -32,19 +32,19 @@ export default function Fees() {
     >
       <h2 id="prices">1. Prices</h2>
       <h3>Family events and celebrations</h3>
-      <p>You pay once per event. Your page is live from the moment you publish, and the plan sets how long it stays online after the event. You can close it sooner at any time, in Settings.</p>
+      <p>You pay once per event. Your page is live from the moment you publish. The Free plan keeps it online for 14 days from publishing; paid plans keep it online until 90 days, 6 months or 12 months after the event. You can close it sooner at any time, in Settings.</p>
       <div className="my-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {family.map((p) => (
           <div key={p.key} className="grid content-start gap-1 rounded-2xl border border-line bg-card p-4">
             <span className="font-bold">{p.name}</span>
             <span className="font-display text-3xl font-extrabold text-brand">{p.pricePence ? formatPence(p.pricePence) : "Free"}</span>
-            <span className="text-[15px] text-muted">Online {p.duration} after the event</span>
-            <span className="text-[15px] text-muted">Up to {p.guestLimit} people</span>
+            <span className="text-[15px] text-muted">{p.fromPublish ? `Online ${p.duration} from publishing` : `Online until ${p.duration} after the event`}</span>
+            <span className="text-[15px] text-muted">{p.guestLimit} people · {p.photoLimit?.toLocaleString("en-GB")} photos</span>
           </div>
         ))}
       </div>
       <ul>
-        <li>More people on any plan: {pack} for each extra 100.</li>
+        <li>More people on any plan: {pack} for each extra 100. Need more photos or more time? Move up a plan and pay only the difference.</li>
         <li>Every switch works on every plan. You pay for time and size, never for features.</li>
         <li>No subscription, nothing to cancel. We&apos;re not registered for VAT, so no VAT is added.</li>
         <li>Paying opens in February 2027.</li>

@@ -20,13 +20,17 @@ const num = (v) => (v === "null" ? null : Number(v));
 const dbPlans = [...(sql + later).matchAll(planRe)].map((m) => ({
   key: m[1], name: m[2], pricePence: +m[3], daysAfter: +m[4], guestLimit: num(m[5]), photoLimit: num(m[6]),
   photosPerGuest: +m[7], aiWrites: +m[8], fullResDownload: m[9] === "true", hideBranding: m[10] === "true",
-  bookingFeeBps: +m[11], bookingFeePence: +m[12], scales: m[13].split(","), packSize: num(m[14]), packPence: num(m[15]), sortOrder: +m[16],
+  fromPublish: false, bookingFeeBps: +m[11], bookingFeePence: +m[12], scales: m[13].split(","), packSize: num(m[14]), packPence: num(m[15]), sortOrder: +m[16],
 }));
-ok("found the 6 plans in the database files (5, and the festive launch's)", dbPlans.length === 6, String(dbPlans.length));
-// Later changes to a plan's time, e.g. 0016's "update public.plans set hosting_days_after = 90 where key = 'popup'".
-for (const m of later.matchAll(/update public\.plans set hosting_days_after = (\d+) where key = '([a-z_]+)'/g)) {
-  const d = dbPlans.find((x) => x.key === m[2]);
-  if (d) d.daysAfter = +m[1];
+ok("found the 7 plans in the database files (5, the festive launch's and the memorial plan)", dbPlans.length === 7, String(dbPlans.length));
+// Later changes to a plan, one column at a time, e.g. 0016's
+// "update public.plans set hosting_days_after = 90 where key = 'popup'" and 0017's Free numbers.
+const planCols = { name: "name", hosting_days_after: "daysAfter", guest_limit: "guestLimit", photo_limit: "photoLimit", photos_per_guest: "photosPerGuest", hosting_from_publish: "fromPublish" };
+for (const m of later.matchAll(/update public\.plans set ([a-z_]+) = ('[^']*'|\w+) where key = '([a-z_]+)'/g)) {
+  const d = dbPlans.find((x) => x.key === m[3]);
+  const col = planCols[m[1]];
+  if (!d || !col) continue;
+  d[col] = m[2].startsWith("'") ? m[2].slice(1, -1) : m[2] === "true" ? true : m[2] === "false" ? false : +m[2];
 }
 for (const d of dbPlans) {
   const t = cat.PLANS.find((p) => p.key === d.key);
@@ -123,18 +127,18 @@ console.log("Music:");
 
 console.log("Prices:");
 const q = cat.quote;
-ok("one-week birthday for 250: £3", q("popup", 250).totalPence === 300);
+ok("250 people on Free needs two packs: £6", q("popup", 250).totalPence === 600 && q("popup", 250).packs === 2);
 ok("90-day anniversary for 380: £12", q("season", 380).totalPence === 1200);
 ok("12-month wedding for 650: £31", q("keepsake", 650).totalPence === 3100);
-ok("exactly 200 on Pop-Up: free, no pack", q("popup", 200).totalPence === 0 && q("popup", 200).packs === 0);
-ok("201 on Pop-Up needs one pack", q("popup", 201).packs === 1);
+ok("exactly 100 on Free: free, no pack", q("popup", 100).totalPence === 0 && q("popup", 100).packs === 0);
+ok("101 on Free needs one pack", q("popup", 101).packs === 1);
 ok("half fee level halves it: £6", q("season", 380, { chargePercent: 50 }).totalPence === 600);
 ok("free fee level: £0", q("keepsake", 650, { chargePercent: 0 }).totalPence === 0);
 ok("same again: 30% off £12 = £8.40", q("season", 380, { sameAgain: true }).totalPence === 840);
 ok("welcome back: 20% off £12 = £9.60", q("season", 380, { welcomeBack: true }).totalPence === 960);
 const both = q("season", 380, { sameAgain: true, welcomeBack: true });
 ok("discounts never stack: the best one (30%) applies", both.totalPence === 840 && both.discount.kind === "same_again");
-ok("a free Pop-Up shows no discount", q("popup", 100, { welcomeBack: true }).discount === null);
+ok("a Free page shows no discount", q("popup", 100, { welcomeBack: true }).discount === null);
 ok("booking fee on a £20 order: £1.10", cat.bookingFee(2000) === 110);
 ok("…half: 55p; free: 0p", cat.bookingFee(2000, 50) === 55 && cat.bookingFee(2000, 0) === 0);
 ok("prices read as £9, £4.50 and Free", cat.formatPence(900) === "£9" && cat.formatPence(450) === "£4.50" && cat.formatPence(0) === "Free");

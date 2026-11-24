@@ -11,7 +11,7 @@ export type Template = "classic" | "modern" | "festive" | "sport";
 export type TextStyle = "classic" | "formal" | "elegant" | "calligraphy" | "heritage" | "contemporary" | "clean" | "bold" | "playful" | "handwritten";
 export type PhotoStyle = "hero" | "arch" | "polaroid" | "split" | "heart";
 export type Parking = "unknown" | "none" | "free" | "paid" | "street";
-export type PlanKey = "popup" | "season" | "half_year" | "keepsake" | "community" | "festive";
+export type PlanKey = "popup" | "season" | "half_year" | "keepsake" | "community" | "festive" | "memorial";
 
 // A small label on a tile, so the choice feels like browsing a shop.
 export type Tag = "popular" | "new" | "soon";
@@ -110,6 +110,8 @@ export type Plan = {
   name: string;
   pricePence: number;
   daysAfter: number;
+  // True: the days count from the day the page is published (Free), not from the event.
+  fromPublish: boolean;
   guestLimit: number | null;
   photoLimit: number | null;
   photosPerGuest: number;
@@ -128,35 +130,46 @@ export type Plan = {
 };
 
 export const PLANS: Plan[] = [
-  { key: "popup", name: "Pop-Up", pricePence: 0, daysAfter: 90, guestLimit: 200, photoLimit: 50, photosPerGuest: 10, aiWrites: 5,
+  { key: "popup", name: "Free", pricePence: 0, daysAfter: 14, fromPublish: true, guestLimit: 100, photoLimit: 25, photosPerGuest: 5, aiWrites: 5,
     fullResDownload: false, hideBranding: false, bookingFeeBps: 0, bookingFeePence: 0, scales: ["personal", "celebration"],
-    packSize: 100, packPence: 300, sortOrder: 1, duration: "90 days", bestFor: "Birthdays, Pasni, parties" },
-  { key: "season", name: "Season", pricePence: 900, daysAfter: 90, guestLimit: 300, photoLimit: 300, photosPerGuest: 20, aiWrites: 30,
+    packSize: 100, packPence: 300, sortOrder: 1, duration: "14 days", bestFor: "Small parties" },
+  { key: "season", name: "Season", pricePence: 900, daysAfter: 90, fromPublish: false, guestLimit: 300, photoLimit: 300, photosPerGuest: 20, aiWrites: 30,
     fullResDownload: false, hideBranding: false, bookingFeeBps: 0, bookingFeePence: 0, scales: ["personal", "celebration"],
-    packSize: 100, packPence: 300, sortOrder: 2, duration: "90 days", bestFor: "Anniversaries, engagements, reunions" },
-  { key: "half_year", name: "Half-Year", pricePence: 1500, daysAfter: 182, guestLimit: 400, photoLimit: 600, photosPerGuest: 20, aiWrites: 50,
+    packSize: 100, packPence: 300, sortOrder: 2, duration: "90 days", bestFor: "Anniversaries, reunions" },
+  { key: "half_year", name: "Half-Year", pricePence: 1500, daysAfter: 182, fromPublish: false, guestLimit: 400, photoLimit: 600, photosPerGuest: 20, aiWrites: 50,
     fullResDownload: false, hideBranding: false, bookingFeeBps: 0, bookingFeePence: 0, scales: ["personal", "celebration"],
     packSize: 100, packPence: 300, sortOrder: 3, duration: "6 months", bestFor: "Weddings planned well ahead" },
-  { key: "keepsake", name: "Keepsake", pricePence: 2500, daysAfter: 365, guestLimit: 500, photoLimit: 1000, photosPerGuest: 30, aiWrites: 100,
+  { key: "keepsake", name: "Keepsake", pricePence: 2500, daysAfter: 365, fromPublish: false, guestLimit: 500, photoLimit: 1000, photosPerGuest: 30, aiWrites: 100,
     fullResDownload: true, hideBranding: true, bookingFeeBps: 0, bookingFeePence: 0, scales: ["personal", "celebration"],
     packSize: 100, packPence: 300, sortOrder: 4, duration: "12 months", bestFor: "Weddings and milestones to keep" },
-  { key: "community", name: "Community", pricePence: 0, daysAfter: 90, guestLimit: null, photoLimit: 2000, photosPerGuest: 20, aiWrites: 30,
+  { key: "community", name: "Community", pricePence: 0, daysAfter: 90, fromPublish: false, guestLimit: null, photoLimit: 2000, photosPerGuest: 20, aiWrites: 30,
     fullResDownload: false, hideBranding: false, bookingFeeBps: 400, bookingFeePence: 30, scales: ["community"],
     packSize: null, packPence: null, sortOrder: 5, duration: "90 days", bestFor: "Melas, tournaments, fundraisers" },
   // The festive launch (0013): free with the Season limits until 31 January
   // 2027; never sold, so not on the prices page.
-  { key: "festive", name: "Festive launch", pricePence: 0, daysAfter: 90, guestLimit: 300, photoLimit: 300, photosPerGuest: 20, aiWrites: 30,
+  { key: "festive", name: "Festive launch", pricePence: 0, daysAfter: 90, fromPublish: false, guestLimit: 300, photoLimit: 300, photosPerGuest: 20, aiWrites: 30,
     fullResDownload: false, hideBranding: false, bookingFeeBps: 0, bookingFeePence: 0, scales: ["personal", "celebration"],
     packSize: 100, packPence: 300, sortOrder: 0, duration: "90 days", bestFor: "Every family event until 31 January 2027" },
+  // Memorials (0017, Recommended): always free, never sold to.
+  { key: "memorial", name: "Memorial", pricePence: 0, daysAfter: 90, fromPublish: false, guestLimit: 300, photoLimit: 300, photosPerGuest: 20, aiWrites: 30,
+    fullResDownload: false, hideBranding: false, bookingFeeBps: 0, bookingFeePence: 0, scales: ["personal", "celebration"],
+    packSize: 100, packPence: 300, sortOrder: 0, duration: "90 days", bestFor: "A funeral or memorial, free for every family" },
 ];
 // When the festive launch ends (0013 public.festive_until()).
 export const FESTIVE_UNTIL = Date.parse("2027-02-01T00:00:00Z");
 // The plan a family page is on once published: a paid one as chosen, else
 // the festive launch's while it lasts, else Pop-Up.
-export function freePlanAt(key: PlanKey, scale: string, now: number): PlanKey {
+export function freePlanAt(key: PlanKey, scale: string, now: number, sensitive = false): PlanKey {
   if (scale === "community") return "community";
-  if (key !== "popup" && key !== "festive") return key;
+  if (key !== "popup" && key !== "festive" && key !== "memorial") return key;
+  if (sensitive) return "memorial";
   return key === "festive" || now < FESTIVE_UNTIL ? "festive" : "popup";
+}
+
+// How long a plan keeps the page online, in words: "online for 14 days from
+// publishing" (Free) or "online until 90 days after the event".
+export function onlineWords(p: Plan): string {
+  return p.fromPublish ? `online for ${p.duration} from the day you publish` : `online until ${p.duration} after the event`;
 }
 
 export function plan(key: PlanKey): Plan {
@@ -166,7 +179,8 @@ export function plan(key: PlanKey): Plan {
 }
 
 export function plansFor(scale: Scale): Plan[] {
-  return PLANS.filter((p) => p.scales.includes(scale));
+  // sortOrder 0 are the plans nobody buys (festive launch, memorial).
+  return PLANS.filter((p) => p.sortOrder > 0 && p.scales.includes(scale));
 }
 
 // Discounts (docs/CONCEPT.md 5g and 5h). Recommended numbers, not yet confirmed.
