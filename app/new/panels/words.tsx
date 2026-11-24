@@ -13,7 +13,7 @@ import { LANGUAGES, TONES, language } from "@/lib/catalog";
 import { boxBy, EMPTY_COPY, markBoxes, type Draft } from "@/lib/draft";
 import { useB2 } from "../context";
 import { PanelShell } from "../panels";
-import { Chips, Hint, markHint, Needed, Note, Section } from "../ui";
+import { AiHead, Chips, Hint, markHint, Needed, Note, Section } from "../ui";
 
 const TONE_SHORT: Record<string, string> = {
   "Warm and welcoming": "Warm", "Formal and elegant": "Formal", "Fun and playful": "Fun",
@@ -37,9 +37,9 @@ export function WordsPanel() {
   const [allSecond, setAllSecond] = useState(() => !!second && !MAIN_LANGS.includes(second.code));
   const [confirmReset, setConfirmReset] = useState(false);
   return (
-    <PanelShell peek icon="pen" title="The words" line="On the invitation and the page. Change any word; nothing goes live until you publish.">
-      <section className="b2-ai" aria-label="AI writer">
-        <p className="b2-h3"><Icon name="sparkle" className="b2-inline" /> AI writer</p>
+    <PanelShell peek icon="pen" title="The words" line="Shown on the invitation and the page. Changes stay in draft until you publish.">
+      <section className="b2-ai" aria-label="AI writing assistant">
+        <AiHead title="AI writing assistant" line="Generates all five text boxes from your event details." />
         <div className="b2-field">
           <span className="b2-label">Tone</span>
           <Chips label="Tone" small value={d.tone} options={TONES.map((t) => ({ key: t, label: TONE_SHORT[t] ?? t }))}
@@ -57,7 +57,8 @@ export function WordsPanel() {
           )}
         </div>
         <div className="b2-field">
-          <span className="b2-label">A second language too? <span style={{ fontWeight: 500 }}>(shown underneath)</span></span>
+          <span className="b2-label">Second language <span className="b2-small" style={{ display: "inline" }}>(optional)</span></span>
+          <span className="b2-small">Shown beneath the main text.</span>
           <Chips label="Second language" small value={allSecond ? "more" : second?.code ?? "none"}
             options={[{ key: "none", label: "No" }, ...MAIN_LANGS.filter((c) => c !== main.code).map((c) => ({ key: c, label: short(c) })), { key: "more", label: "More…" }]}
             onChange={(c) => { if (c === "more") setAllSecond(true); else { setAllSecond(false); setSecond(!c || c === "none" ? null : c); } }} />
@@ -69,46 +70,46 @@ export function WordsPanel() {
           )}
         </div>
         {[main, second].some((l) => l && !l.ready) && (
-          <p className="b2-small">Beta language: the AI writes it well, but please ask a native speaker to read it before you publish.</p>
+          <p className="b2-small">Beta language: the AI writes it well, but please ask a native speaker to review it before you publish.</p>
         )}
         <button type="button" className="b2-btn b2-primary b2-block" disabled={!!ai.busy} style={{ position: "relative" }}
           onClick={() => { markHint("words-ai"); void b.writeAll(); }}>
           {d.wordsBy !== "ai" && !ai.busy && <Hint id="words-ai" label="Let the AI write" style={{ right: 16, bottom: 4 }} />}
           <Icon name="sparkle" className="" />
-          {busyAll ? "Writing your words…" : !b.session ? "Sign in and write it for me" : d.wordsBy === "ai" ? "Write it all again" : "Write it for me"}
+          {busyAll ? "Generating…" : !b.session ? "Sign in to generate text" : d.wordsBy === "ai" ? "Regenerate all text" : "Generate text"}
         </button>
-        <p className="b2-small">{b.session ? "Free, up to 20 times a day. About ten seconds." : "Signing in is free and takes a minute."}</p>
+        <p className="b2-small">{b.session ? "Free · up to 20 generations a day · about 10 seconds." : "Signing in is free and takes about a minute."}</p>
         {ai.error && ai.at !== undefined && ai.at !== "all" ? null : ai.error && <Note tone="warn">{ai.error}</Note>}
-        {ai.done && !ai.error && !busyAll && <Note tone="ok">Done! Read every word below and change anything you like.</Note>}
-        {ai.trimmed && <Note>Some boxes were a little long, so they were shortened to fit. Check them below.</Note>}
+        {ai.done && !ai.error && !busyAll && <Note tone="ok">Done. Review each text box below and edit anything you like.</Note>}
+        {ai.trimmed && <Note>Some boxes were over the length limit, so they were shortened to fit. Please review them below.</Note>}
       </section>
 
-      <Section icon="pen" title="Your words" line="Type your own, or change what was written for you."
+      <Section icon="pen" title="Text content" line="Edit any field directly, or refine it with the AI shortcuts underneath each box."
         action={d.wordsBy !== "suggested" && !confirmReset ? (
-          <button type="button" className="b2-chip b2-chip-sm" onClick={() => setConfirmReset(true)}>Use ready-made</button>
+          <button type="button" className="b2-chip b2-chip-sm" onClick={() => setConfirmReset(true)}>Restore defaults</button>
         ) : undefined}>
         {confirmReset && (
           <div className="b2-note" data-tone="warn" style={{ display: "grid", gap: 10 }}>
-            <span>Put back the ready-made words? This replaces the words below{second ? `, and clears the ${second}` : ""}.</span>
+            <span>Restore the default text? This replaces all the text below{second ? `, and clears the ${second}` : ""}.</span>
             <span className="b2-chips">
               <button type="button" className="b2-chip b2-chip-sm b2-chip-strong" onClick={() => {
                 update((x) => ({ ...x, wordsBy: "suggested", copyBy: undefined, translation: { ...EMPTY_COPY } }));
                 setConfirmReset(false);
-                b.say("Ready-made words put back.");
-              }}>Yes, put them back</button>
-              <button type="button" className="b2-chip b2-chip-sm" onClick={() => setConfirmReset(false)}>Keep mine</button>
+                b.say("Default text restored.");
+              }}>Yes, restore</button>
+              <button type="button" className="b2-chip b2-chip-sm" onClick={() => setConfirmReset(false)}>Keep my text</button>
             </span>
           </div>
         )}
         <p className="b2-key" aria-hidden="true">
-          <span><i style={{ background: "var(--b2-ai-edge)" }} />The AI wrote it</span>
-          <span><i style={{ background: "var(--b2-mine-edge)" }} />You wrote it</span>
-          <span><i style={{ background: "var(--b2-ready-edge)" }} />Ready-made</span>
+          <span><i style={{ background: "var(--b2-ai-edge)" }} />AI-generated</span>
+          <span><i style={{ background: "var(--b2-mine-edge)" }} />Written by you</span>
+          <span><i style={{ background: "var(--b2-ready-edge)" }} />Default</span>
         </p>
         {COPY_KEYS.map((key) => <WordBox key={key} k={key} d={d} second={second?.name} secondCode={second?.code} />)}
       </Section>
 
-      <Section icon="sparkle" title="A blessing at the very top" line="A short line above everything else, as on printed cards. If you like.">
+      <Section icon="sparkle" title="Opening blessing" line="Optional. A short line above everything else, as on printed cards.">
         <Chips label="A blessing at the top" small value={TOP_LINES.includes(d.topLine ?? "") ? d.topLine ?? "" : d.topLine ? "own" : ""}
           options={[{ key: "", label: "None" }, ...TOP_LINES.map((t) => ({ key: t, label: t })), { key: "own", label: "My own" }]}
           onChange={(v) => update((x) => ({ ...x, topLine: v === "own" ? (x.topLine && !TOP_LINES.includes(x.topLine) ? x.topLine : " ") : v ?? "" }))} />
@@ -144,13 +145,13 @@ function WordBox({ k, d, second, secondCode }: { k: CopyKey; d: Draft; second?: 
       {box("copy", d.languages[0])}
       <p className="b2-byline">
         <span className="b2-by" data-by={by}>
-          {by === "ai" ? <><Icon name="sparkle" className="" />The AI wrote this</> : by === "host" ? <><Icon name="pen" className="" />You wrote this</> : "Ready-made"}
+          {by === "ai" ? <><Icon name="sparkle" className="" />AI-generated</> : by === "host" ? <><Icon name="pen" className="" />Written by you</> : "Default"}
         </span>
         <span>{charCount(d.copy[k])}/{f.max}</span>
       </p>
       {second && (
         <>
-          <p className="b2-small" style={{ margin: 0 }}>In {second} · {charCount(d.translation[k])}/{f.max}</p>
+          <p className="b2-label" style={{ margin: 0 }}>{second} version <span className="b2-caption" style={{ display: "inline" }}>{charCount(d.translation[k])}/{f.max}</span></p>
           {box("translation", secondCode, `${f.label} in ${second}`)}
         </>
       )}

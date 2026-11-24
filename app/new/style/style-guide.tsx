@@ -55,10 +55,13 @@ export default function StyleGuide() {
             <div className="b2-card" style={{ display: "grid", gap: 12 }}>
               <p className="b2-kicker">Kicker</p>
               <p className="b2-h1">Headline</p>
-              <p className="b2-h2">Section title</p>
-              <p className="b2-h3">Small title</p>
+              <p className="b2-h2">Page title (panel heading)</p>
+              <p className="b2-title">Section title</p>
+              <p className="b2-h3">Item title</p>
               <p className="b2-lead">Lead text, for one helpful sentence.</p>
-              <p className="b2-small">Small print and hints.</p>
+              <p className="b2-label">Field label</p>
+              <p className="b2-small">Supporting text and hints.</p>
+              <p className="b2-caption">Caption: counters and small notes.</p>
             </div>
           </Part>
 

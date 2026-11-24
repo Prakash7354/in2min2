@@ -11,11 +11,9 @@
 import { useEffect, useState } from "react";
 import { FOOD_NEEDS, foodLabel, foodNeedsOf, type FoodNeed } from "@/lib/catalog";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
-import { AddToCalendar } from "./add-to-calendar";
 
 type Status = "attending" | "maybe" | "declined";
 type Saved = { token: string; name: string; status: Status | "waitlist"; partySize: number; note: string; food?: FoodNeed[] };
-type Cal = { title: string; date: string; startTime: string; endTime: string; timezone: string; venue: string };
 
 const s = (k: string) => `ev-${k}`;
 
@@ -32,9 +30,9 @@ const MESSAGES: Record<string, string> = {
   no_event: "This event can't be found. Please check the link.",
 };
 
-export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, hostName, cal, askFood = false }: {
+export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, hostName, askFood = false }: {
   type: string; slug: string; token: string | null; guestName: string | null;
-  guestReply: { status: string; partySize: number } | null; sensitive: boolean; hostName: string; cal: Cal; askFood?: boolean;
+  guestReply: { status: string; partySize: number } | null; sensitive: boolean; hostName: string; askFood?: boolean;
 }) {
   const key = `in2min2.reply.${type}/${slug}`;
   const [saved, setSaved] = useState<Saved | null>(null);
@@ -121,7 +119,6 @@ export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, host
         <p>{line}</p>
         {saved.status !== "declined" && <p>The plan for the day will be published on this same link. Please keep it and check back.</p>}
         {askFood && saved.status !== "declined" && !!saved.food?.length && <p>Food needs: {saved.food.map(foodLabel).join(", ")}.</p>}
-        {(saved.status === "attending" || saved.status === "maybe") && <AddToCalendar cal={cal} type={type} slug={slug} token={token} />}
         <div>
           <button type="button" className={`${s("btn")} ${s("btnGhost")} ${s("btnSmall")}`} onClick={() => { setStatus(saved.status === "waitlist" ? "attending" : saved.status as Status); setMode("details"); }}>
             Change my reply

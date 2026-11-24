@@ -23,7 +23,7 @@ import { MilestonePicker, TitleLine } from "./pickers";
 import { AccountButton } from "./sheets";
 import { GuestDemo } from "./demo";
 import { YourEventsRow } from "./events";
-import { BottomBar, Chips, Hint, markHint, Pop, TopBar, spring } from "./ui";
+import { AiHead, BottomBar, Chips, Hint, markHint, Pop, TopBar, spring } from "./ui";
 import { Welcome } from "./welcome";
 
 export function quickSteps(d: Draft): Screen[] {
@@ -465,13 +465,13 @@ function ReadyScreen() {
         <p className="b2-note" data-tone="ok"><Icon name="sparkle" className="b2-inline" /> Written by the AI. Read it, and change anything from your event home.</p>
       ) : !writing && (
         <div className="b2-ai">
-          <p className="b2-h3"><Icon name="sparkle" className="b2-inline" /> {session ? "Let the AI write your words" : "Want better words?"}</p>
-          <p className="b2-small">{session
-            ? "In English, Nepali or both, in about ten seconds. You check every word."
-            : "Sign in (free) and the AI writes them for you, in English, Nepali or both. These ready-made words are fine too."}</p>
+          <AiHead title={session ? "Generate your text with AI" : "Want better wording?"}
+            line={session
+              ? "In English, Nepali or both, in about ten seconds. You review every word."
+              : "Sign in (free) and the AI writes it for you, in English, Nepali or both. The default text is fine too."} />
           {ai.error && <p className="b2-small" role="alert">{ai.error}</p>}
           <button type="button" className="b2-btn b2-secondary" onClick={() => void writeAll()}>
-            <Icon name="sparkle" className="" />{session ? "Write it for me" : "Sign in and write it"}
+            <Icon name="sparkle" className="" />{session ? "Generate text" : "Sign in to generate"}
           </button>
         </div>
       )}

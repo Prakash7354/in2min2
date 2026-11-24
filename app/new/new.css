@@ -106,9 +106,18 @@
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
-.b2-h3 { margin: 0; font-weight: 700; font-size: 19px; line-height: 1.25; }
-.b2-lead { margin: 0; color: var(--b2-text-2); font-size: 18px; }
-.b2-small { margin: 0; color: var(--b2-text-2); font-size: 15px; }
+/* The type scale, biggest to smallest (owner, 24 Nov 2026: "title, subtitle and
+   hints all look the same size"). Each step differs in size AND weight or colour:
+   page title 28-36 · section title 21 (.b2-title) · item title 18 (.b2-h3) ·
+   field label 16 bold (.b2-label) · supporting text 14 grey (.b2-small) ·
+   caption 12.5 grey (.b2-caption). */
+.b2-h3 { margin: 0; font-weight: 700; font-size: 18px; line-height: 1.25; }
+.b2-title { margin: 0; font-family: var(--font-display); font-weight: 800; font-size: 21px; line-height: 1.2; letter-spacing: -0.015em; }
+.b2-lead { margin: 0; color: var(--b2-text-2); font-size: 17px; font-weight: 500; }
+.b2-small { margin: 0; color: var(--b2-text-2); font-size: 14px; line-height: 1.4; font-weight: 500; }
+.b2-caption { margin: 0; color: var(--b2-text-2); font-size: 12.5px; line-height: 1.35; font-weight: 600; }
+/* Supporting text sits close under its title, and a little apart from the next block. */
+.b2-sectionhead .b2-small { margin-top: 1px; }
 .b2-kicker {
   margin: 0;
   color: var(--b2-accent-text);
@@ -252,7 +261,8 @@
 
 /* Big inputs: 16px or more so phones don't zoom in */
 .b2-field { display: grid; gap: 8px; }
-.b2-label { font-weight: 800; font-size: 15.5px; color: var(--b2-text); }
+.b2-label { font-weight: 700; font-size: 16px; line-height: 1.3; color: var(--b2-text); }
+.b2-field > .b2-small, .b2-field > span.b2-small { font-size: 13.5px; }
 .b2-input {
   width: 100%;
   min-height: 64px;
@@ -582,6 +592,8 @@
 .b2-appbar { grid-template-columns: 1fr auto; }
 .b2-brand { font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
 .b2-inline { width: 20px; height: 20px; vertical-align: -3px; color: var(--b2-accent-text); }
+.b2-ai .b2-sectionhead { margin-bottom: 2px; }
+.b2-ai .b2-sicon { background: linear-gradient(135deg, var(--b2-violet), color-mix(in srgb, var(--b2-violet) 55%, #000)); }
 .b2-link {
   border: 0; background: none; padding: 4px 0; font: inherit; font-weight: 700; font-size: 15px;
   color: var(--b2-text); text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
@@ -904,13 +916,13 @@ a.b2-row { color: var(--b2-text); }
 .b2-wordbox[data-by="host"] .b2-input { box-shadow: inset 5px 0 0 var(--b2-mine-edge), var(--b2-field-ring); }
 .b2-wordbox[data-by="ready"] .b2-input { box-shadow: inset 5px 0 0 var(--b2-ready-edge), var(--b2-field-ring); }
 .b2-wordbox .b2-input:focus { box-shadow: 0 0 0 3px var(--b2-accent); }
-.b2-byline { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: -2px 0 0; font-size: 13.5px; color: var(--b2-text-2); font-variant-numeric: tabular-nums; }
+.b2-byline { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: -2px 0 0; font-size: 12.5px; color: var(--b2-text-2); font-variant-numeric: tabular-nums; }
 .b2-by { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px 3px 8px; border-radius: 999px; font-weight: 800; color: var(--b2-text); }
 .b2-by svg { width: 14px; height: 14px; }
 .b2-by[data-by="ai"] { background: color-mix(in srgb, var(--b2-ai-edge) 30%, transparent); }
 .b2-by[data-by="host"] { background: color-mix(in srgb, var(--b2-mine-edge) 26%, transparent); }
 .b2-by[data-by="ready"] { background: var(--b2-s3); }
-.b2-key { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; font-size: 14px; color: var(--b2-text-2); }
+.b2-key { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; font-size: 12.5px; font-weight: 600; color: var(--b2-text-2); }
 .b2-key span { display: inline-flex; align-items: center; gap: 6px; }
 .b2-key i { width: 5px; height: 16px; border-radius: 3px; }
 

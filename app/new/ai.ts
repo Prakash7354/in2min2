@@ -94,7 +94,7 @@ export async function aiWrite(d: Draft, one?: { key: CopyKey; adjust: Adjustment
     if (!res.ok) {
       return {
         ok: false, signIn: res.status === 401,
-        message: json.error ?? (res.status === 503 ? "The AI writer isn't switched on yet. You can type your own words for now." : "Something went wrong. Please try again."),
+        message: json.error ?? (res.status === 503 ? "The AI assistant isn't switched on yet. You can type your own text for now." : "Something went wrong. Please try again."),
       };
     }
     return { ok: true, copy: pick(json), translation: json.translation, trimmed: !!res.headers.get("X-Copy-Trimmed") };

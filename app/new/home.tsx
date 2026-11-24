@@ -80,8 +80,8 @@ export function Home() {
 
         <div className="b2-bento">
           <Tile span icon="pen" label="Invitation words" delay={0.04} panel="words" hint={!live ? { id: "home-words", label: "Check your words" } : undefined}
-            line={b.ai.busy === "all" ? "The AI is writing…" : d.wordsBy === "ai" ? "Written by the AI. Tap to read and change." : d.wordsBy === "host" ? "Your own words. Tap to change." : "Ready-made words. Let the AI write better ones."}>
-            {d.wordsBy !== "ai" && d.wordsBy !== "host" && <span className="b2-tagline"><Icon name="sparkle" className="" />AI writer</span>}
+            line={b.ai.busy === "all" ? "Generating text…" : d.wordsBy === "ai" ? "AI-generated. Tap to review and edit." : d.wordsBy === "host" ? "Written by you. Tap to edit." : "Default text. Generate better wording with AI."}>
+            {d.wordsBy !== "ai" && d.wordsBy !== "host" && <span className="b2-tagline"><Icon name="sparkle" className="" />AI assistant</span>}
           </Tile>
           <Tile icon="message" label="Replies" delay={0.08} panel="replies"
             big={r ? String(r.coming) : undefined} tag={b.replies.fresh ? `+${b.replies.fresh} new` : undefined}

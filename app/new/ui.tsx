@@ -236,7 +236,7 @@ export function Section({ icon, title, line, children, action }: { icon?: IconNa
       <div className="b2-sectionhead">
         {icon && <span className="b2-sicon" aria-hidden="true"><Icon name={icon} className="" /></span>}
         <div style={{ display: "grid", gap: 2, flex: 1, minWidth: 0 }}>
-          <h2 className="b2-h3">{title}</h2>
+          <h2 className="b2-title">{title}</h2>
           {line && <p className="b2-small">{line}</p>}
         </div>
         {action}
@@ -343,6 +343,19 @@ export function Row({ icon, label, line, onClick, href, tone, end }: {
     : <button type="button" className="b2-row" onClick={onClick}>{inner}</button>;
 }
 
+// The heading row of an AI card (violet icon, title, one line of help).
+export function AiHead({ title, line }: { title: string; line?: ReactNode }) {
+  return (
+    <div className="b2-sectionhead">
+      <span className="b2-sicon" aria-hidden="true"><Icon name="sparkle" className="" /></span>
+      <div style={{ display: "grid", gap: 2, flex: 1, minWidth: 0 }}>
+        <h2 className="b2-title">{title}</h2>
+        {line && <p className="b2-small">{line}</p>}
+      </div>
+    </div>
+  );
+}
+
 // A full-screen panel's heading line, under its top bar.
 export function PanelHead({ icon, title, line }: { icon: IconName; title: string; line?: ReactNode }) {
   return (
@@ -351,7 +364,7 @@ export function PanelHead({ icon, title, line }: { icon: IconName; title: string
         <span className="b2-sicon b2-sicon-lg" aria-hidden="true"><Icon name={icon} className="" /></span>
         <h1 className="b2-h1" style={{ fontSize: "clamp(28px, 7.5vw, 36px)" }}>{title}</h1>
       </div>
-      {line && <p className="b2-lead" style={{ fontSize: 17 }}>{line}</p>}
+      {line && <p className="b2-lead">{line}</p>}
     </div>
   );
 }

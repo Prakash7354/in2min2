@@ -14,7 +14,7 @@ import { COURSES, DEFAULT_RUN, MEAL_WORDS, RUN_SUGGESTIONS, nextTime } from "@/l
 import { useB2 } from "../context";
 import { DISHES, kindOf, planFor } from "../kinds";
 import { PanelShell } from "../panels";
-import { AddChips, Field, Note, Section, Toggle } from "../ui";
+import { AddChips, AiHead, Field, Note, Section, Toggle } from "../ui";
 
 type Item = Draft["functions"][number];
 const mealLine = (menu: MenuItem[]) => {
@@ -51,12 +51,12 @@ export function PlanPanel() {
 
       {d.functions.length === 0 && (
         <section className="b2-ai">
-          <p className="b2-h3"><Icon name="sparkle" className="b2-inline" /> A suggested plan</p>
-          <p className="b2-small">{suggested.map((f) => `${formatTime(f.time).replace(":00", "")} ${f.title}`).join(" · ")}</p>
+          <AiHead title="Suggested schedule" line="Based on your event type and start time." />
+          <p className="b2-h3" style={{ fontWeight: 600, fontSize: 16 }}>{suggested.map((f) => `${formatTime(f.time).replace(":00", "")} ${f.title}`).join(" · ")}</p>
           <button type="button" className="b2-btn b2-primary b2-block" onClick={() => update((x) => ({ ...x, functions: planFor(x) }))}>
-            Use this plan
+            Use this schedule
           </button>
-          <p className="b2-small">Timed from your start time{d.startTime ? ` (${formatTime(d.startTime)})` : ""}. Change any of it after.</p>
+          <p className="b2-caption">Timed from your start time{d.startTime ? ` (${formatTime(d.startTime)})` : ""}. Change any of it after.</p>
         </section>
       )}
 
