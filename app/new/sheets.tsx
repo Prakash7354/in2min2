@@ -12,7 +12,7 @@ import { Icon, type IconName } from "@/components/icons";
 import { QrCode } from "@/components/qr-code";
 import { eventType, plan, freePlanAt } from "@/lib/catalog";
 import { missingForPublish, toViewData, unpublishedChanges, type Draft } from "@/lib/draft";
-import { formatDate } from "@/lib/event-view";
+import { daysUntil, formatDate } from "@/lib/event-view";
 import { wallPath } from "@/lib/photos";
 import { copyLink, shareLink, whatsappUrl } from "@/lib/share";
 import { AppIcon } from "@/components/app-icons";
@@ -304,6 +304,16 @@ export function updates(b: B2): Update[] {
   if (!d.eventId && missing.length) items.push({ tone: "todo", icon: "list", title: `${missing.length} thing${missing.length > 1 ? "s" : ""} still needed to publish`, line: missing.map((m) => m.text).join(", "), action: { label: "Show me", panel: MISSING_PANEL[missing[0].step] ?? "publish" } });
   if (!d.eventId && !missing.length) items.push({ tone: "todo", icon: "check", title: "Ready to publish", line: "Everything needed is filled in.", action: { label: "Publish", panel: "publish" } });
   if (d.eventId && !unpublishedChanges(d)) items.push({ tone: "ok", icon: "check", title: "Your page is live", line: "Share the link with your guests." });
+  // A few days before: nudge the host to check the day plan and thank-you words (owner, 24 Nov 2026).
+  const soon = d.eventId && d.date ? daysUntil(d.date, d.timezone, b.now) : null;
+  if (soon !== null && soon >= 0 && soon <= 3) {
+    const noPlan = d.toggles.schedule && d.functions.length === 0;
+    const noThanks = !d.copy.post_event_thank_you.trim();
+    items.push({ tone: noPlan || noThanks ? "todo" : "info", icon: "clock",
+      title: `Your event is ${soon === 0 ? "today" : soon === 1 ? "tomorrow" : `in ${soon} days`}`,
+      line: `Check your day plan${noPlan ? " (it's empty)" : ""} and your thank-you words${noThanks ? " (not written yet)" : ""}. Guests use the same link on the day and afterwards.`,
+      action: noPlan ? { label: "Day plan", panel: "plan" } : { label: "Thank-you words", panel: "words" } });
+  }
   // How long it stays online, and where to close it sooner (0015).
   const until = b.replies.usage?.hosting_until;
   if (d.eventId && until) items.push({ tone: "info", icon: "clock", title: `Online until ${new Date(until).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}`,

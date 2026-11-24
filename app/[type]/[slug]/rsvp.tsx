@@ -11,7 +11,7 @@
 import { useEffect, useState } from "react";
 import { FOOD_NEEDS, foodLabel, foodNeedsOf, type FoodNeed } from "@/lib/catalog";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
-import { addDays, zonedToUtcIso } from "@/lib/time";
+import { AddToCalendar } from "./add-to-calendar";
 
 type Status = "attending" | "maybe" | "declined";
 type Saved = { token: string; name: string; status: Status | "waitlist"; partySize: number; note: string; food?: FoodNeed[] };
@@ -119,8 +119,9 @@ export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, host
       <div className={s("replyDone")} role="status" aria-live="polite">
         <p className={s("replyBig")}>Thank you, {first}!</p>
         <p>{line}</p>
+        {saved.status !== "declined" && <p>The plan for the day will be published on this same link. Please keep it and check back.</p>}
         {askFood && saved.status !== "declined" && !!saved.food?.length && <p>Food needs: {saved.food.map(foodLabel).join(", ")}.</p>}
-        {(saved.status === "attending" || saved.status === "maybe") && <CalendarLinks cal={cal} />}
+        {(saved.status === "attending" || saved.status === "maybe") && <AddToCalendar cal={cal} type={type} slug={slug} token={token} />}
         <div>
           <button type="button" className={`${s("btn")} ${s("btnGhost")} ${s("btnSmall")}`} onClick={() => { setStatus(saved.status === "waitlist" ? "attending" : saved.status as Status); setMode("details"); }}>
             Change my reply
@@ -192,31 +193,5 @@ export function Rsvp({ type, slug, token, guestName, guestReply, sensitive, host
         <button type="button" className={`${s("btn")} ${s("btnGhost")} ${s("btnSmall")}`} onClick={() => setMode(saved ? "done" : "choose")}>Back</button>
       </div>
     </form>
-  );
-}
-
-// "Add to calendar": Google Calendar, or a file that Apple, Outlook and
-// Samsung calendars all open.
-function CalendarLinks({ cal }: { cal: Cal }) {
-  if (!cal.date) return null;
-  const start = zonedToUtcIso(cal.date, cal.startTime, cal.timezone);
-  const end = cal.endTime
-    ? zonedToUtcIso(cal.endTime > cal.startTime ? cal.date : addDays(cal.date, 1), cal.endTime, cal.timezone)
-    : new Date(Date.parse(start) + 3 * 3600_000).toISOString();
-  const stamp = (iso: string) => iso.replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-  const here = typeof window !== "undefined" ? window.location.href.split("#")[0] : "";
-  const google = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(cal.title)}&dates=${stamp(start)}/${stamp(end)}`
-    + `&location=${encodeURIComponent(cal.venue)}&details=${encodeURIComponent(here)}`;
-  const esc = (t: string) => t.replace(/[\\;,]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
-  const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//in2min2//EN", "BEGIN:VEVENT", `UID:${stamp(start)}-${esc(cal.title).slice(0, 40)}@in2min2.com`,
-    `DTSTAMP:${stamp(new Date().toISOString())}`, `DTSTART:${stamp(start)}`, `DTEND:${stamp(end)}`, `SUMMARY:${esc(cal.title)}`,
-    `LOCATION:${esc(cal.venue)}`, `URL:${here}`, `DESCRIPTION:${esc(here)}`, "END:VEVENT", "END:VCALENDAR"].join("\r\n");
-  return (
-    <div className={s("btnRow")}>
-      <a className={`${s("btn")} ${s("btnSmall")}`} href={google} target="_blank" rel="noreferrer">Add to Google Calendar</a>
-      <a className={`${s("btn")} ${s("btnGhost")} ${s("btnSmall")}`} href={`data:text/calendar;charset=utf-8,${encodeURIComponent(ics)}`} download="event.ics">
-        Add to iPhone or Outlook
-      </a>
-    </div>
   );
 }

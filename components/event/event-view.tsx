@@ -371,8 +371,7 @@ function Page({ d, now, a, reply, photos }: { d: EventViewData; now: number; a: 
 
       <People d={d} />
       <WhenWhere d={d} a={a} />
-      {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} a={a} />}
-
+      {/* The host's special instructions come first, before the running order (owner, 24 Nov 2026). */}
       {main.guest_note_box && (
         <section className={s.section}>
           <p className={s.note}>
@@ -384,6 +383,9 @@ function Page({ d, now, a, reply, photos }: { d: EventViewData; now: number; a: 
           </p>
         </section>
       )}
+
+      {d.toggles.schedule && d.functions.length > 0 && <RunningOrder d={d} now={now} a={a} />}
+      {d.toggles.schedule && d.functions.length === 0 && <ComingSoon>The plan for the day will be published here soon. Please keep this link and check back.</ComingSoon>}
 
       {d.toggles.rsvp && (
         <section className={`${s.section} ${s.rsvp}`} id={a ? "reply" : undefined}>
@@ -580,7 +582,16 @@ function Live({ d, now, a, photos, thumb }: { d: EventViewData; now: number; a: 
           {order && <a className={`${s.btn} ${s.btnGhost}`} href={a ? "#running-order" : undefined}><Icon name="clock" className="" />What’s on</a>}
         </div>
       </Hero>
+      {main.guest_note_box && (
+        <section className={s.section}>
+          <p className={s.note}>
+            <span className={s.noteIcon} aria-hidden="true">i</span>
+            <span>{main.guest_note_box}<Second text={second?.guest_note_box} lang={secondLang} /></span>
+          </p>
+        </section>
+      )}
       {order && <RunningOrder d={d} now={now} live a={a} />}
+      {d.toggles.schedule && !order && <ComingSoon>Today’s plan will appear here shortly. Please check back.</ComingSoon>}
       {d.toggles.photo_wall && photos && (
         <section className={s.section} id={a ? "photos" : undefined}>
           <Title icon="camera">{d.sensitive ? "Photos and memories" : "Photos from today"}</Title>
@@ -608,14 +619,6 @@ function Live({ d, now, a, photos, thumb }: { d: EventViewData; now: number; a: 
       )}
       <People d={d} />
       <WhenWhere d={d} a={a} />
-      {main.guest_note_box && (
-        <section className={s.section}>
-          <p className={s.note}>
-            <span className={s.noteIcon} aria-hidden="true">i</span>
-            <span>{main.guest_note_box}<Second text={second?.guest_note_box} lang={secondLang} /></span>
-          </p>
-        </section>
-      )}
       <Footer d={d} />
     </>
   );
@@ -645,7 +648,7 @@ function After({ d, a, photos, thumb }: { d: EventViewData; a: boolean; photos?:
           <Title icon="images">{d.sensitive ? "Photos and memories" : "The gallery"}</Title>
           {thumb ? <Fan d={d} /> : <PreviewWheel d={d} />}
           <div className={s.wall} aria-hidden="true">{Array.from({ length: 9 }, (_, i) => <span key={i} />)}</div>
-          <p className={s.muted}>Every guest’s photos, in one place.</p>
+          <p className={s.muted}>Photos will be shared here soon. Please keep this link and check back.</p>
         </section>
       )}
       {d.toggles.guestbook && (
@@ -658,6 +661,15 @@ function After({ d, a, photos, thumb }: { d: EventViewData; a: boolean; photos?:
     </>
   );
 }
+// Shown where a part of the page isn't ready yet, so guests know to come back to the same link.
+function ComingSoon({ children }: { children: ReactNode }) {
+  return (
+    <section className={s.section}>
+      <p className={s.muted}>{children}</p>
+    </section>
+  );
+}
+
 function Footer({ d }: { d: EventViewData }) {
   const o = d.organiser;
   const details = o ? [o.typeLabel, o.charityNumber && `Charity ${o.charityNumber}`,

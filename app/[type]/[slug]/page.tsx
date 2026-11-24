@@ -11,12 +11,14 @@ import { notFound } from "next/navigation";
 import EventView from "@/components/event/event-view";
 import { eventFontVariables } from "@/components/event/fonts";
 import { formatDate, formatTime, openedKey } from "@/lib/event-view";
+import { SHARE_IMAGE } from "@/lib/site-share";
 import { getPublicEvent } from "@/lib/public-event";
 import { PhotoWall } from "@/components/photos/photo-wall";
 import { Opening } from "@/components/event/opening";
 import { Rsvp } from "./rsvp";
 import { LiveNotices } from "./live-notices";
 import { ShareButton } from "./share-button";
+import { AddToCalendar } from "./add-to-calendar";
 
 const token = (sp: Record<string, string | string[] | undefined>) => (typeof sp.g === "string" && /^[A-Za-z0-9]{16,64}$/.test(sp.g) ? sp.g : undefined);
 
@@ -32,7 +34,7 @@ export async function generateMetadata({ params, searchParams }: PageProps<"/[ty
   const d = page.data;
   const when = [d.date && formatDate(d.date), formatTime(d.startTime)].filter(Boolean).join(", ");
   const description = [when, d.venueName].filter(Boolean).join(" · ") || "An invitation made with in2min2";
-  const images = page.shareImage ? [{ url: page.shareImage, width: 1200, height: 630, alt: page.title }] : undefined;
+  const images = page.shareImage ? [{ url: page.shareImage, width: 1200, height: 630, alt: page.title }] : [SHARE_IMAGE]; // no photo yet: the in2min2 picture
   // Never listed, unless the host of a public event chose "Show on Google"
   // (owner, 23 Nov 2026); a personal link (?g=) is never listed either.
   const listed = !!d.searchable && !g;
@@ -109,6 +111,10 @@ export default async function EventPage({ params, searchParams }: PageProps<"/[t
         <EventView data={page.data} view={page.view} now={serverNow()} anchors reply={reply} photos={photos}
           notice={<LiveNotices type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} />} />
       </div>
+      {d.date && page.view !== "after" && (
+        <AddToCalendar className="px-4 pt-6" type={type} slug={slug} token={page.viaGuestLink ? g ?? null : null} colour={p.main} textColour={p.onMain}
+          cal={{ title: page.title, date: d.date, startTime: d.startTime, endTime: d.endTime, timezone: d.timezone, venue: [d.venueName, d.venueAddress].filter(Boolean).join(", ") }} />
+      )}
       <ShareButton title={page.title} colour={p.main} textColour={p.onMain} />
     </main>
   );

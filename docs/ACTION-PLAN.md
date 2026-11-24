@@ -299,3 +299,10 @@ At the end of each phase you get:
 **Backgrounds:** WebP or JPG, 1,200 × 1,800 pixels (portrait), under 300 KB each, with a calmer middle where the words go. If it has its own frame painted in, say so in the file name (e.g. "…-frame-bg.webp").
 
 **Rights:** only images you made yourself, or with a licence that allows business use. Keep a note of where each came from.
+
+## Outstanding from 24 Nov 2026 (see docs/PLAN-day-gifts-replies.md)
+
+- [ ] Nudge the host before the day to check the plan and thank-you words. (Built 24 Nov; tick when you have seen it in the bell.)
+- [ ] Host photos on the thank-you page, so the page is never empty.
+- [ ] Replies dashboard: guests, food needs, gift amounts with a total, comments.
+- [ ] Gifts: amount chips and reason chips, bank transfer, PayPal/Monzo link, then Stripe; a how-to guide for the host. Your decision needed on fees and who holds money.
