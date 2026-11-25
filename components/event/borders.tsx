@@ -250,6 +250,20 @@ function Frame({ file }: { file: string }) {
   );
 }
 
+// B9 Imperial gold (owner's art, 25 Nov 2026): real raised gold with pearls,
+// shown as it is (not tinted). The picture is cut in two, so the top half
+// hangs from the top of the card and the bottom half from the bottom; a
+// plain double rail joins them when the card is tall.
+function ImperialGold() {
+  return (
+    <>
+      <span className="ev-gold2 ev-gold2Rail" />
+      <span className="ev-gold2 ev-gold2Top" />
+      <span className="ev-gold2 ev-gold2Bottom" />
+    </>
+  );
+}
+
 function ArtDeco() {
   const rays = Array.from({ length: 9 }, (_, i) => {
     const a = (i * 90) / 8 * (Math.PI / 180);
@@ -730,6 +744,7 @@ const ART: Record<BorderKey, () => ReactNode> = {
   golden_roses: () => <Frame file="golden-roses.svg" />,
   ornate_flowers: () => <Frame file="ornate-flowers.svg" />,
   wedding_lines: () => <Frame file="wedding-lines.svg" />,
+  imperial_gold: ImperialGold,
   laurel: Laurel,
   floral: Floral,
   vines: Vines,

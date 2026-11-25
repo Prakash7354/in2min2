@@ -84,7 +84,7 @@ function weddingDraft(): Draft {
   return draftOf("wedding", {
     title: "Meenu & Jose", stars: { relation: "The couple", names: "Meenu & Jose" }, venueName: "The Grand Hall", startTime: "11:00",
     cover: "/site/petals-s.jpg", moreCovers: ["/site/w-heart-s.jpg", "/site/w-ceremony-s.jpg"], photoStyle: "polaroid",
-    palette: "sindoor", backdrop: "luminous_red", border: "ornate_flowers",
+    palette: "sindoor", backdrop: "luminous_red", border: "imperial_gold",
     languages: ["en", "ne"],
     copy: { card_headline: "Meenu & Jose are getting married", card_invite_body: "With joy in our hearts, we invite you to celebrate our wedding with us.",
       landing_page_story: "", guest_note_box: "", post_event_thank_you: "" },

@@ -99,8 +99,10 @@
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
 }
 .op-address[data-long] > span { font-size: clamp(17px, 4.8vw, 21px); }
-.op-address::after { /* a written line under the name */
-  content: ""; display: block; width: 92%; height: 1px; margin-top: 6px; background: currentColor; opacity: 0.3;
+.op-address::after { /* a gold flourish under the name (owner's art, 25 Nov 2026) */
+  content: ""; display: block; width: 92%; height: 16px; margin-top: 4px;
+  background: url(/art/gold/divider-1.webp) left center / contain no-repeat;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.3));
 }
 
 /* The back: inside, card, pocket (three folds), flap, seal. */
