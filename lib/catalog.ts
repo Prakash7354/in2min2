@@ -56,7 +56,7 @@ export type EventType = {
 
 export const EVENT_TYPES: EventType[] = [
   { key: "birthday", tag: "popular", label: "Birthday", scale: "personal", theme: "modern", toggles: {}, repeatsYearly: true, sensitive: false,
-    line: "Any age, any size", starLabel: "The birthday person", palette: "confetti_brights", textStyle: "playful", borders: ["balloons", "confetti", "bunting", "stars", "floral", "golden_roses", "royal", "watercolour_roses", "golden_leaves"], photoStyle: "polaroid", tone: "Fun and playful" },
+    line: "Any age, any size", starLabel: "The birthday person", palette: "confetti_brights", textStyle: "playful", borders: ["balloons", "garden_blooms", "confetti", "bunting", "stars", "floral", "golden_roses", "royal", "watercolour_roses", "golden_leaves"], photoStyle: "polaroid", tone: "Fun and playful" },
   { key: "pasni", tag: "popular", label: "Pasni (rice feeding)", scale: "personal", theme: "festive", toggles: { gift_registry: true }, repeatsYearly: false, sensitive: false,
     line: "Baby's first rice", starLabel: "The child", palette: "marigold_indigo", textStyle: "heritage", borders: ["marigold", "imperial_gold", "royal", "ornate_flowers", "mandala", "floral", "balloons"], photoStyle: "arch", tone: "Warm and welcoming" },
   { key: "party", label: "Party", scale: "personal", theme: "modern", toggles: {}, repeatsYearly: false, sensitive: false,
@@ -89,11 +89,11 @@ export const EVENT_TYPES: EventType[] = [
     line: "Funeral, prayers, remembrance", starLabel: "In memory of", palette: "calm", textStyle: "formal", borders: ["fine_line", "laurel", "golden_leaves", "khukuri", "vines", "none"], photoStyle: "arch", tone: "Gentle and respectful" },
   // Festive season (owner, 14 Nov 2026: seasonal designs to show off the festive launch; 0004)
   { key: "christmas", tag: "new", label: "Christmas party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,
-    line: "Family, friends or work", starLabel: "Who it's for", palette: "christmas", textStyle: "classic", borders: ["christmas_greenery", "snowflakes", "stars", "floral", "bunting"], photoStyle: "hero", tone: "Festive and joyful", effect: "snow" },
+    line: "Family, friends or work", starLabel: "Who it's for", palette: "christmas", textStyle: "classic", borders: ["christmas_greenery", "winter_poinsettia", "snowflakes", "stars", "floral", "bunting"], photoStyle: "hero", tone: "Festive and joyful", effect: "snow" },
   { key: "new-year", tag: "new", label: "New Year’s Eve party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,
-    line: "Countdown to midnight", starLabel: "Who it's for", palette: "midnight_gold", textStyle: "contemporary", borders: ["fireworks", "stars", "art_deco", "confetti"], photoStyle: "hero", tone: "Festive and joyful", effect: "fireworks" },
+    line: "Countdown to midnight", starLabel: "Who it's for", palette: "midnight_gold", textStyle: "contemporary", borders: ["fireworks", "gold_line_blooms", "stars", "art_deco", "confetti"], photoStyle: "hero", tone: "Festive and joyful", effect: "fireworks" },
   { key: "lhosar", tag: "new", label: "Lhosar celebration", scale: "community", theme: "festive", toggles: { tickets: true, sponsors: true }, repeatsYearly: true, sensitive: false,
-    line: "Tamu, Sonam or Gyalpo Lhosar", starLabel: "The celebration", palette: "prayer_flags", textStyle: "heritage", borders: ["prayer_flags", "dhaka", "bunting", "marigold"], photoStyle: "hero", tone: "Festive and joyful", effect: "petals" },
+    line: "Tamu, Sonam or Gyalpo Lhosar", starLabel: "The celebration", palette: "prayer_flags", textStyle: "heritage", borders: ["prayer_flags", "lali_gurans", "dhaka", "bunting", "marigold"], photoStyle: "hero", tone: "Festive and joyful", effect: "petals" },
 ];
 
 export const REPEAT_AS: Record<string, string> = { wedding: "anniversary" };
@@ -520,7 +520,8 @@ export type BorderKey =
   | "balloons" | "confetti" | "bunting" | "stars" | "sunburst" | "rainbow" | "stripes" | "pitch"
   | "snowflakes" | "fireworks" | "prayer_flags" | "royal" | "khukuri"
   | "red_roses" | "watercolour_roses" | "gold_crown" | "golden_leaves"
-  | "christmas_greenery" | "golden_roses" | "ornate_flowers" | "wedding_lines" | "imperial_gold";
+  | "christmas_greenery" | "golden_roses" | "ornate_flowers" | "wedding_lines" | "imperial_gold"
+  | "garden_blooms" | "winter_poinsettia" | "lali_gurans" | "gold_line_blooms";
 
 export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[] = [
   { key: "none", name: "Plain", line: "No border: let the words speak" },
@@ -541,6 +542,11 @@ export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[
   { key: "wedding_lines", tag: "new", name: "B8 Wedding lines", line: "Elegant fine lines and corner sprays; takes your colours" },
   // Real-gold frame from the owner's own art (25 Nov 2026; public/art/gold): not tinted, it keeps its own gold and pearls
   { key: "imperial_gold", tag: "new", name: "B9 Imperial gold", line: "Rich raised-gold scrolls and pearls, like a printed palace invitation" },
+  // Contemporary flower designs, drawn in code in the event's own colours (25 Nov 2026)
+  { key: "garden_blooms", tag: "new", name: "Garden blooms", line: "Painted-looking peonies and leaves in your party colours: birthdays and parties" },
+  { key: "winter_poinsettia", tag: "new", name: "Winter poinsettia", line: "Poinsettias, holly, berries and pine: Christmas" },
+  { key: "lali_gurans", tag: "new", name: "Lali gurans", line: "Rhododendron blooms, Nepal's flower: Lhosar and Nepali festivals" },
+  { key: "gold_line_blooms", tag: "new", name: "Line blooms", line: "Fine drawn flowers and sparkles in your main colour: gold on Midnight, for New Year and evenings" },
   { key: "laurel", name: "Laurel", line: "A laurel wreath: regiments, awards, remembrance" },
   { key: "floral", tag: "popular", name: "Flowers", line: "Flower sprays in the corners" },
   { key: "vines", name: "Leafy vine", line: "A vine of many-coloured leaves" },

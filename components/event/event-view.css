@@ -59,6 +59,10 @@
 .ev-root[data-border="ornate_flowers"] { --bt: 0.11; --bb: 0.11; --side: 8cqi; }
 .ev-root[data-border="wedding_lines"] { --bt: 0.1; --bb: 0.1; --side: 7cqi; }
 .ev-root[data-border="imperial_gold"] { --bt: 0.24; --bb: 0.2; --side: 10cqi; }
+.ev-root[data-border="garden_blooms"] { --bt: 0.16; --bb: 0.16; --side: 5cqi; }
+.ev-root[data-border="winter_poinsettia"] { --bt: 0.16; --bb: 0.16; --side: 5cqi; }
+.ev-root[data-border="lali_gurans"] { --bt: 0.16; --bb: 0.16; --side: 5cqi; }
+.ev-root[data-border="gold_line_blooms"] { --bt: 0.16; --bb: 0.16; --side: 5cqi; }
 .ev-root[data-border="art_deco"] { --bt: 0.08; --bb: 0.08; --side: 4cqi; }
 .ev-root[data-border="laurel"] { --bt: 0.05; --bb: 0.2; --side: 2cqi; }
 .ev-root[data-border="floral"] { --bt: 0.07; --bb: 0.07; --side: 2cqi; }
@@ -1013,6 +1017,7 @@
 .ev-f6 { fill: var(--ev-c6); }
 .ev-sm { stroke: var(--ev-main); fill: none; }
 .ev-sa { stroke: var(--ev-accent); fill: none; }
+.ev-fm-soft { fill: var(--ev-main); fill-opacity: 0.14; }
 .ev-sl { stroke: var(--ev-leaf); fill: none; }
 .ev-si { stroke: var(--ev-ink); fill: none; }
 .ev-sb { stroke: var(--ev-bg); fill: none; }

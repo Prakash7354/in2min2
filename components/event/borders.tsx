@@ -729,6 +729,247 @@ function PrayerFlags() {
   );
 }
 
+// ─────────────── contemporary flower designs (owner, 25 Nov 2026) ───────────────
+// Layered, painted-looking blooms in the event's own colours: Garden blooms
+// (birthdays and parties), Winter poinsettia (Christmas), Lali gurans
+// (rhododendron: Lhosar and Nepali festivals) and Gold line blooms (New
+// Year, evenings). All drawn here, no pictures, no licences.
+
+function petalPath(l: number, w: number): string {
+  return `M0 0 C${r1(-w)} ${r1(-l * 0.25)} ${r1(-w * 0.9)} ${r1(-l * 0.92)} 0 ${r1(-l)} C${r1(w * 0.9)} ${r1(-l * 0.92)} ${r1(w)} ${r1(-l * 0.25)} 0 0Z`;
+}
+
+// A layered bloom (peony, dahlia, rose): rings of petals, each a little
+// smaller and turned, with a soft highlight on the outer ring.
+function Bloom({ x, y, r, cls, n = 7, rings = 3, rot = 0, centre = "ev-fa" }: { x: number; y: number; r: number; cls: string; n?: number; rings?: number; rot?: number; centre?: string }) {
+  return (
+    <g transform={`translate(${r1(x)} ${r1(y)}) rotate(${rot})`}>
+      {Array.from({ length: rings }, (_, k) => {
+        const len = r * (1 - k * 0.27);
+        const w = len * (0.44 - k * 0.03);
+        const d = petalPath(r1(len), r1(w));
+        return Array.from({ length: n }, (_, i) => (
+          <g key={`${k}-${i}`} transform={`rotate(${r1((360 / n) * i + k * (180 / n) + k * 9)})`}>
+            <path d={d} className={cls} opacity={r1(Math.min(1, 0.72 + k * 0.14))} stroke="var(--ev-bg)" strokeWidth="0.45" strokeOpacity="0.5" />
+            {k === 0 && <path d={petalPath(r1(len * 0.5), r1(w * 0.5))} transform={`translate(0 ${r1(-len * 0.4)})`} className="ev-fb" opacity="0.22" />}
+          </g>
+        ));
+      })}
+      <circle r={r1(r * 0.13)} className={centre} />
+      {Array.from({ length: 6 }, (_, i) => (
+        <circle key={i} cx={r1(Math.cos((i * Math.PI) / 3) * r * 0.2)} cy={r1(Math.sin((i * Math.PI) / 3) * r * 0.2)} r={r1(r * 0.03)} className="ev-fi" opacity="0.35" />
+      ))}
+    </g>
+  );
+}
+
+// A leafy branch: a thin stem with leaves alternating along it.
+function Branch({ p0, c, p2, n, size, cls = "ev-fl", from = 0.12, vein = true }: { p0: Pt; c: Pt; p2: Pt; n: number; size: number; cls?: string; from?: number; vein?: boolean }) {
+  const leaves = Array.from({ length: n }, (_, i) => {
+    const t = from + (i / Math.max(1, n - 1)) * (0.98 - from);
+    const q = quad(p0, c, p2, t);
+    const side = i % 2 ? -52 : 52;
+    const s = size * (1 - t * 0.35);
+    return (
+      <g key={i} transform={`translate(${r1(q.x)} ${r1(q.y)}) rotate(${r1(q.a + side)})`}>
+        <path d={leafPath(r1(s), r1(s * 0.3))} className={cls} opacity={i % 3 === 0 ? 0.78 : 1} />
+        {vein && <path d={`M0 0 L${r1(s * 0.85)} 0`} className="ev-sb" strokeWidth="0.4" opacity="0.5" />}
+      </g>
+    );
+  });
+  return (
+    <>
+      <path d={`M${p0.x} ${p0.y} Q${c.x} ${c.y} ${p2.x} ${p2.y}`} className="ev-sl" strokeWidth="1.1" strokeLinecap="round" />
+      {leaves}
+    </>
+  );
+}
+
+function Berries({ pts, r = 2.3, cls = "ev-fa" }: { pts: [number, number][]; r?: number; cls?: string }) {
+  return (
+    <>
+      {pts.map(([x, y], i) => (
+        <g key={i}>
+          <circle cx={x} cy={y} r={r} className={cls} />
+          <circle cx={r1(x - r * 0.3)} cy={r1(y - r * 0.3)} r={r1(r * 0.3)} className="ev-fb" opacity="0.55" />
+        </g>
+      ))}
+    </>
+  );
+}
+
+// 1. Garden blooms: a rich bouquet in each of two corners and a small
+//    sprig in the other two, in the party colours of the palette.
+function GardenBlooms() {
+  return (
+    <>
+      <Corners vb="0 0 140 140" width="50cqi" only={["tl", "br"]}>
+        <Branch p0={{ x: 20, y: 22 }} c={{ x: 70, y: 6 }} p2={{ x: 134, y: 12 }} n={9} size={13} />
+        <Branch p0={{ x: 22, y: 20 }} c={{ x: 6, y: 70 }} p2={{ x: 12, y: 134 }} n={9} size={13} />
+        <Branch p0={{ x: 30, y: 34 }} c={{ x: 56, y: 56 }} p2={{ x: 80, y: 84 }} n={4} size={11} from={0.3} />
+        <Berries pts={[[96, 9], [104, 16], [10, 100], [17, 108], [74, 38], [38, 76]]} r={2.2} cls="ev-f5" />
+        <Bloom x={34} y={34} r={27} cls="ev-f1" n={8} rot={8} />
+        <Bloom x={78} y={16} r={15} cls="ev-f2" n={7} rot={30} />
+        <Bloom x={16} y={80} r={15} cls="ev-f3" n={7} rot={14} />
+        <Bloom x={62} y={58} r={11} cls="ev-f4" n={6} rings={2} rot={0} />
+        <Bloom x={112} y={9} r={8} cls="ev-f6" n={6} rings={2} />
+        <Bloom x={9} y={118} r={8} cls="ev-f2" n={6} rings={2} />
+      </Corners>
+      <Corners vb="0 0 140 140" width="30cqi" only={["tr", "bl"]}>
+        <Branch p0={{ x: 10, y: 18 }} c={{ x: 50, y: 4 }} p2={{ x: 118, y: 22 }} n={7} size={12} />
+        <Bloom x={30} y={24} r={15} cls="ev-f5" n={7} rot={20} />
+        <Bloom x={70} y={14} r={9} cls="ev-f3" n={6} rings={2} />
+        <Berries pts={[[96, 18], [104, 26]]} r={2} cls="ev-f2" />
+      </Corners>
+    </>
+  );
+}
+
+// 2. Winter poinsettia: red bracts with gold hearts, holly and pine.
+function poinsettia(x: number, y: number, r: number, rot: number) {
+  const bract = petalPath(r1(r), r1(r * 0.3));
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${rot})`}>
+      {Array.from({ length: 8 }, (_, i) => (
+        <g key={`o${i}`} transform={`rotate(${i * 45})`}>
+          <path d={bract} className="ev-fm" opacity="0.88" />
+          <path d={`M0 ${r1(-r * 0.08)} L0 ${r1(-r * 0.8)}`} className="ev-sb" strokeWidth="0.45" opacity="0.4" />
+        </g>
+      ))}
+      {Array.from({ length: 8 }, (_, i) => (
+        <g key={`i${i}`} transform={`rotate(${i * 45 + 22})`}>
+          <path d={petalPath(r1(r * 0.72), r1(r * 0.24))} className="ev-fm" />
+          <path d={`M0 ${r1(-r * 0.08)} L0 ${r1(-r * 0.58)}`} className="ev-sb" strokeWidth="0.4" opacity="0.4" />
+        </g>
+      ))}
+      {Array.from({ length: 7 }, (_, i) => (
+        <circle key={i} cx={r1(Math.cos((i * 2 * Math.PI) / 7) * r * 0.14)} cy={r1(Math.sin((i * 2 * Math.PI) / 7) * r * 0.14)} r={r1(r * 0.07)} fill="#E9B949" />
+      ))}
+      <circle r={r1(r * 0.07)} fill="#E9B949" />
+    </g>
+  );
+}
+function holly(len: number, wid: number): string {
+  const l = (a: number, b: number) => `${r1(len * a)} ${r1(wid * b)}`;
+  return `M0 0 Q${l(0.08, -1)} ${l(0.2, -0.45)} Q${l(0.24, -1.5)} ${l(0.42, -0.6)} Q${l(0.5, -1.5)} ${l(0.66, -0.45)} Q${l(0.78, -1.2)} ${l(1, 0)} Q${l(0.78, 1.2)} ${l(0.66, 0.45)} Q${l(0.5, 1.5)} ${l(0.42, 0.6)} Q${l(0.24, 1.5)} ${l(0.2, 0.45)} Q${l(0.08, 1)} 0 0Z`;
+}
+function Pine({ x, y, a, len }: { x: number; y: number; a: number; len: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${a})`} className="ev-sa" strokeLinecap="round">
+      <path d={`M0 0 L${len} 0`} strokeWidth="1" />
+      {Array.from({ length: 9 }, (_, i) => {
+        const px = len * (0.1 + i * 0.1), nl = len * 0.2 * (1 - i * 0.06);
+        return <path key={i} d={`M${r1(px)} 0 l${r1(nl * 0.7)} ${r1(-nl)} M${r1(px)} 0 l${r1(nl * 0.7)} ${r1(nl)}`} strokeWidth="0.8" />;
+      })}
+    </g>
+  );
+}
+function WinterPoinsettia() {
+  const hollyAt = (x: number, y: number, a: number, s: number, i: number) => (
+    <g key={i} transform={`translate(${x} ${y}) rotate(${a})`}>
+      <path d={holly(s, s * 0.3)} className="ev-fa" />
+      <path d={holly(s * 0.8, s * 0.2)} className="ev-fb" opacity="0.14" />
+      <path d={`M0 0 L${r1(s * 0.9)} 0`} className="ev-sb" strokeWidth="0.45" opacity="0.5" />
+    </g>
+  );
+  return (
+    <Corners vb="0 0 140 140" width="50cqi" only={["tl", "br"]}>
+      <Pine x={14} y={46} a={-22} len={64} />
+      <Pine x={44} y={12} a={52} len={62} />
+      <Pine x={12} y={20} a={18} len={70} />
+      {[[40, 30, -20, 26], [34, 52, 60, 24], [58, 22, 20, 24], [72, 40, 30, 20], [24, 68, 80, 20], [88, 14, 0, 20]].map(([x, y, a, s], i) => hollyAt(x, y, a, s, i))}
+      <Berries pts={[[56, 44], [62, 50], [51, 51], [86, 28], [92, 33], [30, 82], [36, 88]]} r={3} cls="ev-fm" />
+      {poinsettia(36, 38, 26, 12)}
+      {poinsettia(94, 14, 14, 30)}
+      {poinsettia(16, 92, 14, 0)}
+    </Corners>
+  );
+}
+
+// 3. Lali gurans (rhododendron, Nepal's national flower): clusters of
+//    rounded blooms with long stamens and dark leaves.
+const RHODO = ["#D62A55", "#E8456F", "#C41E4A"];
+function rhodo(x: number, y: number, r: number, rot: number, fill: string) {
+  const lobe = `M0 0 C${r1(-r * 0.55)} ${r1(-r * 0.1)} ${r1(-r * 0.7)} ${r1(-r * 0.85)} 0 ${r1(-r)} C${r1(r * 0.7)} ${r1(-r * 0.85)} ${r1(r * 0.55)} ${r1(-r * 0.1)} 0 0Z`;
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${rot})`}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <g key={i} transform={`rotate(${i * 72})`}>
+          <path d={lobe} fill={fill} stroke="var(--ev-bg)" strokeWidth="0.45" strokeOpacity="0.55" />
+          <path d={`M0 ${r1(-r * 0.12)} Q${r1(r * 0.04)} ${r1(-r * 0.5)} 0 ${r1(-r * 0.8)}`} className="ev-sb" strokeWidth="0.4" opacity="0.4" />
+        </g>
+      ))}
+      {[[-0.16, -0.3], [0.12, -0.34], [0, -0.22], [0.2, -0.2], [-0.22, -0.16]].map(([a, b], i) => (
+        <circle key={i} cx={r1(r * a)} cy={r1(r * b)} r={r1(r * 0.04)} className="ev-fi" opacity="0.42" />
+      ))}
+      {Array.from({ length: 6 }, (_, i) => {
+        const a = ((i * 60 + 10) * Math.PI) / 180;
+        const ex = Math.cos(a) * r * 0.62, ey = Math.sin(a) * r * 0.62;
+        return (
+          <g key={i}>
+            <path d={`M0 0 Q${r1(ex * 0.4 - ey * 0.15)} ${r1(ey * 0.4 + ex * 0.15)} ${r1(ex)} ${r1(ey)}`} className="ev-sa" strokeWidth="0.55" />
+            <circle cx={r1(ex)} cy={r1(ey)} r={r1(r * 0.045)} className="ev-fa" />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+function LaliGurans() {
+  const bud = (x: number, y: number, a: number, s: number, i: number) => (
+    <g key={i} transform={`translate(${x} ${y}) rotate(${a})`}>
+      <path d={petalPath(s, r1(s * 0.38))} fill={RHODO[0]} />
+      <path d={petalPath(r1(s * 0.5), r1(s * 0.2))} transform={`translate(0 ${r1(-s * 0.3)})`} className="ev-fb" opacity="0.25" />
+    </g>
+  );
+  return (
+    <Corners vb="0 0 140 140" width="50cqi" only={["tl", "br"]}>
+      <Branch p0={{ x: 14, y: 30 }} c={{ x: 56, y: 6 }} p2={{ x: 132, y: 22 }} n={7} size={19} />
+      <Branch p0={{ x: 28, y: 12 }} c={{ x: 6, y: 66 }} p2={{ x: 20, y: 132 }} n={7} size={19} />
+      <Branch p0={{ x: 40, y: 44 }} c={{ x: 70, y: 56 }} p2={{ x: 96, y: 88 }} n={4} size={14} from={0.3} />
+      {bud(104, 22, 70, 11, 0)}
+      {bud(116, 28, 90, 9, 1)}
+      {bud(12, 100, 170, 11, 2)}
+      {bud(22, 114, 180, 9, 3)}
+      {rhodo(38, 38, 25, 6, RHODO[0])}
+      {rhodo(78, 20, 15, 40, RHODO[1])}
+      {rhodo(18, 80, 15, 24, RHODO[2])}
+      {rhodo(66, 62, 11, 18, RHODO[1])}
+    </Corners>
+  );
+}
+
+// 4. Gold line blooms: fine drawn outlines with a hint of colour and
+//    sparkles, for New Year and evenings.
+function LineBloom({ x, y, r, n = 8, rot = 0 }: { x: number; y: number; r: number; n?: number; rot?: number }) {
+  return (
+    <g transform={`translate(${x} ${y}) rotate(${rot})`} className="ev-sm" strokeLinecap="round" strokeLinejoin="round">
+      {[1, 0.74, 0.5].map((f, k) =>
+        Array.from({ length: n }, (_, i) => (
+          <path key={`${k}-${i}`} d={petalPath(r1(r * f), r1(r * f * 0.42))} transform={`rotate(${r1((360 / n) * i + k * (180 / n))})`} strokeWidth={k ? 0.6 : 0.85} className={k === 0 ? "ev-sm ev-fm-soft" : "ev-sm"} />
+        ))
+      )}
+      <circle r={r1(r * 0.1)} className="ev-fm" stroke="none" />
+    </g>
+  );
+}
+function GoldLineBlooms() {
+  const sparks: [number, number, number][] = [[62, 40, 5], [100, 30, 3.4], [30, 84, 4], [48, 18, 3], [118, 60, 3], [74, 78, 3.4], [14, 118, 3]];
+  return (
+    <Corners vb="0 0 140 140" width="50cqi" only={["tl", "br"]}>
+      <path d="M16 126 C20 70 60 70 78 44 C92 24 120 20 134 12" className="ev-sm" strokeWidth="0.9" strokeLinecap="round" />
+      <path d="M12 24 C46 22 56 54 86 60 C104 64 112 84 116 130" className="ev-sm" strokeWidth="0.7" strokeLinecap="round" opacity="0.7" />
+      <Branch p0={{ x: 30, y: 98 }} c={{ x: 50, y: 66 }} p2={{ x: 86, y: 40 }} n={6} size={11} cls="ev-fm" from={0.2} vein={false} />
+      <LineBloom x={36} y={36} r={26} n={9} rot={5} />
+      <LineBloom x={84} y={20} r={14} n={7} rot={25} />
+      <LineBloom x={16} y={86} r={14} n={7} rot={12} />
+      <LineBloom x={70} y={62} r={9} n={6} />
+      {sparks.map(([x, y, r], i) => <path key={i} d={sparklePath(x, y, r)} className="ev-fm" />)}
+      {[[104, 12], [12, 104], [92, 46], [48, 90]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="1.3" className="ev-fm" />)}
+    </Corners>
+  );
+}
+
 const ART: Record<BorderKey, () => ReactNode> = {
   none: () => null,
   fine_line: FineLine,
@@ -745,6 +986,10 @@ const ART: Record<BorderKey, () => ReactNode> = {
   ornate_flowers: () => <Frame file="ornate-flowers.svg" />,
   wedding_lines: () => <Frame file="wedding-lines.svg" />,
   imperial_gold: ImperialGold,
+  garden_blooms: GardenBlooms,
+  winter_poinsettia: WinterPoinsettia,
+  lali_gurans: LaliGurans,
+  gold_line_blooms: GoldLineBlooms,
   laurel: Laurel,
   floral: Floral,
   vines: Vines,
