@@ -89,9 +89,9 @@ export const EVENT_TYPES: EventType[] = [
     line: "Funeral, prayers, remembrance", starLabel: "In memory of", palette: "calm", textStyle: "formal", borders: ["fine_line", "laurel", "golden_leaves", "khukuri", "vines", "none"], photoStyle: "arch", tone: "Gentle and respectful" },
   // Festive season (owner, 14 Nov 2026: seasonal designs to show off the festive launch; 0004)
   { key: "christmas", tag: "new", label: "Christmas party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,
-    line: "Family, friends or work", starLabel: "Who it's for", palette: "christmas", textStyle: "classic", borders: ["christmas_greenery", "winter_poinsettia", "snowflakes", "stars", "floral", "bunting"], photoStyle: "hero", tone: "Festive and joyful", effect: "snow" },
+    line: "Family, friends or work", starLabel: "Who it's for", palette: "evergreen_gold", textStyle: "classic", borders: ["winter_poinsettia", "christmas_greenery", "gold_branches", "snowflakes", "stars", "floral", "bunting"], photoStyle: "hero", tone: "Festive and joyful", effect: "snow" },
   { key: "new-year", tag: "new", label: "New Year’s Eve party", scale: "personal", theme: "festive", toggles: {}, repeatsYearly: true, sensitive: false,
-    line: "Countdown to midnight", starLabel: "Who it's for", palette: "midnight_gold", textStyle: "contemporary", borders: ["fireworks", "gold_line_blooms", "stars", "art_deco", "confetti"], photoStyle: "hero", tone: "Festive and joyful", effect: "fireworks" },
+    line: "Countdown to midnight", starLabel: "Who it's for", palette: "new_year_navy", textStyle: "contemporary", borders: ["night_fireworks", "fireworks", "gold_line_blooms", "stars", "art_deco", "confetti"], photoStyle: "arch", tone: "Festive and joyful", effect: "fireworks" },
   { key: "lhosar", tag: "new", label: "Lhosar celebration", scale: "community", theme: "festive", toggles: { tickets: true, sponsors: true }, repeatsYearly: true, sensitive: false,
     line: "Tamu, Sonam or Gyalpo Lhosar", starLabel: "The celebration", palette: "prayer_flags", textStyle: "heritage", borders: ["prayer_flags", "lali_gurans", "dhaka", "bunting", "marigold"], photoStyle: "hero", tone: "Festive and joyful", effect: "petals" },
 ];
@@ -274,7 +274,7 @@ export function togglesFor(typeKey: string | null): Record<ToggleKey, boolean> {
 
 // ─────────────────────────────── The look ───────────────────────────────
 
-export type PaletteFamily = "in2min2" | "Seasonal" | "Formal" | "Nepali and South Asian" | "Modern" | "Festival colours" | "Party" | "Sport" | "Calm";
+export type PaletteFamily = "in2min2" | "Seasonal" | "Formal" | "Nepali and South Asian" | "Modern" | "Festival colours" | "Party" | "Sport" | "Calm" | "Premium";
 
 export type Palette = {
   key: string;
@@ -303,6 +303,21 @@ export const PALETTES: Palette[] = [
     gradient: "linear-gradient(160deg, #0B0B1A 0%, #241A4A 60%, #4A2E7A 100%)", party: ["#F2C14E", "#C9A0FF", "#FF7AB6", "#7FDBFF", "#FFFFFF"] },
   { key: "prayer_flags", tag: "new", name: "Prayer Flags", family: "Seasonal", bg: "#FFFBF2", main: "#1F4E9A", onMain: "#FFFFFF", accent: "#F2C230", onAccent: "#1A1A1A", soft: "#EAF0FA", ink: "#161B29", muted: "#525A6B",
     gradient: "linear-gradient(90deg, #1F5FBF 0 20%, #F4F1E8 20% 40%, #C8102E 40% 60%, #1E8C45 60% 80%, #F2C230 80% 100%)", party: ["#1F5FBF", "#F4F1E8", "#C8102E", "#1E8C45", "#F2C230"] },
+  // Premium pages (owner, 25 Nov 2026: plain white looks thin; some deep, some soft, like good letter paper)
+  { key: "evergreen_gold", tag: "new", name: "Evergreen & Gold", family: "Premium", dark: true, bg: "#10402D", main: "#E9CB78", onMain: "#0B2A1E", accent: "#C8102E", onAccent: "#FFFFFF", soft: "#0B3123", ink: "#FFF7E4", muted: "#CFE3CF",
+    party: ["#E9CB78", "#D9485F", "#FFF7E4", "#58B98A", "#F2A65A", "#C8102E"] },
+  { key: "new_year_navy", tag: "new", name: "New Year Navy", family: "Premium", dark: true, bg: "#0D2260", main: "#F3C969", onMain: "#0B1A4F", accent: "#FF8A5B", onAccent: "#1A0F08", soft: "#09184A", ink: "#FFFFFF", muted: "#C7D3F4",
+    party: ["#F3C969", "#FF8A5B", "#C9A0FF", "#E5484D", "#7FDBFF", "#FFFFFF"] },
+  { key: "plum_gold", tag: "new", name: "Plum & Gold", family: "Premium", dark: true, bg: "#3B1D4A", main: "#EBC66B", onMain: "#25102F", accent: "#F2A7C3", onAccent: "#25102F", soft: "#2D1539", ink: "#FFF4E6", muted: "#E2CDEA",
+    party: ["#EBC66B", "#F2A7C3", "#FFF4E6", "#B993F2", "#F28C6B", "#7FD1C2"] },
+  { key: "sage_gold", tag: "new", name: "Sage & Gold", family: "Premium", bg: "#DFE7D6", main: "#2F5D46", onMain: "#FFFFFF", accent: "#B8893A", onAccent: "#1D1608", soft: "#CBD8C0", ink: "#1B2B22", muted: "#475A4D",
+    party: ["#2F5D46", "#B8893A", "#8FB08C", "#D9C48B", "#6E8F6A", "#E8D9B0"] },
+  { key: "champagne_plum", tag: "new", name: "Champagne & Plum", family: "Premium", bg: "#F1E3CB", main: "#59284A", onMain: "#FFFFFF", accent: "#B8893A", onAccent: "#1F1608", soft: "#E4D1B0", ink: "#2A1425", muted: "#66504F",
+    party: ["#59284A", "#B8893A", "#C98FA8", "#8A5A74", "#D9B26A", "#F6E9D2"] },
+  { key: "blush_rosegold", tag: "new", name: "Blush & Rose Gold", family: "Premium", bg: "#F5DCD8", main: "#8A3446", onMain: "#FFFFFF", accent: "#B76E79", onAccent: "#1F0B10", soft: "#EBC5C2", ink: "#2E1419", muted: "#6B4A4E",
+    party: ["#8A3446", "#B76E79", "#E8A5A8", "#D4A373", "#F2C4BF", "#6B2433"] },
+  { key: "dusty_blue_gold", tag: "new", name: "Dusty Blue & Gold", family: "Premium", bg: "#D6E2EE", main: "#1F3B63", onMain: "#FFFFFF", accent: "#B8973A", onAccent: "#1A1405", soft: "#BFD0E2", ink: "#131F33", muted: "#44556C",
+    party: ["#1F3B63", "#B8973A", "#7FA3C7", "#D9C48B", "#4F7AAE", "#EEF3F9"] },
   // Formal: regimental days, memorials, corporate, charities, anniversaries
   { key: "navy_gold", tag: "popular", name: "Navy & Gold", family: "Formal", bg: "#FBF8F1", main: "#14213D", onMain: "#FFFFFF", accent: "#C9A23F", onAccent: "#14213D", soft: "#ECE5D3", ink: "#14213D", muted: "#535A6B" },
   { key: "regimental", name: "Regimental Green", family: "Formal", bg: "#F7F5EE", main: "#1F3A2E", onMain: "#FFFFFF", accent: "#B8973A", onAccent: "#13261D", soft: "#E3E6D8", ink: "#13261D", muted: "#4F5B52" },
@@ -362,7 +377,7 @@ export const PALETTES: Palette[] = [
   { key: "lily", name: "Lily White & Sage", family: "Calm", bg: "#FFFFFF", main: "#47604F", onMain: "#FFFFFF", accent: "#B9C7B5", onAccent: "#1D2A21", soft: "#EEF2EC", ink: "#1D2A21", muted: "#56645A" },
 ];
 
-export const PALETTE_FAMILIES: PaletteFamily[] = ["in2min2", "Seasonal", "Formal", "Nepali and South Asian", "Modern", "Festival colours", "Party", "Sport", "Calm"];
+export const PALETTE_FAMILIES: PaletteFamily[] = ["in2min2", "Seasonal", "Formal", "Nepali and South Asian", "Modern", "Festival colours", "Party", "Sport", "Calm", "Premium"];
 
 function luminance(hex: string): number {
   const n = hex.replace("#", "");
@@ -521,7 +536,7 @@ export type BorderKey =
   | "snowflakes" | "fireworks" | "prayer_flags" | "royal" | "khukuri"
   | "red_roses" | "watercolour_roses" | "gold_crown" | "golden_leaves"
   | "christmas_greenery" | "golden_roses" | "ornate_flowers" | "wedding_lines" | "imperial_gold"
-  | "garden_blooms" | "winter_poinsettia" | "lali_gurans" | "gold_line_blooms";
+  | "garden_blooms" | "winter_poinsettia" | "lali_gurans" | "gold_line_blooms" | "night_fireworks" | "gold_branches";
 
 export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[] = [
   { key: "none", name: "Plain", line: "No border: let the words speak" },
@@ -546,6 +561,8 @@ export const BORDERS: { key: BorderKey; name: string; line: string; tag?: Tag }[
   { key: "garden_blooms", tag: "new", name: "Garden blooms", line: "Painted-looking peonies and leaves in your party colours: birthdays and parties" },
   { key: "winter_poinsettia", tag: "new", name: "Winter poinsettia", line: "Poinsettias, holly, berries and pine: Christmas" },
   { key: "lali_gurans", tag: "new", name: "Lali gurans", line: "Rhododendron blooms, Nepal's flower: Lhosar and Nepali festivals" },
+  { key: "night_fireworks", tag: "new", name: "Night fireworks", line: "Big fireworks, stars and balloons on a night sky: New Year" },
+  { key: "gold_branches", tag: "new", name: "Gold branches", line: "Fine gold twigs and tiny leaves: weddings and evenings, best on deep green, navy or plum" },
   { key: "gold_line_blooms", tag: "new", name: "Line blooms", line: "Fine drawn flowers and sparkles in your main colour: gold on Midnight, for New Year and evenings" },
   { key: "laurel", name: "Laurel", line: "A laurel wreath: regiments, awards, remembrance" },
   { key: "floral", tag: "popular", name: "Flowers", line: "Flower sprays in the corners" },

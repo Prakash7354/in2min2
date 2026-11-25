@@ -970,6 +970,87 @@ function GoldLineBlooms() {
   );
 }
 
+// ─────────────── New Year night and gold branches (owner, 25 Nov 2026) ───────────────
+// Night fireworks: big, dense bursts over the top of the page, small stars
+// and a bunch of balloons down the right, in the palette's party colours
+// (the owner's first example). Gold branches: fine drawn twigs with tiny
+// leaves in the main colour, for deep green, navy and plum pages (his second).
+
+function bigBurst(cx: number, cy: number, r: number, colour: number, key: string, rays = 26): ReactNode[] {
+  const out: ReactNode[] = [];
+  for (let i = 0; i < rays; i++) {
+    const a = (2 * Math.PI * i) / rays + (colour % 3) * 0.07;
+    const reach = r * (i % 2 ? 0.74 : 1);
+    const c = `var(--ev-c${((colour + (i % 3)) % 6) + 1})`;
+    const x1 = cx + r * 0.16 * Math.cos(a), y1 = cy + r * 0.16 * Math.sin(a);
+    const x2 = cx + reach * Math.cos(a), y2 = cy + reach * Math.sin(a);
+    out.push(<path key={`${key}${i}`} d={`M${r1(x1)} ${r1(y1)} L${r1(x2)} ${r1(y2)}`} strokeWidth="1.3" strokeLinecap="round" fill="none" opacity="0.9" style={{ stroke: c }} />);
+    out.push(<circle key={`${key}t${i}`} cx={r1(cx + (reach + 4) * Math.cos(a))} cy={r1(cy + (reach + 4) * Math.sin(a))} r={i % 2 ? 1.3 : 2} style={{ fill: c }} />);
+    if (i % 2 === 0) out.push(<circle key={`${key}o${i}`} cx={r1(cx + r * 1.16 * Math.cos(a + 0.1))} cy={r1(cy + r * 1.16 * Math.sin(a + 0.1))} r="1" style={{ fill: c }} opacity="0.7" />);
+  }
+  out.push(<circle key={`${key}c`} cx={cx} cy={cy} r={r1(r * 0.07)} style={{ fill: "var(--ev-c1)" }} />);
+  return out;
+}
+
+const NIGHT_STARS: [number, number, number][] = [[150, 12, 4], [160, 96, 3], [236, 22, 3.4], [330, 70, 2.6], [150, 128, 2.6], [310, 30, 2.6], [12, 128, 3], [208, 118, 2.4]];
+
+function NightFireworks() {
+  return (
+    <>
+      <Svg vb="0 0 400 140" className="ev-top">
+        {bigBurst(78, 66, 62, 0, "a", 30)}
+        {bigBurst(196, 40, 30, 2, "b", 20)}
+        {bigBurst(262, 84, 44, 3, "c", 26)}
+        {NIGHT_STARS.map(([x, y, r], i) => <path key={i} d={sparklePath(x, y, r)} className={C(i + 1)} />)}
+      </Svg>
+      <span className="ev-corner ev-tr" style={{ width: "30cqi", top: "12cqi" }}>
+        <svg viewBox="0 0 140 180" className="ev-svg" aria-hidden="true">{balloonBunch(1)}</svg>
+      </span>
+      <Svg vb="0 0 400 60" className="ev-bottom">
+        {[[40, 40, 3.4], [120, 20, 2.6], [200, 44, 3], [286, 18, 2.4], [356, 40, 3.4]].map(([x, y, r], i) => <path key={i} d={sparklePath(x, y, r)} className={C(i)} />)}
+      </Svg>
+    </>
+  );
+}
+
+// A thin twig: a curved stem, small side twigs and tiny leaves.
+function Twig({ p0, c, p2, n, len, flip = 1 }: { p0: Pt; c: Pt; p2: Pt; n: number; len: number; flip?: number }) {
+  const bits: ReactNode[] = [];
+  for (let i = 0; i < n; i++) {
+    const t = 0.1 + (i / Math.max(1, n - 1)) * 0.86;
+    const q = quad(p0, c, p2, t);
+    const side = (i % 2 ? -1 : 1) * flip;
+    const a = ((q.a + side * 48) * Math.PI) / 180;
+    const l = len * (1.1 - t * 0.55);
+    const ex = q.x + l * Math.cos(a), ey = q.y + l * Math.sin(a);
+    const mx = q.x + l * 0.5 * Math.cos(a - side * 0.25), my = q.y + l * 0.5 * Math.sin(a - side * 0.25);
+    bits.push(<path key={`s${i}`} d={`M${r1(q.x)} ${r1(q.y)} Q${r1(mx)} ${r1(my)} ${r1(ex)} ${r1(ey)}`} className="ev-sm" strokeWidth="0.6" strokeLinecap="round" />);
+    bits.push(<g key={`l${i}`} transform={`translate(${r1(ex)} ${r1(ey)}) rotate(${r1((a * 180) / Math.PI)})`}><path d={leafPath(r1(len * 0.34), r1(len * 0.1))} className="ev-fm" /></g>);
+    if (i % 2 === 0) {
+      const ex2 = q.x + l * 0.62 * Math.cos(a + side * 0.7), ey2 = q.y + l * 0.62 * Math.sin(a + side * 0.7);
+      bits.push(<path key={`b${i}`} d={`M${r1(q.x)} ${r1(q.y)} L${r1(ex2)} ${r1(ey2)}`} className="ev-sm" strokeWidth="0.45" strokeLinecap="round" opacity="0.8" />);
+      bits.push(<circle key={`d${i}`} cx={r1(ex2)} cy={r1(ey2)} r="1.1" className="ev-fm" />);
+    }
+  }
+  return (
+    <>
+      <path d={`M${p0.x} ${p0.y} Q${c.x} ${c.y} ${p2.x} ${p2.y}`} className="ev-sm" strokeWidth="0.9" strokeLinecap="round" />
+      {bits}
+    </>
+  );
+}
+
+function GoldBranches() {
+  return (
+    <Corners vb="0 0 160 160" width="54cqi" only={["tl", "br"]}>
+      <Twig p0={{ x: 2, y: 34 }} c={{ x: 56, y: 40 }} p2={{ x: 124, y: 8 }} n={9} len={22} />
+      <Twig p0={{ x: 6, y: 6 }} c={{ x: 30, y: 70 }} p2={{ x: 50, y: 134 }} n={8} len={18} flip={-1} />
+      <Twig p0={{ x: 58, y: 40 }} c={{ x: 84, y: 56 }} p2={{ x: 110, y: 88 }} n={5} len={14} />
+      {[[104, 22], [38, 102], [80, 30]].map(([x, y], i) => <path key={i} d={sparklePath(x, y, 2.4)} className="ev-fm" opacity="0.8" />)}
+    </Corners>
+  );
+}
+
 const ART: Record<BorderKey, () => ReactNode> = {
   none: () => null,
   fine_line: FineLine,
@@ -990,6 +1071,8 @@ const ART: Record<BorderKey, () => ReactNode> = {
   winter_poinsettia: WinterPoinsettia,
   lali_gurans: LaliGurans,
   gold_line_blooms: GoldLineBlooms,
+  night_fireworks: NightFireworks,
+  gold_branches: GoldBranches,
   laurel: Laurel,
   floral: Floral,
   vines: Vines,
