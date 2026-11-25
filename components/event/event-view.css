@@ -2344,12 +2344,13 @@ button.ev-btn { cursor: pointer; }
     var(--g) 7.4% 0 / 1.6px 100% no-repeat, var(--g) 8.4% 0 / 1px 100% no-repeat,
     var(--g) 91.6% 0 / 1.6px 100% no-repeat, var(--g) 92.6% 0 / 1px 100% no-repeat;
 }
-/* Imperial gold: the owner's gold dividers between sections, three in turn */
-.ev-root[data-border="imperial_gold"] .ev-section { position: relative; border-top-color: transparent; }
-.ev-root[data-border="imperial_gold"] .ev-section::before {
+/* The owner's gold dividers between sections, three in turn: Imperial gold, the Royal frame and Golden leaves (memorials). Other borders keep their own tinted ones. */
+.ev-root:is([data-border="imperial_gold"], [data-border="royal"], [data-border="golden_leaves"]) .ev-section { position: relative; border-top-color: transparent; }
+.ev-root:is([data-border="imperial_gold"], [data-border="royal"], [data-border="golden_leaves"]) .ev-section::before {
+  -webkit-mask: none; mask: none;
   content: ""; position: absolute; top: 0; left: 50%; width: min(86%, 340px); height: 26px; transform: translate(-50%, -50%);
   background: url(/art/gold/divider-3.webp) center / contain no-repeat; pointer-events: none;
   filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25));
 }
-.ev-root[data-border="imperial_gold"] .ev-section:nth-of-type(3n+2)::before { background-image: url(/art/gold/divider-1.webp); height: 24px; }
-.ev-root[data-border="imperial_gold"] .ev-section:nth-of-type(3n+3)::before { background-image: url(/art/gold/divider-5.webp); height: 16px; }
+.ev-root:is([data-border="imperial_gold"], [data-border="royal"], [data-border="golden_leaves"]) .ev-section:nth-of-type(3n+2)::before { background-image: url(/art/gold/divider-1.webp); height: 24px; }
+.ev-root:is([data-border="imperial_gold"], [data-border="royal"], [data-border="golden_leaves"]) .ev-section:nth-of-type(3n+3)::before { background-image: url(/art/gold/divider-5.webp); height: 16px; }
