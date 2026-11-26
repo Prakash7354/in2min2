@@ -7,7 +7,7 @@ hub (one inbox over in2min2 and Golf Society Home) comes later and links to this
 ## Decisions (owner)
 - Address `/admin`, signed in with the normal in2min2 email code. Just the owner for now; a second person is one SQL line.
 - One simple contact form: name, email, optional phone, message.
-- Enquiries are read and managed in /admin. **Replying:** a "Reply by email" button opens the owner's own email app with the address, subject and the person's message filled in (a `mailto:` link). The admin can't send email itself: Cloudflare's email service only sends to the owner's own address. Sending from the admin needs a paid mail service (Resend is already named in the privacy page): ask first.
+- Enquiries are read and managed in /admin. **Replying:** a "Reply by email" button opens the owner's own email app with the address, subject and the person's message filled in (a `mailto:` link). The admin can't send email itself: Cloudflare's email service only sends to the owner's own address. Update 26 Nov: Resend (free: 3,000 a month, 100 a day) now sends replies from the admin, from hello@in2min2.com (`/api/admin/reply`, secret `RESEND_API_KEY`).
 - The admin home also shows totals (accounts, events, replies, photos, AI writes, plans, enquiries) from `admin_overview()`.
 
 ## Built
@@ -21,3 +21,6 @@ hub (one inbox over in2min2 and Golf Society Home) comes later and links to this
 - Gochuchuro hub: `enquiries.source` is ready ('in2min2'); the hub gathers from each business by a small push or pull, never a shared database.
 - Delete enquiries 12 months after last touched (Recommended, not built).
 - Payments and revenue totals once Stripe is built.
+
+## Added 26 Nov 2026
+- "Reply here" box (Resend), "Connected services" tab (`lib/admin-services.ts`), Money placeholder.

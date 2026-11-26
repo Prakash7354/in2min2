@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { SignInDialog, useSession } from "@/app/builder/account";
 import { Button, Notice, inputClass } from "@/app/builder/ui";
+import { SECRET_NAMES, SERVICES, STATE_WORDS } from "@/lib/admin-services";
 
 type Status = "new" | "replied" | "archived" | "spam";
 type Enquiry = {
@@ -82,6 +83,7 @@ function Dashboard() {
   const [rows, setRows] = useState<Enquiry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Status>("new");
+  const [view, setView] = useState<"inbox" | "services">("inbox");
 
   const [again, setAgain] = useState(0);
   const load = useCallback(() => setAgain((n) => n + 1), []);
@@ -123,6 +125,13 @@ function Dashboard() {
   return (
     <>
       {error && <Notice tone="warn">{error}</Notice>}
+      <div role="tablist" aria-label="Admin sections" className="flex gap-2">
+        {([["inbox", "Inbox and totals"], ["services", "Connected services"]] as const).map(([k, label]) => (
+          <button key={k} role="tab" aria-selected={view === k} onClick={() => setView(k)}
+            className={`min-h-11 rounded-full px-4 font-bold transition ${view === k ? "bg-ink text-white" : "bg-wash text-ink hover:bg-line"}`}>{label}</button>
+        ))}
+      </div>
+      {view === "services" ? <Services /> : <>
       {overview && <Totals o={overview} />}
 
       <section className="grid gap-3" aria-labelledby="enq-title">
@@ -142,6 +151,7 @@ function Dashboard() {
           : shown.length === 0 ? <p className="rounded-2xl bg-wash p-5 text-muted">{tab === "new" ? "No new enquiries. Messages from in2min2.com/contact appear here." : `Nothing in ${TABS.find((t) => t.key === tab)?.label.toLowerCase()}.`}</p>
           : shown.map((r) => <EnquiryCard key={r.id} r={r} change={change} remove={remove} />)}
       </section>
+      </>}
     </>
   );
 }
@@ -152,6 +162,32 @@ function EnquiryCard({ r, change, remove }: {
   remove: (id: string) => void;
 }) {
   const [notes, setNotes] = useState(r.notes ?? "");
+  const [writing, setWriting] = useState(false);
+  const [reply, setReply] = useState("");
+  const [sending, setSending] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+  async function sendReply() {
+    setSending(true); setProblem(null);
+    const { data } = await supabase().auth.getSession();
+    const res = await fetch("/api/admin/reply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token ?? ""}` },
+      body: JSON.stringify({ id: r.id, message: reply }),
+    }).catch(() => null);
+    const out = res ? ((await res.json().catch(() => ({}))) as { ok?: boolean; error?: string; detail?: string }) : {};
+    setSending(false);
+    if (out.ok) {
+      // Keep what was sent in the private note, then mark it replied.
+      const kept = `${notes ? `${notes}\n\n` : ""}Reply sent ${when(new Date().toISOString())}:\n${reply.trim()}`.slice(-2000);
+      setNotes(kept); setReply(""); setWriting(false);
+      change(r.id, { status: "replied", replied_at: new Date().toISOString(), notes: kept });
+      return;
+    }
+    setProblem(out.error === "not_set_up" ? "Sending from here isn't switched on yet (the Resend key isn't set on Cloudflare). Use \"Open in my email app\" for now."
+      : out.error === "send_failed" ? `Resend didn't send it${out.detail ? `: ${out.detail}` : ""}. Use "Open in my email app" instead.`
+      : out.error === "sign_in" || out.error === "not_allowed" ? "Please sign in again."
+      : "That didn't send. Please try again.");
+  }
   const mail = `mailto:${r.email}?subject=${encodeURIComponent("Re: your message to in2min2")}&body=${encodeURIComponent(
     `Hello ${r.name.split(" ")[0]},\n\n\n\n---\nYou wrote on ${when(r.created_at)}:\n${r.message}`)}`;
   return (
@@ -167,13 +203,26 @@ function EnquiryCard({ r, change, remove }: {
       </p>
       <p className="whitespace-pre-wrap break-words rounded-2xl bg-wash p-4 text-[17px] leading-relaxed">{r.message}</p>
       <div className="flex flex-wrap gap-2">
-        <a href={mail} className="inline-flex min-h-12 items-center rounded-full bg-brand px-6 py-3 font-bold text-white hover:bg-brand-deep">Reply by email</a>
+        <Button kind="brand" onClick={() => setWriting((w) => !w)}>{writing ? "Close reply" : "Reply here"}</Button>
+        <a href={mail} className="inline-flex min-h-12 items-center rounded-full bg-wash px-6 py-3 font-bold text-ink hover:bg-line">Open in my email app</a>
         {r.status !== "replied" && <Button kind="ghost" onClick={() => change(r.id, { status: "replied", replied_at: new Date().toISOString() })}>Mark replied</Button>}
         {r.status !== "archived" && <Button kind="quiet" onClick={() => change(r.id, { status: "archived" })}>Archive</Button>}
         {r.status !== "spam" && <Button kind="quiet" onClick={() => change(r.id, { status: "spam" })}>Spam</Button>}
         {r.status !== "new" && <Button kind="quiet" onClick={() => change(r.id, { status: "new" })}>Back to new</Button>}
         <Button kind="quiet" onClick={() => remove(r.id)}>Delete</Button>
       </div>
+      {writing && (
+        <div className="grid gap-2 rounded-2xl border-2 border-brand/30 p-3">
+          <label htmlFor={`reply-${r.id}`} className="text-sm font-semibold">Your reply to {r.email} <span className="font-normal text-muted">(sent from hello@in2min2.com, with their message below yours)</span></label>
+          <textarea id={`reply-${r.id}`} className={`${inputClass} min-h-32 text-[16px]`} value={reply} maxLength={1500} onChange={(e) => setReply(e.target.value)}
+            placeholder={`Hello ${r.name.split(" ")[0]},`} />
+          {problem && <Notice tone="warn">{problem}</Notice>}
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm tabular-nums text-muted">{reply.length}/1500</span>
+            <Button kind="brand" disabled={sending || !reply.trim()} onClick={() => void sendReply()}>{sending ? "Sending…" : "Send reply"}</Button>
+          </div>
+        </div>
+      )}
       <label className="grid gap-1.5 text-sm font-semibold">
         Private note (only you see this)
         <textarea className={`${inputClass} min-h-20 text-[16px] font-normal`} value={notes} maxLength={2000}
@@ -221,7 +270,11 @@ function Totals({ o }: { o: Overview }) {
         <List title="Published pages by plan" rows={o.by_plan} empty="None published yet." />
         <List title="Most-made kinds of event" rows={o.by_type} empty="No events yet." />
       </div>
-      <p className="text-sm text-muted">Money, visits and sign-ups by country aren&apos;t here yet: payments and website visit counts aren&apos;t built.</p>
+      <div className="grid gap-0.5 rounded-2xl border border-dashed border-line bg-card p-4">
+        <p className="text-sm font-bold text-muted">Money</p>
+        <p className="text-[15px]">Not connected yet. Stripe payments start from February 2027; sales, refunds and fees will show here once they are built.</p>
+        <p className="text-[13px] text-muted">Website visit counts aren&apos;t built either.</p>
+      </div>
     </section>
   );
 }
@@ -235,5 +288,35 @@ function List({ title, rows, empty }: { title: string; rows: { key: string; n: n
           <li key={r.key} className="flex justify-between gap-3"><span className="capitalize">{r.key.replace(/_/g, " ")}</span><strong className="tabular-nums">{r.n}</strong></li>
         ))}</ul>}
     </div>
+  );
+}
+
+const STATE_STYLE: Record<string, string> = {
+  live: "bg-emerald-100 text-emerald-900", check: "bg-amber-100 text-amber-900", planned: "bg-wash text-muted", waiting: "bg-amber-100 text-amber-900",
+};
+
+function Services() {
+  return (
+    <section className="grid gap-3" aria-labelledby="svc-title">
+      <h2 id="svc-title" className="font-display text-2xl font-extrabold text-brand">Connected services</h2>
+      <p className="text-[15px] text-muted">Every app and account in2min2 uses, so you can find them again. Passwords and keys are never kept here.</p>
+      {SERVICES.map((v) => (
+        <article key={v.name} className="grid gap-1.5 rounded-2xl border border-line bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="font-display text-lg font-bold">{v.name}</h3>
+            <span className={`rounded-full px-3 py-1 text-xs font-bold ${STATE_STYLE[v.state]}`}>{STATE_WORDS[v.state]}</span>
+          </div>
+          <p className="text-[15px]">{v.does}</p>
+          <p className="text-[14px] text-muted"><strong>Sign in:</strong> {v.url ? <a className="font-semibold text-brand underline underline-offset-4" href={v.url} target="_blank" rel="noreferrer">{v.login}</a> : v.login}</p>
+          <p className="text-[14px] text-muted"><strong>Cost:</strong> {v.cost}</p>
+          {v.note && <p className="text-[14px] text-muted">{v.note}</p>}
+        </article>
+      ))}
+      <div className="grid gap-1.5 rounded-2xl border border-line bg-card p-4">
+        <h3 className="font-display text-lg font-bold">Secrets on Cloudflare (names only)</h3>
+        <ul className="grid gap-1 text-[15px]">{SECRET_NAMES.map((n) => <li key={n.name}><code className="font-mono text-[14px]">{n.name}</code> <span className="text-muted">· {n.for}</span></li>)}</ul>
+        <p className="text-[14px] text-muted">Set or change one with <code className="font-mono">npx wrangler secret put NAME</code>. Never paste a key into a chat or a file.</p>
+      </div>
+    </section>
   );
 }

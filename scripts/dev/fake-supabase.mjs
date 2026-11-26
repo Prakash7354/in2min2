@@ -135,6 +135,7 @@ http.createServer((req, res) => {
         message: args.p_message, status: "new", replied_at: null, notes: null });
       return send({ ok: true });
     }
+    if (u.pathname === "/emails" && req.method === "POST") { console.log("fake Resend:", JSON.stringify({ to: args.to, from: args.from, subject: args.subject })); return send({ id: "fake-email" }); }
     if (u.pathname === "/rest/v1/rpc/is_admin") return send(process.env.ADMIN !== "0");
     if (u.pathname === "/rest/v1/rpc/admin_overview") {
       if (process.env.ADMIN === "0") return send(null);
