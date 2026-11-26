@@ -23,10 +23,10 @@ const AI_TRAINING = ["GPTBot", "ClaudeBot", "Google-Extended", "Applebot-Extende
 const GUEST_PAGES = [...EVENT_TYPES.map((t) => `/${t.key}/`), "/e/", "/m/", "/photographer/"];
 
 export default function robots(): MetadataRoute.Robots {
-  const notGuests = { allow: "/", disallow: ["/api/", ...GUEST_PAGES] };
+  const notGuests = { allow: "/", disallow: ["/api/", "/admin", ...GUEST_PAGES] };
   return {
     rules: [
-      { userAgent: "*", allow: "/", disallow: "/api/" },
+      { userAgent: "*", allow: "/", disallow: ["/api/", "/admin"] },
       { userAgent: AI_SEARCH, ...notGuests },
       { userAgent: AI_TRAINING, ...(AI_MAY_LEARN ? notGuests : { disallow: "/" }) },
     ],

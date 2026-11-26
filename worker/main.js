@@ -6,7 +6,9 @@
 //   - asks the database a simple question. This keeps the free Supabase
 //     project from pausing, and emails the owner if it stops answering;
 //   - emails the owner one list of any errors noted since the last hour
-//     (lib/ops.ts), then clears them.
+//     (lib/ops.ts), then clears them;
+//   - tells the owner if there are new enquiries from /contact (a nudge to open
+//     in2min2.com/admin; never the message itself).
 // Every night (the 02:07 UTC run, or the next hour's if that one fails):
 //   - saves a copy of every table (0012 backup_snapshot) and of the sign-in
 //     accounts to the private R2 bucket in2min2-backups (EU), as
@@ -84,6 +86,21 @@ async function hourly(env, at) {
     if (errors.length > 15) lines.push(`…and ${errors.length - 15} more like these.`);
   }
 
+  // 3b. New enquiries from in2min2.com/contact (0018): one nudge, never the
+  // message itself, which lives only in in2min2.com/admin. Needs the secret key.
+  let enquiryCount = 0;
+  if (env.SUPABASE_SECRET_KEY) {
+    const since = state.enquiriesSeen ?? "1970-01-01T00:00:00Z";
+    const key = env.SUPABASE_SECRET_KEY;
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/enquiries?select=id&status=eq.new&created_at=gt.${encodeURIComponent(since)}&limit=100`, {
+      headers: { apikey: key, ...(key.startsWith("eyJ") ? { authorization: `Bearer ${key}` } : {}) },
+    }).catch(() => null);
+    if (r?.ok) {
+      enquiryCount = (await r.json().catch(() => [])).length;
+      if (enquiryCount) lines.push(`${enquiryCount} new enquir${enquiryCount === 1 ? "y" : "ies"} on in2min2.com. Open https://in2min2.com/admin to read and reply.`);
+    }
+  }
+
   // 4. Monday's "all well", so silence never hides a broken alert.
   const weekly = at.getUTCHours() === 2 && at.getUTCDay() === 1;
   if (weekly && !lines.length) lines.push(`All well this week. ${backupNote ?? ""}`.trim());
@@ -91,11 +108,13 @@ async function hourly(env, at) {
   if (lines.length) {
     const subject = errors.length ? `in2min2: ${errors.length} error${errors.length === 1 ? "" : "s"}` : !dbOk ? "in2min2: database not answering"
       : lines.some((l) => l.includes("answering again")) ? "in2min2: database answering again"
+      : enquiryCount ? `in2min2: ${enquiryCount} new enquir${enquiryCount === 1 ? "y" : "ies"}`
       : weekly ? "in2min2: weekly check" : "in2min2: backup problem";
     const sent = await email(env, subject, `${lines.join("\n\n")}\n\nSent by the in2min2 Worker's hourly check. Give this email to Claude Code if anything needs fixing.\n`);
     state.lastEmail = { at: at.toISOString(), subject, sent: sent === true, ...(sent === true ? {} : { why: sent || "not set up" }) };
     // Clear the reported errors only once the email has gone.
     if (sent === true && errors.length) await env.BACKUPS.delete(errors.map((e) => e.key));
+    if (sent === true && enquiryCount) state.enquiriesSeen = at.toISOString();
     if (sent !== true) console.log("alert (email not sent):", lines.join(" | "));
   }
   // What the job last did, readable with wrangler (ops/state.json), so a

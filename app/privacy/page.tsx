@@ -45,6 +45,12 @@ export default function Privacy() {
           ["Legal reason", "To provide the service you asked for (contract)."],
           ["How long", "Until you delete your account. If an account isn't used for 2 years, we email you, then delete it."],
         ] },
+        { what: "A message you send us (Contact us)", lines: [
+          ["What", "Your name, email, optional phone number and your message."],
+          ["Why", "To read your message and reply to you."],
+          ["Legal reason", "Our legitimate interest in answering questions (and, if you are a customer, contract)."],
+          ["How long", "Until we've answered and for up to 12 months after, then we delete it. You can ask us to delete it sooner."],
+        ] },
         { what: "Your event's details", lines: [
           ["What", "Names of the people you celebrate and their family, the date, the place, the words, the running order and menu, your main photo, and the preview picture made from it."],
           ["Why", "To make your page and show it to the people you share it with."],

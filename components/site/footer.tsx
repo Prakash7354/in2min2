@@ -22,6 +22,7 @@ export function SiteFooter() {
           <Link href="/#prices">Prices</Link>
           <Link href="/#questions">Questions</Link>
           <Link href="/new/guide">Step-by-step guide</Link>
+          <Link href="/contact">Contact us</Link>
           <a href="mailto:hello@in2min2.com">hello@in2min2.com</a>
         </nav>
         <nav aria-label="Events" className="s-footkinds">

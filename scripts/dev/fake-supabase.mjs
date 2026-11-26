@@ -103,6 +103,13 @@ if (process.env.SEED_REPLIES) {
   for (const n of ["Uncle Ram", "Didi"]) guests.push({ id: randomUUID(), invite_token: randomBytes(16).toString("hex"), invited_at: new Date().toISOString(),
     created_at: new Date(Date.now() - 9 * 3_600_000).toISOString(), rsvp_at: null, source: "host", full_name: n, party_size: 2, rsvp_status: "invited", rsvp_note: null, guest_metadata: {} });
 }
+// Enquiries and the admin (0018): in memory. ADMIN=0 makes the signed-in account a non-admin.
+const enquiries = [
+  { id: randomUUID(), source: "in2min2", created_at: new Date(Date.now() - 3_600_000).toISOString(), name: "Sita Rai", email: "sita@example.com", phone: "07700 900123",
+    message: "Hello, do you do Pasni pages in Nepali? We'd like to send the link to family in Kathmandu.", status: "new", replied_at: null, notes: null },
+  { id: randomUUID(), source: "in2min2", created_at: new Date(Date.now() - 30 * 3_600_000).toISOString(), name: "Arjun Patel", email: "arjun@example.com", phone: null,
+    message: "Can guests upload photos without an account?", status: "replied", replied_at: new Date(Date.now() - 20 * 3_600_000).toISOString(), notes: "Told him yes" },
+];
 const venueCap = process.env.VENUE_CAP ? Number(process.env.VENUE_CAP) : null;
 
 http.createServer((req, res) => {
@@ -120,6 +127,30 @@ http.createServer((req, res) => {
     const eq = (k) => u.searchParams.get(k)?.replace(/^eq\./, "");
     const one = (req.headers.accept ?? "").includes("vnd.pgrst.object");
 
+    if (u.pathname === "/rest/v1/rpc/submit_enquiry") {
+      if (args.p_website) return send({ ok: true });
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(args.p_email ?? "")) return send({ ok: false, reason: "email" });
+      if ((args.p_message ?? "").trim().length < 5) return send({ ok: false, reason: "message" });
+      enquiries.unshift({ id: randomUUID(), source: "in2min2", created_at: new Date().toISOString(), name: args.p_name, email: args.p_email.toLowerCase(), phone: args.p_phone || null,
+        message: args.p_message, status: "new", replied_at: null, notes: null });
+      return send({ ok: true });
+    }
+    if (u.pathname === "/rest/v1/rpc/is_admin") return send(process.env.ADMIN !== "0");
+    if (u.pathname === "/rest/v1/rpc/admin_overview") {
+      if (process.env.ADMIN === "0") return send(null);
+      const days = Array.from({ length: 14 }, (_, i) => ({ day: new Date(Date.now() - (13 - i) * 86_400_000).toISOString().slice(0, 10), events: [0, 1, 0, 2, 3, 0, 1, 4, 2, 0, 1, 5, 2, 3][i], enquiries: [0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0, 1, 0, 1][i] }));
+      return send({ enquiries: { new: enquiries.filter((e) => e.status === "new").length, total: enquiries.filter((e) => e.status !== "spam").length, week: 2 },
+        accounts: { total: 14, hosts: 9 }, events: { total: 21, published: 12, drafts: 9, week: 6, month: 17 }, replies: { total: 64, week: 22, attending: 118 }, photos: { total: 203 }, ai: { week: 41 },
+        by_plan: [{ key: "festive", n: 8 }, { key: "popup", n: 3 }, { key: "memorial", n: 1 }], by_type: [{ key: "birthday", n: 7 }, { key: "pasni", n: 5 }, { key: "wedding", n: 4 }], days });
+    }
+    if (u.pathname === "/rest/v1/enquiries") {
+      const id = eq("id");
+      if (req.method === "GET") return send(enquiries);
+      const i = enquiries.findIndex((x) => x.id === id);
+      if (req.method === "PATCH" && i >= 0) Object.assign(enquiries[i], args);
+      if (req.method === "DELETE" && i >= 0) enquiries.splice(i, 1);
+      res.statusCode = 204; res.end(); return;
+    }
     if (u.pathname === "/rest/v1/rpc/public_event") {
       const e = pages[`${args.p_type}/${args.p_slug}`];
       const g = args.p_token ? guests.find((x) => x.invite_token === args.p_token) : null;

@@ -1056,6 +1056,45 @@ ok("a launch code still works on a festive page", fsto.r.ok === true && fsto.r.p
 await as(B);
 await expectError("a host still can't set the plan themselves", `update events set plan = 'festive' where id = '${fst.id}'`, /permission denied/);
 
+console.log("Enquiries and the admin (0018):");
+await db.exec(`reset role; insert into admins (user_id) values ('${A}')`);
+await as(null);
+const sendEnq = async (name, email, msg, phone = null, web = null) =>
+  (await q(`select submit_enquiry($1, $2, $3, $4, $5) as r`, [name, email, phone, msg, web]))[0].r;
+ok("the public can send an enquiry", (await sendEnq("Sita Rai", "Sita@Example.com", "Do you do Pasni pages?")).ok === true);
+ok("…a bad email is refused", (await sendEnq("Sita", "not-an-email", "Hello there")).reason === "email");
+ok("…an empty name is refused", (await sendEnq("  ", "a@b.co", "Hello there")).reason === "name");
+ok("…a one-word message is refused", (await sendEnq("Sita", "a@b.co", "Hi")).reason === "message");
+ok("…a message over 2000 letters is refused", (await sendEnq("Sita", "a@b.co", "x".repeat(2001))).reason === "message");
+ok("…a robot's filled-in hidden box says thanks and keeps nothing", (await sendEnq("Bot", "bot@b.co", "Buy my pills now", null, "http://spam")).ok === true);
+await expectError("the public can't read enquiries", `select * from enquiries`, /permission denied/);
+await expectError("the public can't write straight into enquiries", `insert into enquiries (name, email, message) values ('x','x@y.co','hello there')`, /permission denied/);
+await expectError("the public can't open the admins list", `select * from admins`, /permission denied/);
+await expectError("the public can't ask for the admin totals", `select admin_overview()`, /permission denied/);
+await as(B);
+ok("another signed-in host sees no enquiries (RLS)", (await q(`select count(*)::int as n from enquiries`))[0].n === 0);
+ok("…and gets nothing from the admin totals", (await q(`select admin_overview() as o`))[0].o === null);
+ok("…and is not an admin", (await q(`select is_admin() as a`))[0].a === false);
+await expectError("…and can't add themselves as an admin", `insert into admins (user_id) values ('${B}')`, /permission denied/);
+ok("…and can't change an enquiry", (await q(`update enquiries set status = 'archived' returning id`)).length === 0);
+await as(A);
+ok("the admin is an admin", (await q(`select is_admin() as a`))[0].a === true);
+const enqs = await q(`select * from enquiries order by created_at`);
+ok("the admin sees exactly the one real enquiry, email in lower case", enqs.length === 1 && enqs[0].email === "sita@example.com" && enqs[0].status === "new" && enqs[0].source === "in2min2");
+await q(`update enquiries set status = 'replied', replied_at = now(), notes = 'Sent prices' where id = $1`, [enqs[0].id]);
+ok("the admin can mark it replied and add a note", (await q(`select status, notes from enquiries where id = $1`, [enqs[0].id]))[0].status === "replied");
+await expectError("…but can't change what the person wrote", `update enquiries set message = 'changed' where id = '${enqs[0].id}'`, /permission denied/);
+const [ov] = await q(`select admin_overview() as o`);
+ok("the admin totals work: accounts, events, enquiries", ov.o.accounts.total >= 3 && ov.o.events.total > 0 && ov.o.enquiries.total === 1 && ov.o.days.length === 14, JSON.stringify(ov.o.enquiries));
+await as(null);
+for (let i = 0; i < 2; i++) await sendEnq("Sita Rai", "sita@example.com", "Another question please");
+ok("a 4th message from one email in an hour is refused", (await sendEnq("Sita Rai", "sita@example.com", "And another one")).reason === "too_many");
+await db.exec(`reset role; delete from enquiries; insert into enquiries (name, email, message) select 'N', 'n' || g || '@b.co', 'hello there' from generate_series(1, 30) g`);
+await as(null);
+ok("more than 30 an hour in total is refused", (await sendEnq("Someone", "new@b.co", "Hello there")).reason === "too_many");
+await as(A);
+ok("the admin can delete an enquiry (a data request)", (await q(`delete from enquiries returning id`)).length === 30);
+
 // For practising a restore without real data: BACKUP_SAMPLE=/path/file.json npm run test:db
 if (process.env.BACKUP_SAMPLE) fs.writeFileSync(process.env.BACKUP_SAMPLE, JSON.stringify(snap));
 

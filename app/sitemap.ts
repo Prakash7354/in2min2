@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE}/`, changeFrequency: "weekly", priority: 1 },
     { url: `${SITE}/new`, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE}/new/guide`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE}/contact`, changeFrequency: "yearly", priority: 0.4 },
     // The page for each kind of event (in2min2.com/pasni…), never the guests' pages under them.
     ...KIND_PAGES.map((k) => ({ url: `${SITE}/${k.type}`, changeFrequency: "monthly" as const, priority: 0.7 })),
   ];
