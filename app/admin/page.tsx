@@ -87,6 +87,14 @@ function Dashboard() {
 
   const [again, setAgain] = useState(0);
   const load = useCallback(() => setAgain((n) => n + 1), []);
+  // New enquiries appear by themselves: every 30 seconds while this page is
+  // open and visible, and straight away when you come back to it.
+  useEffect(() => {
+    const tick = () => { if (document.visibilityState === "visible") load(); };
+    const every = window.setInterval(tick, 30_000);
+    document.addEventListener("visibilitychange", tick);
+    return () => { window.clearInterval(every); document.removeEventListener("visibilitychange", tick); };
+  }, [load]);
   useEffect(() => {
     let live = true;
     Promise.all([
