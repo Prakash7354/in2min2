@@ -42,6 +42,7 @@ export function GuestsPanel() {
   const data = toViewData(d);
   const way: InviteWay = d.inviteWay ?? (d.scale === "community" ? "open" : "personal");
   const [seeing, setSeeing] = useState<string | null | false>(false);
+  const [guestName, setGuestName] = useState("");
   const fromAuto = envelopeFrom({ ...data, envFrom: "" });
   const fromChoices = [...new Set([data.credit?.name, d.stars.names, ...d.family.map((f) => f.names), d.organiserName].map((s) => s?.trim()).filter((s): s is string => !!s))].slice(0, 4);
   const title = data.copy.card_headline || data.title || "Your event";
@@ -79,9 +80,9 @@ export function GuestsPanel() {
         )}
       </Section>
 
-      {way === "personal" ? <Personal /> : <ToLine way={way} />}
+      {way === "personal" ? <Personal name={guestName} onNameChange={setGuestName} /> : <ToLine way={way} />}
 
-      <button type="button" className="b2-btn b2-secondary" onClick={() => setSeeing(way === "personal" ? "Maya & family" : null)}>
+      <button type="button" className="b2-btn b2-secondary" onClick={() => setSeeing(way === "personal" ? (guestName.trim() || "Maya & family") : null)}>
         <Icon name="eye" className="" />See the envelope
       </button>
       {!d.envelope && <Note>The envelope is switched off, so guests go straight to the invitation. Switch it on in Look › Envelope.</Note>}
@@ -137,12 +138,11 @@ function ToLine({ way }: { way: Exclude<InviteWay, "personal"> }) {
 }
 
 // Personal invitations: add names, send each guest their own link.
-function Personal() {
+function Personal({ name, onNameChange }: { name: string; onNameChange: (name: string) => void }) {
   const b = useB2();
   const { d, say } = b;
   const [rows, setRows] = useState<Guest[] | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
-  const [name, setName] = useState("");
   const [size, setSize] = useState(1);
   const [many, setMany] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -185,8 +185,13 @@ function Personal() {
     setBusy(true); setProblem(null);
     const r = await supabase().from("guest_crm").insert(list.map((g) => ({ ...g, event_id: d.eventId, source: "host", rsvp_status: "invited" })));
     setBusy(false);
-    if (r.error) { setProblem(`Couldn't add ${list.length === 1 ? "that guest" : "those guests"}. (Details for Claude Code: ${r.error.code ?? ""} ${r.error.message})`); return; }
-    setName(""); setSize(1); setMany(null);
+    if (r.error) {
+      setProblem(r.error.code === "42501"
+        ? "This account can't add guests to this event. You're probably signed in with a different email from the one that made it. Sign out, then sign in with the email you used to publish."
+        : `Couldn't add ${list.length === 1 ? "that guest" : "those guests"}. (Details for Claude Code: ${r.error.code ?? ""} ${r.error.message})`);
+      return;
+    }
+    onNameChange(""); setSize(1); setMany(null);
     say(list.length === 1 ? `${list[0].full_name} added.` : `${list.length} guests added.`);
     await load();
     b.replies.refresh();
@@ -223,7 +228,7 @@ function Personal() {
       line="Each guest gets their own link: their name is on the envelope, and their reply is already linked to them. Send each link only to that guest.">
       <form style={{ display: "grid", gap: 10 }} onSubmit={(e) => { e.preventDefault(); if (name.trim()) void add([{ full_name: name.trim().slice(0, 120), party_size: size }]); }}>
         <input className="b2-input" value={name} maxLength={120} aria-label="Guest's name, as it goes on the envelope" placeholder="e.g. Mrs Maya Gurung OBE, or Maya & family"
-          onChange={(e) => setName(e.target.value)} />
+          onChange={(e) => onNameChange(e.target.value)} />
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <span className="b2-label">How many people</span>
           <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
