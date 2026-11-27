@@ -10,7 +10,7 @@ import { useMusic, useStopOnLeave } from "@/components/event/music";
 import { Opening } from "@/components/event/opening";
 import { Icon } from "@/components/icons";
 import {
-  BACKDROP_GROUPS, BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, WASHES, washOf, PHOTO_STYLES, TEMPLATES, TEXT_STYLES, eventType, language, musicFor, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle, PHOTO_RINGS, photoRingOf, RING_SHAPES,
+  BACKDROP_GROUPS, BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, WASHES, washOf, ENVELOPE_DECOS, envelopeDecoOf, PHOTO_STYLES, TEMPLATES, TEXT_STYLES, eventType, language, musicFor, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle, PHOTO_RINGS, photoRingOf, RING_SHAPES,
   ENVELOPE_COLOURS,
 } from "@/lib/catalog";
 import { toViewData } from "@/lib/draft";
@@ -400,6 +400,17 @@ function Music() {
                   </button>
                 );
               })}
+            </div>
+          </div>
+        )}
+        {d.envelope && (
+          <div className="b2-field">
+            <span className="b2-label">Round the envelope</span>
+            <div className="b2-chips" role="radiogroup" aria-label="Round the envelope">
+              {ENVELOPE_DECOS.map((o) => (
+                <button key={o.key || "auto"} type="button" role="radio" aria-checked={(envelopeDecoOf(d.envDeco) ?? "") === o.key} className="b2-chip b2-chip-sm"
+                  onClick={() => update((x) => ({ ...x, envDeco: o.key || undefined }))}>{o.label}</button>
+              ))}
             </div>
           </div>
         )}

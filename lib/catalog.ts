@@ -716,6 +716,16 @@ export const ENVELOPE_COLOURS: EnvelopeColour[] = [
 ];
 export const envelopeColourOf = (key: string | null | undefined) => ENVELOPE_COLOURS.find((c) => c.key === key) ?? ENVELOPE_COLOURS[0];
 
+// What surrounds the envelope on the guest's screen (owner, 27 Nov 2026): the
+// system's pick (plain backgrounds get a gold lattice and floral corners,
+// painted frames keep their own, memorials stay calm), always the lattice and
+// frame, or nothing. Kept in feature_toggles.settings.envelope_deco.
+export type EnvelopeDeco = "full" | "plain";
+export const ENVELOPE_DECOS: { key: "" | EnvelopeDeco; label: string }[] = [
+  { key: "", label: "Chosen for you" }, { key: "full", label: "Pattern and frame" }, { key: "plain", label: "Plain" },
+];
+export const envelopeDecoOf = (key: unknown): EnvelopeDeco | null => (key === "full" || key === "plain" ? key : null);
+
 export const MUSIC: Track[] = [
   { key: "happy_birthday", name: "Happy Birthday", line: "A cheerful party tune", file: "/music/happy-birthday-1.m4a", seconds: 69, loop: [0, 67.4],
     kinds: ["birthday", "party", "pasni"] },

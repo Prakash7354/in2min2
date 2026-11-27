@@ -68,6 +68,7 @@ export type EventViewData = {
   envFrom: string;
   envTo: string;
   envColour?: string | null;   // ENVELOPE_COLOURS key; Royal red when empty
+  envDeco?: string | null;     // "full" | "plain" | empty = chosen by the system (catalog ENVELOPE_DECOS)
   wash?: string | null;        // soft shading of the background (catalog WASHES); the palette's own when empty
   searchable?: boolean;        // the host chose "Show on Google" (public events only)
   photoRing?: string | null;   // a moving decoration round the photo (catalog PHOTO_RINGS)

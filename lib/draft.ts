@@ -7,6 +7,7 @@ import { COPY_KEYS, type CopyKey, type EventCopy } from "@/lib/ai/copy";
 import {
   backdropOf,
   washOf,
+  envelopeDecoOf,
   musicOf,
   photoRingOf,
   STARTING_MUSIC,
@@ -107,6 +108,7 @@ export type Draft = {
   envTo?: string;
   // The envelope's colour (catalog ENVELOPE_COLOURS), in feature_toggles.settings.envelope_colour.
   envColour?: string;
+  envDeco?: string;   // the screen round the envelope (catalog ENVELOPE_DECOS), in settings.envelope_deco
   // Soft shading of the background (catalog WASHES), in feature_toggles.settings.wash; empty = the palette's own.
   wash?: string;
   // Show this page on Google and other search engines (owner, 23 Nov 2026; off unless chosen; never for a private event), in feature_toggles.settings.search.
@@ -382,6 +384,7 @@ export function toViewData(d: Draft): EventViewData {
     envFrom: (d.envFrom ?? "").trim().slice(0, 60),
     envTo: (d.envTo ?? "").trim().slice(0, 60),
     envColour: d.envColour || null,
+    envDeco: envelopeDecoOf(d.envDeco),
     wash: washOf(d.wash),
     searchable: !!d.searchable && !d.isPrivate,
     askFood: asksFood(d.askFood, t?.sensitive ?? false),

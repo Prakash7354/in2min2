@@ -122,6 +122,8 @@ ok("every shading shape makes a CSS background, flat makes none", cat.WASHES.fil
 ok("luxe palettes start shaded; the rest start flat", cat.PALETTES.filter((p) => p.family === "Luxe").every((p) => p.bg2 && p.wash && p.wash !== "flat")
   && cat.PALETTES.filter((p) => p.family !== "Luxe").every((p) => !p.wash));
 ok("an unknown shading is ignored", cat.washOf("zigzag") === null && cat.washOf(undefined) === null && cat.washOf("up") === "up");
+ok("the round-the-envelope choice accepts only full or plain", cat.envelopeDecoOf("full") === "full" && cat.envelopeDecoOf("plain") === "plain" && cat.envelopeDecoOf("") === null && cat.envelopeDecoOf("x") === null
+  && cat.ENVELOPE_DECOS.every((o) => o.key === "" || cat.envelopeDecoOf(o.key) === o.key));
 ok("every envelope colour has readable writing (4.5:1) and seal letters (3:1, they are large)", cat.ENVELOPE_COLOURS.every((c) => cat.contrast(c.ink, c.paper) >= 4.5 && cat.contrast(c.waxText, c.wax) >= 3));
 const own = cat.paletteFor("custom", "#FFE066");
 ok("your own pale colour gets dark text automatically", cat.contrast(own.onMain, own.main) >= 4.5 && own.onMain !== "#FFFFFF");

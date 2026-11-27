@@ -15,7 +15,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
-import { backdropOf, washOf, heroMotionOf, musicOf, paletteFor, photoRingOf, TOGGLE_DEFAULTS, type ToggleKey } from "@/lib/catalog";
+import { backdropOf, washOf, envelopeDecoOf, heroMotionOf, musicOf, paletteFor, photoRingOf, TOGGLE_DEFAULTS, type ToggleKey } from "@/lib/catalog";
 import { fingerprint, newDraft, unpublishedChanges, type Draft } from "@/lib/draft";
 import { creditChoice } from "@/lib/event-view";
 import { mediaUrl } from "@/lib/media";
@@ -164,6 +164,7 @@ export async function loadEvent(sb: SupabaseClient, id: string): Promise<{ ok: t
     envTo: typeof settings.envelope_to === "string" ? settings.envelope_to : "",
     ...(typeof settings.envelope_colour === "string" ? { envColour: settings.envelope_colour } : {}),
     ...(washOf(settings.wash) ? { wash: washOf(settings.wash) as string } : {}),
+    ...(envelopeDecoOf(settings.envelope_deco) ? { envDeco: envelopeDecoOf(settings.envelope_deco) as string } : {}),
     ...(settings.search === true ? { searchable: true } : {}),
     photoRing: photoRingOf(settings.photo_ring) ?? "",
     ...(typeof settings.food === "boolean" ? { askFood: settings.food } : {}),
