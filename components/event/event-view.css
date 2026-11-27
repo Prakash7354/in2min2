@@ -373,8 +373,10 @@
   width: 62%;
   aspect-ratio: 1 / 1.08;
   margin-top: min(calc(var(--u) * 2), 10px);
-  /* the rotated photos behind overhang the box on every side; clear them so the kicker below isn't covered */
-  margin-bottom: min(calc(var(--u) * 6), 26px);
+  /* the rotated photos overhang this box on every side; the overhang is a
+     fraction of the box's own (not the card's) width, so it must scale with
+     cqi, not clamp to a px ceiling, or it falls short on a full-size card. */
+  margin-bottom: 9cqi;
 }
 .ev-polaroid {
   position: absolute;
