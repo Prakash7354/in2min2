@@ -111,6 +111,8 @@ export function Opening({ data, title, to, id, preview, embedded = false, autoOp
   const p = data.palette;
   const bd = backdropOf(data.backdrop);
   const env = envelopeColourOf(data.envColour);
+  // Painted backgrounds that already have a frame or a trellis keep it; plain glows get ours.
+  const ownArt = !!bd && (!!bd.frame || bd.group === "traditional" || bd.group === "yours" && !!bd.file && /frame/.test(bd.key));
   const vars = {
     ...eventVars(p, data.textStyle, data.wash),
     "--op-sky": bd ? backdropImage(bd) : washCss(p, washOf(data.wash)) ?? (p.gradient ? `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}d9, ${p.bg}f2), ${p.gradient}` : `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}, ${p.bg})`),
@@ -134,7 +136,10 @@ export function Opening({ data, title, to, id, preview, embedded = false, autoOp
   const envelope = showEnvelope ? (
     <div className={`op ${eventFontVariables}`} data-op={preview ? "preview" : id} data-phase={phase} data-embedded={embedded ? "" : undefined} style={vars}
       role="dialog" aria-modal="true" aria-label="Your invitation">
-      <div className="op-sky" aria-hidden="true">{!data.sensitive && <span className="op-glints" />}</div>
+      <div className="op-sky" aria-hidden="true" data-deco={ownArt ? undefined : data.sensitive ? "calm" : "on"}>
+        {!data.sensitive && <span className="op-glints" />}
+        {!ownArt && <span className="op-frame"><i /><i /><i /><i /></span>}
+      </div>
       {/* The whole screen is the button: a tap anywhere opens it. */}
       <button ref={button} type="button" className="op-tap" onClick={open}
         aria-label={`Open the invitation${guest ? ` for ${guest}` : ""}${fromLine ? ` from ${fromLine}` : ""}${data.music ? ", with music" : ""}`}>

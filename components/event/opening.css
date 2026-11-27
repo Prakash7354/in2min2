@@ -17,6 +17,32 @@
   background: radial-gradient(ellipse 60% 38% at 50% 52%, rgb(255 255 255 / 0.16), transparent 70%);
 }
 
+/* A subtle gold lattice and a floral frame round the envelope (owner, 27 Nov 2026:
+   the plain screen looked thin). Not on painted backgrounds, which have their
+   own; memorials keep only a calm line. */
+.op-sky::before {
+  content: ""; position: absolute; inset: 0; display: none;
+  background: var(--ev-accent); opacity: 0.14;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M18 0L36 18L18 36L0 18Z' fill='none' stroke='%23000' stroke-width='1'/%3E%3Cpath d='M18 9L27 18L18 27L9 18Z' fill='none' stroke='%23000' stroke-width='.8'/%3E%3Ccircle cx='18' cy='18' r='1.7' fill='%23000'/%3E%3Ccircle cx='0' cy='0' r='1.4' fill='%23000'/%3E%3Ccircle cx='36' cy='0' r='1.4' fill='%23000'/%3E%3Ccircle cx='0' cy='36' r='1.4' fill='%23000'/%3E%3Ccircle cx='36' cy='36' r='1.4' fill='%23000'/%3E%3C/svg%3E") 0 0 / 36px 36px repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M18 0L36 18L18 36L0 18Z' fill='none' stroke='%23000' stroke-width='1'/%3E%3Cpath d='M18 9L27 18L18 27L9 18Z' fill='none' stroke='%23000' stroke-width='.8'/%3E%3Ccircle cx='18' cy='18' r='1.7' fill='%23000'/%3E%3Ccircle cx='0' cy='0' r='1.4' fill='%23000'/%3E%3Ccircle cx='36' cy='0' r='1.4' fill='%23000'/%3E%3Ccircle cx='0' cy='36' r='1.4' fill='%23000'/%3E%3Ccircle cx='36' cy='36' r='1.4' fill='%23000'/%3E%3C/svg%3E") 0 0 / 36px 36px repeat;
+}
+.op-sky[data-deco="on"]::before { display: block; }
+.op-frame {
+  position: absolute; inset: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+  border: 1px solid color-mix(in srgb, var(--ev-accent) 38%, transparent); border-radius: 18px; pointer-events: none;
+}
+.op-frame i {
+  display: none; position: absolute; width: 74px; height: 74px; background: var(--ev-accent); opacity: 0.6;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cg fill='%23000'%3E%3Cg transform='translate%2815 15%29'%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%280%29'/%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%2872%29'/%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%28144%29'/%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%28216%29'/%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%28288%29'/%3E%3C/g%3E%3Cellipse cx='44' cy='11' rx='7' ry='2.8' transform='rotate%28-12 44 11%29'/%3E%3Cellipse cx='11' cy='44' rx='2.8' ry='7' transform='rotate%28-12 11 44%29'/%3E%3Cellipse cx='60' cy='7' rx='5' ry='2.2' transform='rotate%28-20 60 7%29'/%3E%3Cellipse cx='7' cy='60' rx='2.2' ry='5' transform='rotate%28-20 7 60%29'/%3E%3C/g%3E%3Cg fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round'%3E%3Cpath d='M26 15C42 15 54 12 72 5'/%3E%3Cpath d='M15 26C15 42 12 54 5 72'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cg fill='%23000'%3E%3Cg transform='translate%2815 15%29'%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%280%29'/%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%2872%29'/%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%28144%29'/%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%28216%29'/%3E%3Cellipse cx='0' cy='-6.2' rx='3.7' ry='6.2' transform='rotate%28288%29'/%3E%3C/g%3E%3Cellipse cx='44' cy='11' rx='7' ry='2.8' transform='rotate%28-12 44 11%29'/%3E%3Cellipse cx='11' cy='44' rx='2.8' ry='7' transform='rotate%28-12 11 44%29'/%3E%3Cellipse cx='60' cy='7' rx='5' ry='2.2' transform='rotate%28-20 60 7%29'/%3E%3Cellipse cx='7' cy='60' rx='2.2' ry='5' transform='rotate%28-20 7 60%29'/%3E%3C/g%3E%3Cg fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round'%3E%3Cpath d='M26 15C42 15 54 12 72 5'/%3E%3Cpath d='M15 26C15 42 12 54 5 72'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+}
+.op-sky[data-deco="on"] .op-frame i { display: block; }
+.op-frame i:nth-child(1) { left: -4px; top: -4px; }
+.op-frame i:nth-child(2) { right: -4px; top: -4px; transform: scaleX(-1); }
+.op-frame i:nth-child(3) { left: -4px; bottom: -4px; transform: scaleY(-1); }
+.op-frame i:nth-child(4) { right: -4px; bottom: -4px; transform: scale(-1); }
+.op[data-embedded] .op-frame { inset: 8px; border-radius: 12px; }
+.op[data-embedded] .op-frame i { width: 44px; height: 44px; }
+.op[data-embedded] .op-sky::before { -webkit-mask-size: 24px 24px; mask-size: 24px 24px; }
+
 /* The whole screen is one button. */
 .op-tap {
   position: absolute; inset: 0;
@@ -38,7 +64,7 @@
 
 /* ── The envelope ── */
 .op-env {
-  --w: min(86vw, 370px);
+  --w: min(90vw, 400px);
   position: relative; display: block; width: var(--w); aspect-ratio: 1.42;
   filter: drop-shadow(0 22px 26px rgb(0 0 0 / 0.28)) drop-shadow(0 4px 6px rgb(0 0 0 / 0.16));
   animation: op-float 4.5s ease-in-out infinite;
