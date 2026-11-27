@@ -20,17 +20,16 @@ import { eventLink, TopBar } from "./topbar";
 import { Button } from "./ui";
 
 const STEPS = [
-  { title: "What are you celebrating?", short: "Event", view: "card" },
-  { title: "Who is it for?", short: "Who", view: "card" },
+  { title: "What are you celebrating?", short: "Event", view: "page" },
+  { title: "Who is it for?", short: "Who", view: "page" },
   { title: "When, where and how many", short: "When", view: "page" },
-  { title: "The words", short: "Words", view: "card" },
-  { title: "The look", short: "Look", view: "card" },
+  { title: "The words", short: "Words", view: "page" },
+  { title: "The look", short: "Look", view: "page" },
   { title: "Switches", short: "Switches", view: "page" },
   { title: "Check and publish", short: "Publish", view: "page" },
 ] as const satisfies readonly { title: string; short: string; view: EventStageView }[];
 
 const VIEWS: { key: EventStageView; label: string }[] = [
-  { key: "card", label: "Invitation" },
   { key: "page", label: "Event page" },
   { key: "live", label: "On the day" },
   { key: "after", label: "After" },
@@ -46,7 +45,7 @@ export default function Builder() {
   });
   const [now] = useState(() => Date.now());
   const [saveOk, setSaveOk] = useState(true);
-  const [view, setView] = useState<EventStageView>(STEPS[draft.step]?.view ?? "card");
+  const [view, setView] = useState<EventStageView>(STEPS[draft.step]?.view ?? "page");
   const [full, setFull] = useState(false);
   const [device, setDevice] = useState<"phone" | "computer">("phone");
   const { session } = useSession();
@@ -116,7 +115,7 @@ export default function Builder() {
   const data = toViewData(draft);
 
   const props = { d: draft, update, now, session, askSignIn, say };
-  const startAgain = () => { clearDraft(); setDraft(newDraft()); setView("card"); goTo(0); };
+  const startAgain = () => { clearDraft(); setDraft(newDraft()); setView("page"); goTo(0); };
   const body = [
     <StepType key="type" {...props} />,
     <StepWho key="who" {...props} />,

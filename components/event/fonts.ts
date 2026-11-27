@@ -17,22 +17,22 @@ import {
 
 // next/font needs each option written out in full (no shared object).
 
-// Latin headline and text faces
-const inter = Inter({ display: "swap", preload: false, subsets: ["latin"], variable: "--f-inter" });
-const playfair = Playfair_Display({ display: "swap", preload: false, subsets: ["latin"], variable: "--f-playfair" });
-const cormorant = Cormorant_Garamond({ display: "swap", preload: false, subsets: ["latin"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--f-cormorant" });
-const greatVibes = Great_Vibes({ display: "swap", preload: false, subsets: ["latin"], weight: "400", variable: "--f-great-vibes" });
-const bebas = Bebas_Neue({ display: "swap", preload: false, subsets: ["latin"], weight: "400", variable: "--f-bebas" });
-const cinzel = Cinzel({ display: "swap", preload: false, subsets: ["latin"], variable: "--f-cinzel" });
-const fraunces = Fraunces({ display: "swap", preload: false, subsets: ["latin"], variable: "--f-fraunces" });
-const lora = Lora({ display: "swap", preload: false, subsets: ["latin"], variable: "--f-lora" });
-const caveat = Caveat({ display: "swap", preload: false, subsets: ["latin"], variable: "--f-caveat" });
+// Latin headline and text faces (latin-ext: Polish, and other diacritics such as Tagalog ñ)
+const inter = Inter({ display: "swap", preload: false, subsets: ["latin", "latin-ext"], variable: "--f-inter" });
+const playfair = Playfair_Display({ display: "swap", preload: false, subsets: ["latin", "latin-ext"], variable: "--f-playfair" });
+const cormorant = Cormorant_Garamond({ display: "swap", preload: false, subsets: ["latin", "latin-ext"], weight: ["400", "500", "600"], style: ["normal", "italic"], variable: "--f-cormorant" });
+const greatVibes = Great_Vibes({ display: "swap", preload: false, subsets: ["latin", "latin-ext"], weight: "400", variable: "--f-great-vibes" });
+const bebas = Bebas_Neue({ display: "swap", preload: false, subsets: ["latin", "latin-ext"], weight: "400", variable: "--f-bebas" });
+const cinzel = Cinzel({ display: "swap", preload: false, subsets: ["latin", "latin-ext"], variable: "--f-cinzel" });
+const fraunces = Fraunces({ display: "swap", preload: false, subsets: ["latin", "latin-ext"], variable: "--f-fraunces" });
+const lora = Lora({ display: "swap", preload: false, subsets: ["latin", "latin-ext"], variable: "--f-lora" });
+const caveat = Caveat({ display: "swap", preload: false, subsets: ["latin", "latin-ext"], variable: "--f-caveat" });
 
 // Faces that cover Latin and Devanagari together
-const rozha = Rozha_One({ display: "swap", preload: false, subsets: ["latin", "devanagari"], weight: "400", variable: "--f-rozha" });
+const rozha = Rozha_One({ display: "swap", preload: false, subsets: ["latin", "latin-ext", "devanagari"], weight: "400", variable: "--f-rozha" });
 const amita = Amita({ display: "swap", preload: false, subsets: ["devanagari"], weight: ["400", "700"], variable: "--f-amita" });
 const kalam = Kalam({ display: "swap", preload: false, subsets: ["devanagari"], weight: ["400", "700"], variable: "--f-kalam" });
-const baloo = Baloo_2({ display: "swap", preload: false, subsets: ["latin", "devanagari"], variable: "--f-baloo" });
+const baloo = Baloo_2({ display: "swap", preload: false, subsets: ["latin", "latin-ext", "devanagari"], variable: "--f-baloo" });
 
 // Plain sans, per script
 const nsDeva = Noto_Sans_Devanagari({ display: "swap", preload: false, subsets: ["devanagari"], variable: "--f-noto-sans-deva" });

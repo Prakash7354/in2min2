@@ -945,8 +945,8 @@ export function StepPublish({ d, update, session, askSignIn, say, onPreview, onS
       )}
 
       <Group icon="eye" title="See it as guests will" line="Tap to open full-screen.">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {([["card", "Invitation card"], ["page", "Event page"], ["live", "On the day"], ["after", "After the event"]] as const).map(([v, label]) => (
+        <div className="grid grid-cols-3 gap-3">
+          {([["page", "Event page"], ["live", "On the day"], ["after", "After the event"]] as const).map(([v, label]) => (
             <Button key={v} kind="quiet" onClick={() => onPreview(v)}>{label}</Button>
           ))}
         </div>

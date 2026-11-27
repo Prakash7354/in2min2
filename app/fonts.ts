@@ -6,7 +6,7 @@
 
 import { Bricolage_Grotesque, Mukta } from "next/font/google";
 
-const bricolage = Bricolage_Grotesque({ subsets: ["latin"], variable: "--f-bricolage", display: "swap" });
-const mukta = Mukta({ subsets: ["latin", "devanagari"], weight: ["400", "500", "700"], variable: "--f-mukta", display: "swap" });
+const bricolage = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], variable: "--f-bricolage", display: "swap" });
+const mukta = Mukta({ subsets: ["latin", "latin-ext", "devanagari"], weight: ["400", "500", "700"], variable: "--f-mukta", display: "swap" });
 
 export const fontVariables = `${bricolage.variable} ${mukta.variable}`;

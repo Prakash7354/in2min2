@@ -160,19 +160,19 @@ export default function Home() {
                   </div>
                   <div className="s-scene s-scene2">
                     <p className="s-mini-h">Whose birthday is it?</p>
-                    <span className="s-mini-input"><span className="s-typed">Sita</span></span>
+                    <span className="s-mini-input"><span className="s-typed">Sagar</span></span>
                     <div className="s-mini-chips"><span>21st</span><span className="s-on">23rd</span><span>30th</span></div>
                     <div className="s-mini-chips"><span className="s-on">Sat 12 Dec</span><span>7pm</span></div>
                   </div>
                   <div className="s-scene s-scene3">
                     <p className="s-mini-ai">✨ The AI is writing…</p>
-                    <p className="s-mini-line s-l1">Join us for Sita’s 23rd birthday! Food, music and lots of dancing.</p>
-                    <p className="s-mini-line s-l2" lang="ne">सीताको २३ औँ जन्मदिनमा तपाईंलाई हार्दिक निमन्त्रणा छ।</p>
+                    <p className="s-mini-line s-l1">Join us for Sagar’s 23rd birthday! Food, music and lots of dancing.</p>
+                    <p className="s-mini-line s-l2" lang="ne">सागरको २३ औँ जन्मदिनमा तपाईंलाई हार्दिक निमन्त्रणा छ।</p>
                     <div className="s-mini-chips"><span>Warm</span><span className="s-on">Fun</span><span>Formal</span></div>
                   </div>
                   <div className="s-scene s-scene4">
                     <div className="s-wa">
-                      <div className="s-wa-card"><span className="s-wa-pic" /><span><b>Sita’s 23rd birthday</b><small>in2min2.com</small></span></div>
+                      <div className="s-wa-card"><span className="s-wa-pic" /><span><b>Sagar’s 23rd birthday</b><small>in2min2.com</small></span></div>
                       <p>You’re invited! Please reply here 👇</p>
                     </div>
                     <p className="s-mini-ok">✓ Asha: Yes, 3 of us</p>

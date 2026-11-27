@@ -30,8 +30,9 @@ export function heroSample(): EventViewData {
 }
 function heroDraft(): Draft {
   return draftOf("birthday", {
-    // 23, as on the balloons in the photo (owner, 21 Nov 2026).
-    title: "Sita’s 23rd birthday", stars: { relation: "The birthday star", names: "Sita" }, milestone: "23rd",
+    // 23, as on the balloons in the photo; named for who the photo actually
+    // shows at the centre, candle and all (owner, 27 Nov 2026).
+    title: "Sagar’s 23rd birthday", stars: { relation: "The birthday star", names: "Sagar" }, milestone: "23rd",
     venueName: "Riverside Hall", cover: "/site/birthday-s.jpg", coverFit: "fill",
   });
 }
@@ -111,9 +112,13 @@ export function kindDraft(kind: string): Draft {
     case "birthday": return heroDraft();
     case "wedding": return weddingDraft();
     case "pasni": return draftOf("pasni", { stars: { relation: "", names: "Jeena" }, title: "Jeena’s Pasni", startTime: "10:00",
-      cover: "/site/jeena-s.jpg", palette: "sindoor", backdrop: "red_gold_frame", border: "none" });
+      cover: "/site/jeena-s.jpg", palette: "sindoor", backdrop: "red_gold_frame", border: "none", languages: ["en", "ne"],
+      copy: { card_invite_body: "Our daughter Jeena will taste her first rice at this happy ceremony. Please join us and share in the blessing." },
+      translation: { card_headline: "", card_invite_body: "आज हाम्रो छोरी जीनाको पास्नी हो। यस खुशीको अवसरमा तपाईंलाई हार्दिक निमन्त्रणा छ।",
+        landing_page_story: "", guest_note_box: "", post_event_thank_you: "" } });
     case "lhosar": return draftOf("lhosar", { title: "Tamu Lhosar 2026", organiserName: "Gurung community", organiserType: "community_group", forProfit: false, startTime: "11:00",
-      cover: "/site/lhosar-s.jpg" }, 5);
+      cover: "/site/lhosar-s.jpg",
+      copy: { card_invite_body: "Join us to welcome the Tamu new year with music, dance and a shared feast for all the family." } }, 5);
     case "memorial": return draftOf("memorial", { stars: { relation: "", names: "" }, title: "Remembering with love", venueName: "Community hall", startTime: "14:00",
       cover: "/site/memorial-s.jpg", palette: "emerald_gold", border: "fine_line",
       copy: { card_headline: "Remembering with love", card_invite_body: MEMORIAL_WORDS, landing_page_story: MEMORIAL_WORDS, guest_note_box: "",
@@ -122,19 +127,33 @@ export function kindDraft(kind: string): Draft {
       cover: "/site/reunion-s.jpg", photoStyle: "hero", palette: "royal_blue_gold", backdrop: "glow_royal", border: "khukuri",
       copy: { card_invite_body: "25 years on, it’s time to get together again: old friends, good food and plenty of stories." } }, 8);
     case "anniversary": return draftOf("anniversary", { stars: { relation: "", names: "Hari & Sita" }, title: "Hari & Sita’s anniversary", startTime: "19:00",
-      cover: "/site/harisita-s.jpg", photoStyle: "heart", palette: "lali_gurans", backdrop: "rose_frame", border: "none" });
-    case "bratabandha": return draftOf("bratabandha", { stars: { relation: "", names: "Rohan" }, title: "Rohan’s Bratabandha", startTime: "08:00" });
-    case "ceremony": return draftOf("ceremony", { title: "Naming ceremony for our daughter", startTime: "10:00" });
+      cover: "/site/harisita-s.jpg", photoStyle: "heart", palette: "lali_gurans", backdrop: "rose_frame", border: "none",
+      copy: { card_invite_body: "Many happy years together, and many more to come. Please join us as we celebrate with family and friends." } });
+    case "bratabandha": return draftOf("bratabandha", { stars: { relation: "", names: "Rohan" }, title: "Rohan’s Bratabandha", startTime: "08:00", languages: ["en", "ne"],
+      copy: { card_invite_body: "Rohan will receive the sacred thread in this age-old ceremony. Your blessings and presence would mean so much to our family." },
+      translation: { card_headline: "", card_invite_body: "आज रोहनको ब्रतबन्ध संस्कार हो। यस पवित्र अवसरमा तपाईंको आशीर्वाद र उपस्थितिको हार्दिक अपेक्षा गर्दछौं।",
+        landing_page_story: "", guest_note_box: "", post_event_thank_you: "" } });
+    case "ceremony": return draftOf("ceremony", { title: "Naming ceremony for our daughter", startTime: "10:00",
+      copy: { card_invite_body: "We'd love for you to be there as we welcome our daughter with her name, blessings and a small family gathering." } });
     case "engagement": return draftOf("engagement", { stars: { relation: "", names: "Asha & Rohit" }, title: "Asha & Rohit’s engagement", startTime: "17:00",
-      cover: "/site/w-heart-s.jpg", photoStyle: "heart" }, 5);
-    case "party": return draftOf("party", { title: "House-warming party", cover: "/site/party-s.jpg", startTime: "19:00" });
-    case "christmas": return draftOf("christmas", { title: "Christmas lunch", cover: "/site/christmas-s.jpg", startTime: "13:00" }, 2);
-    case "new-year": return draftOf("new-year", { title: "New Year’s Eve party", cover: "/site/newyear-s.jpg", startTime: "19:30" }, 4);
-    case "corporate": return draftOf("corporate", { title: "Annual dinner", cover: "/site/office-s.jpg", venueName: "The Grand Hotel", startTime: "19:00" });
-    case "mela": return draftOf("mela", { ...community, title: "Summer Mela", cover: "/site/festival-s.jpg", venueName: "Town park", startTime: "11:00" }, 8);
-    case "sport": return draftOf("sport", { ...community, title: "Football tournament", cover: "/site/sport-s.jpg", venueName: "Sports ground", startTime: "09:00" }, 8);
-    case "charity": return draftOf("charity", { ...community, title: "Charity fun day", cover: "/site/marquee-s.jpg", venueName: "Village green", startTime: "11:00" }, 6);
-    case "community": return draftOf("community", { ...community, title: "Cultural evening", cover: "/site/show-concert-s.jpg", startTime: "18:00" }, 5);
+      cover: "/site/w-heart-s.jpg", photoStyle: "heart",
+      copy: { card_invite_body: "Asha and Rohit are engaged! Join us for an evening of celebration as we look ahead to the big day." } }, 5);
+    case "party": return draftOf("party", { title: "House-warming party", cover: "/site/party-s.jpg", startTime: "19:00",
+      copy: { card_invite_body: "Come and see the new place! Food, drinks and good company, no need to bring a thing but yourself." } });
+    case "christmas": return draftOf("christmas", { title: "Christmas lunch", cover: "/site/christmas-s.jpg", startTime: "13:00",
+      copy: { card_invite_body: "Come together for a warm Christmas lunch with family and friends, good food and good company." } }, 2);
+    case "new-year": return draftOf("new-year", { title: "New Year’s Eve party", cover: "/site/newyear-s.jpg", startTime: "19:30",
+      copy: { card_invite_body: "See out the old year and welcome the new one with us: music, dancing and a midnight countdown together." } }, 4);
+    case "corporate": return draftOf("corporate", { title: "Annual dinner", cover: "/site/office-s.jpg", venueName: "The Grand Hotel", startTime: "19:00",
+      copy: { card_invite_body: "Join us for our annual dinner: an evening to thank the team, celebrate the year and look ahead together." } });
+    case "mela": return draftOf("mela", { ...community, title: "Summer Mela", cover: "/site/festival-s.jpg", venueName: "Town park", startTime: "11:00",
+      copy: { card_invite_body: "A day of music, food and dance for the whole community. Bring the family and join the celebration." } }, 8);
+    case "sport": return draftOf("sport", { ...community, title: "Football tournament", cover: "/site/sport-s.jpg", venueName: "Sports ground", startTime: "09:00",
+      copy: { card_invite_body: "Teams from across the community come together for a day of football, cheering and friendly rivalry." } }, 8);
+    case "charity": return draftOf("charity", { ...community, title: "Charity fun day", cover: "/site/marquee-s.jpg", venueName: "Village green", startTime: "11:00",
+      copy: { card_invite_body: "Games, stalls and good company for a good cause. Every penny raised goes straight to the charity." } }, 6);
+    case "community": return draftOf("community", { ...community, title: "Cultural evening", cover: "/site/show-concert-s.jpg", startTime: "18:00",
+      copy: { card_invite_body: "An evening of music, dance and food celebrating our community's culture. All are warmly welcome." } }, 5);
     default: return draftOf(kind, {});
   }
 }
@@ -173,7 +192,7 @@ export function heroShows(): HeroShow[] {
     show("birthday", "Birthday", heroSample(), { coming: 41, maybe: 6, cant: 4, fourth: ["Not replied", 18], bell: 3, food: [["vegetarian", 9], ["vegan", 2], ["nut_allergy", 1]], replies: [
       { name: "Priya", status: "yes", size: 3, note: "Can’t wait! Two of us are vegetarian 🌱", ago: "2 min ago" },
       { name: "Tom", status: "maybe", size: 2, note: "Hoping to come after work.", ago: "1 hour ago" },
-      { name: "Fatima", status: "no", note: "So sorry, we’re away. Happy birthday Sita! 🎉", ago: "Yesterday" },
+      { name: "Fatima", status: "no", note: "So sorry, we’re away. Happy birthday Sagar! 🎉", ago: "Yesterday" },
     ] }),
     show("pasni", "Pasni", kindSample("pasni"), { coming: 52, maybe: 5, cant: 3, fourth: ["Not replied", 11], bell: 2, food: [["vegetarian", 14], ["vegan", 3], ["dairy_free", 1]], replies: [
       { name: "Bimala", status: "yes", size: 4, note: "Blessings to little Jeena 🙏 One of us is vegan.", ago: "5 min ago" },
