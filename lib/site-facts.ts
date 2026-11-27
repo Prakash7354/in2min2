@@ -78,6 +78,7 @@ export function llmsText(now: number): string {
     `- [Home page](${SITE}/): what in2min2 does, with real example invitations`,
     `- [Make an event](${SITE}/new): the builder; free to try, and no sign-in is needed until you use the AI writer or publish`,
     `- [How it works](${SITE}/new/guide): a two-minute guide`,
+    `- [Help library](${SITE}/help): step-by-step answers to every how-to, from the first invitation to photos, plans and privacy`,
     ...(DRAFT ? [] : [`- [Prices](${SITE}/pricing)`, `- [Privacy](${SITE}/privacy)`, `- [Terms](${SITE}/terms)`]),
   ];
   return `# in2min2

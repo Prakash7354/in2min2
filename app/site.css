@@ -547,3 +547,52 @@
 .s-chrome-tab .s-chrome-right svg { height: 2.1cqw; } .s-chrome-tab .s-ic-bat svg { height: 2.3cqw; }
 .s-chrome-tab .s-homebar { bottom: 1.4cqw; width: 18%; height: 0.55cqw; min-height: 2px; }
 .s-dash { padding-top: 3.2em; }
+
+/* ── Help library (in2min2.com/help; 27 Nov 2026) ── */
+.s-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.s-hsearch { margin-top: 22px; }
+.s-hsearch input { width: 100%; min-height: 58px; padding: 0 20px; border-radius: 999px; border: 2px solid transparent; background: var(--s-card); box-shadow: var(--s-shadow); font: inherit; font-size: 18px; color: var(--s-ink); }
+.s-hsearch input:focus-visible { outline: 3px solid var(--s-teal-deep); outline-offset: 2px; }
+.s-hcount { margin: 14px 4px 0; color: var(--s-muted); font-size: 16px; }
+.s-hgroups { display: grid; gap: 22px; margin-top: 30px; grid-template-columns: 1fr; }
+.s-hgroup { border-radius: 22px; background: var(--s-card); box-shadow: var(--s-shadow); padding: 20px 18px 10px; }
+.s-hgroup h2 { font-family: var(--font-display); font-weight: 800; font-size: 24px; line-height: 1.15; color: var(--s-navy); margin: 0; }
+.s-hgroup > p { margin: 4px 0 8px; color: var(--s-muted); font-size: 15.5px; }
+.s-hgroup ul { list-style: none; margin: 0; padding: 0; }
+.s-hgroup li + li { border-top: 1px solid rgba(15, 42, 79, 0.1); }
+.s-hgroup li a { display: grid; gap: 2px; padding: 14px 4px; text-decoration: none; }
+.s-hgroup li a b { color: var(--s-navy); font-size: 17px; line-height: 1.3; }
+.s-hgroup li a span { color: var(--s-muted); font-size: 15px; line-height: 1.4; }
+.s-hgroup li a:hover b { color: var(--s-teal-deep); text-decoration: underline; text-underline-offset: 3px; }
+@media (min-width: 900px) { .s-hgroups { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+.s-hbody { margin-top: 22px; font-size: 18px; line-height: 1.6; color: var(--s-ink); }
+.s-hbody p { margin: 14px 0 0; }
+.s-hbody h2 { font-family: var(--font-display); font-size: 24px; line-height: 1.2; color: var(--s-navy); margin: 30px 0 0; }
+.s-hbody a { color: var(--s-teal-deep); font-weight: 700; text-underline-offset: 3px; }
+.s-hbody strong { color: var(--s-navy); }
+.s-hsteps { list-style: none; counter-reset: hs; margin: 16px 0 0; padding: 0; display: grid; gap: 10px; }
+.s-hsteps li { counter-increment: hs; position: relative; padding: 14px 16px 14px 62px; border-radius: 18px; background: var(--s-card); box-shadow: var(--s-shadow); }
+.s-hsteps li::before { content: counter(hs); position: absolute; left: 14px; top: 12px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 999px; background: var(--s-orange); color: var(--s-navy); font-weight: 800; }
+.s-hlist { margin: 14px 0 0; padding-left: 22px; display: grid; gap: 8px; }
+.s-hnote { display: grid; gap: 4px; margin: 18px 0 0; padding: 14px 16px; border-radius: 18px; }
+.s-hnote b { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; }
+.s-htip { background: var(--s-mint); }
+.s-htip b { color: var(--s-teal-deep); }
+.s-hwarn { background: #fff1dd; box-shadow: inset 0 0 0 2px rgba(244, 124, 32, 0.45); }
+.s-hwarn b { color: #a64b00; }
+.s-htable { margin-top: 16px; overflow-x: auto; border-radius: 18px; background: var(--s-card); box-shadow: var(--s-shadow); }
+.s-htable table { width: 100%; border-collapse: collapse; font-size: 16px; line-height: 1.4; }
+.s-htable th, .s-htable td { padding: 12px 14px; text-align: left; border-bottom: 1px solid rgba(15, 42, 79, 0.1); white-space: nowrap; }
+.s-htable td:first-child, .s-htable th:first-child { white-space: normal; }
+.s-htable th { color: var(--s-navy); background: var(--s-mint); }
+.s-hstuck { margin-top: 36px; padding: 22px 20px; border-radius: 22px; background: var(--s-navy); color: #fff; display: grid; gap: 10px; }
+.s-hstuck h2 { color: #fff; font-family: var(--font-display); font-size: 24px; margin: 0; }
+.s-hstuck p { margin: 0; color: #d6e0f0; }
+.s-hstuck a.s-hmail { color: #fff; font-weight: 800; }
+.s-hmore { margin-top: 30px; }
+.s-hmore h2 { font-family: var(--font-display); font-size: 22px; color: var(--s-navy); margin: 0 0 10px; }
+.s-hmore ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.s-hmore a { display: block; padding: 14px 16px; border-radius: 16px; background: var(--s-card); box-shadow: var(--s-shadow); color: var(--s-navy); font-weight: 700; text-decoration: none; }
+.s-hmore a:hover { color: var(--s-teal-deep); }
+.s-hupdated { margin: 8px 0 0; font-size: 14.5px; color: var(--s-muted); }
