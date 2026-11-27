@@ -9,7 +9,7 @@
 //
 // Inline marks in text: **bold** and [label](/path).
 
-import { FESTIVE_UNTIL, PLANS, formatPence, onlineWords, plan } from "@/lib/catalog";
+import { FESTIVE_UNTIL, PLANS, formatPence, plan } from "@/lib/catalog";
 
 export const HELP_UPDATED = "27 November 2026";
 export const HELP_EMAIL = "hello@in2min2.com";
