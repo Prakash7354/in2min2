@@ -29,7 +29,7 @@
     radial-gradient(circle at 7px 7px, color-mix(in srgb, var(--ev-accent) 26%, transparent) 0 0.9px, transparent 1.3px) 0 0 / 14px 14px,
     repeating-linear-gradient(45deg, color-mix(in srgb, var(--ev-ink) 3%, transparent) 0 1px, transparent 1px 5px),
     repeating-linear-gradient(-45deg, color-mix(in srgb, var(--ev-ink) 2.5%, transparent) 0 1px, transparent 1px 5px),
-    var(--ev-bg);
+    var(--ev-wash, var(--ev-bg));
   background: var(--ev-paper);
   color: var(--ev-ink);
   font-family: var(--ev-body);

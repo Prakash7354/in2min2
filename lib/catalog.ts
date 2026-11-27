@@ -274,7 +274,21 @@ export function togglesFor(typeKey: string | null): Record<ToggleKey, boolean> {
 
 // ─────────────────────────────── The look ───────────────────────────────
 
-export type PaletteFamily = "in2min2" | "Seasonal" | "Formal" | "Nepali and South Asian" | "Modern" | "Festival colours" | "Party" | "Sport" | "Calm" | "Premium";
+export type PaletteFamily = "in2min2" | "Seasonal" | "Formal" | "Nepali and South Asian" | "Modern" | "Festival colours" | "Party" | "Sport" | "Calm" | "Premium" | "Luxe";
+
+// Soft shading of the page background (owner, 27 Nov 2026: the premium look of
+// gradients, not flat white or blue). Kept in feature_toggles.settings.wash
+// (no database change). "flat" is the plain paper; the others blend the
+// palette's background with a second, close colour (`bg2`, or made from the
+// palette's main colour) from the top, from a corner, or from a centred glow.
+export type WashShape = "flat" | "up" | "diagonal" | "glow";
+export const WASHES: { key: WashShape; name: string; line: string }[] = [
+  { key: "flat", name: "Flat", line: "One plain colour" },
+  { key: "up", name: "Top to bottom", line: "Light at the top, settling down" },
+  { key: "diagonal", name: "Diagonal", line: "From one corner to the other" },
+  { key: "glow", name: "Soft glow", line: "A gentle light in the middle" },
+];
+export const washOf = (key: unknown): WashShape | null => WASHES.find((w) => w.key === key)?.key ?? null;
 
 export type Palette = {
   key: string;
@@ -284,6 +298,8 @@ export type Palette = {
   bg: string; main: string; onMain: string; accent: string; onAccent: string; soft: string; ink: string; muted: string;
   dark?: boolean;      // light text on a dark page
   gradient?: string;   // a colour blend behind the card and in some borders
+  bg2?: string;        // the soft second colour of the background (the "tip" of its shading)
+  wash?: WashShape;    // how bg and bg2 blend by default; flat when left out
   party?: string[];    // colours for confetti, balloons, bunting and leaves
 };
 
@@ -294,6 +310,17 @@ export const PALETTES: Palette[] = [
   { key: "marigold_indigo", tag: "popular", name: "Marigold & Indigo", family: "in2min2", bg: "#FFF9EF", main: "#2E2A6E", onMain: "#FFFFFF", accent: "#F4A522", onAccent: "#1C1A3A", soft: "#F7E6C4", ink: "#1C1A3A", muted: "#5C5878" },
   { key: "lali_gurans", name: "Lali Gurans", family: "in2min2", bg: "#FFF8F4", main: "#C0163D", onMain: "#FFFFFF", accent: "#F2B134", onAccent: "#15203B", soft: "#F3DCD6", ink: "#15203B", muted: "#5E5A66" },
   { key: "himalayan_dusk", name: "Himalayan Dusk", family: "in2min2", bg: "#F6F7FA", main: "#4A2545", onMain: "#FFFFFF", accent: "#F7A072", onAccent: "#4A2545", soft: "#CFE6E4", ink: "#22172A", muted: "#5D5866" },
+  // Luxe (owner, 27 Nov 2026): soft two-colour backgrounds, in the muted, expensive shades of his gradient swatches. Each blends bg and bg2 (WASHES); the text pairs are checked on both ends by npm run test:db.
+  { key: "pearl_taupe", tag: "new", name: "Pearl & Taupe", family: "Luxe", bg: "#D8CABD", bg2: "#F1EAE3", wash: "up", main: "#5A4434", onMain: "#FFFFFF", accent: "#9A6A1A", onAccent: "#FFFFFF", soft: "#E6DACE", ink: "#2A1F17", muted: "#5C4D42" },
+  { key: "sand_gold", tag: "new", name: "Sand & Gold", family: "Luxe", bg: "#D9C4A1", bg2: "#F1E6CF", wash: "diagonal", main: "#6A4A18", onMain: "#FFFFFF", accent: "#9A6B1C", onAccent: "#FFFFFF", soft: "#E8D8B8", ink: "#2C1F0C", muted: "#5E4B2E" },
+  { key: "rose_dust", tag: "new", name: "Rose Dust", family: "Luxe", bg: "#DDBDB6", bg2: "#F4E1DD", wash: "up", main: "#7A2F42", onMain: "#FFFFFF", accent: "#A85C68", onAccent: "#FFFFFF", soft: "#EACBC5", ink: "#2E1419", muted: "#68474B" },
+  { key: "mint_mist", tag: "new", name: "Mint Mist", family: "Luxe", bg: "#B4D3C2", bg2: "#E4F1E9", wash: "glow", main: "#22574A", onMain: "#FFFFFF", accent: "#A87A2A", onAccent: "#1D1405", soft: "#CBE2D4", ink: "#13302A", muted: "#3F5A50" },
+  { key: "silver_mist", tag: "new", name: "Silver Mist", family: "Luxe", bg: "#CACCCC", bg2: "#EEEEED", wash: "diagonal", main: "#2E3138", onMain: "#FFFFFF", accent: "#6F7682", onAccent: "#FFFFFF", soft: "#DCDDDE", ink: "#1C1E22", muted: "#4A4F58" },
+  { key: "plum_velvet", tag: "new", name: "Plum Velvet", family: "Luxe", dark: true, bg: "#4A2A52", bg2: "#6A476F", wash: "up", main: "#EBC66B", onMain: "#25102F", accent: "#F2A7C3", onAccent: "#25102F", soft: "#3A1F42", ink: "#FFF4E6", muted: "#E8D4EE" },
+  { key: "mocha_gold", tag: "new", name: "Mocha & Gold", family: "Luxe", dark: true, bg: "#47301D", bg2: "#6E4B2C", wash: "up", main: "#E9CB78", onMain: "#2A1A0C", accent: "#C9955A", onAccent: "#241507", soft: "#382416", ink: "#FFF3E0", muted: "#E6D3B8" },
+  { key: "oxblood_gold", tag: "new", name: "Oxblood & Gold", family: "Luxe", dark: true, bg: "#6A1D26", bg2: "#8A3A36", wash: "diagonal", main: "#F1D28A", onMain: "#3E0A12", accent: "#E8B04B", onAccent: "#3D0710", soft: "#551219", ink: "#FFF3E4", muted: "#F0D3C0" },
+  { key: "charcoal_silk", tag: "new", name: "Charcoal Silk", family: "Luxe", dark: true, bg: "#37342F", bg2: "#524C46", wash: "glow", main: "#D8C7A0", onMain: "#1E1B17", accent: "#B9A06A", onAccent: "#1A150C", soft: "#2A2723", ink: "#F5F1E8", muted: "#D9D2C4" },
+  { key: "slate_night", tag: "new", name: "Slate Night", family: "Luxe", dark: true, bg: "#363B49", bg2: "#4A5266", wash: "diagonal", main: "#E3CB86", onMain: "#1F2230", accent: "#9AA7C4", onAccent: "#161A26", soft: "#2B2F3B", ink: "#F4F2F8", muted: "#D3D6E2" },
   // Seasonal: Christmas, New Year and Lhosar (14 Nov 2026)
   { key: "christmas", tag: "new", name: "Christmas Red & Green", family: "Seasonal", bg: "#FFF8F0", main: "#A3172B", onMain: "#FFFFFF", accent: "#1F6B45", onAccent: "#FFFFFF", soft: "#F3E1D6", ink: "#2A1215", muted: "#6A4F52",
     party: ["#A3172B", "#1F6B45", "#D4AF37", "#C8102E", "#2E8B57", "#E9DCC9"] },
@@ -377,7 +404,7 @@ export const PALETTES: Palette[] = [
   { key: "lily", name: "Lily White & Sage", family: "Calm", bg: "#FFFFFF", main: "#47604F", onMain: "#FFFFFF", accent: "#B9C7B5", onAccent: "#1D2A21", soft: "#EEF2EC", ink: "#1D2A21", muted: "#56645A" },
 ];
 
-export const PALETTE_FAMILIES: PaletteFamily[] = ["in2min2", "Seasonal", "Formal", "Nepali and South Asian", "Modern", "Festival colours", "Party", "Sport", "Calm", "Premium"];
+export const PALETTE_FAMILIES: PaletteFamily[] = ["in2min2", "Luxe", "Seasonal", "Formal", "Nepali and South Asian", "Modern", "Festival colours", "Party", "Sport", "Calm", "Premium"];
 
 function luminance(hex: string): number {
   const n = hex.replace("#", "");
@@ -389,6 +416,34 @@ function luminance(hex: string): number {
 export function contrast(a: string, b: string): number {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
+}
+
+function mixHex(a: string, b: string, t: number): string {
+  const n = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const [x, y] = [n(a), n(b)];
+  return "#" + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, "0")).join("").toUpperCase();
+}
+
+// The second colour of a shaded background. A palette's own `bg2` when it has
+// one; otherwise its background nudged towards its main colour, only as far as
+// the text still reads (4.5:1) on it, so shading can never spoil readability.
+export function washTip(p: Palette): string {
+  if (p.bg2) return p.bg2;
+  for (let t = 0.14; t > 0.01; t -= 0.02) {
+    const tip = mixHex(p.bg, p.main, t);
+    if (contrast(p.ink, tip) >= 4.5 && contrast(p.muted, tip) >= 4.5) return tip;
+  }
+  return p.bg;
+}
+
+// The CSS background for a shape, or null for plain paper.
+export function washCss(p: Palette, shape: WashShape | null | undefined): string | null {
+  const s = shape ?? p.wash ?? "flat";
+  if (s === "flat") return null;
+  const tip = washTip(p);
+  if (s === "up") return `linear-gradient(180deg, ${tip} 0%, ${p.bg} 100%)`;
+  if (s === "diagonal") return `linear-gradient(to bottom right, ${tip} 0%, ${p.bg} 100%)`;
+  return `radial-gradient(ellipse 110% 75% at 50% 30%, ${tip} 0%, ${p.bg} 100%)`;
 }
 
 // Colours for confetti, balloons and bunting: the palette's own, or a set
@@ -655,6 +710,9 @@ export const ENVELOPE_COLOURS: EnvelopeColour[] = [
   { key: "plum", label: "Royal purple", paper: "#4B1748", ink: "#F1D28A", wax: "#D2A848", waxText: "#3A0F37" },
   { key: "black", label: "Black and gold", paper: "#17161A", ink: "#E6C774", wax: "#C9A043", waxText: "#17161A" },
   { key: "ivory", label: "Ivory and gold", paper: "#F3E9D8", ink: "#7A5A1E", wax: "#B8862F", waxText: "#FFF6E3" },
+  { key: "mocha", label: "Mocha and gold", paper: "#4A2F1E", ink: "#F1D28A", wax: "#D2A848", waxText: "#3A2314" },
+  { key: "slate", label: "Slate and gold", paper: "#3B4254", ink: "#EFD58E", wax: "#D2A848", waxText: "#262B38" },
+  { key: "rose_dust", label: "Rose dust", paper: "#E4C3BC", ink: "#6E2C3A", wax: "#9C4D5A", waxText: "#FFF6F2" },
 ];
 export const envelopeColourOf = (key: string | null | undefined) => ENVELOPE_COLOURS.find((c) => c.key === key) ?? ENVELOPE_COLOURS[0];
 

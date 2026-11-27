@@ -108,6 +108,21 @@ for (const p of cat.PALETTES) {
   }
 }
 ok(`every one of the ${cat.PALETTES.length} palettes passes the 4.5:1 readability check`, low.length === 0, low.join("; "));
+// Soft shading (27 Nov 2026): the words must read on BOTH ends of every blend.
+const lowTip = [];
+for (const p of cat.PALETTES) {
+  const tip = cat.washTip(p);
+  for (const [a, n] of [[p.ink, "ink"], [p.muted, "muted"], ...(p.bg2 ? [[p.main, "main"]] : [])]) {
+    if (cat.contrast(a, tip) < 4.5) lowTip.push(`${p.key} ${n} on shading ${cat.contrast(a, tip).toFixed(2)}`);
+  }
+}
+ok("text reads on the second colour of every palette's shading", lowTip.length === 0, lowTip.join("; "));
+ok("every shading shape makes a CSS background, flat makes none", cat.WASHES.filter((w) => w.key !== "flat").every((w) => /gradient\(/.test(cat.washCss(cat.PALETTES[0], w.key) ?? ""))
+  && cat.washCss(cat.PALETTES[0], "flat") === null);
+ok("luxe palettes start shaded; the rest start flat", cat.PALETTES.filter((p) => p.family === "Luxe").every((p) => p.bg2 && p.wash && p.wash !== "flat")
+  && cat.PALETTES.filter((p) => p.family !== "Luxe").every((p) => !p.wash));
+ok("an unknown shading is ignored", cat.washOf("zigzag") === null && cat.washOf(undefined) === null && cat.washOf("up") === "up");
+ok("every envelope colour has readable writing (4.5:1) and seal letters (3:1, they are large)", cat.ENVELOPE_COLOURS.every((c) => cat.contrast(c.ink, c.paper) >= 4.5 && cat.contrast(c.waxText, c.wax) >= 3));
 const own = cat.paletteFor("custom", "#FFE066");
 ok("your own pale colour gets dark text automatically", cat.contrast(own.onMain, own.main) >= 4.5 && own.onMain !== "#FFFFFF");
 

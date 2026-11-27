@@ -10,7 +10,7 @@ import { useMusic, useStopOnLeave } from "@/components/event/music";
 import { Opening } from "@/components/event/opening";
 import { Icon } from "@/components/icons";
 import {
-  BACKDROP_GROUPS, BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, PHOTO_STYLES, TEMPLATES, TEXT_STYLES, eventType, language, musicFor, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle, PHOTO_RINGS, photoRingOf, RING_SHAPES,
+  BACKDROP_GROUPS, BACKDROPS, BORDERS, COVER_FITS, EFFECTS, HERO_MOTIONS, MAX_SHOWCASE, PALETTE_FAMILIES, PALETTES, WASHES, washOf, PHOTO_STYLES, TEMPLATES, TEXT_STYLES, eventType, language, musicFor, type CoverFit, type EffectKey, type HeroMotion, type PhotoStyle, type Template, type TextStyle, PHOTO_RINGS, photoRingOf, RING_SHAPES,
   ENVELOPE_COLOURS,
 } from "@/lib/catalog";
 import { toViewData } from "@/lib/draft";
@@ -47,7 +47,7 @@ export function LookPanel() {
       )}
       {tab === "looks" && <Looks />}
       {tab === "photos" && <Photos />}
-      {tab === "colours" && <Colours />}
+      {tab === "colours" && <><Colours /><Shading /></>}
       {tab === "background" && <Backgrounds />}
       {tab === "border" && <Borders />}
       {tab === "letters" && <Letters />}
@@ -202,13 +202,13 @@ function Colours() {
   const [all, setAll] = useState(false);
   const t = eventType(d.eventType);
   // Suggested: this kind's own colours, those in its looks, and the popular ones.
-  const picks = [...new Set([t?.palette, ...looksFor(d.eventType).map((l) => l.palette), ...PALETTES.filter((p) => p.tag === "popular").map((p) => p.key), d.palette])]
-    .filter(Boolean).slice(0, 9) as string[];
+  const picks = [...new Set([t?.palette, ...looksFor(d.eventType).map((l) => l.palette), ...PALETTES.filter((p) => p.tag === "popular").map((p) => p.key), ...PALETTES.filter((p) => p.family === "Luxe").slice(0, 4).map((p) => p.key), d.palette])]
+    .filter(Boolean).slice(0, 13) as string[];
   const swatch = (key: string) => {
     const p = PALETTES.find((x) => x.key === key);
     if (!p) return null;
     return (
-      <button key={p.key} type="button" role="radio" aria-checked={d.palette === p.key} className="b2-palette" onClick={() => update((x) => ({ ...x, palette: p.key }))}>
+      <button key={p.key} type="button" role="radio" aria-checked={d.palette === p.key} className="b2-palette" onClick={() => update((x) => ({ ...x, palette: p.key, wash: p.wash ?? x.wash }))}>
         <span className="b2-palette-sw" style={{ background: p.gradient ?? `linear-gradient(135deg, ${p.main} 0 50%, ${p.accent} 50% 75%, ${p.soft} 75%)` }} aria-hidden="true" />
         <span>{p.name}</span>
       </button>
@@ -231,6 +231,26 @@ function Colours() {
           onChange={(e) => update((x) => ({ ...x, customColor: e.target.value, palette: "custom" }))} onClick={() => update((x) => ({ ...x, palette: "custom" }))} />
       </label>
       <button type="button" className="b2-btn b2-quiet" onClick={() => setAll((v) => !v)}>{all ? "Show only the suggestions" : `Show all ${PALETTES.length} colour sets`}</button>
+    </Section>
+  );
+}
+
+// Soft shading of the page background (owner, 27 Nov 2026). Shown on every
+// colour set; the luxe sets start shaded, the rest start flat.
+function Shading() {
+  const { d, update, now } = useB2();
+  const data = toViewData(d);
+  const current = washOf(d.wash) ?? data.palette.wash ?? "flat";
+  return (
+    <Section icon="palette" title="Shading" line="Blend the background softly, like a printed card, instead of one flat colour. Words stay easy to read.">
+      <div className="b2-cardgrid" role="radiogroup" aria-label="Background shading">
+        {WASHES.map((w) => (
+          <button key={w.key} type="button" role="radio" aria-checked={current === w.key} className="b2-cardpick" onClick={() => update((x) => ({ ...x, wash: w.key }))}>
+            <span className="b2-cardpick-view" aria-hidden="true"><EventView data={{ ...data, wash: w.key }} view="card" now={now} thumb /></span>
+            <span>{w.name}</span>
+          </button>
+        ))}
+      </div>
     </Section>
   );
 }

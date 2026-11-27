@@ -6,7 +6,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { COPY_KEYS } from "@/lib/ai/copy";
-import { language, musicOf, paletteFor, photoRingOf, TOGGLE_DEFAULTS, type ToggleKey } from "@/lib/catalog";
+import { language, musicOf, paletteFor, photoRingOf, washOf, TOGGLE_DEFAULTS, type ToggleKey } from "@/lib/catalog";
 import { slugify, type Draft } from "@/lib/draft";
 import { addDays, zonedToUtcIso } from "@/lib/time";
 
@@ -141,6 +141,7 @@ export async function publishDraft(sb: SupabaseClient, d: Draft): Promise<Publis
   if (d.envFrom?.trim()) settings.envelope_from = d.envFrom.trim().slice(0, 60); else delete settings.envelope_from;
   if (d.envTo?.trim()) settings.envelope_to = d.envTo.trim().slice(0, 60); else delete settings.envelope_to;
   if (d.envColour) settings.envelope_colour = d.envColour; else delete settings.envelope_colour;
+  if (washOf(d.wash)) settings.wash = d.wash; else delete settings.wash;
   if (d.searchable && !d.isPrivate) settings.search = true; else delete settings.search;
   if (d.askFood === undefined) delete settings.food; else settings.food = d.askFood;
   if (d.credit === undefined) delete settings.credit;

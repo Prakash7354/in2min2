@@ -6,6 +6,7 @@
 import { COPY_KEYS, type CopyKey, type EventCopy } from "@/lib/ai/copy";
 import {
   backdropOf,
+  washOf,
   musicOf,
   photoRingOf,
   STARTING_MUSIC,
@@ -106,6 +107,8 @@ export type Draft = {
   envTo?: string;
   // The envelope's colour (catalog ENVELOPE_COLOURS), in feature_toggles.settings.envelope_colour.
   envColour?: string;
+  // Soft shading of the background (catalog WASHES), in feature_toggles.settings.wash; empty = the palette's own.
+  wash?: string;
   // Show this page on Google and other search engines (owner, 23 Nov 2026; off unless chosen; never for a private event), in feature_toggles.settings.search.
   searchable?: boolean;
   // A moving decoration round the photo (catalog PHOTO_RINGS), in
@@ -122,6 +125,8 @@ export const EMPTY_COPY: EventCopy = Object.fromEntries(COPY_KEYS.map((k) => [k,
 export function newDraft(): Draft {
   return {
     v: 1,
+    // New invitations start with a soft top-to-bottom shading (owner, 27 Nov 2026); older pages keep their flat paper.
+    wash: "up",
     eventType: null,
     scale: "personal",
     title: "",
@@ -377,6 +382,7 @@ export function toViewData(d: Draft): EventViewData {
     envFrom: (d.envFrom ?? "").trim().slice(0, 60),
     envTo: (d.envTo ?? "").trim().slice(0, 60),
     envColour: d.envColour || null,
+    wash: washOf(d.wash),
     searchable: !!d.searchable && !d.isPrivate,
     askFood: asksFood(d.askFood, t?.sensitive ?? false),
   };

@@ -21,7 +21,7 @@ import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties }
 import { createPortal } from "react-dom";
 import { Icon, type IconName } from "@/components/icons";
 import { TapHand } from "@/components/tap-hand";
-import { backdropImage, backdropOf, envelopeColourOf } from "@/lib/catalog";
+import { backdropImage, backdropOf, envelopeColourOf, washCss, washOf } from "@/lib/catalog";
 import { envelopeFrom, envelopeTo, formatDate, openedKey, type EventViewData } from "@/lib/event-view";
 import { eventVars } from "./event-view";
 import { eventFontVariables } from "./fonts";
@@ -112,8 +112,8 @@ export function Opening({ data, title, to, id, preview, embedded = false, autoOp
   const bd = backdropOf(data.backdrop);
   const env = envelopeColourOf(data.envColour);
   const vars = {
-    ...eventVars(p, data.textStyle),
-    "--op-sky": bd ? backdropImage(bd) : p.gradient ? `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}d9, ${p.bg}f2), ${p.gradient}` : `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}, ${p.bg})`,
+    ...eventVars(p, data.textStyle, data.wash),
+    "--op-sky": bd ? backdropImage(bd) : washCss(p, washOf(data.wash)) ?? (p.gradient ? `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}d9, ${p.bg}f2), ${p.gradient}` : `radial-gradient(ellipse 90% 70% at 50% 42%, ${p.soft}, ${p.bg})`),
     "--op-text": bd ? (bd.dark ? "#FFFFFF" : p.ink) : p.ink,
     // The envelope: a rich colour with gold writing, a gold seal and a gold
     // lining (catalog ENVELOPE_COLOURS; Royal red unless the host chose

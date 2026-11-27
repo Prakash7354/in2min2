@@ -132,11 +132,11 @@ export function kindDraft(kind: string): Draft {
     case "anniversary": return draftOf("anniversary", { stars: { relation: "", names: "Hari & Sita" }, title: "Hari & Sita’s anniversary", startTime: "19:00",
       cover: "/site/harisita-s.jpg", photoStyle: "heart", palette: "lali_gurans", backdrop: "rose_frame", border: "none",
       copy: { card_invite_body: "Many happy years together, and many more to come. Please join us as we celebrate with family and friends." } });
-    case "bratabandha": return draftOf("bratabandha", { stars: { relation: "", names: "Rohan" }, title: "Rohan’s Bratabandha", startTime: "08:00", languages: ["en", "ne"],
+    case "bratabandha": return draftOf("bratabandha", { stars: { relation: "", names: "Rohan" }, title: "Rohan’s Bratabandha", startTime: "08:00", palette: "sand_gold", wash: "diagonal", languages: ["en", "ne"],
       copy: { card_invite_body: "Rohan will receive the sacred thread in this age-old ceremony. Your blessings and presence would mean so much to our family." },
       translation: { card_headline: "", card_invite_body: "आज रोहनको ब्रतबन्ध संस्कार हो। यस पवित्र अवसरमा तपाईंको आशीर्वाद र उपस्थितिको हार्दिक अपेक्षा गर्दछौं।",
         landing_page_story: "", guest_note_box: "", post_event_thank_you: "" } });
-    case "ceremony": return draftOf("ceremony", { title: "Naming ceremony for our daughter", startTime: "10:00",
+    case "ceremony": return draftOf("ceremony", { title: "Naming ceremony for our daughter", startTime: "10:00", palette: "rose_dust",
       copy: { card_invite_body: "We'd love for you to be there as we welcome our daughter with her name, blessings and a small family gathering." } });
     case "engagement": return draftOf("engagement", { stars: { relation: "", names: "Asha & Rohit" }, title: "Asha & Rohit’s engagement", startTime: "17:00",
       cover: "/site/w-heart-s.jpg", photoStyle: "heart",

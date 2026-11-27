@@ -7,7 +7,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { COPY_KEYS, type EventCopy } from "@/lib/ai/copy";
-import { partyColours, photoRingOf, RING_SHAPES, skyFor, textStyle, type HeroMotion, type Palette, backdropImage, backdropOf } from "@/lib/catalog";
+import { partyColours, photoRingOf, RING_SHAPES, skyFor, textStyle, type HeroMotion, type Palette, backdropImage, backdropOf, washCss, washOf } from "@/lib/catalog";
 import {
   daysUntil, directionsUrl, formatDate, formatTime, monogram, runningOrder,
   type EventStageView, type EventViewData, type MenuItem,
@@ -34,13 +34,15 @@ type Props = { data: EventViewData; view: EventStageView; now: number; thumb?: b
 
 // The event's colours and fonts as CSS variables. Also used by the photos
 // page, the TV slideshow and the table cards, which wear the event's design.
-export function eventVars(p: Palette, textStyleKey: string): CSSProperties {
+export function eventVars(p: Palette, textStyleKey: string, wash?: string | null): CSSProperties {
   const ts = textStyle(textStyleKey);
+  const shade = washCss(p, washOf(wash));
   const party = partyColours(p);
   return {
     "--ev-bg": p.bg, "--ev-main": p.main, "--ev-on-main": p.onMain, "--ev-accent": p.accent, "--ev-on-accent": p.onAccent,
     "--ev-soft": p.soft, "--ev-ink": p.ink, "--ev-muted": p.muted, "--ev-display": ts.display, "--ev-body": ts.body,
     ...(p.gradient ? { "--ev-gradient": p.gradient } : {}),
+    ...(shade ? { "--ev-wash": shade } : {}),
     ...Object.fromEntries(Array.from({ length: 6 }, (_, i) => [`--ev-c${i + 1}`, party[i % party.length]])),
   } as CSSProperties;
 }
@@ -48,7 +50,8 @@ export function eventVars(p: Palette, textStyleKey: string): CSSProperties {
 export default function EventView({ data, view, now, thumb = false, anchors = false, reply, photos, notice }: Props) {
   const p = data.palette;
   const bd = backdropOf(data.backdrop);
-  const vars = bd ? { ...eventVars(p, data.textStyle), ["--ev-backdrop" as string]: backdropImage(bd), ["--ev-shade" as string]: String(bd.shade ?? 0) } : eventVars(p, data.textStyle);
+  const base = eventVars(p, data.textStyle, data.wash);
+  const vars = bd ? { ...base, ["--ev-backdrop" as string]: backdropImage(bd), ["--ev-shade" as string]: String(bd.shade ?? 0) } : base;
 
   return (
     <div className={s.frame}>
