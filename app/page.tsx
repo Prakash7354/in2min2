@@ -150,27 +150,34 @@ export default function Home() {
             <div className="s-howgrid">
               <div className="s-phone s-howphone" aria-hidden="true">
                 <div className="s-phonescreen s-howscreen">
+                  <div className="s-statusbar"><b>9:41</b><span className="s-sigs"><i /><i /><i /><i /><em>80</em></span></div>
                   <div className="s-scene s-scene1">
+                    <p className="s-mini-step">Step 1 of 4</p>
                     <p className="s-mini-h">What are you celebrating?</p>
                     <div className="s-mini-tiles">
-                      <span className="s-mt s-mt-on"><i>🎂</i>Birthday</span><span className="s-mt"><i>💍</i>Wedding</span>
-                      <span className="s-mt"><i>🍚</i>Pasni</span><span className="s-mt"><i>🎄</i>Christmas</span>
+                      <span className="s-mt s-mt-on s-c1"><i>🎂</i>Birthday</span><span className="s-mt s-c2"><i>💍</i>Wedding</span>
+                      <span className="s-mt s-c3"><i>🍚</i>Pasni</span><span className="s-mt s-c4"><i>🎄</i>Christmas</span>
                     </div>
                     <span className="s-minihand"><TapHand fill="#FFC94A" /></span>
                   </div>
                   <div className="s-scene s-scene2">
+                    <p className="s-mini-step">Step 2 of 4</p>
                     <p className="s-mini-h">Whose birthday is it?</p>
                     <span className="s-mini-input"><span className="s-typed">Sagar</span></span>
+                    <p className="s-mini-lab">Age</p>
                     <div className="s-mini-chips"><span>21st</span><span className="s-on">23rd</span><span>30th</span></div>
+                    <p className="s-mini-lab">When</p>
                     <div className="s-mini-chips"><span className="s-on">Sat 12 Dec</span><span>7pm</span></div>
                   </div>
                   <div className="s-scene s-scene3">
+                    <p className="s-mini-step">Step 3 of 4</p>
                     <p className="s-mini-ai">✨ The AI is writing…</p>
                     <p className="s-mini-line s-l1">Join us for Sagar’s 23rd birthday! Food, music and lots of dancing.</p>
                     <p className="s-mini-line s-l2" lang="ne">सागरको २३ औँ जन्मदिनमा तपाईंलाई हार्दिक निमन्त्रणा छ।</p>
                     <div className="s-mini-chips"><span>Warm</span><span className="s-on">Fun</span><span>Formal</span></div>
                   </div>
                   <div className="s-scene s-scene4">
+                    <p className="s-mini-step">You’re live! 🎉</p>
                     <div className="s-wa">
                       <div className="s-wa-card"><span className="s-wa-pic" /><span><b>Sagar’s 23rd birthday</b><small>in2min2.com</small></span></div>
                       <p>You’re invited! Please reply here 👇</p>
@@ -179,6 +186,7 @@ export default function Home() {
                     <p className="s-mini-ok">✓ Hari: Yes, 2 of us</p>
                     <p className="s-mini-ok s-maybe">? Gita: Maybe</p>
                   </div>
+                  <span className="s-homebar" />
                 </div>
               </div>
               <ol className="s-steps">
