@@ -372,7 +372,9 @@
   position: relative;
   width: 62%;
   aspect-ratio: 1 / 1.08;
-  margin-block: min(calc(var(--u) * 2), 10px);
+  margin-top: min(calc(var(--u) * 2), 10px);
+  /* the rotated photos behind overhang the box on every side; clear them so the kicker below isn't covered */
+  margin-bottom: min(calc(var(--u) * 6), 26px);
 }
 .ev-polaroid {
   position: absolute;

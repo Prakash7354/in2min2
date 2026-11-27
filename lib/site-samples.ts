@@ -33,7 +33,10 @@ function heroDraft(): Draft {
     // 23, as on the balloons in the photo; named for who the photo actually
     // shows at the centre, candle and all (owner, 27 Nov 2026).
     title: "Sagar’s 23rd birthday", stars: { relation: "The birthday star", names: "Sagar" }, milestone: "23rd",
-    venueName: "Riverside Hall", cover: "/site/birthday-s.jpg", coverFit: "fill",
+    venueName: "Riverside Hall", cover: "/site/birthday-s.jpg", coverFit: "fill", languages: ["en", "ne"],
+    copy: { card_invite_body: "Come and celebrate Sagar’s 23rd birthday with us. There’ll be food, fun and cake, and we’d love you to be there." },
+    translation: { card_headline: "", card_invite_body: "सागरको २३ औँ जन्मदिनको उत्सवमा तपाईंलाई न्यानो निमन्त्रणा छ। खाना, रमाइलो र केक हुनेछ, तपाईंको उपस्थितिले हामीलाई खुशी बनाउनेछ।",
+      landing_page_story: "", guest_note_box: "", post_event_thank_you: "" },
   });
 }
 
