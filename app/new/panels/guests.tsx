@@ -222,7 +222,7 @@ function Personal() {
     <Section icon="user" title="Personal invitations"
       line="Each guest gets their own link: their name is on the envelope, and their reply is already linked to them. Send each link only to that guest.">
       <form style={{ display: "grid", gap: 10 }} onSubmit={(e) => { e.preventDefault(); if (name.trim()) void add([{ full_name: name.trim().slice(0, 120), party_size: size }]); }}>
-        <input className="b2-input" value={name} maxLength={120} aria-label="Guest's name, as it goes on the envelope" placeholder="e.g. Maya & family"
+        <input className="b2-input" value={name} maxLength={120} aria-label="Guest's name, as it goes on the envelope" placeholder="e.g. Mrs Maya Gurung OBE, or Maya & family"
           onChange={(e) => setName(e.target.value)} />
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <span className="b2-label">How many people</span>
