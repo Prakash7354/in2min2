@@ -130,7 +130,7 @@ export function kindDraft(kind: string): Draft {
       cover: "/site/reunion-s.jpg", photoStyle: "hero", palette: "royal_blue_gold", backdrop: "glow_royal", border: "khukuri",
       copy: { card_invite_body: "25 years on, it’s time to get together again: old friends, good food and plenty of stories." } }, 8);
     case "anniversary": return draftOf("anniversary", { stars: { relation: "", names: "Hari & Sita" }, title: "Hari & Sita’s anniversary", startTime: "19:00",
-      cover: "/site/harisita-s.jpg", photoStyle: "heart", palette: "lali_gurans", backdrop: "rose_frame", border: "none",
+      cover: "/site/harisita-s.jpg", photoStyle: "heart", palette: "mocha_gold", wash: "glow", border: "golden_roses",
       copy: { card_invite_body: "Many happy years together, and many more to come. Please join us as we celebrate with family and friends." } });
     case "bratabandha": return draftOf("bratabandha", { stars: { relation: "", names: "Rohan" }, title: "Rohan’s Bratabandha", startTime: "08:00", palette: "sand_gold", wash: "diagonal", languages: ["en", "ne"],
       copy: { card_invite_body: "Rohan will receive the sacred thread in this age-old ceremony. Your blessings and presence would mean so much to our family." },
