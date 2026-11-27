@@ -7,6 +7,7 @@
 // scroll or a key hands it to the visitor and it stops. Phones set to reduce
 // motion get the page, still.
 
+import { PhoneChrome } from "@/components/site/phone-chrome";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import EventView from "@/components/event/event-view";
 import { Opening } from "@/components/event/opening";
@@ -70,6 +71,7 @@ export function AutoPlayPhone({ data, title, label, now }: { data: EventViewData
             embedded autoOpen={visible ? 1700 : undefined} onDone={() => setStage("page")} />
         )}
       </div>
+      <PhoneChrome bg={data.palette.bg} battery={58} />
     </div>
   );
 }

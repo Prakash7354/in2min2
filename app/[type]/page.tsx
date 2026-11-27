@@ -5,6 +5,7 @@
 // exactly what guests get: the card first, then the page with the time,
 // place, directions, day plan, menu and the reply. Made once at build time.
 
+import { PhoneChrome } from "@/components/site/phone-chrome";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -96,7 +97,7 @@ export default async function KindPage({ params }: PageProps<"/[type]">) {
               <p className="s-small">No app to download. Works on any phone.</p>
             </div>
             <div className="s-wordsart" aria-hidden="true">
-              <div className="s-phone"><div className="s-phonescreen"><EventView data={card} view="card" now={now} thumb /></div></div>
+              <div className="s-phone"><div className="s-phonescreen"><EventView data={card} view="card" now={now} thumb /></div><PhoneChrome bg={card.palette.bg} battery={72} /></div>
             </div>
           </div>
         </section>
@@ -119,7 +120,7 @@ export default async function KindPage({ params }: PageProps<"/[type]">) {
             <div className="s-fullphone">
               <div className="s-phone"><div className="s-phonescreen" tabIndex={0} aria-label={`The full page for ${title}, as guests see it`}>
                 <EventView data={full} view="page" now={now} />
-              </div></div>
+              </div><PhoneChrome bg={full.palette.bg} battery={90} /></div>
             </div>
           </div>
         </section>

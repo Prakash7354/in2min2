@@ -17,6 +17,7 @@ import { FESTIVE_UNTIL, formatPence, PLANS, type Plan } from "@/lib/catalog";
 import { bigDaySample, heroSample, heroShows, heroWedding, kindSample, wordsSample } from "@/lib/site-samples";
 import { QUESTIONS, TAGLINE, siteJsonLd } from "@/lib/site-facts";
 import { SHARE_DESCRIPTION, SHARE_IMAGE, SHARE_TITLE } from "@/lib/site-share";
+import { PhoneChrome } from "@/components/site/phone-chrome";
 import "./site.css";
 
 // in2min2.com: the website (owner, 21 Nov 2026). What in2min2 does, shown
@@ -150,8 +151,7 @@ export default function Home() {
             <div className="s-howgrid">
               <div className="s-phone s-howphone" aria-hidden="true">
                 <div className="s-phonescreen s-howscreen">
-                  <div className="s-statusbar"><b>9:41</b><span className="s-sigs"><i /><i /><i /><i /><em>80</em></span></div>
-                  <div className="s-scene s-scene1">
+                                    <div className="s-scene s-scene1">
                     <p className="s-mini-step">Step 1 of 4</p>
                     <p className="s-mini-h">What are you celebrating?</p>
                     <div className="s-mini-tiles">
@@ -186,8 +186,8 @@ export default function Home() {
                     <p className="s-mini-ok">✓ Hari: Yes, 2 of us</p>
                     <p className="s-mini-ok s-maybe">? Gita: Maybe</p>
                   </div>
-                  <span className="s-homebar" />
                 </div>
+                <PhoneChrome dark={false} />
               </div>
               <ol className="s-steps">
                 {STEPS.map((s, i) => (
@@ -240,7 +240,7 @@ export default function Home() {
               </ul>
             </div>
             <div className="s-wordsart" aria-hidden="true">
-              <div className="s-phone"><div className="s-phonescreen"><EventView data={words} view="card" now={now} thumb /></div></div>
+              <div className="s-phone"><div className="s-phonescreen"><EventView data={words} view="card" now={now} thumb /></div><PhoneChrome bg={words.palette.bg} battery={64} /></div>
             </div>
           </div>
         </section>

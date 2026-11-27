@@ -6,6 +6,7 @@
 // screen whole. Still (no changing) when the phone asks for less motion;
 // the dots below choose one by hand.
 
+import { PhoneChrome } from "@/components/site/phone-chrome";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import EventView from "@/components/event/event-view";
 import { GuestDemoButton } from "@/components/site/guest-demo";
@@ -32,6 +33,7 @@ export function HeroDevices({ shows, now }: { shows: HeroShow[]; now: number }) 
           <div className="s-tabscreen">
             {shows.map((s, i) => <div key={s.key} className="s-slide" data-pos={pos(i)}><Dashboard d={s.dash} days={s.card.date ? daysUntil(s.card.date, s.card.timezone, now) : null} /></div>)}
           </div>
+          <PhoneChrome tablet dark time="9:41" day="Fri 27 Nov" battery={100} />
         </div>
         <div className="s-phone s-herophone">
           <div className="s-phonescreen s-phonefit">
@@ -41,6 +43,7 @@ export function HeroDevices({ shows, now }: { shows: HeroShow[]; now: number }) 
               </div>
             ))}
           </div>
+          <PhoneChrome bg={shows[at].card.palette.bg} battery={85} />
         </div>
       </div>
       <div className="s-devdots" role="group" aria-label="Examples">
