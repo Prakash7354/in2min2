@@ -2,7 +2,10 @@
    at /new (owner's decision, 15 Nov 2026; CONCEPT 7e).
    Bold, mobile first, one thing per screen. Dark by default with a light
    option (the theme sits on #b2 as data-theme). Depth comes from layered
-   surfaces, rounded corners, soft shadows and space, never hairline borders.
+   surfaces, rounded corners, soft shadows and space, never a flat hairline
+   border — but every surface gets a soft violet-tinted edge (--b2-edge) so
+   its shape still reads clearly against the page (owner, 26 Nov 2026: more
+   striking than subtle).
    Every text pair passes WCAG AA (checked with a script, 15 Nov 2026).
    Every class starts with b2- so nothing clashes with the current app. */
 
@@ -14,7 +17,7 @@
   --b2-s2: #24203f;
   --b2-s3: #302a52;
   --b2-text: #f6f3ff;
-  --b2-text-2: #c1bbe0;
+  --b2-text-2: #d4cfec;   /* brighter, less washed-out than the old #c1bbe0 (26 Nov 2026: sharper for ESL readers) */
   --b2-accent: #ffb627;
   --b2-accent-text: #ffb627;   /* marigold as words */
   --b2-on-accent: #1a1330;
@@ -22,7 +25,7 @@
   --b2-ok: #4fe3a6;
   --b2-glow: rgba(255, 182, 39, 0.35);
   --b2-shadow: 0 22px 44px -20px rgba(0, 0, 0, 0.75);
-  --b2-edge: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  --b2-edge: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px color-mix(in srgb, var(--b2-violet) 16%, transparent);
   --b2-overlay: rgba(5, 4, 14, 0.62);
   /* Colour jobs (owner, 19 Nov 2026: "which is heading, instruction, where
      to write, what the AI wrote?"): boxes you type in are light paper; quick
@@ -53,7 +56,7 @@
   --b2-s2: #efebfa;
   --b2-s3: #e2dcf6;
   --b2-text: #15122b;
-  --b2-text-2: #4f4a6b;
+  --b2-text-2: #3d3858;   /* darker, more neutral than the old #4f4a6b (26 Nov 2026: sharper for ESL readers) */
   --b2-accent: #f4a522;
   --b2-accent-text: #8a5300;   /* marigold is too faint as words on light: dark amber, 5.7:1 */
   --b2-on-accent: #1a1330;
@@ -61,7 +64,7 @@
   --b2-ok: #11865a;
   --b2-glow: rgba(244, 165, 34, 0.3);
   --b2-shadow: 0 16px 34px -18px rgba(40, 30, 90, 0.32);
-  --b2-edge: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --b2-edge: inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 0 0 1px color-mix(in srgb, var(--b2-violet) 14%, transparent);
   --b2-overlay: rgba(20, 16, 40, 0.45);
   --b2-field: #ffffff;
   --b2-field-ring: inset 0 0 0 2px #d8d0f6;
@@ -183,7 +186,7 @@
 .b2-round:active { transform: scale(0.94); }
 .b2-round svg { width: 22px; height: 22px; }
 
-/* ── Surfaces: a shade lighter than the page, no outlines ── */
+/* ── Surfaces: a shade lighter than the page, defined by --b2-edge not a hairline ── */
 .b2-card {
   position: relative;
   border-radius: 26px;
@@ -249,7 +252,7 @@
   font-weight: 650;
   font-size: 15px;
   line-height: 1.2;
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--b2-violet) 40%, transparent);
+  box-shadow: inset 0 0 0 1.75px color-mix(in srgb, var(--b2-violet) 48%, transparent);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s ease, transform 0.12s ease;
