@@ -63,7 +63,7 @@ const HERO_PHOTOS: [string, string][] = [
 const STEPS = [
   { title: "Choose your event", line: "Birthday, wedding, mehndi, Pasni, a Diwali or Eid party, Lhosar or a tournament. Each one comes with the right questions." },
   { title: "Answer a few questions", line: "Mostly taps: names, the date and the place. Then pick a look you like." },
-  { title: "Let the AI write it", line: "In English, Nepali or both, warm, fun or formal. You check every word." },
+  { title: "Let the AI write it", line: "In English, your language or both, warm, fun or formal. You check every word." },
   { title: "Share and celebrate", line: "Send one link. Guests open an envelope with their name on it, reply, and add photos on the day." },
 ];
 

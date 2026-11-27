@@ -467,8 +467,8 @@ function ReadyScreen() {
         <div className="b2-ai">
           <AiHead title={session ? "Generate your text with AI" : "Want better wording?"}
             line={session
-              ? "In English, Nepali or both, in about ten seconds. You review every word."
-              : "Sign in (free) and the AI writes it for you, in English, Nepali or both. The default text is fine too."} />
+              ? "In English, your language or both, in about ten seconds. You review every word."
+              : "Sign in (free) and the AI writes it for you, in English, your language or both. The default text is fine too."} />
           {ai.error && <p className="b2-small" role="alert">{ai.error}</p>}
           <button type="button" className="b2-btn b2-secondary" onClick={() => void writeAll()}>
             <Icon name="sparkle" className="" />{session ? "Generate text" : "Sign in to generate"}

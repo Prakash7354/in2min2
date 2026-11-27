@@ -19,6 +19,11 @@ const TONE_SHORT: Record<string, string> = {
   "Warm and welcoming": "Warm", "Formal and elegant": "Formal", "Fun and playful": "Fun",
   "Festive and joyful": "Festive", "Sporty and energetic": "Sporty", "Gentle and respectful": "Gentle",
 };
+// The four tones most hosts want, shown as chips; the rest (kind defaults like Sporty for
+// tournaments, Gentle for memorials) sit under "More…" so they're still reachable but don't
+// crowd the row.
+const TONE_MAIN = ["Warm and welcoming", "Formal and elegant", "Fun and playful", "Festive and joyful"];
+const TONE_MORE = TONES.filter((t) => !TONE_MAIN.includes(t));
 const MAIN_LANGS = ["en", "ne", "ne-Latn"];
 // Lines families often put at the top of a card (Hindu, Buddhist); any other can be typed.
 const TOP_LINES = ["॥ श्री गणेशाय नमः ॥", "॥ ॐ ॥", "ॐ मणि पद्मे हूँ"];
@@ -30,43 +35,55 @@ export function WordsPanel() {
   const main = language(d.languages[0]) ?? LANGUAGES[0];
   const second = language(d.languages[1]);
   const busyAll = ai.busy === "all";
-  const setMain = (code: string) => update((x) => ({ ...x, languages: [code, ...x.languages.slice(1).filter((c) => c !== code)] }));
-  const setSecond = (code: string | null) => update((x) => ({ ...x, languages: code ? [x.languages[0], code] : [x.languages[0]] }));
-  // The three most used languages as chips; every other one under "More…".
-  const [allMain, setAllMain] = useState(() => !MAIN_LANGS.includes(main.code));
-  const [allSecond, setAllSecond] = useState(() => !!second && !MAIN_LANGS.includes(second.code));
+  // Three ways to write: English only, your language only, or both together. A mix always
+  // pairs English with one other language; whichever was the host's single language stays
+  // first when they switch to a mix, so the AI keeps writing that one as the lead text.
+  const mode: "en" | "other" | "mix" = d.languages.length > 1 ? "mix" : d.languages[0] === "en" ? "en" : "other";
+  const ownLangCode = d.languages.find((c) => c !== "en") ?? "ne";
+  const setMode = (m: "en" | "other" | "mix") => update((x) => {
+    const own = x.languages.find((c) => c !== "en") ?? "ne";
+    if (m === "en") return { ...x, languages: ["en"] };
+    if (m === "other") return { ...x, languages: [own] };
+    const ownWasFirst = x.languages.length === 1 && x.languages[0] !== "en";
+    return { ...x, languages: ownWasFirst ? [own, "en"] : ["en", own] };
+  });
+  const setOwnLang = (code: string) => update((x) => ({ ...x, languages: x.languages.length > 1 ? x.languages.map((c) => (c === "en" ? c : code)) : [code] }));
+  // Every language beyond the quick chips sits under "More…".
+  const [allOwn, setAllOwn] = useState(() => !MAIN_LANGS.includes(ownLangCode));
+  const [allTone, setAllTone] = useState(() => !TONE_MAIN.includes(d.tone));
   const [confirmReset, setConfirmReset] = useState(false);
   return (
     <PanelShell peek icon="pen" title="The words" line="Shown on the invitation and the page. Changes stay in draft until you publish.">
       <section className="b2-ai" aria-label="AI writing assistant">
         <AiHead title="AI writing assistant" line="Generates all five text boxes from your event details." />
         <div className="b2-field">
-          <span className="b2-label">Tone</span>
-          <Chips label="Tone" small value={d.tone} options={TONES.map((t) => ({ key: t, label: TONE_SHORT[t] ?? t }))}
-            onChange={(t) => t && update((x) => ({ ...x, tone: t }))} />
-        </div>
-        <div className="b2-field">
           <span className="b2-label">Language</span>
-          <Chips label="Language" small value={allMain ? "more" : main.code}
-            options={[...MAIN_LANGS.map((c) => ({ key: c, label: short(c) })), { key: "more", label: "More…" }]}
-            onChange={(c) => { if (c === "more") setAllMain(true); else if (c) { setAllMain(false); setMain(c); } }} />
-          {allMain && (
-            <select className="b2-input b2-input-sm" aria-label="Main language" value={main.code} onChange={(e) => setMain(e.target.value)}>
-              {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.name}{l.ready ? "" : " (beta)"}</option>)}
-            </select>
-          )}
+          <span className="b2-small">English only, your language only, or both together.</span>
+          <Chips label="Language" small value={mode}
+            options={[{ key: "en", label: "English only" }, { key: "other", label: "Your language only" }, { key: "mix", label: "English + your language" }]}
+            onChange={(m) => m && setMode(m as "en" | "other" | "mix")} />
         </div>
+        {mode !== "en" && (
+          <div className="b2-field">
+            <span className="b2-label">Your language</span>
+            <Chips label="Your language" small value={allOwn ? "more" : ownLangCode}
+              options={[...MAIN_LANGS.filter((c) => c !== "en").map((c) => ({ key: c, label: short(c) })), { key: "more", label: "More…" }]}
+              onChange={(c) => { if (c === "more") setAllOwn(true); else if (c) { setAllOwn(false); setOwnLang(c); } }} />
+            {allOwn && (
+              <select className="b2-input b2-input-sm" aria-label="Your language" value={ownLangCode} onChange={(e) => setOwnLang(e.target.value)}>
+                {LANGUAGES.filter((l) => l.code !== "en").map((l) => <option key={l.code} value={l.code}>{l.name}{l.ready ? "" : " (beta)"}</option>)}
+              </select>
+            )}
+          </div>
+        )}
         <div className="b2-field">
-          <span className="b2-label">Second language <span className="b2-small" style={{ display: "inline" }}>(optional)</span></span>
-          <span className="b2-small">Shown beneath the main text.</span>
-          <Chips label="Second language" small value={allSecond ? "more" : second?.code ?? "none"}
-            options={[{ key: "none", label: "No" }, ...MAIN_LANGS.filter((c) => c !== main.code).map((c) => ({ key: c, label: short(c) })), { key: "more", label: "More…" }]}
-            onChange={(c) => { if (c === "more") setAllSecond(true); else { setAllSecond(false); setSecond(!c || c === "none" ? null : c); } }} />
-          {allSecond && (
-            <select className="b2-input b2-input-sm" aria-label="Second language" value={second?.code ?? ""} onChange={(e) => setSecond(e.target.value || null)}>
-              <option value="">None</option>
-              {LANGUAGES.filter((l) => l.code !== main.code).map((l) => <option key={l.code} value={l.code}>{l.name}{l.ready ? "" : " (beta)"}</option>)}
-            </select>
+          <span className="b2-label">Tone</span>
+          <Chips label="Tone" small value={allTone ? "more" : d.tone}
+            options={[...TONE_MAIN.map((t) => ({ key: t, label: TONE_SHORT[t] ?? t })), { key: "more", label: "More…" }]}
+            onChange={(t) => { if (t === "more") setAllTone(true); else if (t) { setAllTone(false); update((x) => ({ ...x, tone: t })); } }} />
+          {allTone && (
+            <Chips label="More tones" small value={d.tone} options={TONE_MORE.map((t) => ({ key: t, label: TONE_SHORT[t] ?? t }))}
+              onChange={(t) => t && update((x) => ({ ...x, tone: t }))} />
           )}
         </div>
         {[main, second].some((l) => l && !l.ready) && (
