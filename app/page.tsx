@@ -385,8 +385,8 @@ export default function Home() {
               <ul className="s-payticks">
                 <li>Pay once per event, no subscription</li>
                 <li>No card needed to start</li>
-                <li>Full refund within 14 days</li>
-                <li>If we let you down on the day, your money back</li>
+                <li>Cancel within 14 days, as UK law allows</li>
+                <li>If we let you down, you may get your money back</li>
               </ul>
             </div>
           </div>

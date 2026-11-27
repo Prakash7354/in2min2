@@ -114,11 +114,22 @@ export default function Terms() {
         <li>Launch offers and reduced fees: see <Link href="/pricing">prices and fair fees</Link>.</li>
       </ul>
 
-      <h2 id="refunds">8. Changing your mind</h2>
+      <h2 id="refunds">8. Cancelling and refunds</h2>
       <ul>
-        <li>Ask within 14 days of paying, and we refund you in full.</li>
-        <li>If your event has already happened by then, we refund the part of your plan you haven&apos;t used yet.</li>
-        <li>If in2min2 lets you down on the day (for example, your page doesn&apos;t work), we refund what you paid for that event.</li>
+        <li>
+          <strong>Your 14 days.</strong> If you buy a paid plan, you can cancel within 14 days of paying, without giving a reason. This is your
+          right under UK consumer law. It is not the same as the Free plan&apos;s 14 days, which is only how long a Free page stays online.
+        </li>
+        <li>
+          <strong>Your page starts at once.</strong> Your page goes live when you publish. When you pay, we ask you to tick a box to say you want us
+          to start straight away. If you then cancel within 14 days, we may keep a fair amount for the time your page has been live, and refund
+          the rest. If we have already provided the whole service in that time, you agree that you can no longer cancel under this right.
+        </li>
+        <li>
+          <strong>Genuine cases.</strong> After the 14 days, or if something has gone wrong, you may be given a full or part refund in genuine
+          cases. For example, if your page didn&apos;t work on the day, or you were charged twice by mistake. Write to <a href={`mailto:${CONTACT}`}>{CONTACT}</a> with
+          what happened and any paperwork that helps, such as a screenshot or your receipt. We look at every request and tell you our decision in writing.
+        </li>
         <li>None of this affects your legal rights as a consumer.</li>
       </ul>
 
